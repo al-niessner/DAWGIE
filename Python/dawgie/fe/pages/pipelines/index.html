@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<!--
+COPYRIGHT:
+Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+U.S. Government sponsorship acknowledged.
+
+All rights reserved.
+
+LICENSE:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+- Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
+
+- Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+
+- Neither the name of Caltech nor its operating division, the Jet
+Propulsion Laboratory, nor the names of its contributors may be used to
+endorse or promote products derived from this software without specific prior
+written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+NTR:
+-->
+<html>
+  <head>
+    <meta content='text/html; charset=US-ASCII' http-equiv='Content-Type'>
+    <meta charset='utf-8'>
+    <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible'>
+    <title>
+      Excalibur
+    </title>
+    <link href='/stylesheets/application.css' rel='stylesheet'>
+  </head>
+  <body data-spy='scroll' data-target='#navbar-scrollspy' id='top'>
+    <nav class='navbar navbar-fixed-top navbar-inverse'>
+      <div class='container'>
+        <div class='navbar-header'>
+          <button aria-expanded='false' class='navbar-toggle collapsed' data-target='#mobile_navigation' data-toggle='collapse' type='button'>
+            <span class='sr-only'>
+              Toggle navigation
+            </span>
+            <span class='icon-bar'></span>
+            <span class='icon-bar'></span>
+            <span class='icon-bar'></span>
+          </button>
+          <a class='navbar-brand' href='/pages'>
+            Excalibur
+          </a>
+        </div>
+        <div class='collapse navbar-collapse' id='mobile_navigation'>
+          <ul class='nav navbar-nav navbar-right' id='main_nav'>
+            <li>
+              <a href='/pages/about'>
+                About
+              </a>
+            </li>
+            <li>
+              <a href='/pages/news'>
+                News
+              </a>
+            </li>
+            <li>
+              <a href='/pages/exoplanet_systems'>
+                Exoplanet Systems
+              </a>
+            </li>
+            <li class='dropdown'>
+              <a aria-expanded='false' aria-haspopup='true' href='/pages/search' role='button'>
+                Database
+                <span class='caret'></span>
+              </a>
+              <ul class='dropdown-menu'>
+                <li>
+                  <a href='/pages/database/primary_table'>
+                    Primary Table
+                  </a>
+                </li>
+                <li>
+                  <a href='/pages/database/targets'>
+                    Targets
+                  </a>
+                </li>
+                <li>
+                  <a href='/pages/database/tasks'>
+                    Tasks
+                  </a>
+                </li>
+                <li>
+                  <a href='/pages/database/versions'>
+                    Versions
+                  </a>
+                </li>
+                <li class='divider' role='separator'></li>
+                <li>
+                  <a href='/pages/search'>
+                    Search Database
+                  </a>
+                </li>
+                <li class='divider' role='separator'></li>
+                <li>
+                  <a href='/pages/database/trace_report.html'>
+                    Trace Report
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class='dropdown'>
+              <a aria-expanded='false' aria-haspopup='true' href='/pages/tasks' role='button'>
+                Dependency Trees
+                <span class='caret'></span>
+              </a>
+              <ul class='dropdown-menu'>
+                <li>
+                  <a href='/pages/tasks'>
+                    Tasks
+                  </a>
+                </li>
+                <li>
+                  <a href='/pages/algorithms'>
+                    Algorithms
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <a href='/pages/command'>
+                Command
+              </a>
+            </li>
+            <li class='hidden' id='lock_view_button'>
+              <a href='#'>
+                LockView
+              </a>
+            </li>
+            <li>
+              <a href='/pages/pipelines'>
+                Pipeline's State
+              </a>
+            </li>
+            <li>
+              <a href='/pages/schedule'>
+                Schedule
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div id='alert-message'></div>
+    <div class='container'>
+      <div class='page-header'>
+        <div class='flt-right'>
+          <div class='form-group'>
+            <span>
+              <strong>
+                Refresh rate:
+              </strong>
+            </span>
+            <select class='form-control' id='selRe' onchange='setRefresh(this.options[selectedIndex].value)'>
+              <option selected='' value='0'>No Refresh</option>
+              <option value='10'>10 Seconds</option>
+              <option value='30'>30 Seconds</option>
+              <option value='45'>45 Seconds</option>
+              <option value='60'>1 Minute</option>
+            </select>
+          </div>
+        </div>
+        <h1>
+          Pipeline
+        </h1>
+      </div>
+    </div>
+    <div class='container'>
+      <div class='row'>
+        <div class='col-md-6'>
+          <h3>
+            Current Pipeline's State
+          </h3>
+          <div class='row'>
+            <div class='col-md-12'>
+              <div class='svg states' id='svg_image'></div>
+            </div>
+          </div>
+        </div>
+        <div class='col-md-6'>
+          <h3>
+            Pipeline
+          </h3>
+          <div class='row'>
+            <div class='col-md-12'>
+              <table class='table'>
+                <tr>
+                  <th>
+                    State
+                  </th>
+                  <th>
+                    Description
+                  </th>
+                </tr>
+                <tr class='svg_highlight' data-element-id='starting' data-svg-class='states'>
+                  <td>
+                    Starting
+                  </td>
+                  <td>
+                    Initializing the non-pipeline infrastructure then loading and starting the base pipeline.
+                  </td>
+                </tr>
+                <tr class='svg_highlight' data-element-id='updating' data-svg-class='states'>
+                  <td>
+                    Updating
+                  </td>
+                  <td>
+                    Discarding all exo.spec.ae modules that have been loaded. Updating the OPS source code from git and merging in the PRE-OPS branch.
+                  </td>
+                </tr>
+                <tr class='svg_highlight' data-element-id='loading' data-svg-class='states'>
+                  <td>
+                    Loading
+                  </td>
+                  <td>
+                    Load all of the exo.spec.ae modules. Determine the AE module hierarchy. Check for new software versions and schedule accordingly.
+                  </td>
+                </tr>
+                <tr class='svg_highlight' data-element-id='running' data-svg-class='states'>
+                  <td>
+                    Running
+                  </td>
+                  <td>
+                    Process the TODO list and initiate any periodic tasks as they become due. Command, Database, and Schedule pages will be responsive.
+                  </td>
+                </tr>
+                <tr class='svg_highlight' data-element-id='archiving' data-svg-class='states'>
+                  <td>
+                    Archiving
+                  </td>
+                  <td>
+                    Snapshot the database state for posterity. Keep 20 historical versions.
+                  </td>
+                </tr>
+                <tr class='svg_highlight' data-element-id='gitting' data-svg-class='states'>
+                  <td>
+                    Gitting
+                  </td>
+                  <td>
+                    Merge the user submission from the Command page into the PRE-OPS branch. Verify the code is compliant (exo/spec/tools/compliant.py) before pushing branch back to github.
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='container'>
+      <footer class='footer'>
+        <nav>
+          <ul>
+            <li>
+              <a href='/pages/about'>
+                About
+              </a>
+            </li>
+            <li>
+              <a href='/pages/news'>
+                News
+              </a>
+            </li>
+            <li>
+              <a href='/pages/exoplanet_systems'>
+                Exoplanet Systems
+              </a>
+            </li>
+            <li>
+              <a href='/pages/database'>
+                Database
+              </a>
+            </li>
+            <li>
+              <a href='/pages/tasks'>
+                Dependency Trees
+              </a>
+            </li>
+            <li>
+              <a href='/pages/command'>
+                Command
+              </a>
+            </li>
+            <li>
+              <a href='/pages/pipelines'>
+                Pipeline's State
+              </a>
+            </li>
+            <li>
+              <a href='/pages/schedule'>
+                Schedule
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </footer>
+    </div>
+    <script src="/javascripts/application.js"></script>
+    <script>
+      $(document).ready(function(){
+        initializeRefresh();
+        embedSvg("/images/svg/state.svg", getPipelineState);
+      });
+    </script>
+    <script>
+      $('#lock_view_button').removeClass(showLockView());
+      if (localStorage.alert_status) {   
+        $("#alert-message").html (HandlebarsTemplates['alert'](localStorage));
+        localStorage.removeItem("alert_status");
+        localStorage.removeItem("alert_message");
+      }
+    </script>
+  </body>
+</html>

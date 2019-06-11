@@ -1,0 +1,188 @@
+'''Define the bits of the front end that require some help from the server
+
+COPYRIGHT:
+Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+U.S. Government sponsorship acknowledged.
+
+All rights reserved.
+
+LICENSE:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+- Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
+
+- Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+
+- Neither the name of Caltech nor its operating division, the Jet
+Propulsion Laboratory, nor the names of its contributors may be used to
+endorse or promote products derived from this software without specific prior
+written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+NTR:
+'''
+
+from dawgie.fe import DynamicContent, HttpMethod
+
+import dawgie
+import dawgie.context
+import dawgie.db
+import dawgie.pl.farm
+import dawgie.pl.schedule
+import dawgie.pl.start
+import enum
+import json
+
+class Axis(enum.Enum):
+    runid = 0
+    svn = 1
+    tn = 2
+    pass
+
+def db_item(display:dawgie.Visitor, path:str)->None:
+    runid,tn,task,alg,sv = path[0].split ('.')
+    dawgie.db.view (display, int(runid), tn, task, alg, sv)
+    return
+
+def db_lockview():
+    return json.dumps(dawgie.db.view_locks()).encode()
+
+def db_prime():
+    # pylint: disable=protected-access
+    return json.dumps (list(set(['.'.join (k.split ('.')[:-1])
+                                 for k in dawgie.db._prime_keys()]))).encode()
+
+def db_targets():
+    return json.dumps (dawgie.db.targets(True)).encode()
+
+def db_versions():
+    return json.dumps (dawgie.db.versions()).encode()
+
+def pl_state():
+    return json.dumps ({'name':dawgie.pl.start.sdp.state,
+                        'status':'active'}).encode()
+
+def schedule_crew():
+    return json.dumps (dawgie.pl.farm.crew()).encode()
+
+def schedule_doing():
+    return json.dumps (dawgie.pl.schedule.view_doing()).encode()
+
+def schedule_failure():
+    return json.dumps (dawgie.pl.schedule.view_failure()).encode()
+
+def schedule_run (tasks:[str], targets:[str]):
+    dawgie.pl.schedule.organize (task_names=tasks,
+                                 targets=set(targets),
+                                 event='command-run requested by user')
+    return json.dumps ({'alert_status':'success',
+                        'alert_message':'All jobs scheduled to run.'}).encode()
+
+def schedule_success():
+    return json.dumps (dawgie.pl.schedule.view_success()).encode()
+
+def schedule_tasks():
+    return json.dumps (dawgie.pl.schedule.tasks()).encode()
+
+def schedule_todo():
+    return json.dumps (dawgie.pl.schedule.view_todo()).encode()
+
+def _s0 (k): return k.split('.')[0]
+def _s1 (k): return k.split('.')[1]
+def _s2 (k): return '.'.join (k.split('.')[2:])
+def _search (axis, key):
+    # pylint: disable=cell-var-from-loop,protected-access
+    if axis == Axis.runid:
+        k1,k2,k3,k4 = 'run_id', 'targets', 'target_name', 'state_vectors'
+        prime,second,third = _s0,_s1,_s2
+        pass
+    if axis == Axis.svn:
+        k1,k2,k3,k4 = 'state_vector', 'targets', 'name', 'ids'
+        prime,second,third = _s2,_s1,_s0
+        pass
+    if axis == Axis.tn:
+        k1,k2,k3,k4 = 'target_name', 'targets', 'state_vector', 'ids'
+        prime,second,third = _s1,_s2,_s0
+        pass
+
+    result = {'items':[]}
+    keys = list(set(['.'.join (k.split ('.')[:-1])
+                     for k in filter (lambda k:-1 < prime(k).find (key),
+                                      dawgie.db._prime_keys())]))
+    keys.sort (key=prime)
+    for lkey in sorted (set ([prime (k) for k in keys])):
+        result['items'].append ({k1:lkey, k2:[]})
+        tnks = [k for k in filter (lambda k:prime (k) == lkey, keys)]
+        for nn in sorted (set ([second (k) for k in tnks])):
+            ids = sorted (set ([third (k) for k in
+                                filter (lambda k:second (k) == nn, tnks)]))
+            result['items'][-1]['targets'].append ({k3:nn, k4:ids})
+            pass
+        pass
+    return json.dumps (result).encode()
+
+# pylint: disable=dangerous-default-value
+def search_runid(key:[str]=['']): return _search (Axis.runid, key[0])
+def search_svn(key:[str]=['']): return _search (Axis.svn, key[0])
+def search_tn(key:[str]=['']): return _search (Axis.tn, key[0])
+
+def search_cmplt_svn():
+    # pylint: disable=protected-access
+    return json.dumps(sorted(set(['.'.join (k.split('.')[2:-1])
+                                  for k in dawgie.db._prime_keys()]))).encode()
+def search_cmplt_tn(): return json.dumps(sorted(dawgie.db.targets())).encode()
+
+def start_changeset():
+    return dawgie.context.git_rev.encode('utf-8')
+
+def start_state():
+    return json.dumps ({'name':dawgie.pl.start.sdp.state,
+                        'status':'active'}).encode()
+
+def start_submit (changeset:[str], submission:[str]):
+    if changeset[0].lower() != '':
+        result = dawgie.pl.start.submit(changeset[0], submission[0])
+    else: result = {'alert_status':'danger',
+                    'alert_message':'Cannot submit a blank changeset'}
+    return json.dumps (result).encode()
+
+DynamicContent(db_item, '/app/db/item')
+DynamicContent(db_lockview, '/app/db/lockview')
+DynamicContent(db_prime, '/app/db/prime')
+DynamicContent(db_targets, '/app/db/targets')
+DynamicContent(db_versions, '/app/db/versions')
+
+DynamicContent(pl_state, '/app/pl/state')
+
+DynamicContent(schedule_crew, '/app/schedule/crew')
+DynamicContent(schedule_doing, '/app/schedule/doing')
+DynamicContent(schedule_failure, '/app/schedule/failure')
+DynamicContent(schedule_run, '/app/run', [HttpMethod.POST])
+DynamicContent(schedule_success, '/app/schedule/success')
+DynamicContent(schedule_tasks, '/app/schedule/tasks')
+DynamicContent(schedule_todo, '/app/schedule/todo')
+
+DynamicContent(search_runid, '/app/search/ri')
+DynamicContent(search_svn, '/app/search/sv')
+DynamicContent(search_tn, '/app/search/tn')
+DynamicContent(search_cmplt_svn, '/app/search/completion/sv')
+DynamicContent(search_cmplt_tn, '/app/search/completion/tn')
+
+DynamicContent(start_changeset, '/app/changeset.txt')
+DynamicContent(start_state, '/app/state/status')
+DynamicContent(start_submit, '/app/submit', [HttpMethod.POST])

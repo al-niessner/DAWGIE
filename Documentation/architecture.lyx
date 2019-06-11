@@ -1,0 +1,1550 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Unconventional Documentation for an Unconventional Idea
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset FloatList figure
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset FloatList table
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Overview
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "fig:Overview"
+
+\end_inset
+
+ is fancy picture of a possible architecture based on a discussion about
+ the current processing.
+ It is basically a regurgitation of what I heard.
+ The picture does not stand on its own and requires some explanation, which
+ is given in the subsequent text.
+\end_layout
+
+\begin_layout Standard
+Lets start with some definitions before moving onto the picture.
+\end_layout
+
+\begin_layout Description
+blue
+\begin_inset space ~
+\end_inset
+
+box A data store.
+ Data stores are a set of disks and a server that makes that the set of
+ disks available to a hodge podge of compute nodes, where hodge podge is
+ indicates that they need not be the same platform or location.
+\end_layout
+
+\begin_layout Description
+green_hexagon An AI bot.
+ AI bots do the drudgery work that we humans are very poor at due to their
+ tedium.
+ They need not be all that intelligent.
+ They do need to be robust, autonomous, make decisions without intervention,
+ and altering humans when something is beyond their ability.
+\end_layout
+
+\begin_layout Description
+pink_circle A run of the mill processing block that makes no decisions.
+\end_layout
+
+\begin_layout Description
+yellow_oval The goal: a science paper.
+\end_layout
+
+\begin_layout Description
+dashed_line Data pull.
+ The object on the right pulls data from the object on left.
+\end_layout
+
+\begin_layout Description
+dotted_line Data query.
+ The object requires more information for processing but it does not come
+ from a previous processing block.
+ An example would be instrument calibration data.
+\end_layout
+
+\begin_layout Description
+solid_line Data push.
+ The data follows the arrow with the tail being the object that pushed data
+ to the arrow head.
+\end_layout
+
+\begin_layout Standard
+The concept of data push and data pull is very important to the architecture
+ because it determines whether or not an object is active or passive.
+ The difference between a query and pull is that in a query the result is
+ available to the requester immediately and without ambiguity.
+ In a pull, the actor must make decisions to complete the pull.
+\end_layout
+
+\begin_layout Standard
+Moving on to the picture, the data flows from the left, starting with a
+ very large collection through a non-reliable connection into the wild,
+ to the right, culminating into a science paper.
+ The data also move up and down, but following the arrows is the correct
+ thing to do.
+ 
+\end_layout
+
+\begin_layout Standard
+The picture can also be viewed as seven columns.
+ The first column, furthest left, is in the wild and represents the raw
+ data stores that we have access to.
+ The next column to the right are the actors that periodically search the
+ stores in the wild for interesting data and pull it across the wild barrier
+ into a more controlled environment and push it to the next column which
+ is a local and controlled data store.
+ The data permanently rests in this data store.
+ Data is pull from the third column data store and if certain qualities
+ exist, it is pushed into the processing pipe where it is finally pushed
+ into the fifth column and third data store.
+ From here a bot searches the data for the most interesting and likely results
+ that can be used for a science paper in the right most column.
+ The column organization lets us add more science papers (types), more bots
+ to scan the fifth column data store for different interests, etc.
+\end_layout
+
+\begin_layout Standard
+The first AI bots in column two should be the most permissive.
+ They should load nearly all data that is usable because their job is to
+ overcome the link between wild and controllable so that the data is always
+ ready to be processed.
+ Since they are so permissive, they rarely if ever need updating.
+\end_layout
+
+\begin_layout Standard
+The second AI bot in column four is more restrictive than the first but
+ it is important that it never be predictive.
+ It should select data to be processed based on the metadata, which is ever
+ changing.
+ It should not select data based on information that may generate a positive
+ result (predictive).
+ Instead it should not select data based on metadata that prevents it from
+ possibly producing a valuable result.
+\end_layout
+
+\begin_layout Standard
+The third AI bot is column six and will take the most effort to train.
+ The third AI bot is to choose which, if any, of the results from all of
+ the previous processing contains any results worth reporting.
+\end_layout
+
+\begin_layout Standard
+The interesting cycle is the feedback from the Alarm AI in column six to
+ Metadata task in column three.
+ As the Alarm AI is trained it also means that information is gained for
+ better filtering at the Filter AI.
+ In order for the Filter AI to improve, it needs new and more encompassing
+ metadata.
+ Hence, the Metadata task must constantly walk through all of the data and
+ update the known information.
+ It means that the metadata should only ever be added and never removed.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways true
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename architecture.svg
+	width 90page%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Overview"
+
+\end_inset
+
+Overview
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Database
+\end_layout
+
+\begin_layout Standard
+The database is used to quickly reference information used throughout the
+ SDP processing.
+ There are two distinct types of information: the scientific content and
+ the indexing to find it.
+ Therefore, the database structure is broken down in two parts: One, all
+ of the scientific content are binary blobs with the respect to the database
+ and therefore will be stored external to the database.
+ Two, the card catalog
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+A card catalog is the archaic reference to database index tables.
+\end_layout
+
+\end_inset
+
+ is quite simple and acts as a very trivial file system to find the blobs
+ quickly based on simple metadata.
+\end_layout
+
+\begin_layout Subsection
+Blob Naming
+\end_layout
+
+\begin_layout Standard
+To reduce problems and complexity of files that 
+\begin_inset Quotes eld
+\end_inset
+
+vanish
+\begin_inset Quotes erd
+\end_inset
+
+ from view with respect to the database, the choice has been made to store
+ all of the blobs in a single directory with names that the user cannot
+ penetrate.
+ The name within the store is the MD5 hexidecimal digest and SHA1 hexidecimal
+ digest with an underscore separating them.
+ For instance, ff701424adb852fe1fedb95dd37b70ed_487c2d0004636a2a6cde7332a9ce53a2
+65035881.
+\end_layout
+
+\begin_layout Standard
+The intended consequences of this are: One, the known location can easily
+ be monitored and tied using logical drives if necessary for nearly infinite
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Nearly infinite is relative to the spectural analysis being done on known
+ transiting exo-planets.
+\end_layout
+
+\end_inset
+
+ storage.
+ Two, because the names are impenetrable, the user will not be tempted to
+ 
+\begin_inset Quotes eld
+\end_inset
+
+optimize
+\begin_inset Quotes erd
+\end_inset
+
+ the directory structure or filenames in the future cause them to vanish
+ from the database's purview.
+ The same consequence also forces the user to write tools like purge to
+ access the information via the database and hopefully keeping the store
+ and the database synchronized.
+ Three, any data can be stored this way since the filename is not a conglomerati
+on of metadata.
+ 
+\end_layout
+
+\begin_layout Standard
+The third consequence is the actual driver for this database structure.
+ Originally, the science data are HST FITS files coming from MAST.
+ However, the intent is derive and host of state vectors from the science
+ data and they require storage and fast look up as well as the science data.
+ They are also native to the language being used to develop the SDP, which
+ is Python.
+ Hence, we can take the values of the state vector and simply pickle them
+ in and out of storage with fast lookup to find them.
+ 
+\end_layout
+
+\begin_layout Standard
+There are also two unintended consequences: One, the potenial for automatic
+ storage optimization.
+ Since blobs that form the same MD5 and SHA1 digests must be bitwise identical,
+ then only need to store the single item until the names diverge.
+ Two, if the database indexing table becomes corrupted, it may (most likely)
+ be impossible to recover the database/indexing tables.
+ One can speculate on what corruption is recoverable and what is not, but
+ with even mediocre discipline the simple protections afforded from database
+ and store backups would minimize the damageto a tolerable limit.
+ At worst, one should expect having to let the computer redo all of its
+ computations since the last backup.
+ 
+\end_layout
+
+\begin_layout Subsection
+Card Catalog
+\end_layout
+
+\begin_layout Standard
+Finding the files that we care about is significantly more complicated than
+ naming the blobs, but, in terms of many database schemas, it is also very
+ simple.
+ There are 12 tables, 6 of which holds all of the references to the blobs
+ in the store and they other 5 are indexing tables to quickly locate the
+ blob names.
+ The data tables are described in tables 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "tab:Primary"
+
+\end_inset
+
+ through 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "tab:Value"
+
+\end_inset
+
+.
+ The values in the second row are meant to indicate the type of data stored
+ in the column with quoted values being strings and numbers being integers
+ of some form.
+ While these tables are not space efficient, they should be fast insertion
+ and search, which is the primary goal.
+ The six index tables are self explanatory allowing for fast searches on
+ run, tn ID, task ID, alg ID, sv ID, and val ID.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Primary"
+
+\end_inset
+
+Primary
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="8">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PK
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+run
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+tn ID
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+task ID
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+alg ID
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+sv ID
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+val ID
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+blob name
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Quotes eld
+\end_inset
+
+0_0
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+where PK is the primary key, run is detailed in ???, tn ID is the target
+ name ID, alg ID is the algorithm name and version ID, sv ID is the state
+ vector name and version ID, and val ID is the value ID.
+ In database lingo, ID is the primary key from the data tables and used
+ as a foriegn key in this table.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Target"
+
+\end_inset
+
+Target
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PK
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+name
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Quotes eld
+\end_inset
+
+gj1214b
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+where PK is the primary key, name is the target's name.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Task"
+
+\end_inset
+
+Task
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PK
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+name
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Quotes eld
+\end_inset
+
+mast
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+where PK is the primary key, name is the task's name that is assigned by
+ the pipeline.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Algorithm"
+
+\end_inset
+
+Algorithm
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="5">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PK
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+name
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+design
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+implementation
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+bugfix
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Quotes eld
+\end_inset
+
+mast.ingest
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+where PK is the primary key, name is the developer specified algorithm name,
+ and design, implementation and bugfix are part of the version (see ???
+ for details).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:State-Vector"
+
+\end_inset
+
+State Vector
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="5">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PK
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+name
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+design
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+implementation
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+bugfix
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Quotes eld
+\end_inset
+
+mast.ingest.observation
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+where PK is the primary key, name is the developer specified state vector
+ name, and design, implementation and bugfix are part of the version (see
+ ??? for details).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:Value"
+
+\end_inset
+
+Value
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="5">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PK
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+name
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+design
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+implementation
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+bugfix
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Quotes eld
+\end_inset
+
+mast.ingest.observation.date
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+where PK is the primary key, name is the developer specified value name,
+ and design, implementation and bugfix are part of the version (see ???
+ for details).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Software
+\end_layout
+
+\begin_layout Standard
+Using Python seems almost fait accompli prior to this architecture.
+ Currently, there is are many languages used to get part of the task done.
+ The new architecture started in Python only because most of the players
+ seemed to desire it and now it seems as though many of the languages are
+ going to fade as Python takes throne.
+ The prefix for the Python packages is exo.spec.
+ From there it is broken into ae for algorithm engine, db for database,
+ and pl for pipeline.
+ These are the major parts that will be discussed indepenently in subsections.
+ The interfaces that allow them to interact without becoming tangled are
+ discussed here.
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand vref
+reference "fig:Software-Architecture"
+
+\end_inset
+
+ shows the interfaces that compose the software architecture.
+ The Executive has the capability to start a thread of processing from here
+ out called a run based on 3 factors: One, a change in version numbers.
+ Two, the arrival of new data into the system.
+ Three, the user demands that a task be accomplished immediately.
+ Three of the interfaces, Algorithm, StateVector, and Value, inhert the
+ Version interface, which allows the executive to monitor the current status
+ of the software and make decisions about what requires processing.
+ When new data arrives from an ingest Algorithm, the Executive will detect
+ the change and begin processing all of the Tasks that have dependencies
+ on the ingestion StateVectors.
+ Finally, the user may change some part of the system that is not automagically
+ monitored or for some other unforseen reason, then the user can demand
+ that the Executive process one or more Tasks.
+\end_layout
+
+\begin_layout Standard
+Also shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Software-Architecture"
+
+\end_inset
+
+ are the Python packages that should contain the implementations of these
+ classes.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename softarch.svg
+	width 80col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Software-Architecture"
+
+\end_inset
+
+Software Architecture
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Algorithm Engine
+\end_layout
+
+\begin_layout Standard
+The package exo.spec.ae should contain a packge for each algorithm and it
+ should contain at least three modules.
+ One for Algorithm.
+ One for StateVectors and Values.
+ One for Task.
+\end_layout
+
+\begin_layout Subsection
+Database
+\end_layout
+
+\begin_layout Standard
+There is one database for development, which is based on the Python shelve
+ package.
+\end_layout
+
+\begin_layout Standard
+There is one database for operations, which is a postgresql database on
+ mentor.
+\end_layout
+
+\begin_layout Subsection
+Pipeline
+\end_layout
+
+\begin_layout Enumerate
+Spawn (start.py)
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+front end web GUI
+\end_layout
+
+\begin_layout Enumerate
+twisted for spreading about
+\end_layout
+
+\begin_layout Enumerate
+use the reloading from PyUnit: http://pyunit.sourceforge.net/notes/reloading.html
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Scan and find all bots (scan.py)
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+import all packages in exo.spec.ae
+\end_layout
+
+\begin_layout Enumerate
+build a list of all the factory(runid) functions in the packages
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Once all bots are found, collect all versions (version.py)
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+walk down bots, algs, state vector, and values to get versions
+\end_layout
+
+\begin_layout Enumerate
+load old versions
+\end_layout
+
+\begin_layout Enumerate
+compare new versions to old
+\end_layout
+
+\begin_layout Enumerate
+save new versions into the db
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Schedule jobs base on (schedule.py)
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+versions
+\end_layout
+
+\begin_layout Enumerate
+time (periodic)
+\end_layout
+
+\begin_layout Enumerate
+user demand
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+pause executive or all executives
+\end_layout
+
+\begin_layout Enumerate
+exit
+\end_layout
+
+\begin_layout Enumerate
+reload (recompute schedule on new software)
+\end_layout
+
+\begin_layout Enumerate
+run task
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+other events??
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Execute schedule (executive.py)
+\end_layout
+
+\begin_layout Enumerate
+GUI Views
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+schedule
+\end_layout
+
+\begin_layout Enumerate
+task/alg relationship
+\end_layout
+
+\begin_layout Enumerate
+pipeline state machine?
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Special target, algorithm, and state vector names:
+\end_layout
+
+\begin_layout Description
+_job_ contains runtime information about a completed job
+\end_layout
+
+\begin_deeper
+\begin_layout Description
+status.log contains runtime log information
+\end_layout
+
+\begin_layout Description
+version.info contains the name and version information about algorithms,
+ state vectors, and values.
+\end_layout
+
+\end_deeper
+\end_body
+\end_document

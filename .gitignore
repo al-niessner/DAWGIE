@@ -1,0 +1,17 @@
+*~
+*.docx
+*.pdf
+*.pyc
+*.idlwave_catalog
+*.class
+*.swp
+*.fits
+*.pkl
+*.rpt.txt
+*.zip
+__pycache__
+Python/exo/spec/fe/javascripts/fe.data.js
+svg/
+notes.txt
+.coverage*
+.cache/

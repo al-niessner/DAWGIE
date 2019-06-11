@@ -1,0 +1,38 @@
+<!--
+COPYRIGHT:
+Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+U.S. Government sponsorship acknowledged.
+
+All rights reserved.
+
+LICENSE:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+- Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
+
+- Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+
+- Neither the name of Caltech nor its operating division, the Jet
+Propulsion Laboratory, nor the names of its contributors may be used to
+endorse or promote products derived from this software without specific prior
+written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+NTR:
+-->
+(function(){return this.HandlebarsTemplates||(this.HandlebarsTemplates={}),this.HandlebarsTemplates.algorithms_modal_scheduled=Handlebars.template({compiler:[7,">= 4.0.0"],main:function(e,t,n,a,s){var i;return"<div aria-labelledby='modalLabel' class='modal fade' id='"+e.escapeExpression((n.algorithmId||t&&t.algorithmId||n.helperMissing).call(null!=t?t:{},null!=t?t.name:t,{name:"algorithmId",hash:{},data:s}))+"_modal' role='dialog' tabindex='-1'>\n  <div class='modal-dialog' role='document'>\n    <div class='modal-content'>\n      <div class='modal-header'>\n        <button aria-label='Close' class='close' data-dismiss='modal' type='button'>\n          <span aria-hidden='true'>&times;</span>\n        </button>\n        <h3 class='modal-title' id='modalLabel'>\n          "+e.escapeExpression((i=null!=(i=n.name||(null!=t?t.name:t))?i:n.helperMissing,"function"==typeof i?i.call(null!=t?t:{},{name:"name",hash:{},data:s}):i))+"\n        </h3>\n      </div>\n      <div class='modal-body'>\n        <div class='row'>\n          <div class='col-md-2'>\n            <label>Status</label>\n            <div class='modal_data modal_status'>\n              "+e.escapeExpression((i=null!=(i=n.status||(null!=t?t.status:t))?i:n.helperMissing,"function"==typeof i?i.call(null!=t?t:{},{name:"status",hash:{},data:s}):i))+"\n            </div>\n          </div>\n          <div class='col-md-10'>\n            <label>Targets</label>\n            <div class='modal_data'>\n              "+e.escapeExpression((n.scheduledTargets||t&&t.scheduledTargets||n.helperMissing).call(null!=t?t:{},null!=t?t.targets:t,{name:"scheduledTargets",hash:{},data:s}))+"\n            </div>\n          </div>\n        </div>\n      </div>\n      <div class='modal-footer'>\n        <button class='btn btn-default' data-dismiss='modal' type='button'>Close</button>\n      </div>\n    </div>\n  </div>\n</div>"},useData:!0}),this.HandlebarsTemplates.algorithms_modal_scheduled}).call(this);
