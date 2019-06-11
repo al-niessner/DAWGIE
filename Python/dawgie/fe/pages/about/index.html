@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<!--
-COPYRIGHT:
+<html>
+  <head>
+    <!--
+      COPYRIGHT:
 Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
@@ -35,9 +37,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 NTR:
--->
-<html>
-  <head>
+    -->
     <meta content='text/html; charset=US-ASCII' http-equiv='Content-Type'>
     <meta charset='utf-8'>
     <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible'>
@@ -70,8 +70,8 @@ NTR:
               </a>
             </li>
             <li>
-              <a href='/pages/news'>
-                News
+              <a href='/pages/logs'>
+                Logs
               </a>
             </li>
             <li>
@@ -168,23 +168,8 @@ NTR:
           About
         </h1>
       </div>
-    </div>
-    <div class='container'>
       <div class='row'>
-        <div class='col-md-8'>
-          <p>
-            The traditional science data pipeline is built around a model in which data is ingested, calibrated or otherwise processed, and then the results archived or curated. The challenge with this static model is that as new data or methods become available, the original science data pipeline results become stale. Especially in the rapidly expanding field of exoplanet science, static science data pipeline models can face significant challenges to maintaining scientific relevance.
-          </p>
-          <p>
-            <b>EXCALIBUR</b> takes a different approach and is designed to provide the capability for making the current best estimate in terms of our knowledge of exoplanet atmospheres. <b>EXCALIBUR</b> is event driven where the events are defined as changes in data or algorithms; when events are detected, dependencies affected by the changes are re-processed. Calibration steps are transparent and quantified using a combination of accessible intermediate state vectors, auto-generation of calibration step documentation, and statistical metrics. <b>EXCALIBUR</b> implements a unified marginalization over both science and instrument model parameters coupled with a Bayesian, evidence-based, model selection capability.
-          </p>
-          <p>
-            <b>EXCALIBUR</b> is designed to provide current, state of the art, calibration and retrieval results to the exoplanet community. For example, changes in a planet's orbital parameters, mass, or improved estimates of the host star temperature, metallicity, or log(G) parameters have the potential to impact science results. <b>EXCALIBUR</b> periodically collects new exoplanet data and parameters from multiple archives and incorporates algorithmic, instrument model, and science model updates as they are developed.
-          </p>
-        </div>
-        <div class='col-xs-4'>
-          <img src='/images/Excalibur_logo.png' width='100%'>
-        </div>
+        <div class='col-md-12 markdown'></div>
       </div>
     </div>
     <div class='container'>
@@ -197,8 +182,8 @@ NTR:
               </a>
             </li>
             <li>
-              <a href='/pages/news'>
-                News
+              <a href='/pages/logs'>
+                Logs
               </a>
             </li>
             <li>
@@ -237,8 +222,19 @@ NTR:
     </div>
     <script src="/javascripts/application.js"></script>
     <script>
+      $(document).ready(function(){
+        $.ajax({
+          url: "/markdown/about.md",
+          type: "GET"
+        }).success(function(result) {
+          var md = window.markdownit()
+          $('.markdown').html(md.render(result));
+        })
+      });
+    </script>
+    <script>
       $('#lock_view_button').removeClass(showLockView());
-      if (localStorage.alert_status) {   
+      if (localStorage.alert_status) {
         $("#alert-message").html (HandlebarsTemplates['alert'](localStorage));
         localStorage.removeItem("alert_status");
         localStorage.removeItem("alert_message");

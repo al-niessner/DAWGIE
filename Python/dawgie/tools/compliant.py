@@ -291,7 +291,7 @@ def rule_03 (task):
                      isinstance (a.state_vectors(), list)])
 
     def _verify_alg (a):
-        if a.previous(): pl = all([isinstance (p, dawgie.ALG_REF)
+        if a.previous(): pl = all([isinstance (p, (dawgie.ALG_REF, dawgie.SV_REF, dawgie.V_REF))
                                    for p in a.previous()])
         else: pl = True
 

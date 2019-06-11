@@ -91,6 +91,7 @@ fe_path = '/tmp/' + os.environ.get ('USERNAME', 'unknown') + '/fe'
 fe_port = int(os.environ.get ('FE_PORT', 8080 + PortOffset.frontend.value))
 git_rev = None
 gpg_home = os.environ.get ('GNUPGHOME', '~/.gnupg')
+log_capacity = 100
 log_level = logging.WARN
 log_port = int(os.environ.get('LOG_PORT', 8080 + PortOffset.log.value))
 
@@ -158,6 +159,8 @@ def add_arguments (ap):
                      help='AE specific directory for the front-end [%(default)s]')
     ap.add_argument ('--context-gpg-home', default=gpg_home, required=False,
                      help='location to find the PGP keys [%(default)s]')
+    ap.add_argument ('--context-log-capacity', default=log_capacity, required=False, type=int,
+                     help='the number of log messages to save for the front-end lists [%(default)s]')
     ap.add_argument ('--context-log-port', default=log_port, required=False, type=int,
                      help='the port to the log server [%(default)s]')
     ap.add_argument ('--context-email-signature', default=email_signature, required=False,
@@ -243,6 +246,7 @@ def override (args):
     dawgie.context.fe_path = args.context_fe_path
     dawgie.context.git_rev = _rev()
     dawgie.context.gpg_home = args.context_gpg_home
+    dawgie.context.log_capacity = args.context_log_capacity
     dawgie.context.log_port = args.context_log_port
 
     if not dawgie.context.ae_base_path.endswith (os.path.sep + dawgie.context.ae_base_package.replace ('.', os.path.sep)): raise ValueError('context-ae-dir ({0}) does not end with context-ae-pkg ({1})'.format (dawgie.context.ae_base_path,dawgie.context.ae_base_package))
