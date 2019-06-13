@@ -164,12 +164,35 @@ NTR:
     <div id='alert-message'></div>
     <div class='container search'>
       <div class='page-header'>
+        <div alt='Search Result Filters' class='input-group filter_box' title='Search Result Filters'>
+          <span class='input-group-addon'>
+            <span class='glyphicon glyphicon-filter'></span>
+          </span>
+          <div class='input-group-btn'>
+            <label class='btn btn-info'>
+              <input autocomplete='off' class='filter' name='filter' type='radio' value='none'>
+              None
+            </label>
+            <label class='btn btn-info active'>
+              <input autocomplete='off' checked='checked' class='filter' name='filter' type='radio' value='user'>
+              User
+            </label>
+            <label class='btn btn-info'>
+              <input autocomplete='off' class='filter' name='filter' type='radio' value='dev'>
+              Dev
+            </label>
+            <label class='btn btn-info'>
+              <input autocomplete='off' class='filter' name='filter' type='radio' value='admin'>
+              Admin
+            </label>
+          </div>
+        </div>
         <h1>
           Search Database
         </h1>
       </div>
       <div class='row'>
-        <div class='col-lg-5 col-md-5 col-sm-5'>
+        <div class='col-lg-6 col-md-6 col-sm-6'>
           <label class='control-label'>State Vector</label>
           <div class='input-group search_box'>
             <input autocomplete='off' class='form-control' id='sv' placeholder='Search' required='true' type='text'>
@@ -181,7 +204,7 @@ NTR:
             </input>
           </div>
         </div>
-        <div class='col-lg-7 col-md-7 col-sm-7'>
+        <div class='col-lg-6 col-md-6 col-sm-6'>
           <label class='control-label'>Target Name</label>
           <div class='input-group search_box'>
             <input autocomplete='off' class='form-control' id='tn' placeholder='Search' required='true' type='text'>
@@ -189,18 +212,6 @@ NTR:
                 <button class='btn btn-primary' type='submit'>
                   <span class='glyphicon glyphicon-search'></span>
                 </button>
-                <label class='btn btn-info active'>
-                  <input autocomplete='off' checked='checked' class='filter' name='filter' type='radio' value='user'>
-                  User
-                </label>
-                <label class='btn btn-info'>
-                  <input autocomplete='off' class='filter' name='filter' type='radio' value='dev'>
-                  Dev
-                </label>
-                <label class='btn btn-info'>
-                  <input autocomplete='off' class='filter' name='filter' type='radio' value='admin'>
-                  Admin
-                </label>
               </span>
             </input>
           </div>
