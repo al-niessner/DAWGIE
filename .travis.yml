@@ -3,3 +3,4 @@ python: "3.6"
 services: docker
 script:
 - ./.ci/step_00.sh
+- ./.ci/step_01.sh
