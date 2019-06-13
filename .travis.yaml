@@ -1,0 +1,5 @@
+language: python
+python: "3.6"
+services: docker
+script
+- ./.ci/step_00.sh
