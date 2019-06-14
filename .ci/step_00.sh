@@ -57,7 +57,8 @@ then
     echo "CIT Version: $citVersion"
 
     docker images
-    docker images niessner/cit
+    docker pull niessner/cit:${citVersion}
+    docker images
     exit
     if [ -z "$(docker images niessner/cit | grep ${citVersion})" ]
     then
