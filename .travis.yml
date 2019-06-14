@@ -6,6 +6,7 @@ services:
  - docker
 
 before_install:
+- ping -c 10 dockerhub.com
 - docker images
 - docker images niessner/cit
 
