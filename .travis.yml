@@ -6,7 +6,6 @@ before_install:
 - docker images
 - docker images niessner/cit
 install:
-- pip install -r .ci/requirements.txt
 script:
 - ./.ci/step_00.sh
 - ./.ci/step_01.sh
