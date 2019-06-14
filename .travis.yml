@@ -2,7 +2,6 @@ language: python
 python: "3.6"
 services:
 - docker
-before_install:
-- ./.ci/step_00.sh
 script:
+- ./.ci/step_00.sh
 - ./.ci/step_01.sh
