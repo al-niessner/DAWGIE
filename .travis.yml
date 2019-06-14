@@ -4,4 +4,8 @@ services:
  - docker
 script:
 - ./.ci/step_00.sh
-- ./.ci/step_01.sh
+- ./.ci/check_01.sh
+- ./.ci/check_02.sh
+- ./.ci/check_03.sh
+- ./.ci/check_04.sh
+- ./.ci/step_99.sh
