@@ -56,6 +56,9 @@ then
     echo "PY Version: $pyVersion"
     echo "CIT Version: $citVersion"
 
+    docker images
+    docker images niessner/cit
+    exit
     if [ -z "$(docker images niessner/cit | grep ${citVersion})" ]
     then
         echo "building CIT because $(docker images niessner/cit | grep ${citVersion})"
