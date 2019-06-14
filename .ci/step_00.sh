@@ -58,6 +58,7 @@ then
 
     if [ -z "$(docker images niessner/cit | grep ${citVersion})" ]
     then
+        echo "building CIT because $(docker images niessner/cit | grep ${citVersion})"
         .ci/dcp.py --server .ci/Dockerfile.1 .ci/Dockerfile.2 .ci/Dockerfile.3 &
         while [ ! -f .ci/Dockerfile.3.dcp ]
         do
