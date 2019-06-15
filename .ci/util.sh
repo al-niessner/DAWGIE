@@ -35,7 +35,7 @@
 #
 # NTR:
 
-GHE_API_URL=https://github.com/api/v3
+GHE_API_URL=https://api.github.com
 ghrVersion=${ghrVersion:-"`git describe --tags`"}
 PYTHONPATH=${PWD}/Python:${PWD}/Test
 REPO=niessner/DAWGIE
