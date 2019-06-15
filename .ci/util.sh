@@ -57,7 +57,7 @@ current_state ()
 download ()
 {
     curl -L \
-         -H "Authorization: token ${GHE4_TOKEN}" \
+         -H "Authorization: token ${GHE_TOKEN}" \
          ${ghrReleaseTarball} > $1
 }
 
@@ -127,7 +127,7 @@ post_state ()
     fi
 
     curl -XPOST \
-         -H "Authorization: token ${GHE4_TOKEN}" \
+         -H "Authorization: token ${GHE_TOKEN}" \
          ${GHE4_API_URL}/repos/${REPO}/statuses/${ghprbActualCommit} \
          -d "{\"state\": \"${3}\", \"target_url\": \"${BUILD_URL}/console\", \"description\": \"${2}\", \"context\": \"${1}\"}" > /dev/null 2>&1
 }
