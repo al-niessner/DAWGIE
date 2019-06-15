@@ -128,8 +128,8 @@ post_state ()
 
     curl -XPOST \
          -H "Authorization: token ${GHE_TOKEN}" \
-         ${GHE_API_URL}/repos/${REPO}/statuses/${ghprbActualCommit} \
-         -d "{\"state\": \"${3}\", \"target_url\": \"${BUILD_URL}/console\", \"description\": \"${2}\", \"context\": \"${1}\"}" > /dev/null 2>&1
+         ${GHE_API_URL}/repos/${TRAVIS_REPO_SLUG}/statuses/${TRAVIS_PULL_REQUEST_SHA} \
+         -d "{\"state\": \"${3}\", \"target_url\": \"${TRAVIS_BUILD_WEB_UR}\", \"description\": \"${2}\", \"context\": \"${1}\"}" > /dev/null 2>&1
 }
 
 which_port ()
