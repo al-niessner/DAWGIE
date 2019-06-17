@@ -94,7 +94,8 @@ class LogSinkFactory(twisted.internet.protocol.Factory):
         twisted.internet.protocol.Factory.__init__(self)
         self.__actual = logging.handlers.StreamHandler() if path is None else \
                         logging.handlers.TimedRotatingFileHandler\
-                        (path, backupCount=10, when='midnight', utc=True)
+                        (path, backupCount=dawgie.context.log_backup,
+                         when='midnight', utc=True)
         self.__actual.addFilter (LogFilter('gnupg'))
         self.__actual.setFormatter(logging.Formatter('%(asctime)s :: ' +
                                                      '%(name)s :: ' +
