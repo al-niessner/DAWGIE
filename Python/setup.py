@@ -49,7 +49,7 @@ deps = ['bokeh==0.13.0',
         'gnupg>=2.3.1',
         'psycopg2>=2.7.4',
         'pydot3==1.0.9',
-        'requests==2',
+        'requests>=2.20.0',
         'transitions==0.6.8',
         'twisted>=18.7.0',
         ]
