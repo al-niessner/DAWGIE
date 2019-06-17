@@ -91,6 +91,7 @@ fe_path = '/tmp/' + os.environ.get ('USERNAME', 'unknown') + '/fe'
 fe_port = int(os.environ.get ('FE_PORT', 8080 + PortOffset.frontend.value))
 git_rev = None
 gpg_home = os.environ.get ('GNUPGHOME', '~/.gnupg')
+log_backup = 10
 log_capacity = 100
 log_level = logging.WARN
 log_port = int(os.environ.get('LOG_PORT', 8080 + PortOffset.log.value))
@@ -159,6 +160,8 @@ def add_arguments (ap):
                      help='AE specific directory for the front-end [%(default)s]')
     ap.add_argument ('--context-gpg-home', default=gpg_home, required=False,
                      help='location to find the PGP keys [%(default)s]')
+    ap.add_argument ('--context-log-backup', default=log_backup, required=False, type=int,
+                     help='the number of log files to accumulate in the log directory [%(default)s]')
     ap.add_argument ('--context-log-capacity', default=log_capacity, required=False, type=int,
                      help='the number of log messages to save for the front-end lists [%(default)s]')
     ap.add_argument ('--context-log-port', default=log_port, required=False, type=int,
