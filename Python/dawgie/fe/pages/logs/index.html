@@ -162,39 +162,51 @@ NTR:
       </div>
     </nav>
     <div id='alert-message'></div>
-    <div class='jumbotron'>
-      <div class='container'>
-        <div class='intro'>
-          <article>
-            <h1>
-              Welcome to Excalibur
-            </h1>
-            <p>
-              The <b>Ex</b>oplanet <b>Cali</b>bration <b>B</b>ayesian <b>U</b>nified <b>R</b>etrieval Pipeline
-            </p>
-            <p>
-              <em>The process is the product.</em>
-            </p>
-          </article>
-        </div>
-      </div>
-    </div>
     <div class='container'>
       <div class='row'>
-        <div class='col-md-8 markdown'></div>
-        <div class='col-md-4'>
-          <h2>
-            Doing
-          </h2>
-          <div id='doing'></div>
-          <a class='btn btn-default flt-right' href='/pages/schedule' role='button'>View Schedule</a>
-        </div>
-        <div class='col-md-4'>
-          <h2>
-            Logs
-          </h2>
+        <div class='col-md-12'>
+          <div class='page-header'>
+            <div class='small log_countdown'>
+              Updating in
+              <span>
+                5
+              </span>
+              seconds
+            </div>
+            <h1>
+              Pipeline Logs
+            </h1>
+          </div>
+          <div class='log_controls'>
+            <ul class='nav nav-pills'>
+              <li class='active'>
+                <a data-level='DEBUG' href='#'>
+                  Debug
+                </a>
+              </li>
+              <li class='active'>
+                <a data-level='INFO' href='#'>
+                  Info
+                </a>
+              </li>
+              <li class='active'>
+                <a data-level='WARNING' href='#'>
+                  Warning
+                </a>
+              </li>
+              <li class='active'>
+                <a data-level='ERROR' href='#'>
+                  Error
+                </a>
+              </li>
+              <li class='active'>
+                <a data-level='CRITICAL' href='#'>
+                  Critical
+                </a>
+              </li>
+            </ul>
+          </div>
           <div class='logs'></div>
-          <a class='btn btn-default flt-right' href='/pages/logs' role='button'>All Logs</a>
         </div>
       </div>
     </div>
@@ -247,18 +259,16 @@ NTR:
       </footer>
     </div>
     <script src="/javascripts/application.js"></script>
-    <script src='/javascripts/schedule.js'></script>
     <script>
       $(document).ready(function(){
-        $.ajax({
-          url: "/markdown/homepage.md",
-          type: "GET"
-        }).success(function(result) {
-          var md = window.markdownit()
-          $('.markdown').html(md.render(result));
-        })
-        schedule_doing();
-        getLogs(3, "show");
+        getLogs();
+        window.setInterval(function(){
+          getLogs();
+          $(".log_countdown span").html(6)
+        }, 5000);
+        window.setInterval(function(){
+          $(".log_countdown span").html(parseInt($(".log_countdown span").html()) - 1)
+        }, 1000);
       });
     </script>
     <script>

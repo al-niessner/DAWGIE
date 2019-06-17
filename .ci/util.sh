@@ -35,14 +35,12 @@
 #
 # NTR:
 
-GHE4JPL_API_URL=https://github.jpl.nasa.gov/api/v3
-GHE4JPL_TOKEN=fe03c6cd731021805fc89fde8fb1be6b3432ae51
+GHE_API_URL=https://api.github.com
 ghrVersion=${ghrVersion:-"`git describe --tags`"}
-PATH=/usr/local/python3/bin:usr/local/Python-3.4.3/bin:${PATH}
 PYTHONPATH=${PWD}/Python:${PWD}/Test
 REPO=niessner/DAWGIE
 
-export GHE4JPL_API_URL PATH PYTHONPATH
+export GHE_API_URL PATH PYTHONPATH
 
 cit_version ()
 {
@@ -59,7 +57,7 @@ current_state ()
 download ()
 {
     curl -L \
-         -H "Authorization: token ${GHE4JPL_TOKEN}" \
+         -H "Authorization: token ${GHE_TOKEN}" \
          ${ghrReleaseTarball} > $1
 }
 
@@ -129,9 +127,9 @@ post_state ()
     fi
 
     curl -XPOST \
-         -H "Authorization: token ${GHE4JPL_TOKEN}" \
-         ${GHE4JPL_API_URL}/repos/${REPO}/statuses/${ghprbActualCommit} \
-         -d "{\"state\": \"${3}\", \"target_url\": \"${BUILD_URL}/console\", \"description\": \"${2}\", \"context\": \"${1}\"}" > /dev/null 2>&1
+         -H "Authorization: token ${GHE_TOKEN}" \
+         ${GHE_API_URL}/repos/${TRAVIS_REPO_SLUG}/statuses/${TRAVIS_PULL_REQUEST_SHA} \
+         -d "{\"state\": \"${3}\", \"target_url\": \"${TRAVIS_BUILD_WEB_URL}\", \"description\": \"${2}\", \"context\": \"${1}\"}" > /dev/null 2>&1
 }
 
 which_port ()

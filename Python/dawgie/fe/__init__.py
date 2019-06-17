@@ -228,6 +228,7 @@ def root() -> bytes:
     _root.putChild (b'fonts', StaticContent())
     _root.putChild (b'images', StaticContent())
     _root.putChild (b'javascripts', StaticContent())
+    _root.putChild (b'markdown', StaticContent())
     _root.putChild (b'pages', StaticContent())
     _root.putChild (b'partials', StaticContent())
     _root.putChild (b'scripts', StaticContent())

@@ -194,6 +194,7 @@ class SDP(object):
     def _logging (self):
         import dawgie.context
         import dawgie.pl.logger
+        import dawgie.pl.logger.fe
 
         if self.__doctest: print ('self._logging()')
         else:
@@ -202,10 +203,12 @@ class SDP(object):
                                      (os.path.join (dawgie.context.data_log,
                                                     self.args.log_file))),
                                     port=dawgie.context.log_port)
-            handler = dawgie.pl.logger.TwistedHandler\
-                      (host=dawgie.context.db_host,
-                       port=dawgie.context.log_port)
-            logging.basicConfig (handlers=[handler],
+            dawgie.pl.logger.fe.instance = dawgie.pl.logger.fe.Handler()
+            twisted_handler = dawgie.pl.logger.TwistedHandler\
+                              (host=dawgie.context.db_host,
+                               port=dawgie.context.log_port)
+            logging.basicConfig (handlers=[dawgie.pl.logger.fe.instance,
+                                           twisted_handler],
                                  level=self.args.log_level)
             logging.captureWarnings (True)
             pass

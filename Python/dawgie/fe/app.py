@@ -43,10 +43,13 @@ import dawgie
 import dawgie.context
 import dawgie.db
 import dawgie.pl.farm
+import dawgie.pl.logger.fe
 import dawgie.pl.schedule
 import dawgie.pl.start
 import enum
 import json
+import logging; log = logging.getLogger(__name__)
+import os
 
 class Axis(enum.Enum):
     runid = 0
@@ -72,6 +75,9 @@ def db_targets():
 
 def db_versions():
     return json.dumps (dawgie.db.versions()).encode()
+
+def log_messages():
+    return dawgie.pl.logger.fe.remembered().encode()
 
 def pl_state():
     return json.dumps ({'name':dawgie.pl.start.sdp.state,
@@ -136,16 +142,36 @@ def _search (axis, key):
         pass
     return json.dumps (result).encode()
 
-# pylint: disable=dangerous-default-value
-def search_runid(key:[str]=['']): return _search (Axis.runid, key[0])
-def search_svn(key:[str]=['']): return _search (Axis.svn, key[0])
-def search_tn(key:[str]=['']): return _search (Axis.tn, key[0])
+def _search_filter (fn:str, default:str)->bytes:
+    if os.path.isfile (os.path.join (dawgie.context.fe_path, fn)):
+        try:
+            with open (os.path.join (dawgie.context.fe_path, fn), 'rt') as f:\
+                 txt = f.read()
+            default = json.loads (txt)
+        except: log.exception ('Text file could not be parsed as JSON')  # pylint: disable=bare-except
+    else: log.info ('using DAWGIE default for %s', fn)
+    return json.dumps (default).encode()
 
 def search_cmplt_svn():
     # pylint: disable=protected-access
     return json.dumps(sorted(set(['.'.join (k.split('.')[2:-1])
                                   for k in dawgie.db._prime_keys()]))).encode()
 def search_cmplt_tn(): return json.dumps(sorted(dawgie.db.targets())).encode()
+
+def search_filter_a(): return _search_filter ('admin.json',
+                                              json.dumps ({'exclude':[],
+                                                           'include_only':{}}))
+def search_filter_d(): return _search_filter ('dev.json',
+                                              json.dumps ({'exclude':['.__metric__$'],
+                                                           'include_only':{}}))
+def search_filter_u(): return _search_filter ('user.json',
+                                              json.dumps ({'exclude':['.__metric__$'],
+                                                           'include_only':{}}))
+
+# pylint: disable=dangerous-default-value
+def search_runid(key:[str]=['']): return _search (Axis.runid, key[0])
+def search_svn(key:[str]=['']): return _search (Axis.svn, key[0])
+def search_tn(key:[str]=['']): return _search (Axis.tn, key[0])
 
 def start_changeset():
     return dawgie.context.git_rev.encode('utf-8')
@@ -167,6 +193,8 @@ DynamicContent(db_prime, '/app/db/prime')
 DynamicContent(db_targets, '/app/db/targets')
 DynamicContent(db_versions, '/app/db/versions')
 
+DynamicContent(log_messages, '/app/pl/log')
+
 DynamicContent(pl_state, '/app/pl/state')
 
 DynamicContent(schedule_crew, '/app/schedule/crew')
@@ -177,11 +205,14 @@ DynamicContent(schedule_success, '/app/schedule/success')
 DynamicContent(schedule_tasks, '/app/schedule/tasks')
 DynamicContent(schedule_todo, '/app/schedule/todo')
 
+DynamicContent(search_cmplt_svn, '/app/search/completion/sv')
+DynamicContent(search_cmplt_tn, '/app/search/completion/tn')
+DynamicContent(search_filter_a, '/app/filter/admin')
+DynamicContent(search_filter_d, '/app/filter/dev')
+DynamicContent(search_filter_u, '/app/filter/user')
 DynamicContent(search_runid, '/app/search/ri')
 DynamicContent(search_svn, '/app/search/sv')
 DynamicContent(search_tn, '/app/search/tn')
-DynamicContent(search_cmplt_svn, '/app/search/completion/sv')
-DynamicContent(search_cmplt_tn, '/app/search/completion/tn')
 
 DynamicContent(start_changeset, '/app/changeset.txt')
 DynamicContent(start_state, '/app/state/status')
