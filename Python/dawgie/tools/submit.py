@@ -192,9 +192,11 @@ def mail_out(to, msg):
     message['Subject'] = "SDP Submit results"
     message["From"] = "no-reply@mentor.jpl.nasa.gov"
     message["To"] = ",".join(to)
-    s = smtplib.SMTP("localhost")
-    s.send_message(message)
-    s.quit()
+    try:
+        s = smtplib.SMTP("localhost")
+        s.send_message(message)
+        s.quit()
+    except OSError: logging.critical ('No email: %s', str(msg))
 
 def main(an_args):
     # 1. Run auto merge tool
