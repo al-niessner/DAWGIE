@@ -263,7 +263,7 @@ if __name__ == '__main__':
                      help='real name in the form "First Last"')
     args = ap.parse_args()
     homedir = tempfile.mkdtemp()
-    pgp = gnupg.GPG(**{gpgargname=homedir})
+    pgp = gnupg.GPG(**{gpgargname:homedir})
     k = pgp.gen_key (pgp.gen_key_input (key_type='DSA',
                                         name_email=args.user_email,
                                         name_real=args.user_name))
