@@ -58,7 +58,7 @@ import struct
 import tempfile
 
 _pgp = None
-gpgargname = 'gpgargname' if 'gpgargname' in inspect.signature (gnupg.GPG).parameters else 'homedir'
+gpgargname = 'gnupghome' if 'gnupghome' in inspect.signature (gnupg.GPG).parameters else 'homedir'
 
 class TwistedWrapper(object):
     # pylint: disable=too-few-public-methods
@@ -215,9 +215,7 @@ def finalize()->None:
 
     Should be called when all done with the security module.
     '''
-    if 'gnupghome' in dir(_pgp): shutil.rmtree (_pgp.gnupghome)
-    elif 'homedir' in dir(_pgp): shutil.rmtree (_pgp.homedir)
-    else: log.error ('resource leak: cannot find pgp directory')
+    shutil.rmtree (getattr (_pgp, gpgargname))
     return
 
 def initialize (path:str=None)->None:
