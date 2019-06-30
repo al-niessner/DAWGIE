@@ -344,6 +344,9 @@ class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
                       ('StateVector contains data that does not extend ' +
                        'dawgie.Value correctly. See log for details.')
 
+            if self._tn() not in self._keys (Table.target):\
+               self._set (self._tn(), Table.target, None)
+
             for sv in self._alg().state_vectors():
                 for k in sv.keys():
                     runid, tn, task = self._runid(), self._tn(), self._task()
@@ -383,6 +386,9 @@ class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
                 raise dawgie.NotValidImplementationError\
                       ('MetricStateVector contains data that does not extend ' +
                        'dawgie.Value correctly. See log for details.')
+
+            if self._tn() not in self._keys (Table.target):\
+               self._set (self._tn(), Table.target, None)
 
             for k in msv.keys():
                 runid, tn, task = self._runid(), self._tn(), self._task()
