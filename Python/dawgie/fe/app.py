@@ -161,9 +161,9 @@ def search_cmplt_tn(): return json.dumps(sorted(dawgie.db.targets())).encode()
 def search_filter_a(): return _search_filter ('admin.json',
                                               json.dumps ({'include':['.__metric__$']}))
 def search_filter_d(): return _search_filter ('dev.json',
-                                              json.dumps ({'exclude':['.__metric__$']}))
+                                              json.dumps ({'exclude':{'.__metric__$':[]}}))
 def search_filter_u(): return _search_filter ('user.json',
-                                              json.dumps ({'exclude':['.__metric__$']}))
+                                              json.dumps ({'exclude':{'.__metric__$':[]}}))
 
 # pylint: disable=dangerous-default-value
 def search_runid(key:[str]=['']): return _search (Axis.runid, key[0])
