@@ -118,6 +118,7 @@ def _walk (task, ifbot=_t, ifalg=_t, ifsv=_t, ifv=_t,
             ifanl (bot)
             for a in bot.list():
                 ifanz (a)
+                for ref in a.feedback(): ifref (ref)
                 for ref in a.traits(): ifref (ref)
                 for sv in a.state_vectors():
                     ifsv (sv)
@@ -128,6 +129,8 @@ def _walk (task, ifbot=_t, ifalg=_t, ifsv=_t, ifv=_t,
             ifbot (bot)
             for a in bot.list():
                 ifalg (a)
+                for ref in a.feedback(): ifref (ref)
+                for ref in a.previous(): ifref (ref)
                 for sv in a.state_vectors():
                     ifsv (sv)
                     for i in sv.items(): ifv (i)
@@ -139,6 +142,7 @@ def _walk (task, ifbot=_t, ifalg=_t, ifsv=_t, ifv=_t,
             ifret (bot)
             for r in bot.list():
                 ifrec (r)
+                for ref in a.feedback(): ifref (ref)
                 for ref in r.variables(): ifref (ref)
                 for sv in r.state_vectors():
                     ifsv (sv)
@@ -249,7 +253,8 @@ def rule_02 (task):
                                    'Regress'),
            ifrec=lambda a:_signal (isinstance (a, dawgie.Regression),
                                    'Regression'),
-           ifref=lambda ref:_signal (isinstance (ref, (dawgie.SV_REF,
+           ifref=lambda ref:_signal (isinstance (ref, (dawgie.ALG_REF,
+                                                       dawgie.SV_REF,
                                                        dawgie.V_REF)),
                                      'Aspect Reference'),
            ifmom=lambda mom:_signal (isinstance (mom, dawgie.EVENT),
@@ -442,6 +447,42 @@ def rule_07 (task):
     findings = [True]
     _walk (task, ifv=test)
     return all (findings)
+
+def rule_08 (task):
+    '''Verify elements of *_REF are the correct types
+
+    The documentation states what each of the elements should be.
+       factory - a function with 4 or 3 params depending on Analysis/Regressor/Task
+       impl - an Analyzer, Algorithm, or Regression
+       item - a StateVector
+       feat - a string
+    '''
+    def _check_ref_types (ref):
+        findings.append (inspect.isfunction (ref.factory) or
+                         inspect.ismethod (ref.factory))
+        if not findings[-1]: logging.error ('ref.factory is not a function')
+
+        findings.append (isinstance (ref.impl, (dawgie.Algorithm,
+                                                dawgie.Analyzer,
+                                                dawgie.Regression)))
+        if not findings[-1]: logging.error ('ref.impl not an instance of Algorithm, Analyzer, or Ressions')
+
+        if isinstance (ref, (dawgie.SV_REF, dawgie.V_REF)):
+            findings.append (isinstance (ref.item, dawgie.StateVector))
+            if not findings[-1]: logging.error ('ref.item not an instance of StateVector')
+            pass
+
+        if isinstance (ref, dawgie.V_REF):
+            findings.append (isinstance (ref.feat, str))
+            if not findings[-1]: logging.error ('ref.feat is not a string')
+            pass
+
+        if not state: logging.error ('failed to inherit correctly within package ' + task + ' because item ' + name + ' is does not inherit from dawgie.' + t)
+        return
+
+    findings = []
+    _walk (task, ifref=_check_ref_types)
+    return all(findings)
 
 def verify (repo, silent, verbose):
     cmd = ['python3', '-m', 'dawgie.tools.compliant',
