@@ -48,6 +48,7 @@ import argparse
 import datetime
 import getpass
 import gnupg
+import inspect
 import logging; log = logging.getLogger (__name__)
 import os
 import random
@@ -57,6 +58,7 @@ import struct
 import tempfile
 
 _pgp = None
+gpgargname = 'gnupghome' if 'gnupghome' in inspect.signature (gnupg.GPG).parameters else 'homedir'
 
 class TwistedWrapper(object):
     # pylint: disable=too-few-public-methods
@@ -213,7 +215,7 @@ def finalize()->None:
 
     Should be called when all done with the security module.
     '''
-    shutil.rmtree (_pgp.gnupghome)
+    shutil.rmtree (getattr (_pgp, gpgargname))
     return
 
 def initialize (path:str=None)->None:
@@ -231,7 +233,7 @@ def initialize (path:str=None)->None:
     '''
     # pylint: disable=import-self,protected-access
     import dawgie.security
-    dawgie.security._pgp = gnupg.GPG(gnupghome=tempfile.mkdtemp())
+    dawgie.security._pgp = gnupg.GPG(**{gpgargname:tempfile.mkdtemp()})
 
     if path and os.path.exists (path) and os.path.isdir (path):
         keys = []
@@ -259,7 +261,7 @@ if __name__ == '__main__':
                      help='real name in the form "First Last"')
     args = ap.parse_args()
     homedir = tempfile.mkdtemp()
-    pgp = gnupg.GPG(gnupghome=homedir)
+    pgp = gnupg.GPG(**{gpgargname:homedir})
     k = pgp.gen_key (pgp.gen_key_input (key_type='DSA',
                                         name_email=args.user_email,
                                         name_real=args.user_name))
