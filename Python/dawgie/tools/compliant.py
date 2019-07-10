@@ -476,8 +476,6 @@ def rule_08 (task):
             findings.append (isinstance (ref.feat, str))
             if not findings[-1]: logging.error ('ref.feat is not a string')
             pass
-
-        if not state: logging.error ('failed to inherit correctly within package ' + task + ' because item ' + name + ' is does not inherit from dawgie.' + t)
         return
 
     findings = []
