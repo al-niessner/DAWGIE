@@ -163,7 +163,7 @@ class Construct(object):
         for ref in dawgie.util.as_vref (a.traits()):
             pf,pi = ref.factory,ref.impl
             pn = '.'.join ([dawgie.util.task_name (pf), pi.name(),
-                            ref.item, ref.feat])
+                            ref.item.name(), ref.feat])
 
             if pn not in self._flat:\
                self._flat[pn] = Node(pn, attrib={'alg':pi,
@@ -179,7 +179,7 @@ class Construct(object):
         for ref in dawgie.util.as_vref (a.variables()):
             pf,pi, = ref.factory, ref.impl
             pn = '.'.join ([dawgie.util.task_name (pf), pi.name(),
-                            ref.item, ref.feat])
+                            ref.item.name(), ref.feat])
 
             if pn not in self._flat:\
                self._flat[pn] = Node(pn, attrib={'alg':pi,
@@ -195,7 +195,7 @@ class Construct(object):
         for ref in dawgie.util.as_vref (a.previous()):
             pf,pi, = ref.factory, ref.impl
             pn = '.'.join ([dawgie.util.task_name (pf), pi.name(),
-                            ref.item, ref.feat])
+                            ref.item.name(), ref.feat])
 
             if pn not in self._flat:\
                self._flat[pn] = Node(pn, attrib={'alg':pi,
