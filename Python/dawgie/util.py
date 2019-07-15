@@ -84,7 +84,7 @@ class MetricValue(dawgie.Value):
     pass
 
 def algref2svref (ref:dawgie.ALG_REF)->[dawgie.SV_REF]:
-    return [dawgie.SV_REF(factory=ref.factory, impl=ref.impl, item=sv.name())
+    return [dawgie.SV_REF(factory=ref.factory, impl=ref.impl, item=sv)
             for sv in ref.impl.state_vectors()]
 
 def as_vref (references:[dawgie.ALG_REF, dawgie.SV_REF, dawgie.V_REF]):
@@ -120,7 +120,7 @@ def set_ports (fe_port:int)->None:
 
 def svref2vref (ref:dawgie.SV_REF)->[dawgie.V_REF]:
     return [dawgie.V_REF(factory=ref.factory, impl=ref.impl, item=ref.item,
-                         feat=key) for key in ref.impl.sv_as_dict()[ref.item]]
+                         feat=key) for key in ref.item]
 
 def task_name (factory):
     '''Compute the pipeline specified prefix for any dawgie.Task
@@ -164,4 +164,4 @@ def verify_name (o, err=False):
 
 def vref_as_name (vref:dawgie.V_REF)->str:
     return '.'.join ([task_name (vref.factory), vref.impl.name(),
-                      vref.item, vref.feat])
+                      vref.item.name(), vref.feat])

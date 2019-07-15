@@ -88,7 +88,7 @@ SV_REF = collections.namedtuple ('SV_REF', ['factory', 'impl', 'item'])
 # factory : the task factory that would normally create this algorithm
 # impl : an instance of the algorithm
 # item : an instance of the state vector from the algorithm
-# feat : an object to use as the key in the state vector
+# feat : a string to use as the key in the state vector
 V_REF = collections.namedtuple ('V_REF', ['factory', 'impl', 'item', 'feat'])
 
 

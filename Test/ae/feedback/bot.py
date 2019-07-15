@@ -80,7 +80,7 @@ class Control(dawgie.Algorithm):
     def previous(self): return [dawgie.ALG_REF(factory=ae.feedback.task,
                                                impl=self.__base),
                                 dawgie.V_REF(factory=ae.feedback.task,
-                                             impl=self, item='response',
+                                             impl=self, item=self.__response,
                                              feat='accum')]
     def run (self, ds, ps):
         accum = self.__response['accum'].array()
@@ -107,12 +107,13 @@ class Model(dawgie.Algorithm):
         return
 
     def name(self): return 'model'
-    def previous(self): return [dawgie.V_REF(factory=ae.feedback.task,
-                                             impl=self.__base,
-                                             item='response', feat='voltage'),
-                                dawgie.V_REF(factory=ae.feedback.task,
-                                             impl=self,
-                                             item='voltage', feat='value')]
+    def previous(self):
+        return [dawgie.V_REF(factory=ae.feedback.task,
+                             impl=self.__base,
+                             item=self.__base.sv_as_dict()['response'],
+                             feat='voltage'),
+                dawgie.V_REF(factory=ae.feedback.task, impl=self,
+                             item=self.__model, feat='value')]
     def run (self, ds, ps):
         correction = self.__base.state_vectors()[0]['voltage'].array()
         state = self.__model['value'].array()
