@@ -48,7 +48,7 @@ post_state "$context" "$description" "$state"
 
 if current_state
 then
-    git checkout
+    git reset --hard HEAD
     git clean -df
     declare -i count=1
     for filename in .ci/Dockerfile.os .ci/Dockerfile.py .ci/Dockerfile.ap .ci/Dockerfile.ex .ci/Dockerfile.test
