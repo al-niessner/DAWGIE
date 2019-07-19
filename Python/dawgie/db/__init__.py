@@ -101,7 +101,8 @@ def copy (dst, method, gateway):
 def gather (anz, ans):
     '''Gather an dawgie.Aspect to the database backend
 
-    anz : the instance of dawgie.Analyzer that will be using the Aspect
+    anz : instance of dawgie.Analyzer that will be using the Aspect
+    ans : instance of dawgie.Analysis that creates the anz 
     '''
     return _db_in_use().gather (anz, ans)
 
@@ -130,6 +131,11 @@ def reopen():
     return _db_in_use().reopen()  # may only be needed in db/shelf.py
 
 def retreat (reg, ret):
+    '''Get a dawgie.Timeline from the database backend
+
+    reg : instance of dawgie.Regression that will be using the Timeline
+    ret : instance of dawgie.Regress that creates the ret
+    '''
     return _db_in_use().retreat (reg, ret)
 
 def targets (fulllist:bool=False):
