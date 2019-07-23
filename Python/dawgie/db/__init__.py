@@ -102,7 +102,7 @@ def gather (anz, ans):
     '''Gather an dawgie.Aspect to the database backend
 
     anz : instance of dawgie.Analyzer that will be using the Aspect
-    ans : instance of dawgie.Analysis that creates the anz 
+    ans : instance of dawgie.Analysis that creates the anz
     '''
     return _db_in_use().gather (anz, ans)
 
