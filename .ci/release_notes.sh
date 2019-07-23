@@ -36,7 +36,7 @@
 #
 # NTR:
 
-git log --format='format:## [%s](https://github.jpl.nasa.gov/niessner/DAWGIE/commit/%H)
+git log --format='format:## [%s](https://github.com/al-niessner/DAWGIE/commit/%H)
 *Author*: %an
 *Date*: %aD
 %b' $@
