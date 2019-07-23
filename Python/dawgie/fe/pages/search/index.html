@@ -42,7 +42,7 @@ NTR:
     <meta charset='utf-8'>
     <meta content='IE=edge,chrome=1' http-equiv='X-UA-Compatible'>
     <title>
-      Excalibur
+      {{site_title}}
     </title>
     <link href='/stylesheets/application.css' rel='stylesheet'>
   </head>
@@ -59,7 +59,7 @@ NTR:
             <span class='icon-bar'></span>
           </button>
           <a class='navbar-brand' href='/pages'>
-            Excalibur
+            {{site_title}}
           </a>
         </div>
         <div class='collapse navbar-collapse' id='mobile_navigation'>
@@ -169,21 +169,21 @@ NTR:
             <span class='glyphicon glyphicon-filter'></span>
           </span>
           <div class='input-group-btn'>
-            <label class='btn btn-info'>
-              <input autocomplete='off' class='filter' name='filter' type='radio' value='none'>
-              None
-            </label>
-            <label class='btn btn-info active'>
+            <label class='btn btn-info' data-filter-id='user'>
               <input autocomplete='off' checked='checked' class='filter' name='filter' type='radio' value='user'>
               User
             </label>
-            <label class='btn btn-info'>
+            <label class='btn btn-info' data-filter-id='dev'>
               <input autocomplete='off' class='filter' name='filter' type='radio' value='dev'>
               Dev
             </label>
-            <label class='btn btn-info'>
+            <label class='btn btn-info' data-filter-id='admin'>
               <input autocomplete='off' class='filter' name='filter' type='radio' value='admin'>
               Admin
+            </label>
+            <label class='btn btn-info' data-filter-id='none'>
+              <input autocomplete='off' class='filter' name='filter' type='radio' value='none'>
+              None
             </label>
           </div>
         </div>
@@ -271,28 +271,44 @@ NTR:
         </nav>
       </footer>
     </div>
+    <script src="/javascripts/siteconfig.js"></script>
     <script src="/javascripts/application.js"></script>
     <script>
-      var prefetchSV = new Bloodhound({
-        datumTokenizer: Bloodhound.tokenizers.whitespace,
-        queryTokenizer: Bloodhound.tokenizers.whitespace,
-        cache: false,
-        thumbprint: "state_vector",
-        prefetch: {url: '/app/search/completion/sv', cache: false}
-      });
-      $('#sv').typeahead(null, {
-        name: 'prefetchSV',
-        source: prefetchSV
-      });
-      var prefetchTN = new Bloodhound({
-        datumTokenizer: Bloodhound.tokenizers.whitespace,
-        queryTokenizer: Bloodhound.tokenizers.whitespace,
-        prefetch: {url: '/app/search/completion/tn', cache: false}
-      });
-      $('#tn').typeahead(null, {
-        name: 'prefetchTN',
-        source: prefetchTN
-      });
+      $(document).ready(function() {
+        updateActiveFilterButton();
+        $.ajax({
+          url: "/app/search/completion/sv",
+          type: "GET",
+          success: function(result) {
+            data = $.parseJSON(result);
+            $('#sv').typeahead({
+              hint: true,
+              highlight: true,
+              minLength: 1
+            },
+            {
+              name: 'SV',
+              source: substringMatcher(data)
+            });
+          }
+        });
+        $.ajax({
+          url: "/app/search/completion/tn",
+          type: "GET",
+          success: function(result) {
+            data = $.parseJSON(result);
+            $('#tn').typeahead({
+              hint: true,
+              highlight: true,
+              minLength: 1
+            },
+            {
+              name: 'TN',
+              source: substringMatcher(data)
+            });
+          }
+        });
+      })
     </script>
     <script>
       $('#lock_view_button').removeClass(showLockView());
