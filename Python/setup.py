@@ -44,12 +44,15 @@ import setuptools
 dawgie = os.path.join ('dawgie', '__init__.py')
 deps = ['bokeh>=1.2',
         'boto3>=1.7.80',
+        'cryptography>=2.1.4',
         'GitPython>=2.1.11',
+        'matplotlib>=2.1.1',
         'psycopg2>=2.7.4',
         'pydot3==1.0.9',
+        'pyparsing>=2.2',
+        'python-gnupg==0.4.3',
         'pyxb==1.2.6',
         'requests>=2.20.0',
-        'textdistance',
         'transitions==0.6.8',
         'twisted>=18.7.0',
         ]
@@ -60,8 +63,7 @@ with open (os.path.join (os.path.dirname (__file__), dawgie), 'tw') as f:\
      f.write (t)
 with open (os.path.join (os.path.dirname (__file__), 'README.md'), 'rt') as f:\
      description = f.read()
-with open (os.path.join (os.path.dirname (__file__), 'LICENSE'), 'rt') as f:\
-     license = f.read()
+
 setuptools.setup (name='dawgie',
                   version=version,
                   packages=['dawgie',
@@ -100,11 +102,13 @@ setuptools.setup (name='dawgie',
                   author='Al Niessner',
                   author_email='Al.Niessner@jpl.nasa.gov',
                   classifiers=[ "Programming Language :: Python :: 3",
-                                "License", "Operating System :: OS Independent",
+                                "Operating System :: OS Independent",
+                                'License :: Free To Use But Restricted',
+                                'Development Status :: 5 - Production/Stable'
                                 ],
-                  description='Data and Algorithm Work-flow Generation, Introspection, and Execution (DAWGIE) -- dynamically schedules dawgie.Tasks to be done a worker farm (cloud) and persists the dawgie.Values within the dawgie.StateVectors generated from the dawgie.Algorithms that make up the dawgie.Task.',
+                  description='Data and Algorithm Work-flow Generation, Introspection, and Execution (DAWGIE)',
+                  license='see LICENSE file for details',
                   long_description=description,
                   long_description_content_type="text/markdown",
-                  license=license,
                   keywords='adaptive pipeline',
-                  url='https://github.com/niessner/DAWGIE')
+                  url='https://github.com/al-niessner/DAWGIE')
