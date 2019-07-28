@@ -45,8 +45,11 @@ fi
 
 # sudo pip3 install -U twine wheel setuptools
 export DAWGIE_VERSION=$1
-wdir=$(mkdtemp -d)
+wdir=$(mktemp -d)
+echo "tempdir: ${wdir}"
 cd $wdir
+wget https://github.com/al-niessner/DAWGIE/archive/${1}.tar.gz
+tar  --strip-components=1 -xzf ${1}.tar.gz
 cd Python
 cp ../README.md README.md
 cat ../COPYRIGHT.txt > LICENSE
