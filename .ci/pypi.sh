@@ -45,6 +45,7 @@ fi
 
 # sudo pip3 install -U twine wheel setuptools
 export DAWGIE_VERSION=$1
+bdir=$(pwd)
 wdir=$(mktemp -d)
 echo "tempdir: ${wdir}"
 cd $wdir
@@ -58,7 +59,6 @@ echo "" >> LICENSE
 cat ../LICENSE.txt >> LICENSE
 python3 setup.py sdist bdist_wheel
 twine check dist/*
-#twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*
-#twine upload --verbose dist/*
-cd -
-rm -rf $wdir
+twine upload --verbose dist/*
+cd ${bdir}
+rm -rf ${wdir}
