@@ -41,6 +41,7 @@ import dawgie.context
 import dawgie.db
 import dawgie.pl.dag
 import dawgie.pl.scan
+import logging
 import os
 
 def _dir (dn:str):
@@ -60,13 +61,19 @@ def pt (task, text=''):
 ap = argparse.ArgumentParser(description='Build the task, algorithm, state vector, and value trees for the AE and write them to --output-dir.')
 ap.add_argument ('-O', '--output-dir', required=True, type=_dir,
                  help='directory to write the SVG files to')
+ap.add_argument ('-v', '--verbose', action='store_true', default=False,
+                 help='display processing information')
 dawgie.context.add_arguments (ap)
 args = ap.parse_args()
+
+if args.verbose: logging.basicConfig(level=logging.DEBUG)
+
 dawgie.context.override (args)
 dawgie.db.open()
 factories = dawgie.pl.scan.for_factories (dawgie.context.ae_base_path,
                                           dawgie.context.ae_base_package)
 dag = dawgie.pl.dag.Construct(factories)
+print ('root count:', len (dag.tt))
 for tt in dag.tt: print (pt (tt))
 with open (os.path.join (args.output_dir,'av.svg'),'wb') as f: f.write (dag.av)
 with open (os.path.join (args.output_dir,'sv.svg'),'wb') as f: f.write (dag.svv)
