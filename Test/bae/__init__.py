@@ -37,27 +37,42 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import dawgie.context
-import dawgie.tools.compliant
-import os
-import unittest
+import bokeh.embed
+import bokeh.model
+import bokeh.plotting
+import dawgie
+import numpy
 
-class Compliant(unittest.TestCase):
-    def test_ae(self):
-        dawgie.context.ae_base_path = os.path.join (os.path.abspath
-                                                    (os.path.dirname(__file__)),
-                                                    'ae')
-        dawgie.context.ae_base_package = 'ae'
-        self.assertTrue (dawgie.tools.compliant._verify
-                         (dawgie.tools.compliant._scan(), False, True))
+class StateVector(dawgie.StateVector):
+    def __init__(self):
+        dawgie.StateVector.__init__(self)
+        self['image'] = Value(None)
+        self._version_ = dawgie.VERSION(1,0,0)
         return
 
-    def test_bae(self):
-        dawgie.context.ae_base_path = os.path.join (os.path.abspath
-                                                    (os.path.dirname(__file__)),
-                                                    'bae')
-        dawgie.context.ae_base_package = 'bae'
-        self.assertFalse (dawgie.tools.compliant._verify
-                          (dawgie.tools.compliant._scan(), False, True))
+    def name(self): return 'test'
+
+    def view(self, visitor:dawgie.Visitor):
+        fig = bokeh.plotting.Figure(title='Current state of the data',
+                                    x_range=[0,self['image'].array().shape[1]],
+                                    y_range=[0,self['image'].array().shape[0]])
+        fig.image (image=[self['image'].array()], x=[0], y=[0],
+                   dw=[self['image'].array().shape[1]],
+                   dn=[self['image'].array().shape[0]],
+                   palette='Greys256')
+        js,div = bokeh.embed.components (fig)
+        visitor.add_declaration (None, div=div, js=js)
         return
+    pass
+
+class Value(dawgie.Value):
+    def __init__(self, array:numpy.ndarray=None, uid:int=0):
+        dawgie.Value.__init__(self)
+        self.__array = array
+        self.__uid = uid
+        self._version_ = dawgie.VERSION(1,0,0)
+        return
+    def array(self)->numpy.ndarray: return self.__array
+    def features(self): return []
+    def uid(self)->int: return self.__uid
     pass

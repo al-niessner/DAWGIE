@@ -36,28 +36,13 @@ POSSIBILITY OF SUCH DAMAGE.
 
 NTR:
 '''
+ignore = False  # forces the pipeline to ignore this package (aka task)
 
-import dawgie.context
-import dawgie.tools.compliant
-import os
-import unittest
+# pylint: disable=redefined-builtin
+def analysis (prefix, ps_hint=0, runid=-1):
+    import bae.network.bot
+    return bae.network.bot.Actor(prefix, ps_hint, runid)
 
-class Compliant(unittest.TestCase):
-    def test_ae(self):
-        dawgie.context.ae_base_path = os.path.join (os.path.abspath
-                                                    (os.path.dirname(__file__)),
-                                                    'ae')
-        dawgie.context.ae_base_package = 'ae'
-        self.assertTrue (dawgie.tools.compliant._verify
-                         (dawgie.tools.compliant._scan(), False, True))
-        return
-
-    def test_bae(self):
-        dawgie.context.ae_base_path = os.path.join (os.path.abspath
-                                                    (os.path.dirname(__file__)),
-                                                    'bae')
-        dawgie.context.ae_base_package = 'bae'
-        self.assertFalse (dawgie.tools.compliant._verify
-                          (dawgie.tools.compliant._scan(), False, True))
-        return
-    pass
+def task (prefix, ps_hint=0, runid=-1, target='__none__'):
+    import bae.network.bot
+    return bae.network.bot.Agent(prefix, ps_hint, runid, target)
