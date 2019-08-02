@@ -493,7 +493,7 @@ def rule_09 (task):
     def non_zero (tsk): return 0 < len (tsk.state_vectors())
 
     findings = []
-    _walk (task, ifalg=non_zero, ifanl=non_zero, ifret=non_zero)
+    _walk (task, ifalg=non_zero, ifanz=non_zero, ifrec=non_zero)
     return all(findings)
 
 def verify (repo, silent, verbose):
