@@ -482,6 +482,20 @@ def rule_08 (task):
     _walk (task, ifref=_check_ref_types)
     return all(findings)
 
+def rule_09 (task):
+    '''Verify it has state vectors
+
+    The scheduler is *smart* in the sense that it will ignore items (Analyzer,
+    Algorithms, and Regression) that have an empty list of state vectors. The
+    concept is that if it does not output a state vector, it must not have any
+    affect on the world it knows. Or, side-effects are not supported.
+    '''
+    def non_zero (tsk): findings.append (0 < len (tsk.state_vectors()))
+
+    findings = []
+    _walk (task, ifalg=non_zero, ifanz=non_zero, ifrec=non_zero)
+    return all(findings)
+
 def verify (repo, silent, verbose):
     cmd = ['python3', '-m', 'dawgie.tools.compliant',
            '--ae-dir={0}'.format

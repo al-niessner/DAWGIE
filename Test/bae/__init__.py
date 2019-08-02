@@ -1,4 +1,5 @@
 '''
+
 COPYRIGHT:
 Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
@@ -36,46 +37,42 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import argparse
-import dawgie.context
-import dawgie.db
-import dawgie.pl.dag
-import dawgie.pl.scan
-import logging
-import os
+import bokeh.embed
+import bokeh.model
+import bokeh.plotting
+import dawgie
+import numpy
 
-def _dir (dn:str):
-    if not os.path.isdir (dn):
-        raise ValueError('The specified value {} is not a directory'.format(dn))
-    return dn
+class StateVector(dawgie.StateVector):
+    def __init__(self):
+        dawgie.StateVector.__init__(self)
+        self['image'] = Value(None)
+        self._version_ = dawgie.VERSION(1,0,0)
+        return
 
-known = set()
-def pt (task, text=''):
-    text += task.tag
+    def name(self): return 'test'
 
-    if task.tag not in known and task:
-        known.add (task.tag)
-        for c in task: text = pt (c, text + ' -> ')
-    return text
+    def view(self, visitor:dawgie.Visitor):
+        fig = bokeh.plotting.Figure(title='Current state of the data',
+                                    x_range=[0,self['image'].array().shape[1]],
+                                    y_range=[0,self['image'].array().shape[0]])
+        fig.image (image=[self['image'].array()], x=[0], y=[0],
+                   dw=[self['image'].array().shape[1]],
+                   dn=[self['image'].array().shape[0]],
+                   palette='Greys256')
+        js,div = bokeh.embed.components (fig)
+        visitor.add_declaration (None, div=div, js=js)
+        return
+    pass
 
-ap = argparse.ArgumentParser(description='Build the task, algorithm, state vector, and value trees for the AE and write them to --output-dir.')
-ap.add_argument ('-O', '--output-dir', required=True, type=_dir,
-                 help='directory to write the SVG files to')
-ap.add_argument ('-v', '--verbose', action='store_true', default=False,
-                 help='display processing information')
-dawgie.context.add_arguments (ap)
-args = ap.parse_args()
-
-if args.verbose: logging.basicConfig(level=logging.DEBUG)
-
-dawgie.context.override (args)
-dawgie.db.open()
-factories = dawgie.pl.scan.for_factories (dawgie.context.ae_base_path,
-                                          dawgie.context.ae_base_package)
-dag = dawgie.pl.dag.Construct(factories)
-print ('root count:', len (dag.tt))
-for tt in dag.tt: print (pt (tt))
-with open (os.path.join (args.output_dir,'av.svg'),'wb') as f: f.write (dag.av)
-with open (os.path.join (args.output_dir,'sv.svg'),'wb') as f: f.write (dag.svv)
-with open (os.path.join (args.output_dir,'tv.svg'),'wb') as f: f.write (dag.tv)
-with open (os.path.join (args.output_dir,'vv.svg'),'wb') as f: f.write (dag.vv)
+class Value(dawgie.Value):
+    def __init__(self, array:numpy.ndarray=None, uid:int=0):
+        dawgie.Value.__init__(self)
+        self.__array = array
+        self.__uid = uid
+        self._version_ = dawgie.VERSION(1,0,0)
+        return
+    def array(self)->numpy.ndarray: return self.__array
+    def features(self): return []
+    def uid(self)->int: return self.__uid
+    pass
