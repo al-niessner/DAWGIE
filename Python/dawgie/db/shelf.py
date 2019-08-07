@@ -779,7 +779,9 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
     log.info ('metrics() - starting')
     keys = [k for k in _prime_keys()]
     log.info ('metrics() - total prime keys %d', len (keys))
-    for m in sorted (filter (lambda s:s.split('.')[4] == '__metric__', keys)):
+    keys = [k for k in sorted (filter (lambda s:s.split('.')[4] == '__metric__', keys))]
+    log.info ('metrics() - total __metric__ in prime keys %d', len (keys))
+    for m in keys:
         runid,target,task,algn,_svn,vn = m.split('.')
 
         if not result or result[-1].run_id != runid or \
