@@ -768,7 +768,8 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
         raise RuntimeError('called metrics before open')
 
     result = []
-    log.info ('Collecting %d metrics from the database',
+    log.info ('metrics() - starting')
+    log.info ('metrics() - collecting %d metrics from the database',
               len(filter (lambda s:s.split('.')[4] == '__metric__',
                           _prime_keys())))
     for m in sorted (filter (lambda s:s.split('.')[4] == '__metric__',
