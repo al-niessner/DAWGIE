@@ -48,12 +48,14 @@ post_state "$context" "$description" "$state"
 
 if current_state
 then
+    cp README.md LICENSE Python/
     .ci/dcp.py --server .ci/Dockerfile.3 &
     while [ ! -f .ci/Dockerfile.3.dcp ]
     do
         sleep 3
     done
     docker build --network=host -t ap:${ghrVersion} - < .ci/Dockerfile.3.dcp
+    rm Python/{README.md,LICENSE}
     state=`get_state`
 fi
 

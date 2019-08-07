@@ -90,7 +90,7 @@ EOF
         if [[ 4 -eq $inc ]]
         then
             target=$(curl http://localhost:8080/app/db/targets)
-            target=${target:2:${#target}-4}
+            target=${target:13:${#target}-15}
             echo "target: $target"
             curl -X POST -F tasks=feedback.command -F tasks=feedback.sensor -F targets=${target} http://localhost:8080/app/run
             echo ""
