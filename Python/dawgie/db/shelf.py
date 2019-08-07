@@ -785,9 +785,10 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
         log.info ('metrics() - working on %s', m)
         runid,target,task,algn,_svn,vn = m.split('.')
 
-        if any (not result,
-                result[-1].run_id != runid, result[-1].target != target,
-                result[-1].task != task, result[-1].alg_name != algn):
+        if not result or any ([result[-1].run_id != runid,
+                               result[-1].target != target,
+                               result[-1].task != task,
+                               result[-1].alg_name != algn]):
             log.info ('metrics() - make new reuslt')
             msv = dawgie.util.MetricStateVector(dawgie.METRIC(-2,-2,-2,-2,-2,-2),
                                                 dawgie.METRIC(-2,-2,-2,-2,-2,-2))
