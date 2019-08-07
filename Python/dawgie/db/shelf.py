@@ -768,22 +768,29 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
         raise RuntimeError('called metrics before open')
 
     result = []
-    for m in sorted (_prime_keys()):
-        runid,target,task,algn,svn,vn = m.split ('.')
+    log.info ('Collecting %d metrics from the database',
+              len(filter (lambda s:s.split('.')[4] == '__metric__',
+                          _prime_keys())))
+    for m in sorted (filter (lambda s:s.split('.')[4] == '__metric__',
+                             _prime_keys())):
+        runid,target,task,algn,_svn,vn = m.split('.')
 
-        if svn != '__metric__': continue
         if not result or result[-1].run_id != runid or \
            result[-1].target != target or result[-1].task != task or \
            result[-1].alg_name != algn:
+            log.info ()
             msv = dawgie.util.MetricStateVector(dawgie.METRIC(-2,-2,-2,-2,-2,-2),
                                                 dawgie.METRIC(-2,-2,-2,-2,-2,-2))
             result.append (dawgie.db.METRIC_DATA(alg_name=algn,
                                                  alg_ver=dawgie.VERSION(-1,-1,-1),
                                                  run_id=runid, sv=msv,
                                                  target=target, task=task))
+            log.info ('metrics() - result length %d', len (result))
             pass
 
-        try: msv[vn] = dawgie.db.util.decode (dawgie.db.shelf._db.primary[m])
+        try:
+            log.info ('metrics() - reading data and decoding')
+            msv[vn] = dawgie.db.util.decode (dawgie.db.shelf._db.primary[m])
         except FileNotFoundError: log.exception('missing metric data for %s',vn)
         pass
     return result
