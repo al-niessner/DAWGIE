@@ -55,6 +55,7 @@ def _latest (history:[dawgie.db.METRIC_DATA])->dawgie.db.METRIC_DATA:
 def aspects (metric:[dawgie.db.METRIC_DATA])->{str:[dawgie.db.METRIC_DATA]}:
     log.info ('aspects() - metrics of aspects')
     reg = regress (metric)
+    log.info ('aspects() - number of regressions %d', len (reg))
     names = set(['.'.join ([m.task, m.alg_name]) for m in metric])
     asp = dict([(name,[]) for name in names])
     for r in reg:
