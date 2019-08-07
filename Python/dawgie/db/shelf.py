@@ -103,9 +103,11 @@ class Connector(object):
         msg = pickle.dumps (request, pickle.HIGHEST_PROTOCOL)
         s.sendall (struct.pack ('>I', len(msg)) + msg)
         buf = b''
+        log.info ('Connector.__do() - sending command')
         while len (buf) < 4: buf += s.recv(4 - len (buf))
         l = struct.unpack ('>I', buf)[0]
         buf = b''
+        log.info ('Connector.__do() - receiving command')
         while len (buf) < l: buf += s.recv(l - len (buf))
         s.close()
         return pickle.loads (buf)
@@ -510,6 +512,9 @@ class Worker(twisted.internet.protocol.Protocol):
             self._send (self.__db[request.table.value][request.key])
             pass
         elif request.func == Func.keys:
+            log.info ('Worker.do() - received request for keys')
+            log.info ('Worker.do() - table %s', request.table.name)
+            log.info ('Worker.do() - table size %d', len (self.__db[request.table.value]))
             self._send ([k for k in self.__db[request.table.value].keys()])
             pass
         elif request.func == Func.release:
@@ -769,9 +774,6 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
 
     result = []
     log.info ('metrics() - starting')
-    log.info ('metrics() - collecting %d metrics from the database',
-              len(filter (lambda s:s.split('.')[4] == '__metric__',
-                          _prime_keys())))
     for m in sorted (filter (lambda s:s.split('.')[4] == '__metric__',
                              _prime_keys())):
         runid,target,task,algn,_svn,vn = m.split('.')
