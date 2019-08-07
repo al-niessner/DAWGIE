@@ -40,6 +40,7 @@ import collections
 import dawgie
 import dawgie.context
 import dawgie.db
+import logging; log = logging.getLogger(__name__)
 import numpy
 
 HINT = collections.namedtuple ('HINT',['cpu','io','memory','pages','summary'])
@@ -52,6 +53,7 @@ def _latest (history:[dawgie.db.METRIC_DATA])->dawgie.db.METRIC_DATA:
     return most_recent
 
 def aspects (metric:[dawgie.db.METRIC_DATA])->{str:[dawgie.db.METRIC_DATA]}:
+    log.info ('aspects() - metrics of aspects')
     reg = regress (metric)
     names = set(['.'.join ([m.task, m.alg_name]) for m in metric])
     asp = dict([(name,[]) for name in names])
@@ -62,8 +64,10 @@ def aspects (metric:[dawgie.db.METRIC_DATA])->{str:[dawgie.db.METRIC_DATA]}:
     return asp
 
 def distribution (metric:[dawgie.db.METRIC_DATA])->{str:HINT}:
+    log.info ('distribution() - use metrics for automaated choice of distribution')
     dst = {}
     reg = regress (metric)
+    log.info ('distribution() - number of regressions %d', len (reg))
     for name in reg:
         if reg[name]:
             cpu = numpy.median ([m.sv['task_system'].value() +
@@ -84,6 +88,7 @@ def distribution (metric:[dawgie.db.METRIC_DATA])->{str:HINT}:
     return dst
 
 def regress (metric:[dawgie.db.METRIC_DATA])->{str:[dawgie.db.METRIC_DATA]}:
+    log.info ('regress() - regress back across metric data %d', len (metric))
     names = set(['.'.join ([m.target, m.task, m.alg_name]) for m in metric])
     reg = dict([(name,[]) for name in names])
     for m in metric:
