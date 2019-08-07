@@ -142,12 +142,11 @@ def _search (axis, key):
         pass
     return json.dumps (result).encode()
 
-def _search_filter (fn:str, default:str)->bytes:
+def _search_filter (fn:str, default:{})->bytes:
     if os.path.isfile (os.path.join (dawgie.context.fe_path, fn)):
         try:
             with open (os.path.join (dawgie.context.fe_path, fn), 'rt') as f:\
-                 txt = f.read()
-            default = json.loads (txt)
+                 default = json.load(f)
         except: log.exception ('Text file could not be parsed as JSON')  # pylint: disable=bare-except
     else: log.info ('using DAWGIE default for %s', fn)
     return json.dumps (default).encode()
@@ -159,11 +158,11 @@ def search_cmplt_svn():
 def search_cmplt_tn(): return json.dumps(sorted(dawgie.db.targets())).encode()
 
 def search_filter_a(): return _search_filter ('admin.json',
-                                              json.dumps ({'include':{'.__metric__$':[]}}))
+                                              {'include':{'.__metric__$':[]}})
 def search_filter_d(): return _search_filter ('dev.json',
-                                              json.dumps ({'exclude':{'.__metric__$':[]}}))
+                                              {'exclude':{'.__metric__$':[]}})
 def search_filter_u(): return _search_filter ('user.json',
-                                              json.dumps ({'exclude':{'.__metric__$':[]}}))
+                                              {'exclude':{'.__metric__$':[]}})
 
 # pylint: disable=dangerous-default-value
 def search_runid(key:[str]=['']): return _search (Axis.runid, key[0])

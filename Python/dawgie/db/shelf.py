@@ -103,9 +103,11 @@ class Connector(object):
         msg = pickle.dumps (request, pickle.HIGHEST_PROTOCOL)
         s.sendall (struct.pack ('>I', len(msg)) + msg)
         buf = b''
+        log.info ('Connector.__do() - sending command')
         while len (buf) < 4: buf += s.recv(4 - len (buf))
         l = struct.unpack ('>I', buf)[0]
         buf = b''
+        log.info ('Connector.__do() - receiving command')
         while len (buf) < l: buf += s.recv(l - len (buf))
         s.close()
         return pickle.loads (buf)
@@ -118,7 +120,9 @@ class Connector(object):
     def _keys (self, table):
         return self.__do (COMMAND(Func.keys, None, table, None))
 
-    def _prime_keys (self): return self._keys (Table.primary)
+    def _prime_keys (self):
+        log.info ('Connector._prime_keys() - get prime keys')
+        return self._keys (Table.primary)
 
     def _release (self, s):
         request = COMMAND(Func.release, None, None, None)
@@ -510,6 +514,9 @@ class Worker(twisted.internet.protocol.Protocol):
             self._send (self.__db[request.table.value][request.key])
             pass
         elif request.func == Func.keys:
+            log.info ('Worker.do() - received request for keys')
+            log.info ('Worker.do() - table %s', request.table.name)
+            log.info ('Worker.do() - table size %d', len (self.__db[request.table.value]))
             self._send ([k for k in self.__db[request.table.value].keys()])
             pass
         elif request.func == Func.release:
@@ -659,6 +666,7 @@ def _copy (table):
     return dict([(k,table[k]) for k in table.keys()])
 
 def _prime_keys():
+    log.info ('_prime_keys() - size is %d', len (dawgie.db.shelf._db.primary))
     return dawgie.db.shelf._db.primary.keys()
 def _prime_values():
     return dawgie.db.shelf._db.primary.values()
@@ -768,23 +776,33 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
         raise RuntimeError('called metrics before open')
 
     result = []
-    for m in sorted (_prime_keys()):
-        runid,target,task,algn,svn,vn = m.split ('.')
+    log.info ('metrics() - starting')
+    keys = [k for k in _prime_keys()]
+    log.info ('metrics() - total prime keys %d', len (keys))
+    keys = [k for k in sorted (filter (lambda s:s.split('.')[4] == '__metric__', keys))]
+    log.info ('metrics() - total __metric__ in prime keys %d', len (keys))
+    for m in keys:
+        log.info ('metrics() - working on %s', m)
+        runid,target,task,algn,_svn,vn = m.split('.')
 
-        if svn != '__metric__': continue
-        if not result or result[-1].run_id != runid or \
-           result[-1].target != target or result[-1].task != task or \
-           result[-1].alg_name != algn:
+        if not result or any ([result[-1].run_id != runid,
+                               result[-1].target != target,
+                               result[-1].task != task,
+                               result[-1].alg_name != algn]):
+            log.info ('metrics() - make new reuslt')
             msv = dawgie.util.MetricStateVector(dawgie.METRIC(-2,-2,-2,-2,-2,-2),
                                                 dawgie.METRIC(-2,-2,-2,-2,-2,-2))
             result.append (dawgie.db.METRIC_DATA(alg_name=algn,
                                                  alg_ver=dawgie.VERSION(-1,-1,-1),
                                                  run_id=runid, sv=msv,
                                                  target=target, task=task))
+            log.info ('metrics() - result length %d', len (result))
             pass
 
-        try: msv[vn] = dawgie.db.util.decode (dawgie.db.shelf._db.primary[m])
-        except FileNotFoundError: log.exception('missing metric data for %s',vn)
+        try:
+            log.info ('metrics() - reading data and decoding')
+            msv[vn] = dawgie.db.util.decode (dawgie.db.shelf._db.primary[m])
+        except FileNotFoundError: log.exception('missing metric data for %s',m)
         pass
     return result
 
