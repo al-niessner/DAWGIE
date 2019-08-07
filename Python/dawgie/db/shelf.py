@@ -782,12 +782,13 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
     keys = [k for k in sorted (filter (lambda s:s.split('.')[4] == '__metric__', keys))]
     log.info ('metrics() - total __metric__ in prime keys %d', len (keys))
     for m in keys:
+        log.info ('metrics() - working on %s', m)
         runid,target,task,algn,_svn,vn = m.split('.')
 
-        if not result or result[-1].run_id != runid or \
-           result[-1].target != target or result[-1].task != task or \
-           result[-1].alg_name != algn:
-            log.info ()
+        if any (not result,
+                result[-1].run_id != runid, result[-1].target != target,
+                result[-1].task != task, result[-1].alg_name != algn):
+            log.info ('metrics() - make new reuslt')
             msv = dawgie.util.MetricStateVector(dawgie.METRIC(-2,-2,-2,-2,-2,-2),
                                                 dawgie.METRIC(-2,-2,-2,-2,-2,-2))
             result.append (dawgie.db.METRIC_DATA(alg_name=algn,
@@ -800,7 +801,7 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
         try:
             log.info ('metrics() - reading data and decoding')
             msv[vn] = dawgie.db.util.decode (dawgie.db.shelf._db.primary[m])
-        except FileNotFoundError: log.exception('missing metric data for %s',vn)
+        except FileNotFoundError: log.exception('missing metric data for %s',m)
         pass
     return result
 
