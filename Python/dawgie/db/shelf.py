@@ -120,7 +120,9 @@ class Connector(object):
     def _keys (self, table):
         return self.__do (COMMAND(Func.keys, None, table, None))
 
-    def _prime_keys (self): return self._keys (Table.primary)
+    def _prime_keys (self):
+        log.info ('Connector._prime_keys() - get prime keys')
+        return self._keys (Table.primary)
 
     def _release (self, s):
         request = COMMAND(Func.release, None, None, None)
@@ -664,6 +666,7 @@ def _copy (table):
     return dict([(k,table[k]) for k in table.keys()])
 
 def _prime_keys():
+    log.info ('_prime_keys() - dispatch to db connector')
     return dawgie.db.shelf._db.primary.keys()
 def _prime_values():
     return dawgie.db.shelf._db.primary.values()
