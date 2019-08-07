@@ -666,7 +666,8 @@ def _copy (table):
     return dict([(k,table[k]) for k in table.keys()])
 
 def _prime_keys():
-    log.info ('_prime_keys() - dispatch to db connector')
+    log.info ('_prime_keys() - dispatch to db connector %s',
+              str(dawgie.db.shelf._db))
     return dawgie.db.shelf._db.primary.keys()
 def _prime_values():
     return dawgie.db.shelf._db.primary.values()
