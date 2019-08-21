@@ -49,7 +49,7 @@ class Handler(logging.handlers.BufferingHandler):
         self.setFormatter (logging.Formatter('%(asctime)s;\n;' +
                                              '%(name)s;\n;' +
                                              '%(levelname)s;\n;' +
-                                             '%(message);\n;'))
+                                             '%(message)s'))
         return
 
     def emit(self, record):
