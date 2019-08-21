@@ -77,7 +77,7 @@ def db_versions():
     return json.dumps (dawgie.db.versions()).encode()
 
 def log_messages():
-    return dawgie.pl.logger.fe.remembered().encode()
+    return json.dumps (dawgie.pl.logger.fe.remembered()).encode()
 
 def pl_state():
     return json.dumps ({'name':dawgie.pl.start.sdp.state,
