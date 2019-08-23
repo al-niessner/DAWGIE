@@ -249,6 +249,7 @@ def override (args):
     dawgie.context.fe_path = args.context_fe_path
     dawgie.context.git_rev = _rev()
     dawgie.context.gpg_home = args.context_gpg_home
+    dawgie.context.log_backup = args.context_log_backup
     dawgie.context.log_capacity = args.context_log_capacity
     dawgie.context.log_port = args.context_log_port
 
