@@ -827,7 +827,8 @@ def next():
 def open():
     dawgie.db.shelf.open_db()
     try: twisted.internet.reactor.listenTCP(int(dawgie.context.db_port),
-                                            DBSerializer())
+                                            DBSerializer(),
+                                            dawgie.context.worker_backlog)
     except twisted.internet.error.CannotListenError:\
         logging.getLogger(__name__).warning("Address  already in use.")
     return
