@@ -414,7 +414,8 @@ def execute (address:(str,int), inc:int, ps_hint:int, rev:str):
 
 def initialize():
     twisted.internet.reactor.listenTCP (int(dawgie.context.cloud_port),
-                                        Company())
+                                        Company(),
+                                        dawgie.context.worker_backlog)
     return
 
 def sqs_pop():

@@ -144,7 +144,9 @@ class TwistedHandler(logging.handlers.SocketHandler):
 
 def start(path:str, port:int)->None:
     # pylint: disable=import-self,protected-access
+    import dawgie.context
     import dawgie.pl.logger
     dawgie.pl.logger._root = LogSinkFactory(path)
-    twisted.internet.reactor.listenTCP (port, dawgie.pl.logger._root)
+    twisted.internet.reactor.listenTCP (port, dawgie.pl.logger._root,
+                                        dawgie.context.worker_backlog)
     return
