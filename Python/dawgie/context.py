@@ -95,6 +95,7 @@ log_backup = 10
 log_capacity = 100
 log_level = logging.WARN
 log_port = int(os.environ.get('LOG_PORT', 8080 + PortOffset.log.value))
+worker_backlog = 50
 
 def _rev():
     rev = os.environ.get ('DOCKER_GIT_REVISION', '')
@@ -168,6 +169,9 @@ def add_arguments (ap):
                      help='the port to the log server [%(default)s]')
     ap.add_argument ('--context-email-signature', default=email_signature, required=False,
                      help='Sign e-mail summary reports with this signature. [%(default)s]')
+    ap.add_argument ('--context-worker-backlog', default=worker_backlog,
+                     required=False, type=int,
+                     help='the number of expected workers that may try to contact the foreman at the same time [%(default)s]')
     return
 
 def dumps()->bytes:
@@ -251,6 +255,7 @@ def override (args):
     dawgie.context.gpg_home = args.context_gpg_home
     dawgie.context.log_capacity = args.context_log_capacity
     dawgie.context.log_port = args.context_log_port
+    dawgie.context.worker_backlog = args.context_worker_backlog
 
     if not dawgie.context.ae_base_path.endswith (os.path.sep + dawgie.context.ae_base_package.replace ('.', os.path.sep)): raise ValueError('context-ae-dir ({0}) does not end with context-ae-pkg ({1})'.format (dawgie.context.ae_base_path,dawgie.context.ae_base_package))
     return
