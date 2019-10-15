@@ -497,6 +497,26 @@ def rule_09 (task):
     _walk (task, ifalg=non_zero, ifanz=non_zero, ifrec=non_zero)
     return all(findings)
 
+def rule_10 (task):
+    '''Verify moments are built correctly
+
+    When using the factory periodic, it requires that dawgie.MOMENT be
+    constructed in a specific way where some values are mutually exclusive.
+    '''
+    findings = []
+    mod = importlib.import_module (task)
+
+    if 'events' in dir (mod):
+        for e in mod.events():
+            not_defined = [e.moment.boot is None,
+                           e.moment.day is None,
+                           e.moment.dom is None,
+                           e.moment.dow is None]
+            findings.append (sum (not_defined) == len (not_defined) - 1)
+            pass
+    else: findings.append (True)
+    return all(findings)
+
 def verify (repo, silent, verbose):
     cmd = ['python3', '-m', 'dawgie.tools.compliant',
            '--ae-dir={0}'.format
