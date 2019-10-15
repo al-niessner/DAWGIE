@@ -43,6 +43,11 @@ def analysis (prefix, ps_hint=0, runid=-1):
     import ae.network.bot
     return ae.network.bot.Actor(prefix, ps_hint, runid)
 
+def events():
+    import ae.network.bot
+    import dawgie
+    return [dawgie.schedule(analysis, ae.network.bot.Analyzer(), True)]
+
 def task (prefix, ps_hint=0, runid=-1, target='__none__'):
     import ae.network.bot
     return ae.network.bot.Agent(prefix, ps_hint, runid, target)

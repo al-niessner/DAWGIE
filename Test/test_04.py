@@ -55,13 +55,13 @@ class Scan(unittest.TestCase):
     def test (self):
         factories = dawgie.pl.scan.for_factories (self.__ae_dir, self.__ae_pkg)
         self.assertEqual (2, len (factories[dawgie.Factories.analysis]))
-        self.assertEqual (0, len (factories[dawgie.Factories.events]))
+        self.assertEqual (1, len (factories[dawgie.Factories.events]))
         self.assertEqual (1, len (factories[dawgie.Factories.regress]))
         self.assertEqual (4, len (factories[dawgie.Factories.task]))
         for f in factories[dawgie.Factories.analysis]:\
             self.assertTrue (isinstance (f('a', 0, 0), dawgie.Analysis))
         for f in factories[dawgie.Factories.events]:
-            for p in ps: self.assertTrue (isinstance (p, dawgie.EVENT))
+            for e in f(): self.assertTrue (isinstance (e, dawgie.EVENT))
         for f in factories[dawgie.Factories.regress]:\
             self.assertTrue (isinstance (f('r', 0, 0), dawgie.Regress))
         for f in factories[dawgie.Factories.task]:\

@@ -80,7 +80,8 @@ def schedule(factory, impl,
     not_defined = [boot is None, day is None, dom is None, dow is None]
 
     if sum (not_defined) != len (not_defined)-1:
-        raise ValueError('Only one of boot, day, dom, or dow should be defined.')
+        raise ValueError('One and only one of boot, day, dom, or dow ' +
+                         'should be defined.')
     return EVENT(ALG_REF(factory, impl), MOMENT(boot, day, dom, dow, time))
 
 # factory : the task factory that would normally create this algorithm
