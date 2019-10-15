@@ -296,7 +296,9 @@ def rule_03 (task):
                      isinstance (a.state_vectors(), list)])
 
     def _verify_alg (a):
-        if a.previous(): pl = all([isinstance (p, (dawgie.ALG_REF, dawgie.SV_REF, dawgie.V_REF))
+        if a.previous(): pl = all([isinstance (p, (dawgie.ALG_REF,
+                                                   dawgie.SV_REF,
+                                                   dawgie.V_REF))
                                    for p in a.previous()])
         else: pl = True
 
@@ -315,9 +317,8 @@ def rule_03 (task):
                                      if r.list() else False)
 
     def _verify_regression (r):
-        if 0 < r.variables(): tl = all([isinstance (v, (dawgie.SV_REF,
-                                                        dawgie.V_REF))
-                                        for v in r.variables()])
+        if r.variables(): tl = all([isinstance (v, (dawgie.SV_REF,dawgie.V_REF))
+                                    for v in r.variables()])
         else: tl = True
 
         if r.state_vectors():
