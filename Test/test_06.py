@@ -167,6 +167,12 @@ class Schedule(unittest.TestCase):
 
     def test_tasks(self):
         tasks = dawgie.pl.schedule.tasks()
-        self.assertEqual (10, len (tasks))
+        self.assertEqual (12, len (tasks))
+        return
+
+    def test_update(self):
+        root = [n for n in filter (lambda n:n.tag.startswith ('network.'),
+                                   dawgie.pl.schedule.ae.at)][0]
+        dawgie.pl.schedule.update (['a.b.c.d.e'], root, 12)
         return
     pass

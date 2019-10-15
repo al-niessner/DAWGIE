@@ -72,14 +72,18 @@ class DAG(unittest.TestCase):
         root = list(self.__dag.at)
         root = [r for r in filter(lambda n:n.tag.startswith('network'),root)][0]
         self.assertEqual ('network.analyzer', root.tag)
-        self.assertEqual (2, len (root))
+        self.assertEqual (4, len (root))
         children = list(root)
         self.assertTrue ('network.engine' in [child.tag for child in children])
         self.assertTrue ('disk.engine' in [child.tag for child in children])
-        self.assertEqual (1, len (children[0]))
-        self.assertEqual (1, len (children[1]))
         grands = set()
-        for child in children: grands.update (list (child))
+        for child in children:
+            if child.tag.startswith ('review.'): self.assertEqual(0,len(child))
+            else:
+                self.assertEqual (1, len(child))
+                grands.update (list (child))
+                pass
+            pass
         self.assertEqual (2, len (grands))
         print ([n.tag for n in grands])
         self.assertTrue ('disk.engine' in [node.tag for node in grands])
@@ -116,8 +120,10 @@ class DAG(unittest.TestCase):
                      'feedback.output.actual.voltage':['feedback.model.voltage.value'],
                    'network.analyzer.test.image':[],
                    'network.engine.test.image':['network.analyzer.test.image'],
-                   'noio.engine.test.image':['disk.engine.test.image']}
-        self.assertEqual (14, len (nodes))
+                   'noio.engine.test.image':['disk.engine.test.image'],
+                   'review.aspect.test.image':['network.analyzer.test.image'],
+                   'review.history.test.image':['network.analyzer.test.image']}
+        self.assertEqual (16, len (nodes))
         for node in nodes:
             print (node.tag)
             self.assertTrue (node.tag in parents)
@@ -145,8 +151,10 @@ class DAG(unittest.TestCase):
                      'network.engine.test.image':['network.analyzer.test.image'],
                      'noio.engine.test.image':['disk.engine.test.image',
                                                'network.analyzer.test.image',
-                                               'network.engine.test.image']}
-        self.assertEqual (14, len (nodes))
+                                               'network.engine.test.image'],
+                     'review.aspect.test.image':['network.analyzer.test.image'],
+                     'review.history.test.image':['network.analyzer.test.image']}
+        self.assertEqual (16, len (nodes))
         for node in nodes:
             self.assertTrue (node.tag in ancestors)
             print (node.tag, sorted ([a for a in node.get ('ancestry')]))

@@ -36,35 +36,13 @@ POSSIBILITY OF SUCH DAMAGE.
 
 NTR:
 '''
+ignore = False  # forces the pipeline to ignore this package (aka task)
 
-import dawgie
-import dawgie.pl.scan
-import os
-import sys
-import unittest
+# pylint: disable=redefined-builtin
+def analysis (prefix, ps_hint=0, runid=-1):
+    import ae.review.bot
+    return ae.review.bot.Actor(prefix, ps_hint, runid)
 
-class Scan(unittest.TestCase):
-    def __init__ (self, *args):
-        unittest.TestCase.__init__(self, *args)
-        self.__ae_dir = os.path.abspath (os.path.join
-                                         (os.path.dirname (__file__), 'ae'))
-        self.__ae_pkg = 'ae'
-        sys.path.insert (0, os.path.abspath (os.path.dirname (__file__)))
-        return
-
-    def test (self):
-        factories = dawgie.pl.scan.for_factories (self.__ae_dir, self.__ae_pkg)
-        self.assertEqual (2, len (factories[dawgie.Factories.analysis]))
-        self.assertEqual (0, len (factories[dawgie.Factories.events]))
-        self.assertEqual (1, len (factories[dawgie.Factories.regress]))
-        self.assertEqual (4, len (factories[dawgie.Factories.task]))
-        for f in factories[dawgie.Factories.analysis]:\
-            self.assertTrue (isinstance (f('a', 0, 0), dawgie.Analysis))
-        for f in factories[dawgie.Factories.events]:
-            for p in ps: self.assertTrue (isinstance (p, dawgie.EVENT))
-        for f in factories[dawgie.Factories.regress]:\
-            self.assertTrue (isinstance (f('r', 0, 0), dawgie.Regress))
-        for f in factories[dawgie.Factories.task]:\
-            self.assertTrue (isinstance (f('t', 0, 0, 0), dawgie.Task))
-        return
-    pass
+def regress (prefix, ps_hint=0, target='__none__'):
+    import ae.review.bot
+    return ae.review.bot.Regress(prefix, ps_hint, target)
