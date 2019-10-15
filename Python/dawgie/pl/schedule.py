@@ -105,6 +105,13 @@ def _diff (curr, prev):
 def _is_asp (n:dawgie.pl.dag.Node)->bool:
     return n.get ('factory').__name__ == dawgie.Factories.analysis.name
 
+def _priors (node):
+    result = []
+    if isinstance (node, dawgie.Analyzer): result = node.traits()
+    if isinstance (node, dawgie.Regression): result = node.variables()
+    if isinstance (node, dawgie.Task): result = node.previous()
+    return result
+
 def _to_name (m):
     result = []
     for ak in m:
@@ -315,7 +322,7 @@ def update (value_names:[str], original:dawgie.pl.dag.Node, rid:int):
                 pass
             pass
         for node in filter (lambda n:n.tag != original.tag, original):
-            for vref in dawgie.util.as_vref (node.get ('alg').previous()):
+            for vref in dawgie.util.as_vref (_priors (node.get ('alg'))):
                 if dawgie.util.vref_as_name (vref) in vns:\
                    task_names.add (node.tag)
                 pass
