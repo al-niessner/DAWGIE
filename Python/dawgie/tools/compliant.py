@@ -42,6 +42,7 @@ NTR: 49811
 # pylint: disable=import-self,protected-access,too-many-arguments,too-many-branches,too-many-locals,unused-argument
 
 import argparse
+import datetime
 import importlib
 import inspect
 import logging
@@ -495,6 +496,35 @@ def rule_09 (task):
 
     findings = []
     _walk (task, ifalg=non_zero, ifanz=non_zero, ifrec=non_zero)
+    return all(findings)
+
+def rule_10 (task):
+    '''Verify moments are built correctly
+
+    When using the factory periodic, it requires that dawgie.MOMENT be
+    constructed in a specific way where some values are mutually exclusive.
+    '''
+    findings = []
+    mod = importlib.import_module (task)
+
+    if 'events' in dir (mod):
+        for e in mod.events():
+            not_defined = [e.moment.boot is None,
+                           e.moment.day is None,
+                           e.moment.dom is None,
+                           e.moment.dow is None]
+            findings.append (sum (not_defined) == len (not_defined) - 1)
+            findings.append (e.moment.day is None or
+                             isinstance (e.moment.day, datetime.date))
+            findings.append (e.moment.dom is None or
+                             isinstance (e.moment.dom, int))
+            findings.append (e.moment.dow is None or
+                             isinstance (e.moment.dow, int))
+
+            if e.moment.boot is None:\
+               findings.append (isinstance (e.moment.time, datetime.time))
+            pass
+    else: findings.append (True)
     return all(findings)
 
 def verify (repo, silent, verbose):

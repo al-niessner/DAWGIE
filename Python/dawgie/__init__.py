@@ -70,15 +70,28 @@ METRIC = collections.namedtuple ('METRICS', ['input', 'mem', 'output',
 # dow : day-of-week from calendar
 # time: an instance of datetime.time and tzone will be assigned UTC if None
 #
-# Only one of date, dom, or dow should be defined
-MOMENT = collections.namedtuple ('MOMENT', ['day', 'dom', 'dow', 'time'])
+# Only one of boot, date, dom, or dow should be defined
+MOMENT = collections.namedtuple ('MOMENT', ['boot','day','dom','dow','time'])
 
 def schedule(factory, impl,
+             boot:bool=None,
              day:datetime.date=None, dom:int=None,
              dow:int=None, time:datetime.time=None):
-    if sum ([day is None, dom is None, dow is None]) != 2:
-        raise ValueError('Only one of day, dom, or dow should be defined.')
-    return EVENT(ALG_REF(factory, impl), MOMENT(day, dom, dow, time))
+    not_defined = [boot is None, day is None, dom is None, dow is None]
+
+    if sum (not_defined) != len (not_defined)-1:
+        raise ValueError('One and only one of boot, day, dom, or dow ' +
+                         'should be defined.')
+    if day and not isinstance (day, datetime.date):
+        raise ValueError('day must be of datetime.date')
+    if dom and not isinstance (dom, int):
+        raise ValueError('dom must be an integer')
+    if dow and not isinstance (dow, int):
+        raise ValueError('dow must be an integer')
+    if not boot and (time and not isinstance (time, datetime.time)):
+        raise ValueError('time must be of datetime.time')
+
+    return EVENT(ALG_REF(factory, impl), MOMENT(boot, day, dom, dow, time))
 
 # factory : the task factory that would normally create this algorithm
 # impl : an instance of the algorithm

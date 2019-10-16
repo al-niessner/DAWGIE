@@ -52,6 +52,7 @@ import logging; log = logging.getLogger (__name__)
 import twisted.internet.reactor
 
 ae = None
+booted = []
 err = []
 que = []
 per = []
@@ -59,38 +60,48 @@ suc = []
 
 pipeline_paused = False
 
-def _delay (when:dawgie.MOMENT)->datetime.timedelta:
+class _DelayNotKnowableError(ArithmeticError): pass
+
+def _delay (when:dawgie.EVENT)->datetime.timedelta:
     now = datetime.datetime.utcnow()
     today = now.isoweekday() - 1
 
-    if when.day is not None:
-        then = datetime.datetime(year=when.day.year,
-                                 month=when.day.month,
-                                 day=when.day.day,
-                                 hour=when.time.hour,
-                                 minute=when.time.minute,
-                                 second=when.time.second)
-        pass
+    if when.moment.boot is not None:
+        if when in booted: raise _DelayNotKnowableError()
 
-    if when.dom is not None:
-        nm = now.month + 1
-        then = datetime.datetime(year=now.year + (1 if nm == 13 else 0),
-                                 month=1 if nm == 13 else nm,
-                                 day=when.dom,
-                                 hour=when.time.hour,
-                                 minute=when.time.minute,
-                                 second=when.time.second)
-        pass
+        then = now
+        booted.append (when)
+    else:
+        if when.moment.day is not None:
+            then = datetime.datetime(year=when.moment.day.year,
+                                     month=when.moment.day.month,
+                                     day=when.moment.day.day,
+                                     hour=when.moment.time.hour,
+                                     minute=when.moment.time.minute,
+                                     second=when.moment.time.second)
+            pass
 
-    if when.dow is not None:
-        dd = datetime.timedelta (days=(7 + when.dow - today)
-                                 if when.dow < today else (when.dow - today))
-        then = datetime.datetime(year=now.year,
-                                 month=now.month,
-                                 day=now.day,
-                                 hour=when.time.hour,
-                                 minute=when.time.minute,
-                                 second=when.time.second) + dd
+        if when.moment.dom is not None:
+            nm = now.month + 1
+            then = datetime.datetime(year=now.year + (1 if nm == 13 else 0),
+                                     month=1 if nm == 13 else nm,
+                                     day=when.moment.dom,
+                                     hour=when.moment.time.hour,
+                                     minute=when.moment.time.minute,
+                                     second=when.moment.time.second)
+            pass
+
+        if when.moment.dow is not None:
+            dd = datetime.timedelta (days=(7 + when.moment.dow - today)
+                                     if when.moment.dow < today else
+                                     (when.moment.dow-today))
+            then = datetime.datetime (year=now.year,
+                                      month=now.month,
+                                      day=now.day,
+                                      hour=when.moment.time.hour,
+                                      minute=when.moment.time.minute,
+                                      second=when.moment.time.second) + dd
+            pass
         pass
 
     return then - now
@@ -179,20 +190,23 @@ def defer():
                                                        State.waiting], per):
         t.set ('status', State.delayed)
         for p in t.get ('period'):
-            ts = _delay (p).total_seconds()
+            try:
+                ts = _delay (p).total_seconds()
 
-            if ts <= 300.0:
-                que.append (t)
-                que.sort (key=lambda i:i.get ('level'))
-                t.set ('status', State.waiting)
-                t.set ('event', 'Periodic timer')
+                if ts <= 300.0:
+                    que.append (t)
+                    que.sort (key=lambda i:i.get ('level'))
+                    t.set ('status', State.waiting)
+                    t.set ('event', 'Periodic timer')
 
-                if _is_asp (t): t.get ('todo').add ('__all__')
-                else: t.get ('todo').update (dawgie.db.targets())
+                    if _is_asp (t): t.get ('todo').add ('__all__')
+                    else: t.get ('todo').update (dawgie.db.targets())
 
-                log.info ('defer() - moving deferred task ' + str (t.tag) +
-                          ' to the job queue')
-            else: delay.append (ts)
+                    log.info ('defer() - moving deferred task ' + str (t.tag) +
+                              ' to the job queue')
+                else: delay.append (ts)
+            except _DelayNotKnowableError:
+                pass
             pass
         pass
 
@@ -276,8 +290,8 @@ def periodics (factories):
                 for n in rta.locate (an):
                     per.append (n)
 
-                    if n.get ('period'): n.get ('period').append (event.moment)
-                    else: n.set ('period', [event.moment])
+                    if n.get ('period'): n.get ('period').append (event)
+                    else: n.set ('period', [event])
                     pass
                 pass
             pass

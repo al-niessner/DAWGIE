@@ -71,6 +71,18 @@ class Schedule(unittest.TestCase):
             pass
         return list (result)
 
+    def test__delay(self):
+        import ae.network
+        import ae.network.bot
+
+        a = dawgie.schedule (ae.network.analysis,ae.network.bot.Analyzer(),True)
+        b = dawgie.schedule (ae.network.task, ae.network.bot.Engine(), True)
+        self.assertEqual (0, dawgie.pl.schedule._delay (a).total_seconds())
+        self.assertEqual (0, dawgie.pl.schedule._delay (b).total_seconds())
+        self.assertRaises (dawgie.pl.schedule._DelayNotKnowableError,
+                           dawgie.pl.schedule._delay, a)
+        return
+
     def test_complete(self):
         self.assertEqual (0, len (dawgie.pl.schedule.que))
         nodes = self._unravel (dawgie.pl.schedule.ae.at)

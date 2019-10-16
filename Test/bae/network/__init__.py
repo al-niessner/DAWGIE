@@ -43,6 +43,11 @@ def analysis (prefix, ps_hint=0, runid=-1):
     import bae.network.bot
     return bae.network.bot.Actor(prefix, ps_hint, runid)
 
+def events():
+    import dawgie
+    return [dawgie.EVENT (dawgie.ALG_REF(None, None),
+                          dawgie.MOMENT(True, True, None, None, None))]
+
 def task (prefix, ps_hint=0, runid=-1, target='__none__'):
     import bae.network.bot
     return bae.network.bot.Agent(prefix, ps_hint, runid, target)
