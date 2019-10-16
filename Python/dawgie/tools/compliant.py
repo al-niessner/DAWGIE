@@ -42,6 +42,7 @@ NTR: 49811
 # pylint: disable=import-self,protected-access,too-many-arguments,too-many-branches,too-many-locals,unused-argument
 
 import argparse
+import datetime
 import importlib
 import inspect
 import logging
@@ -513,6 +514,15 @@ def rule_10 (task):
                            e.moment.dom is None,
                            e.moment.dow is None]
             findings.append (sum (not_defined) == len (not_defined) - 1)
+            findings.append (e.moment.day is None or
+                             isinstance (e.moment.day, datetime.date))
+            findings.append (e.moment.dom is None or
+                             isinstance (e.moment.dom, int))
+            findings.append (e.moment.dow is None or
+                             isinstance (e.moment.dow, int))
+
+            if e.moment.boot is None:\
+               findings.append (isinstance (e.moment.time, datetime.time))
             pass
     else: findings.append (True)
     return all(findings)

@@ -82,6 +82,15 @@ def schedule(factory, impl,
     if sum (not_defined) != len (not_defined)-1:
         raise ValueError('One and only one of boot, day, dom, or dow ' +
                          'should be defined.')
+    if day and not isinstance (day, datetime.date):
+        raise ValueError('day must be of datetime.date')
+    if dom and not isinstance (dom, int):
+        raise ValueError('dom must be an integer')
+    if dow and not isinstance (dow, int):
+        raise ValueError('dow must be an integer')
+    if not boot and (time and not isinstance (time, datetime.time)):
+        raise ValueError('time must be of datetime.time')
+
     return EVENT(ALG_REF(factory, impl), MOMENT(boot, day, dom, dow, time))
 
 # factory : the task factory that would normally create this algorithm

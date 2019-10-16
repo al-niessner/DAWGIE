@@ -62,7 +62,7 @@ pipeline_paused = False
 
 class _DelayNotKnowableError(ArithmeticError): pass
 
-def _delay (when:dawgie.MOMENT)->datetime.timedelta:
+def _delay (when:dawgie.EVENT)->datetime.timedelta:
     now = datetime.datetime.utcnow()
     today = now.isoweekday() - 1
 
@@ -72,34 +72,35 @@ def _delay (when:dawgie.MOMENT)->datetime.timedelta:
         then = now
         booted.append (when)
     else:
-        if when.day is not None:
-            then = datetime.datetime(year=when.day.year,
-                                     month=when.day.month,
-                                     day=when.day.day,
-                                     hour=when.time.hour,
-                                     minute=when.time.minute,
-                                     second=when.time.second)
+        if when.moment.day is not None:
+            then = datetime.datetime(year=when.moment.day.year,
+                                     month=when.moment.day.month,
+                                     day=when.moment.day.day,
+                                     hour=when.moment.time.hour,
+                                     minute=when.moment.time.minute,
+                                     second=when.moment.time.second)
             pass
 
-        if when.dom is not None:
+        if when.moment.dom is not None:
             nm = now.month + 1
             then = datetime.datetime(year=now.year + (1 if nm == 13 else 0),
                                      month=1 if nm == 13 else nm,
-                                     day=when.dom,
-                                     hour=when.time.hour,
-                                     minute=when.time.minute,
-                                     second=when.time.second)
+                                     day=when.moment.dom,
+                                     hour=when.moment.time.hour,
+                                     minute=when.moment.time.minute,
+                                     second=when.moment.time.second)
             pass
 
-        if when.dow is not None:
-            dd = datetime.timedelta (days=(7 + when.dow - today)
-                                     if when.dow < today else (when.dow-today))
+        if when.moment.dow is not None:
+            dd = datetime.timedelta (days=(7 + when.moment.dow - today)
+                                     if when.moment.dow < today else
+                                     (when.moment.dow-today))
             then = datetime.datetime (year=now.year,
                                       month=now.month,
                                       day=now.day,
-                                      hour=when.time.hour,
-                                      minute=when.time.minute,
-                                      second=when.time.second) + dd
+                                      hour=when.moment.time.hour,
+                                      minute=when.moment.time.minute,
+                                      second=when.moment.time.second) + dd
             pass
         pass
 
@@ -289,8 +290,8 @@ def periodics (factories):
                 for n in rta.locate (an):
                     per.append (n)
 
-                    if n.get ('period'): n.get ('period').append (event.moment)
-                    else: n.set ('period', [event.moment])
+                    if n.get ('period'): n.get ('period').append (event)
+                    else: n.set ('period', [event])
                     pass
                 pass
             pass
