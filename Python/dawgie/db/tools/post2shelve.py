@@ -185,7 +185,7 @@ def convert_prime_db(conn, fn, data):
         value_info[v['value_pk']] = v['name']
         value_pk.append(str(v['value_pk']))
 
-    cur.execute("SELECT PK,tn_ID,task_ID,alg_ID,sv_ID,val_ID,blob_name from Prime where " +
+    cur.execute("SELECT PK,tn_ID,task_ID,alg_ID,sv_ID,val_ID,run_ID,blob_name from Prime where " +
                 "tn_ID = ANY('{%s}'::int[]) " % (','.join(tn_IDs)) +
                 "and task_ID = ANY('{%s}'::int[]) " % (','.join(task_IDs)) +
                 "and alg_ID = ANY('{%s}'::int[]) " % (','.join(alg_IDs)) +
@@ -195,7 +195,10 @@ def convert_prime_db(conn, fn, data):
     tdb = {}
     for r in sorted (rows, key=lambda r:r[0]):
         y = Yo(r)
-        k = '.'.join(['1',data['target'][r[1]]['name'],data['value'][r[5]]['name']])
+        rid = r[-2]
+        k = '.'.join(['1' if rid else '0',
+                      data['target'][r[1]]['name'],
+                      data['value'][r[5]]['name']])
         tdb[k] = {'prime_pk':r[0], 'yo':y, 'name':k}
         d[k] = '%s'% (r[-1])
 
