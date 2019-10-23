@@ -196,8 +196,8 @@ def convert_prime_db(conn, fn, data):
     for r in sorted (rows, key=lambda r:r[0]):
         y = Yo(r)
         rid = r[-2]
-        k = '.'.join(['1' if rid else '0'
-                      ,data['target'][r[1]]['name'],
+        k = '.'.join(['1' if rid else '0',
+                      data['target'][r[1]]['name'],
                       data['value'][r[5]]['name']])
         tdb[k] = {'prime_pk':r[0], 'yo':y, 'name':k}
         d[k] = '%s'% (r[-1])
