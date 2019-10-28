@@ -37,6 +37,7 @@ NTR:
 '''
 
 import base64
+import bokeh
 import dawgie
 import html
 import io
@@ -174,11 +175,9 @@ class Visitor(Cell):
         buf.write ('<meta charset="UTF-8"><title>')
         buf.write (self.__title)
         buf.write ('</title>')
-        buf.write ('''<link
-    href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.3.min.css"
-    rel="stylesheet" type="text/css">
-<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.3.min.js"></script>
-''')
+        buf.write ('''<script src="https://cdn.pydata.org/bokeh/release/bokeh-{0}.min.js"></script>
+<script src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-{0}.min.js"></script>
+<script src="https://cdn.pydata.org/bokeh/release/bokeh-tables-{0}.min.js"></script>'''.format (bokeh.__version__))
         for js in self.__js: buf.write (js)
         buf.write ('</head><body>')
         for d in self.__decl: buf.write (d)
