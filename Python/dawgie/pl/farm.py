@@ -216,13 +216,8 @@ def delta_time_to_string(diff):
 
 insights = {}
 def dispatch():
-    # pylint: disable=too-many-branches,too-many-statements
-    if dawgie.pl.start.sdp.waiting_on_crew() and not _agency:
-        log.info("farm.dispatch: Waiting for crew to finish...")
-        return
-    if not dawgie.pl.start.sdp.is_pipeline_active():
-        log.info("Pipeline is not active. Returning from farm.dispatch().")
-        return
+    # pylint: disable=too-many-branches
+    if not something_to_do(): return
 
     jobs = dawgie.pl.schedule.next_job_batch()
 
@@ -231,15 +226,7 @@ def dispatch():
         pass
 
     for j in jobs:
-        runid = j.get ('runid', None)
-
-        if not runid:
-            runid = dawgie.db.next()
-            log.critical (('New run ID ({0:d}) for algorithm {1:s} ' +
-                           'trigger by the event: ').format (runid, j.tag) +
-                          j.get ('event', 'Not Specified'))
-            pass
-
+        runid = rerunid (j)
         j.set ('status', dawgie.pl.schedule.State.running)
         fm = j.get ('factory').__module__
         fn = j.get ('factory').__name__
@@ -305,3 +292,24 @@ def plow():
                                        Foreman(), dawgie.context.worker_backlog)
     twisted.internet.task.LoopingCall(dispatch).start(5).addErrback (dawgie.pl.LogDeferredException(None, 'dispatching scheduled jobs to workers on the farm').log)
     return
+
+def rerunid (job):
+    runid = job.get ('runid', None)
+
+    if runid is None:
+        runid = dawgie.db.next()
+        log.critical (('New run ID ({0:d}) for algorithm {1:s} ' +
+                       'trigger by the event: ').format (runid, job.tag) +
+                      job.get ('event', 'Not Specified'))
+        pass
+    return runid
+
+def something_to_do():
+    # pylint: disable=too-many-branches,too-many-statements
+    if dawgie.pl.start.sdp.waiting_on_crew() and not _agency:
+        log.info("farm.dispatch: Waiting for crew to finish...")
+        return False
+    if not dawgie.pl.start.sdp.is_pipeline_active():
+        log.info("Pipeline is not active. Returning from farm.dispatch().")
+        return False
+    return True
