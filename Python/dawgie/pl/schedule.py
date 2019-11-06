@@ -118,9 +118,9 @@ def _is_asp (n:dawgie.pl.dag.Node)->bool:
 
 def _priors (node):
     result = []
+    if isinstance (node, dawgie.Algorithm): result = node.previous()
     if isinstance (node, dawgie.Analyzer): result = node.traits()
     if isinstance (node, dawgie.Regression): result = node.variables()
-    if isinstance (node, dawgie.Task): result = node.previous()
     return result
 
 def _to_name (m):
