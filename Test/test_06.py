@@ -185,6 +185,15 @@ class Schedule(unittest.TestCase):
     def test_update(self):
         root = [n for n in filter (lambda n:n.tag.startswith ('network.'),
                                    dawgie.pl.schedule.ae.at)][0]
-        dawgie.pl.schedule.update (['a.b.c.d.e'], root, 12)
+        root.get ('doing').add ('fred')
+        for c in root:
+            if c.tag == 'disk.engine': c.get ('doing').add ('fred')
+            pass
+        dawgie.pl.schedule.que.clear()
+        dawgie.pl.schedule.update (['12.fred.network.analyzer.test.image'],
+                                   root, 12)
+        self.assertEqual (len (root), len (dawgie.pl.schedule.que))
+        for n in dawgie.pl.schedule.que:\
+            self.assertEqual (12, n.get ('runid'), n.tag)
         return
     pass
