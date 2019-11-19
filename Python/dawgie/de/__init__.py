@@ -49,6 +49,9 @@ class Type(enum.Enum):
 
 def factory (dt:Type=None) -> dawgie.Visitor:
     if dt is None: dt = dawgie.context.display
+    else: dt = dt.name
 
-    mod = importlib.import_module ('dawgie.de.' + dt.name)
+    if not dt.count ('.'): dt += 'dawgie.de.' + dt
+
+    mod = importlib.import_module (dt)
     return mod.Visitor()

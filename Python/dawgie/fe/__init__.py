@@ -81,8 +81,7 @@ class DynamicContent(twisted.web.resource.Resource):
         sig = inspect.signature (self.__fnc)
         display = 'display' in sig.parameters and \
                   sig.parameters['display'].annotation == dawgie.Visitor
-        kwds = {} if not display else \
-               {'display':dawgie.de.factory (dawgie.de.Type.html)}
+        kwds = {} if not display else {'display':dawgie.de.factory()}
         for ak in request.args.keys():
             if ak.decode() in sig.parameters:
                 kwds[ak.decode()] = [a.decode() for a in request.args[ak]]
