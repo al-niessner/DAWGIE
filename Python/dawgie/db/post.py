@@ -752,7 +752,7 @@ def archive (done):
         raise ValueError('The path "' + path +
                          '" does not exist or is not a directory')
 
-    for i in range (19,0,-1):
+    for i in range (int(dawgie.context.db_rotate)-1,0,-1):
         ffn = os.path.join (path, bfn.format (i-1))
         nfn = os.path.join (path, bfn.format (i))
 
