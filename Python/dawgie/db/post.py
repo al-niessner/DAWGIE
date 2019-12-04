@@ -765,7 +765,7 @@ def archive (done):
             '-d', dawgie.context.db_name,
             '-f', os.path.join (path, bfn.format (0))]
     handler = ArchiveHandler(' '.join (args), done)
-    twisted.internet.reactor.spawnProcess (handler, args[0], args=args)
+    twisted.internet.reactor.spawnProcess (handler, args[0], args=args, env=os.environ)
     return
 
 def close(): return
