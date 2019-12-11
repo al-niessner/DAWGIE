@@ -39,8 +39,6 @@ NTR:
 '''
 
 import os
-from pathlib import Path
-import re
 import setuptools
 
 
@@ -48,39 +46,29 @@ def read_requirements():
     requirements = []
     with open('./requirements.txt', 'r') as file:
         for line in file:
-            # exclude comments
-            if re.match('^\\s*#.*', line):
-                # print('****************LINE--', line)
-                continue
-            requirements.append(str(line.lstrip().rstrip()))
+            line = str(line)  # guard against str exceptions
+            line = line[:line.find("#")] if "#" in line else line  # exclude comments
+            line = line.strip()  # clean
+            if line:
+                requirements.append(line)
     return requirements
 
 
 dawgie = os.path.join ('dawgie', '__init__.py')
 version = os.environ.get ('DAWGIE_VERSION', '0.0.0')
-with open (os.path.join (os.path.dirname (__file__), dawgie)) as f: t = f.read()
+with open (os.path.join (os.path.dirname (__file__), dawgie)) as f:
+    t = f.read()
 t = t.replace ("'0.0.0'", "'{0}'".format (version))
-with open (os.path.join (os.path.dirname (__file__), dawgie), 'tw') as f:\
-     f.write (t)
+with open (os.path.join (os.path.dirname (__file__), dawgie), 'tw') as f:
+    f.write(t)
 
-data_files_locations = []
-
-read_me_file_dir_string = "."
-read_me_file = Path(__file__).absolute().parent / "README.md"
-if read_me_file.exists() is False:
-    read_me_file_dir_string = ".."
-    read_me_file = read_me_file.parent.parent / read_me_file.name
-data_files_locations.append((".", [read_me_file_dir_string + "/" + read_me_file.name]))
-
-license_file_dir_string = "."
-license_file = Path(__file__).absolute().parent / "LICENSE.txt"
-if license_file.exists() is False:
-    license_file_dir_string = ".."
-    license_file = license_file.parent.parent / license_file.name
-data_files_locations.append((".", [license_file_dir_string + "/" + license_file.name]))
-
-with read_me_file.open() as f:
+read_me_file_name = "README.md"
+read_me_file = read_me_file_name if os.path.exists(read_me_file_name) else f"../{read_me_file_name}"
+with open(read_me_file, "rt") as f:
     description = f.read()
+
+data_files_names = [read_me_file_name, "LICENSE.txt"]
+data_files_locations = [('.', [f]) if os.path.exists(f) else ('.', ["../" + f]) for f in data_files_names]
 
 deps = read_requirements()
 setuptools.setup (name='dawgie',
