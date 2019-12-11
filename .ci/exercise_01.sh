@@ -44,13 +44,15 @@ context="continuous-exercise/01/run-test-ae"
 
 post_state "$context" "$description" "$state"
 
+# assign gpg command to variable, default to gpg2
+command -v gpg2 && gpg_cmd="gpg2" || gpg_cmd="gpg"
 if current_state
 then
-    tempdir=$(mktemp -d)
+    tempdir=$(mktemp -d /tmp/tmp.XXXXXX)
     mkdir -p ${tempdir}/{db,dbs,fe,gnupg,logs,stg}
     mkdir ${tempdir}/gnupg/private-keys-v1.d
     chmod 700 ${tempdir}/gnupg ${tempdir}/gnupg/private-keys-v1.d
-    GNUPGHOME=${tempdir}/gnupg gpg2 --batch --generate-key <<EOF
+    GNUPGHOME=${tempdir}/gnupg ${gpg_cmd} --batch --generate-key <<EOF
      %echo Generating a basic OpenPGP key
      %no-ask-passphrase
      %no-protection
@@ -66,8 +68,8 @@ then
      %commit
      %echo done
 EOF
-    GNUPGHOME=${tempdir}/gnupg gpg -armor --export no-reply@dawgie.jpl.nasa,gov > ${tempdir}/gnupg/dawgie.test.pub
-    GNUPGHOME=${tempdir}/gnupg gpg -armor --export-secret-key no-reply@dawgie.jpl.nasa,gov > ${tempdir}/gnupg/dawgie.test.sec
+    GNUPGHOME=${tempdir}/gnupg ${gpg_cmd} -armor --export no-reply@dawgie.jpl.nasa,gov > ${tempdir}/gnupg/dawgie.test.pub
+    GNUPGHOME=${tempdir}/gnupg ${gpg_cmd} -armor --export-secret-key no-reply@dawgie.jpl.nasa,gov > ${tempdir}/gnupg/dawgie.test.sec
     docker run --rm -e GNUPGHOME=/proj/data/gnupg -e USER=$USER -p 8080-8089:8080-8089 -u $UID -v ${PWD}/Test:/proj/src -v ${tempdir}:/proj/data ex:${ghrVersion} dawgie.pl.start --context-fe-path=/proj/data/fe &
     python3 <<EOF
 import json
@@ -83,7 +85,7 @@ while not isRunning:
 EOF
     declare -i jobs=1
     declare -i inc=1
-    while [[ 0 < $jobs ]]
+    while [[ 0 -lt $jobs ]]
     do
         docker run --rm -e GNUPGHOME=/proj/data/gnupg -e USER=$USER --network host -u $UID -v ${PWD}/Test:/proj/src -v ${tempdir}:/proj/data ex:${ghrVersion} dawgie.pl.worker -a /proj/src/ae -b ae -c cluster -g /proj/data/gnupg -i $inc -n localhost -p 8081
 
