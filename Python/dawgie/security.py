@@ -210,7 +210,6 @@ def connect (address:(str, int))->socket.socket:
 def delete (keys:[str])->None: _pgp.delete_keys ('\n'.join (keys))
 def extend (keys:[str])->None: return _pgp.import_keys ('\n'.join (keys))
 
-
 def finalize()->None:
     '''clean up after ones self
 
@@ -218,7 +217,6 @@ def finalize()->None:
     '''
     shutil.rmtree(getattr(_pgp, gpgargname), ignore_errors=True)
     return
-
 
 def initialize (path:str=None)->None:
     '''initialize this library with the PGP keyring location
