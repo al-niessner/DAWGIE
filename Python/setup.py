@@ -39,16 +39,18 @@ NTR:
 '''
 
 import os
+
 import setuptools
 
 
 def read_requirements():
     requirements = []
-    with open('./requirements.txt', 'r') as file:
+    with open('./requirements.txt', 'rt') as file:
         for line in file:
-            line = str(line)  # guard against str exceptions
-            line = line[:line.find("#")] if "#" in line else line  # exclude comments
-            line = line.strip()  # clean
+            # exclude comments
+            line = line[:line.find("#")] if "#" in line else line
+            # clean
+            line = line.strip()
             if line:
                 requirements.append(line)
     return requirements
@@ -62,13 +64,15 @@ t = t.replace ("'0.0.0'", "'{0}'".format (version))
 with open (os.path.join (os.path.dirname (__file__), dawgie), 'tw') as f:
     f.write(t)
 
-read_me_file_name = "README.md"
-read_me_file = read_me_file_name if os.path.exists(read_me_file_name) else f"../{read_me_file_name}"
+# first item in list must be README file name
+data_files_names = ["README.md", "LICENSE.txt"]
+data_files_locations = [('.', [f]) if os.path.exists(f) else
+    ('.', ["../" + f]) for f in data_files_names]
+
+read_me_file = data_files_names[0] if os.path.exists(data_files_names[0]) else \
+    f"../{data_files_names[0]}"
 with open(read_me_file, "rt") as f:
     description = f.read()
-
-data_files_names = [read_me_file_name, "LICENSE.txt"]
-data_files_locations = [('.', [f]) if os.path.exists(f) else ('.', ["../" + f]) for f in data_files_names]
 
 deps = read_requirements()
 setuptools.setup (name='dawgie',
