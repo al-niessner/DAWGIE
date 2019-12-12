@@ -215,7 +215,7 @@ def finalize()->None:
 
     Should be called when all done with the security module.
     '''
-    shutil.rmtree (getattr (_pgp, gpgargname))
+    shutil.rmtree(getattr(_pgp, gpgargname), ignore_errors=True)
     return
 
 def initialize (path:str=None)->None:
