@@ -1,0 +1,13 @@
+bokeh>=1.2
+boto3>=1.7.80
+cryptography>=2.1.4
+dawgie-pydot3==1.0.10
+GitPython>=2.1.11
+matplotlib>=2.1.1
+psycopg2-binary>=2.7.4
+pyparsing>=2.2
+python-gnupg==0.4.4
+pyxb==1.2.6
+requests>=2.20.0
+transitions==0.6.8
+twisted>=18.7.0

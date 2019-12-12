@@ -39,44 +39,57 @@ NTR:
 '''
 
 import os
+
 import setuptools
 
-dawgie = os.path.join ('dawgie', '__init__.py')
-deps = ['bokeh>=1.2',
-        'boto3>=1.7.80',
-        'cryptography>=2.1.4',
-        'dawgie-pydot3==1.0.10',
-        'GitPython>=2.1.11',
-        'matplotlib>=2.1.1',
-        'psycopg2>=2.7.4',
-        'pyparsing>=2.2',
-        'python-gnupg==0.4.4',
-        'pyxb==1.2.6',
-        'requests>=2.20.0',
-        'transitions==0.6.8',
-        'twisted>=18.7.0',
-        ]
-version = os.environ.get ('DAWGIE_VERSION', '0.0.0')
-with open (os.path.join (os.path.dirname (__file__), dawgie)) as f: t = f.read()
-t = t.replace ("'0.0.0'", "'{0}'".format (version))
-with open (os.path.join (os.path.dirname (__file__), dawgie), 'tw') as f:\
-     f.write (t)
-with open (os.path.join (os.path.dirname (__file__), 'README.md'), 'rt') as f:\
-     description = f.read()
 
-setuptools.setup (name='dawgie',
-                  version=version,
-                  packages=['dawgie',
-                            'dawgie.db', 'dawgie.db.tools',
-                            'dawgie.de',
-                            'dawgie.fe',
-                            'dawgie.pl', 'dawgie.pl.logger',
-                            'dawgie.tools'],
-                  setup_requires=deps,
-                  src_root=os.path.abspath (os.path.dirname (__file__)),
-                  install_requires=deps,
-                  package_data={'dawgie.pl':['state.dot'],
-                                'dawgie.fe':['fonts/open*','fonts/bootstrap/*',
+def read_requirements():
+    requirements = []
+    with open('./requirements.txt', 'rt') as file:
+        for line in file:
+            # exclude comments
+            line = line[:line.find("#")] if "#" in line else line
+            # clean
+            line = line.strip()
+            if line:
+                requirements.append(line)
+    return requirements
+
+
+dawgie = os.path.join('dawgie', '__init__.py')
+version = os.environ.get('DAWGIE_VERSION', '0.0.0')
+with open(os.path.join(os.path.dirname(__file__), dawgie)) as f:
+    t = f.read()
+t = t.replace("'0.0.0'", "'{0}'".format(version))
+with open(os.path.join(os.path.dirname(__file__), dawgie), 'tw') as f:
+    f.write(t)
+
+# first item in list must be README file name
+data_files_names = ["README.md", "LICENSE.txt"]
+data_files_locations = [('.', [f]) if os.path.exists(f) else
+                        ('.', ["../" + f]) for f in data_files_names]
+
+read_me_file = data_files_names[0] if os.path.exists(data_files_names[0]) else \
+    f"../{data_files_names[0]}"
+with open(read_me_file, "rt") as f:
+    description = f.read()
+
+deps = read_requirements()
+setuptools.setup(name='dawgie',
+                 version=version,
+                 packages=['dawgie',
+                           'dawgie.db',
+                           'dawgie.db.tools',
+                           'dawgie.de',
+                           'dawgie.fe',
+                           'dawgie.pl',
+                           'dawgie.pl.logger',
+                           'dawgie.tools'],
+                 setup_requires=deps,
+                 src_root=os.path.abspath(os.path.dirname(__file__)),
+                 install_requires=deps,
+                 package_data={'dawgie.pl': ['state.dot'],
+                               'dawgie.fe': ['fonts/open*', 'fonts/bootstrap/*',
                                              'images/*.jpg',
                                              'images/*.gif',
                                              'images/svg/*',
@@ -99,16 +112,16 @@ setuptools.setup (name='dawgie',
                                              'pages/search/index.html',
                                              'pages/tasks/index.html',
                                              'stylesheets/*.css']},
-                  author='Al Niessner',
-                  author_email='Al.Niessner@jpl.nasa.gov',
-                  classifiers=["Programming Language :: Python :: 3",
-                               "Operating System :: OS Independent",
-                               'License :: Free To Use But Restricted',
-                               'Development Status :: 5 - Production/Stable'],
-                  data_files=[('.', ['LICENSE', 'README.md'])],
-                  description='Data and Algorithm Work-flow Generation, Introspection, and Execution (DAWGIE)',
-                  license='see LICENSE file for details',
-                  long_description=description,
-                  long_description_content_type="text/markdown",
-                  keywords='adaptive pipeline',
-                  url='https://github.com/al-niessner/DAWGIE')
+                 author='Al Niessner',
+                 author_email='Al.Niessner@jpl.nasa.gov',
+                 classifiers=["Programming Language :: Python :: 3",
+                              "Operating System :: OS Independent",
+                              'License :: Free To Use But Restricted',
+                              'Development Status :: 5 - Production/Stable'],
+                 data_files=data_files_locations,
+                 description='Data and Algorithm Work-flow Generation, Introspection, and Execution (DAWGIE)',
+                 license='see LICENSE file for details',
+                 long_description=description,
+                 long_description_content_type="text/markdown",
+                 keywords='adaptive pipeline',
+                 url='https://github.com/al-niessner/DAWGIE')
