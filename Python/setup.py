@@ -56,18 +56,18 @@ def read_requirements():
     return requirements
 
 
-dawgie = os.path.join ('dawgie', '__init__.py')
-version = os.environ.get ('DAWGIE_VERSION', '0.0.0')
-with open (os.path.join (os.path.dirname (__file__), dawgie)) as f:
+dawgie = os.path.join('dawgie', '__init__.py')
+version = os.environ.get('DAWGIE_VERSION', '0.0.0')
+with open(os.path.join(os.path.dirname(__file__), dawgie)) as f:
     t = f.read()
-t = t.replace ("'0.0.0'", "'{0}'".format (version))
-with open (os.path.join (os.path.dirname (__file__), dawgie), 'tw') as f:
+t = t.replace("'0.0.0'", "'{0}'".format(version))
+with open(os.path.join(os.path.dirname(__file__), dawgie), 'tw') as f:
     f.write(t)
 
 # first item in list must be README file name
 data_files_names = ["README.md", "LICENSE.txt"]
 data_files_locations = [('.', [f]) if os.path.exists(f) else
-    ('.', ["../" + f]) for f in data_files_names]
+                        ('.', ["../" + f]) for f in data_files_names]
 
 read_me_file = data_files_names[0] if os.path.exists(data_files_names[0]) else \
     f"../{data_files_names[0]}"
@@ -75,19 +75,21 @@ with open(read_me_file, "rt") as f:
     description = f.read()
 
 deps = read_requirements()
-setuptools.setup (name='dawgie',
-                  version=version,
-                  packages=['dawgie',
-                            'dawgie.db', 'dawgie.db.tools',
-                            'dawgie.de',
-                            'dawgie.fe',
-                            'dawgie.pl', 'dawgie.pl.logger',
-                            'dawgie.tools'],
-                  setup_requires=deps,
-                  src_root=os.path.abspath (os.path.dirname (__file__)),
-                  install_requires=deps,
-                  package_data={'dawgie.pl':['state.dot'],
-                                'dawgie.fe':['fonts/open*','fonts/bootstrap/*',
+setuptools.setup(name='dawgie',
+                 version=version,
+                 packages=['dawgie',
+                           'dawgie.db',
+                           'dawgie.db.tools',
+                           'dawgie.de',
+                           'dawgie.fe',
+                           'dawgie.pl',
+                           'dawgie.pl.logger',
+                           'dawgie.tools'],
+                 setup_requires=deps,
+                 src_root=os.path.abspath(os.path.dirname(__file__)),
+                 install_requires=deps,
+                 package_data={'dawgie.pl': ['state.dot'],
+                               'dawgie.fe': ['fonts/open*', 'fonts/bootstrap/*',
                                              'images/*.jpg',
                                              'images/*.gif',
                                              'images/svg/*',
@@ -110,16 +112,16 @@ setuptools.setup (name='dawgie',
                                              'pages/search/index.html',
                                              'pages/tasks/index.html',
                                              'stylesheets/*.css']},
-                  author='Al Niessner',
-                  author_email='Al.Niessner@jpl.nasa.gov',
-                  classifiers=["Programming Language :: Python :: 3",
-                               "Operating System :: OS Independent",
-                               'License :: Free To Use But Restricted',
-                               'Development Status :: 5 - Production/Stable'],
-                  data_files=data_files_locations,
-                  description='Data and Algorithm Work-flow Generation, Introspection, and Execution (DAWGIE)',
-                  license='see LICENSE file for details',
-                  long_description=description,
-                  long_description_content_type="text/markdown",
-                  keywords='adaptive pipeline',
-                  url='https://github.com/al-niessner/DAWGIE')
+                 author='Al Niessner',
+                 author_email='Al.Niessner@jpl.nasa.gov',
+                 classifiers=["Programming Language :: Python :: 3",
+                              "Operating System :: OS Independent",
+                              'License :: Free To Use But Restricted',
+                              'Development Status :: 5 - Production/Stable'],
+                 data_files=data_files_locations,
+                 description='Data and Algorithm Work-flow Generation, Introspection, and Execution (DAWGIE)',
+                 license='see LICENSE file for details',
+                 long_description=description,
+                 long_description_content_type="text/markdown",
+                 keywords='adaptive pipeline',
+                 url='https://github.com/al-niessner/DAWGIE')
