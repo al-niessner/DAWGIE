@@ -49,7 +49,8 @@ class Type(enum.Enum):
 
 def factory (dt:Type=None) -> dawgie.Visitor:
     if dt is None: dt = dawgie.context.display
-    else: dt = dt.name
+    if isinstance (dt, Type): dt = dt.name
+    if not isinstance (dt, str): dt = str(dt)
 
     if not dt.count ('.'): dt += 'dawgie.de.' + dt
 
