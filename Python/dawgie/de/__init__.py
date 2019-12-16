@@ -52,7 +52,7 @@ def factory (dt:Type=None) -> dawgie.Visitor:
     if isinstance (dt, Type): dt = dt.name
     if not isinstance (dt, str): dt = str(dt)
 
-    if not dt.count ('.'): dt += 'dawgie.de.' + dt
+    if not dt.count ('.'): dt = 'dawgie.de.' + dt
 
     mod = importlib.import_module (dt)
     return mod.Visitor()
