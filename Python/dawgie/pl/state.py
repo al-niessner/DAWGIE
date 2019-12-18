@@ -79,7 +79,7 @@ import threading
 import time
 import transitions
 import twisted.internet
-import twisted.python
+import twisted.internet.ssl
 import twisted.web.resource
 import twisted.web.server
 
