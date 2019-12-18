@@ -39,7 +39,6 @@ NTR:
 
 import dawgie.context
 import dawgie.de
-import dawgie.fe.app
 import dawgie.pl.start
 import enum
 import inspect
@@ -237,3 +236,5 @@ def root() -> bytes:
     _root.putChild (b'scripts', StaticContent())
     _root.putChild (b'stylesheets', StaticContent())
     return _root
+
+import dawgie.fe.app  # build all of the dynamic hooks now
