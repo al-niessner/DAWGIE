@@ -79,6 +79,7 @@ import threading
 import time
 import transitions
 import twisted.internet
+import twisted.python
 import twisted.web.resource
 import twisted.web.server
 
@@ -186,8 +187,20 @@ class SDP(object):
         if self.__doctest: print ('self._gui()')
         else:
             factory = twisted.web.server.Site(dawgie.fe.root())
-            twisted.internet.reactor.listenTCP (dawgie.context.fe_port,
-                                                factory)
+
+            if dawgie.context.ssl_pem_file:
+                if os.path.isfile (dawgie.context.ssl_pem_file):
+                    with open (dawgie.context.ssl_pem_file, 'rt') as f:
+                        cert = f.read()
+                        pass
+                    cert = twisted.internet.ssl.PrivateCertificate.loadPEM(cert)
+                    twisted.internet.reactor.listenSSL (dawgie.context.fe_port,
+                                                        factory,
+                                                        cert.options())
+                else:
+                    raise FileNotFoundError(dawgie.context.ssl_pem_file)
+            else: twisted.internet.reactor.listenTCP (dawgie.context.fe_port,
+                                                      factory)
             pass
         return
 
