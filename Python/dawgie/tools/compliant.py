@@ -180,8 +180,9 @@ def main():
     yes = True
 
     if args.log_file and args.log_file.startswith ('::') and args.log_file.endswith ('::'):
-        lf = args.log_file.split ('::')
-        handler = dawgie.pl.logger.TwistedHandler (host=lf[1], port=int(lf[2]))
+        host,port,gpghome = args.log_file.split ('::')[1:-1]
+        dawgie.security.initialize (gpghome)
+        handler = dawgie.pl.logger.TwistedHandler (host=host, port=int(port))
         logging.basicConfig (handlers=[handler],
                              level=args.log_level)
         logging.captureWarnings (True)
@@ -532,8 +533,9 @@ def verify (repo, silent, verbose):
            '--ae-dir={0}'.format
            (dawgie.context.ae_base_path.replace ('ops', 'deployment')),
            '--ae-pkg={0}'.format (dawgie.context.ae_base_package),
-           '--log-file=::{0}::{1}::'.format (dawgie.context.db_host,
-                                             dawgie.context.log_port),
+           '--log-file=::{0}::{1}::{2}::'.format (dawgie.context.db_host,
+                                                  dawgie.context.log_port,
+                                                  dawgie.context.gpg_home),
            '--log-level={}'.format (dawgie.context.log_level)]
 
     if silent: cmd.append ('--silent')
@@ -552,6 +554,7 @@ if __name__ == '__main__':
     import dawgie.context
     import dawgie.pl.logger
     import dawgie.pl.scan
+    import dawgie.security
     import dawgie.tools.compliant
     import dawgie.util
 
@@ -564,6 +567,7 @@ else:
     import dawgie.context
     import dawgie.pl.logger
     import dawgie.pl.scan
+    import dawgie.security
     import dawgie.tools.compliant
     import dawgie.util
     pass
