@@ -196,6 +196,8 @@ def main():
     else:
         yes =_verify (_scan() if not args.task_list else args.task_list,
                       args.silent, args.verbose)
+
+    print ('returning', yes)
     return yes
 
 def rule_01 (task):
