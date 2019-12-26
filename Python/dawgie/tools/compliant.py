@@ -181,10 +181,10 @@ def main():
 
     if args.log_file and args.log_file.startswith ('::') and args.log_file.endswith ('::'):
         host,port,gpghome = args.log_file.split ('::')[1:-1]
+        print (args.log_file, host, port, gpghome)
         dawgie.security.initialize (gpghome)
         handler = dawgie.pl.logger.TwistedHandler (host=host, port=int(port))
-        logging.basicConfig (handlers=[handler],
-                             level=args.log_level)
+        logging.basicConfig (handlers=[handler], level=args.log_level)
         logging.captureWarnings (True)
     else: logging.basicConfig (filename=args.log_file, level=args.log_level)
 
@@ -541,6 +541,7 @@ def verify (repo, silent, verbose):
     if silent: cmd.append ('--silent')
     if verbose: cmd.append ('--verbose')
 
+    logging.getLogger(__name__).info ('spawn off compliant check: %s', str(cmd))
     rc = subprocess.call (cmd, env=os.environ)
     return rc == 0
 
