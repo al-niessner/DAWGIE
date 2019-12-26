@@ -539,7 +539,7 @@ def verify (repo, silent, verbose):
     if silent: cmd.append ('--silent')
     if verbose: cmd.append ('--verbose')
 
-    rc = subprocess.call (cmd)
+    rc = subprocess.call (cmd, env=os.environ)
     return rc == 0
 
 if __name__ == '__main__':
