@@ -54,10 +54,6 @@ import dawgie.db.test
 import dawgie.util
 import importlib
 import logging; log = logging.getLogger(__name__)
-import getpass
-import glob
-import os
-import subprocess
 
 METRIC_DATA = collections.namedtuple('METRIC_DATA', ['alg_name','alg_ver','sv',
                                                      'run_id','target','task'])
