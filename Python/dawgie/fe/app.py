@@ -38,10 +38,12 @@ NTR:
 '''
 
 from dawgie.fe import DynamicContent, HttpMethod
+from . import svrender
 
 import dawgie
 import dawgie.context
 import dawgie.db
+import dawgie.de
 import dawgie.pl.farm
 import dawgie.pl.logger.fe
 import dawgie.pl.schedule
@@ -56,11 +58,6 @@ class Axis(enum.Enum):
     svn = 1
     tn = 2
     pass
-
-def db_item(display:dawgie.Visitor, path:str)->None:
-    runid,tn,task,alg,sv = path[0].split ('.')
-    dawgie.db.view (display, int(runid), tn, task, alg, sv)
-    return
 
 def db_lockview():
     return json.dumps(dawgie.db.view_locks()).encode()
@@ -183,7 +180,9 @@ def start_submit (changeset:[str], submission:[str]):
                     'alert_message':'Cannot submit a blank changeset'}
     return json.dumps (result).encode()
 
-DynamicContent(db_item, '/app/db/item')
+sv_renderer = svrender.Defer()
+
+DynamicContent(sv_renderer, '/app/db/item', defer=sv_renderer)
 DynamicContent(db_lockview, '/app/db/lockview')
 DynamicContent(db_prime, '/app/db/prime')
 DynamicContent(db_targets, '/app/db/targets')
