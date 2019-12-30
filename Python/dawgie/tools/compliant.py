@@ -48,7 +48,6 @@ import inspect
 import logging
 import os
 import pickle
-import subprocess
 import sys
 
 def _get_rules():
@@ -534,10 +533,30 @@ def rule_10 (task):
     else: findings.append (True)
     return all(findings)
 
-def verify (repo, silent, verbose):
+def verify (repo:str, silent:bool, verbose:bool, spawn):
+    '''verify a repo meets DAWGIEs needs
+
+    Spawn a subprocess and run the rules over the repo. A subprocess is used to
+    remove any potential confusion from the current environment. However, how
+    a subprocess is spawned is left to the caller. Typically, the function spawn
+    (see arguments) would simply look like this:
+
+        def spawn (cmd:[str]):
+            return subprocess.call (cmd) == 0
+
+    When using twisted, however, it is not nearly so simple (see twisted docs
+    for twisted.internet.reactor.spawnProcess). Twisted and subprocess do not
+    play well together.
+
+    repo : the working repository
+    silent : when True, do not print the the screen
+    verbose : when True, print more details about what is happening
+    spawn : a function pointer that takes one argument that is a list of strings
+
+    Function returns what spawn returns.
+    '''
     cmd = ['python3', '-m', 'dawgie.tools.compliant',
-           '--ae-dir={0}'.format
-           (dawgie.context.ae_base_path.replace ('ops', 'deployment')),
+           '--ae-dir={0}'.format (repo),
            '--ae-pkg={0}'.format (dawgie.context.ae_base_package),
            '--log-file=::{0}::{1}::{2}::'.format (dawgie.context.db_host,
                                                   dawgie.context.log_port,
@@ -550,8 +569,7 @@ def verify (repo, silent, verbose):
     if verbose: cmd.append ('--verbose')
 
     logging.getLogger(__name__).info ('spawn off compliant check: %s', str(cmd))
-    rc = subprocess.call (cmd)
-    return rc == 0
+    return spawn (cmd)
 
 if __name__ == '__main__':
     root = os.path.dirname (__file__)

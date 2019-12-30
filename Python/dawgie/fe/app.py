@@ -38,6 +38,7 @@ NTR:
 '''
 
 from dawgie.fe import DynamicContent, HttpMethod
+from . import submit
 from . import svrender
 
 import dawgie
@@ -173,13 +174,7 @@ def start_state():
     return json.dumps ({'name':dawgie.pl.start.sdp.state,
                         'status':'active'}).encode()
 
-def start_submit (changeset:[str], submission:[str]):
-    if changeset[0].lower() != '':
-        result = dawgie.pl.start.submit(changeset[0], submission[0])
-    else: result = {'alert_status':'danger',
-                    'alert_message':'Cannot submit a blank changeset'}
-    return json.dumps (result).encode()
-
+start_submit = submit.Defer()
 sv_renderer = svrender.Defer()
 
 DynamicContent(sv_renderer, '/app/db/item', defer=sv_renderer)
@@ -211,4 +206,4 @@ DynamicContent(search_tn, '/app/search/tn')
 
 DynamicContent(start_changeset, '/app/changeset.txt')
 DynamicContent(start_state, '/app/state/status')
-DynamicContent(start_submit, '/app/submit', [HttpMethod.POST])
+DynamicContent(start_submit.start, '/app/submit', [HttpMethod.POST])
