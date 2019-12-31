@@ -37,7 +37,8 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import dawgie.fe
+from dawgie.fe import Defer as absDefer
+
 import dawgie.pl.start
 import dawgie.tools.submit
 import json
@@ -45,7 +46,7 @@ import logging; log = logging.getLogger(__name__)
 import twisted.internet.reactor
 import twisted.web.server
 
-class Defer(dawgie.fe.Defer):
+class Defer(absDefer):
     def __init__(self):
         dawgie.fe.Defer.__init__(self)
         self.__busy = False

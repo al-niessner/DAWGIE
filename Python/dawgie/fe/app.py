@@ -38,13 +38,13 @@ NTR:
 '''
 
 from dawgie.fe import DynamicContent, HttpMethod
-from . import submit
-from . import svrender
 
 import dawgie
 import dawgie.context
 import dawgie.db
 import dawgie.de
+import dawgie.fe.submit
+import dawgie.fe.svrender
 import dawgie.pl.farm
 import dawgie.pl.logger.fe
 import dawgie.pl.schedule
@@ -174,8 +174,8 @@ def start_state():
     return json.dumps ({'name':dawgie.pl.start.sdp.state,
                         'status':'active'}).encode()
 
-start_submit = submit.Defer()
-sv_renderer = svrender.Defer()
+start_submit = dawgie.fe.submit.Defer()
+sv_renderer = dawgie.fe.svrender.Defer()
 
 DynamicContent(sv_renderer, '/app/db/item', defer=sv_renderer)
 DynamicContent(db_lockview, '/app/db/lockview')
