@@ -37,11 +37,13 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import dawgie.fe
+from dawgie.fe import Defer as absDefer
+
+import dawgie
 import logging; log = logging.getLogger(__name__)
 import twisted.internet.threads
 
-class Defer(dawgie.fe.Defer):
+class Defer(absDefer):
     @staticmethod
     def _db_item (display:dawgie.Visitor, path:str)->None:
         runid,tn,task,alg,sv = path[0].split ('.')
