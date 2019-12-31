@@ -97,7 +97,7 @@ class Process(object):
         return fail
 
     def step_0 (self):
-        d = twisted.internet.reactor.callLater(self.step_1)
+        d = twisted.internet.reactor.callLater(0, self.step_1)
         d.addCallbacks (self.step_2, self.failure)
         return
 
