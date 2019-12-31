@@ -48,7 +48,7 @@ import twisted.web.server
 
 class Defer(absDefer):
     def __init__(self):
-        dawgie.fe.Defer.__init__(self)
+        absDefer.__init__(self)
         self.__busy = False
         return
 
