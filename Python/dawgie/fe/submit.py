@@ -97,8 +97,10 @@ class Process(object):
         return fail
 
     def step_0 (self):
-        d = twisted.internet.reactor.callLater(0, self.step_1)
+        d = twisted.internet.defer.Deferred()
+        d.addCallback (self._step_1)
         d.addCallbacks (self.step_2, self.failure)
+        d = twisted.internet.reactor.callLater(0, d.callback)
         return
 
     def step_1(self):
@@ -124,7 +126,6 @@ class Process(object):
         '''spawn bulk of work now that state has changed onto another thread'''
         d = twisted.internet.threads.deferToThread (self.step_3)
         d.addCallbacks (self.step_4, self.failure)
-        # d.addCallbacks (self.success, self.failure)
         return
 
     def step_3(self):
