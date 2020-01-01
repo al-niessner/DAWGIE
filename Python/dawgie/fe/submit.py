@@ -190,13 +190,13 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
 
     def processEnded(self, reason):
         if isinstance (reason.value, twisted.internet.error.ProcessTerminated):
-            log.critical ('Error in archiving of data.    EXIT CODE: %s' +
+            log.critical ('Error while running compliant.py.    EXIT CODE: %s' +
                           '   SIGNAL: %s    STATUS: %s   COMMAND: "%s"',
                           str (reason.value.exitCode),
                           str (reason.value.signal),
                           str (reason.value.status),
                           self.__command)
-            self.__process.failure ()
+            self.__process.failure (twisted.python.failure.Failure())
         else:
             d = twisted.internet.threads.deferToThread (self.__process.step_5)
             d.addCallbacks (self.__process.step_6, self.__process.failure)
