@@ -100,10 +100,10 @@ class Process(object):
         d = twisted.internet.defer.Deferred()
         d.addCallback (self.step_1)
         d.addCallbacks (self.step_2, self.failure)
-        twisted.internet.reactor.callLater(0, d.callback)
+        twisted.internet.reactor.callLater(0, d.callback, None)
         return
 
-    def step_1(self, _result):
+    def step_1(self):
         '''transition pipeline state to gitting'''
         if not dawgie.pl.start.sdp.is_pipeline_active():
             log.warning("submit: pipeline is not active, cannot submit.")
@@ -122,7 +122,7 @@ class Process(object):
         dawgie.pl.start.sdp.gitting_trigger()
         return
 
-    def step_2(self, _result):
+    def step_2(self):
         '''spawn bulk of work now that state has changed onto another thread'''
         d = twisted.internet.threads.deferToThread (self.step_3)
         d.addCallbacks (self.step_4, self.failure)
@@ -140,7 +140,7 @@ class Process(object):
         result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure()
         return result
 
-    def step_4(self, _result):
+    def step_4(self):
         '''dawgie compliant'''
         self.__msg = {'alert_status':'danger',
                       'alert_message':'DAWGIE compliant checks failed.'}
@@ -164,7 +164,7 @@ class Process(object):
         result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure()
         return result
 
-    def step_6(self, _result):
+    def step_6(self, result):
         '''go back to running and respond with status'''
         dawgie.pl.start.sdp.running_trigger()
         result = {'alert_status':'success',
