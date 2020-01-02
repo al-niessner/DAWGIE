@@ -43,6 +43,7 @@ import dawgie.pl.start
 import dawgie.tools.submit
 import json
 import logging; log = logging.getLogger(__name__)
+import os
 import twisted.internet.reactor
 import twisted.web.server
 
@@ -213,6 +214,7 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
     def spawn_off (self, cmd:[str]):
         self.__command = ' '.join (cmd)
         log.info ('VerifyHandler.spawn_off (%s)', self.__command)
-        twisted.internet.reactor.spawnProcess (self, cmd[0], args=cmd)
+        twisted.internet.reactor.spawnProcess (self, cmd[0], args=cmd,
+                                               env=os.environ)
         return
     pass
