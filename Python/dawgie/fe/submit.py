@@ -84,6 +84,8 @@ class Process(object):
         if self.__request is not None:
             if dawgie.pl.start.sdp.state == 'gitting':\
                dawgie.pl.start.sdp.running_trigger()
+            else: log.info ('Process.failure() state is not gitting: %s',
+                            str(dawgie.pl.start.sdp.state))
 
             self.__request.write (json.dumps (self.__msg).encode())
             try: self.__request.finish()
@@ -93,7 +95,7 @@ class Process(object):
                 pass
             self.__clear()
             self.__request = None
-            pass
+        else: log.info ('Process.failure() self.__request is None')
         return fail
 
     def step_0 (self):
@@ -205,6 +207,7 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
 
     def spawn_off (self, cmd:[str]):
         self.__command = ' '.join (cmd)
+        log.info ('VerifyHandler.spawn_off (%s)', self.__command)
         twisted.internet.reactor.spawnProcess (self, cmd[0], args=cmd)
         return
     pass
