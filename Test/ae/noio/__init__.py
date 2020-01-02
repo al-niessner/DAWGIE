@@ -38,9 +38,6 @@ NTR:
 '''
 ignore = False  # forces the pipeline to ignore this package (aka task)
 
-import calendar
-import datetime
-
 def task (prefix, ps_hint=0, runid=-1, target='__none__'):
     import ae.noio.bot
     return ae.noio.bot.Actor(prefix, ps_hint, runid, target)

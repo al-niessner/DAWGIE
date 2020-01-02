@@ -1,4 +1,5 @@
-'''
+'''Define a deferred rendering of a state vector
+
 COPYRIGHT:
 Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
@@ -36,30 +37,50 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import logging; log = logging.getLogger(__name__)
-import os
-import twisted.internet.error
-import twisted.internet.protocol
-import twisted.internet.reactor
+from dawgie.fe import Defer as absDefer
 
-class SVGOHandler(twisted.internet.protocol.ProcessProtocol):
-    def __init__ (self, command): self.__command = command
-    def processEnded(self, reason):
-        if isinstance (reason.value, twisted.internet.error.ProcessTerminated):
-            log.critical ('Error in archiving of data.    EXIT CODE: %s'+
-                          '   SIGNAL: %s    STATUS: %s' + '   COMMAND: "%s"',
-                          str (reason.value.exitCode),
-                          str (reason.value.signal),
-                          str (reason.value.status),
-                          self.__command)
-            pass
+import dawgie
+import logging; log = logging.getLogger(__name__)
+import twisted.internet.threads
+
+class Defer(absDefer):
+    @staticmethod
+    def _db_item (display:dawgie.Visitor, path:str)->None:
+        runid,tn,task,alg,sv = path[0].split ('.')
+        dawgie.db.view (display, int(runid), tn, task, alg, sv)
         return
+
+    def db_item (self, path:str):
+        display = dawgie.de.factory()
+        d = twisted.internet.threads.deferToThread(self._db_item,
+                                                   display=display, path=path)
+        h = Renderer(display, self.get_request())
+        d.addCallbacks (h.success, h.failure)
+        return twisted.web.server.NOT_DONE_YET
     pass
 
-def svgo (ifn, ofn):
-    args = ['/usr/lib/node_modules/svgo/bin/svgo', ifn, ofn,
-            '--disable=cleanupIDs', '--enable=removeStyleElement']
-    handler = SVGOHandler(' '.join (args))
-    twisted.internet.reactor.spawnProcess (handler, args[0], args=args,
-                                           env=os.environ)
-    return
+class Renderer(object):
+    def __init__ (self, display, request):
+        object.__init__(self)
+        self.__display = display
+        self.__request = request
+        return
+
+    def failure (self, result):
+        # pylint: disable=bare-except
+        self.__request.write (b'<h1>Dynamic Content Generation Failed</h1><p>' +
+                              str (result).replace ('\n','<br/>').encode() +
+                              b'</p>')
+        try: self.__request.finish()
+        except: log.exception ('Failed to complete an error page: ' +
+                               str (result))
+        return
+
+    def success (self, result):
+        # pylint: disable=bare-except
+        self.__request.write (self.__display.render().encode())
+        try: self.__request.finish()
+        except: log.exception ('Failed to complete a successful page: ' +
+                               str (result))
+        return
+    pass

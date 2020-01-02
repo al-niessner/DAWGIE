@@ -48,7 +48,6 @@ import inspect
 import logging
 import os
 import pickle
-import subprocess
 import sys
 
 def _get_rules():
@@ -176,21 +175,28 @@ def main():
     args = ap.parse_args()
     dawgie.context.ae_base_path = args.ae_dir
     dawgie.context.ae_base_package = args.ae_pkg
-    sys.path.append ('/'.join (args.ae_dir.split ('/')[:-len(args.ae_pkg.split ('.'))]))
+    sys.path.insert (0, '/'.join (args.ae_dir.split ('/')[:-len(args.ae_pkg.split ('.'))]))
     yes = True
 
     if args.log_file and args.log_file.startswith ('::') and args.log_file.endswith ('::'):
-        lf = args.log_file.split ('::')
-        handler = dawgie.pl.logger.TwistedHandler (host=lf[1], port=int(lf[2]))
-        logging.basicConfig (handlers=[handler],
-                             level=args.log_level)
+        host,port,gpghome = args.log_file.split ('::')[1:-1]
+        print (args.log_file, host, port, gpghome)
+        dawgie.security.initialize (gpghome)
+        print ('dawgie.security.initialize')
+        handler = dawgie.pl.logger.TwistedHandler (host=host, port=int(port))
+        print ('dawgie.pl.logger.TwistedHandler')
+        logging.basicConfig (handlers=[handler], level=args.log_level)
+        print ('logging.basicConfig')
         logging.captureWarnings (True)
+        print ('logging.captureWarnings')
     else: logging.basicConfig (filename=args.log_file, level=args.log_level)
 
     if args.rules: _rules()
     else:
         yes =_verify (_scan() if not args.task_list else args.task_list,
                       args.silent, args.verbose)
+
+    print ('returning', yes)
     return yes
 
 def rule_01 (task):
@@ -527,20 +533,43 @@ def rule_10 (task):
     else: findings.append (True)
     return all(findings)
 
-def verify (repo, silent, verbose):
+def verify (repo:str, silent:bool, verbose:bool, spawn):
+    '''verify a repo meets DAWGIEs needs
+
+    Spawn a subprocess and run the rules over the repo. A subprocess is used to
+    remove any potential confusion from the current environment. However, how
+    a subprocess is spawned is left to the caller. Typically, the function spawn
+    (see arguments) would simply look like this:
+
+        def spawn (cmd:[str]):
+            return subprocess.call (cmd) == 0
+
+    When using twisted, however, it is not nearly so simple (see twisted docs
+    for twisted.internet.reactor.spawnProcess). Twisted and subprocess do not
+    play well together.
+
+    repo : the working repository
+    silent : when True, do not print the the screen
+    verbose : when True, print more details about what is happening
+    spawn : a function pointer that takes one argument that is a list of strings
+
+    Function returns what spawn returns.
+    '''
     cmd = ['python3', '-m', 'dawgie.tools.compliant',
-           '--ae-dir={0}'.format
-           (dawgie.context.ae_base_path.replace ('ops', 'deployment')),
+           '--ae-dir={0}/{1}'.format (repo, dawgie.context.ae_base_package.replace ('.', '/')),
            '--ae-pkg={0}'.format (dawgie.context.ae_base_package),
-           '--log-file=::{0}::{1}::'.format (dawgie.context.db_host,
-                                             dawgie.context.log_port),
+           '--log-file=::{0}::{1}::{2}::'.format (dawgie.context.db_host,
+                                                  dawgie.context.log_port,
+                                                  dawgie.context.gpg_home),
            '--log-level={}'.format (dawgie.context.log_level)]
 
+    silent = False
+    verbose = True
     if silent: cmd.append ('--silent')
     if verbose: cmd.append ('--verbose')
 
-    rc = subprocess.call (cmd)
-    return rc == 0
+    logging.getLogger(__name__).info ('spawn off compliant check: %s', str(cmd))
+    return spawn (cmd)
 
 if __name__ == '__main__':
     root = os.path.dirname (__file__)
@@ -552,6 +581,7 @@ if __name__ == '__main__':
     import dawgie.context
     import dawgie.pl.logger
     import dawgie.pl.scan
+    import dawgie.security
     import dawgie.tools.compliant
     import dawgie.util
 
@@ -564,6 +594,7 @@ else:
     import dawgie.context
     import dawgie.pl.logger
     import dawgie.pl.scan
+    import dawgie.security
     import dawgie.tools.compliant
     import dawgie.util
     pass
