@@ -45,5 +45,4 @@ RUN set -ex && \
                  transitions==0.6.8 \
                  twisted==18.7.0 && \
     cd /usr/local/lib/python3.6/dist-packages/pydot && \
-    patch < /tmp/.ci/pydot.patch && \
     rm -rf ${HOME}/.cache /tmp/,ci
