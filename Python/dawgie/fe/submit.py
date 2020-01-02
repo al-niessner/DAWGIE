@@ -1,7 +1,7 @@
 '''Define a deferred rendering of a state vector
 
 COPYRIGHT:
-Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -109,7 +109,7 @@ class Process(object):
             log.warning("submit: pipeline is not active, cannot submit.")
             self.__msg = {'alert_status':'danger',
                           'alert_message':'The pipeline is not active so cannot submit.'}
-            return twisted.python.failure.Failure(Excpetion())
+            return twisted.python.failure.Failure(Exception())
 
         if dawgie.tools.submit.already_applied \
                (self.__changeset, dawgie.tools.submit.repo_dir):
