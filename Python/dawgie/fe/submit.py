@@ -171,7 +171,7 @@ class Process(object):
         dawgie.pl.start.sdp.running_trigger()
         result = {'alert_status':'success',
                   'alert_message':'Submission successful scheduling update.'}
-        logging.info("Going to the crossroads.")
+        log.info("Going to the crossroads.")
         self.__request.write (json.dumps (result).encode())
         try: self.__request.finish()
         except:  # pylint: disable=bare-except
@@ -216,5 +216,5 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
         log.info ('VerifyHandler.spawn_off (%s)', self.__command)
         twisted.internet.reactor.spawnProcess (self, cmd[0], args=cmd,
                                                env=os.environ, usePTY=True)
-        return
+        return True
     pass
