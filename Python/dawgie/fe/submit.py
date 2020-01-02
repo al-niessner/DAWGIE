@@ -191,7 +191,7 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
         return
 
     def childDataReceived(self, childFD, data):
-        log.info ('VerifyHandler.childDataReceived() %s', str(data))
+        log.debug ('VerifyHandler.childDataReceived() %s', str(data))
         return
 
     def processEnded(self, reason):
