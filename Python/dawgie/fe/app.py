@@ -206,4 +206,4 @@ DynamicContent(search_tn, '/app/search/tn')
 
 DynamicContent(start_changeset, '/app/changeset.txt')
 DynamicContent(start_state, '/app/state/status')
-DynamicContent(start_submit.start, '/app/submit', [HttpMethod.POST])
+DynamicContent(start_submit.start,'/app/submit',[HttpMethod.POST],start_submit)

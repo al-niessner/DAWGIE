@@ -73,6 +73,10 @@ class Defer(absDefer):
 class Process(object):
     def __init__ (self, changeset, clear, request, submission):
         object.__init__(self)
+        log.info ('Process.__changeset %s', str(changeset))
+        log.info ('Process.__clear %s', str(clear))
+        log.info ('Process.__request %s', str(request))
+        log.info ('Process.__submission %s', str(submission))
         self.__changeset = changeset
         self.__clear = clear
         self.__msg = 'unspecified'
