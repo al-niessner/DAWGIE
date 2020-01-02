@@ -42,6 +42,7 @@ import dawgie
 import html
 import io
 
+
 class AsIsText(object):
     # pylint: disable=too-few-public-methods
     def __init__ (self, text):
@@ -50,7 +51,9 @@ class AsIsText(object):
         return
 
     def _render (self, buf:io.StringIO): buf.write (self.__text)
+
     pass
+
 
 class Cell(dawgie.Visitor):
     # pylint: disable=protected-access
@@ -83,7 +86,9 @@ class Cell(dawgie.Visitor):
     def add_table (self, clabels:[str], rows:int=0, title:str=None)->'TableVisitor':
         self.__content.append (Table(clabels, rows, title))
         return self.__content[-1]
+
     pass
+
 
 class Table(dawgie.TableVisitor):
     # pylint: disable=protected-access,too-few-public-methods
@@ -137,51 +142,121 @@ class Table(dawgie.TableVisitor):
                                                 range (c - len (col) + 1)])
             pass
         return self.__table[r][c]
+
     pass
 
+
 class Visitor(Cell):
-    def __init__ (self):
-        Cell.__init__ (self)
+    void_elements = ["area", "base", "br", "col", "embed", "hr", "img",
+                     "input", "link", "meta", "param", "source", "track",
+                     "wbr"]
+
+    def __init__(self):
+        Cell.__init__(self)
+        self.__css = []
         self.__decl = []
         self.__js = []
+        self.__stylesheet = []
         self.__title = 'Undefined Visitee'
         pass
 
-    def add_declaration (self, text:str, **kwds)->None:
+    def add_declaration(self, text: str, **kwds) -> None:
+        # attributes that apply to presentation
+        # class allows application of predefined css within preloaded
+        #     stylesheets files -- if file isn't preloaded there is no effect
+        claz = (' class="' + kwds['class'] + '" ') if 'class' in kwds else ''
+        # id allows reference via scripting and link references
+        idd = (' id="' + kwds['id'] + '" ') if 'id' in kwds else ''
+        # style allows direct application of raw css to enclosed content
         style = (' style="' + kwds['style'] + '" ') if 'style' in kwds else ''
 
-        if 'div' in kwds: self.__decl.append (kwds['div'])
-        if 'enum' in kwds:
-            if kwds['list']: self.__decl.append ('<OL' + style + '>')
-            else: self.__decl.append ('</OL>')
-            pass
-        if 'js' in kwds: self.__js.append (kwds['js'])
-        if 'list' in kwds:
-            if kwds['list']: self.__decl.append ('<UL' + style + '>')
-            else: self.__decl.append ('</UL>')
-            pass
-        if 'title' in kwds: self.__title = html.escape (text)
+        # tags for configuration settings (e.g. __<custom_name> in class vars)
+        # plain text representing a raw stylesheet that will be embedded directly
+        #     into the document via a style tag
+        if 'css' in kwds: self.__css.append(kwds['css'])
+        # fully qualified (entire) tags for js -- maintain for backwards comp
+        if 'js' in kwds: self.__js.append(kwds['js'])
+        # list of relative uris from SV display page directory,
+        #     e.g. '../../stylesheets/application.css'
+        if 'stylesheet' in kwds: self.__stylesheet.append(str(kwds['stylesheet']))
+        # title composed from text, value ignored -- maintain for backwards comp
+        if 'title' in kwds:
+            # if defined use title value and ignore text
+            if kwds['title'] is not None and len(str(kwds['title']).strip()) > 0:
+                self.__title = html.escape(str(kwds['title']))
+            else:
+                self.__title = html.escape(text)
 
+        # content + tags for presentation (e.g. __decl in class vars)
+        # fully qualified (entire) tags for div -- maintain for backwards comp
+        #     note: closing tag must subsequently be specified, also
+        if 'div' in kwds: self.__decl.append(kwds['div'])
+        # text content is escaped and embedded in paragraph tag by default
+        #     unless different tag is specified in kwds
         if text and 'title' not in kwds:
-            text = html.escape (text)
-            tag = (kwds['tag'] if 'tag' in kwds else 'p') + style
-            self.__decl.append ('<' + tag + '>' + text + '</' + tag + '>')
-            pass
+            tag = str(kwds['tag']) if 'tag' in kwds else 'p'
+            tag = tag if len(tag.strip()) > 0 else 'p'
+            tag_open = '<' + tag + idd + claz + style + '>'
+            tag_close = ('</' + tag + '>') if tag not in self.void_elements else ''
+            self.__decl.append(tag_open + html.escape(text) + tag_close)
+        # NOTE that list and pre are placed below text to allow a compound
+        #     add_declaration statement that includes text, tag, pre and/or
+        #     list that places a paragraph above the formatted content to
+        #     allow prose to describe the reported values
+        # lists -- list should actually be a list of items as a str will parse
+        #          into its constituent chars
+        if 'list' in kwds:
+            # value of enum is ignored but presence implies numbered list
+            tag_for_list = 'ol' if 'enum' in kwds else 'ul'
+            self.__decl.append('<' + tag_for_list + idd + claz + style + '>')
+            for item in list(kwds['list']):
+                self.__decl.append('<li>' + html.escape(item) + '</li>')
+            self.__decl.append('</' + tag_for_list + '>')
+        # pre -- display preformatted text
+        if 'pre' in kwds:
+            tag_open = '<pre' + idd + claz + style + '>'
+            tag_close = '</pre>'
+            self.__decl.append(tag_open + str(kwds['pre']) + tag_close)
         return
 
-    def render(self)->str:
+    # overrides method from Cell class to append to __decl buffer instead of
+    # separate buffer ... Visitor class implementations then render primitives
+    # inline with declarations.
+    def add_primitive(self, value, label: str = None) -> None:
+        content = (label + ' = ') if label else ''
+        content += str(value)
+        self.__decl.append(AsIsText('<p>' + html.escape(content) + '</p>'))
+        return
+
+    def render(self) -> str:
         buf = io.StringIO()
-        buf.write ('<!DOCTYPE HTML><html lang="en-US"><head>')
-        buf.write ('<meta charset="UTF-8"><title>')
-        buf.write (self.__title)
-        buf.write ('</title>')
-        buf.write ('''<script src="https://cdn.pydata.org/bokeh/release/bokeh-{0}.min.js"></script>
-<script src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-{0}.min.js"></script>
-<script src="https://cdn.pydata.org/bokeh/release/bokeh-tables-{0}.min.js"></script>'''.format (bokeh.__version__))
-        for js in self.__js: buf.write (js)
-        buf.write ('</head><body>')
-        for d in self.__decl: buf.write (d)
-        self._render (buf)
-        buf.write ('</body></html>')
+        buf.write(f"<!DOCTYPE HTML>")
+        buf.write(f"<html lang=\"en-US\">")
+        buf.write(f"    <head>")
+        buf.write(f"        <meta charset=\"UTF-8\">")
+        buf.write(f"        <title>{self.__title}</title>")
+        buf.write(f"        <script src=\"https://cdn.pydata.org/bokeh/release/bokeh-{bokeh.__version__}.min.js\"></script>")
+        buf.write(f"        <script src=\"https://cdn.pydata.org/bokeh/release/bokeh-widgets-{bokeh.__version__}.min.js\"></script>")
+        buf.write(f"        <script src=\"https://cdn.pydata.org/bokeh/release/bokeh-tables-{bokeh.__version__}.min.js\"></script>")
+        for js in self.__js: buf.write("        " + js)
+        for stylesheet in self.__stylesheet:
+            # <link rel = "stylesheet" type = "text/css" href = "myStyle.css" />
+            # <link href="mystyles.css" rel="preload" as="style">
+            tag_for_stylesheet = "        <link href=\"" + stylesheet + "\" rel=\"preload\" as=\"style\">"
+            buf.write(tag_for_stylesheet)
+        for css in self.__css:
+            tag_for_css = "        <style>" + css + "</style>"
+            buf.write(tag_for_css)
+        buf.write(f"    </head>")
+        buf.write(f"    <body>")
+        for d in self.__decl: buf.write(d)
+        # 20200101: disabled separate queues for add_declaration and
+        #           add_primitive ... primitives are now rendered inline with
+        #           the same buffer as declaration formatting (function
+        #           add_primitive was overriden to append to __decl instead.
+        # self._render (buf)
+        buf.write(f"    </body>")
+        buf.write(f"</html>")
         return buf.getvalue()
+
     pass
