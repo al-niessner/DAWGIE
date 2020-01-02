@@ -102,6 +102,7 @@ class Process(object):
         d = twisted.internet.defer.Deferred()
         d.addCallback (self.step_1)
         d.addCallbacks (self.step_2, self.failure)
+        d.addCallbacks (self.step_3, self.failure)
         twisted.internet.reactor.callLater(0, d.callback, None)
         return
 
@@ -125,12 +126,6 @@ class Process(object):
         return
 
     def step_2(self, _result):
-        '''spawn bulk of work now that state has changed onto another thread'''
-        d = twisted.internet.threads.deferToThread (self.step_3)
-        d.addCallbacks (self.step_4, self.failure)
-        return
-
-    def step_3(self):
         '''prepare_pre_ops'''
         self.__msg = {'alert_status':'danger',
                       'alert_message':'The submit tool could not prepare pre_ops.'}
@@ -142,7 +137,7 @@ class Process(object):
         result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure(Exception())
         return result
 
-    def step_4(self, _result):
+    def step_3(self, _result):
         '''dawgie compliant'''
         self.__msg = {'alert_status':'danger',
                       'alert_message':'DAWGIE compliant checks failed.'}
@@ -154,7 +149,7 @@ class Process(object):
         result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure(Exception())
         return result
 
-    def step_5(self):
+    def step_4(self, _result):
         '''push results'''
         self.__msg = {'alert_status':'danger',
                       'alert_message':'Could not pull pre_ops into master.'}
@@ -166,7 +161,7 @@ class Process(object):
         result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure(Exception())
         return result
 
-    def step_6(self, _result):
+    def step_5(self, _result):
         '''go back to running and respond with status'''
         dawgie.pl.start.sdp.running_trigger()
         result = {'alert_status':'success',
@@ -200,8 +195,10 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
                           self.__command)
             self.__process.failure (twisted.python.failure.Failure(Exception()))
         else:
-            d = twisted.internet.threads.deferToThread (self.__process.step_5)
-            d.addCallbacks (self.__process.step_6, self.__process.failure)
+            d = twisted.internet.defer.Deferred()
+            d.addCallback (self.__process.step_4, None)
+            d.addCallbacks (self.__process.step_5, self.__process.failure)
+            twisted.internet.reactor.callLater(0, d.callback, None)
             pass
         return
 
