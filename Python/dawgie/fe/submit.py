@@ -192,7 +192,7 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
     def childDataReceived(self, childFD, data):
         log.info ('VerifyHandler.childDataReceived() %s', str(data))
         return
-        
+
     def processEnded(self, reason):
         if isinstance (reason.value, twisted.internet.error.ProcessTerminated):
             log.critical ('Error while running compliant.py.    EXIT CODE: %s' +
