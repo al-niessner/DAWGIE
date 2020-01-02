@@ -109,14 +109,14 @@ class Process(object):
             log.warning("submit: pipeline is not active, cannot submit.")
             self.__msg = {'alert_status':'danger',
                           'alert_message':'The pipeline is not active so cannot submit.'}
-            return twisted.python.failure.Failure()
+            return twisted.python.failure.Failure(Excpetion())
 
         if dawgie.tools.submit.already_applied \
                (self.__changeset, dawgie.tools.submit.repo_dir):
             log.warning("submit: changeset already in history")
             self.__msg = {'alert_status':'danger',
                           'alert_message':'The changeset is already in history.'}
-            return twisted.python.failure.Failure()
+            return twisted.python.failure.Failure(Exception())
 
         # Go To: gitting state
         dawgie.pl.start.sdp.gitting_trigger()
@@ -137,7 +137,7 @@ class Process(object):
                   dawgie.tools.submit.pre_ops,
                   dawgie.tools.submit.repo_dir,
                   dawgie.tools.submit.origin)
-        result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure()
+        result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure(Exception())
         return result
 
     def step_4(self, _result):
@@ -149,7 +149,7 @@ class Process(object):
                  (self.__changeset,
                   dawgie.tools.submit.repo_dir,
                   handler.spawn_off)
-        result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure()
+        result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure(Exception())
         return result
 
     def step_5(self):
@@ -161,7 +161,7 @@ class Process(object):
                   dawgie.tools.submit.pre_ops,
                   dawgie.tools.submit.repo_dir,
                   self.__submission)
-        result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure()
+        result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure(Exception())
         return result
 
     def step_6(self, _result):
@@ -196,7 +196,7 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
                           str (reason.value.signal),
                           str (reason.value.status),
                           self.__command)
-            self.__process.failure (twisted.python.failure.Failure())
+            self.__process.failure (twisted.python.failure.Failure(Exception()))
         else:
             d = twisted.internet.threads.deferToThread (self.__process.step_5)
             d.addCallbacks (self.__process.step_6, self.__process.failure)
