@@ -1,5 +1,5 @@
 # COPYRIGHT:
-# Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+# Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 # U.S. Government sponsorship acknowledged.
 #
 # All rights reserved.
@@ -36,15 +36,13 @@
 
 FROM os:ghrVersion
 RUN set -ex && \
-    /bin/dcp.py -p DCP_PORT_NUMBER .ci/pydot.patch /tmp && \
     pip3 install bokeh==0.13.0 \
                  boto3==1.7.80 \
                  GitPython==2.1.11 \
                  python-gnupg==0.4.3 \
-                 pydot3==1.0.9 \
+                 dawgie-pydot3==1.0.10 \
                  requests==2.19.1 \
                  transitions==0.6.8 \
                  twisted==18.7.0 && \
     cd /usr/local/lib/python3.6/dist-packages/pydot && \
-    patch < /tmp/.ci/pydot.patch && \
     rm -rf ${HOME}/.cache /tmp/,ci

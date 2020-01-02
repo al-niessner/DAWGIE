@@ -1,5 +1,5 @@
 # COPYRIGHT:
-# Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+# Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 # U.S. Government sponsorship acknowledged.
 #
 # All rights reserved.
@@ -35,9 +35,7 @@
 # NTR:
 
 FROM ubuntu:18.04
-COPY dcp.py /bin
 RUN set -ex && \
-    chmod 755 /bin/dcp.py && \
     export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
     apt-get install -y \
