@@ -37,6 +37,7 @@ NTR:
 '''
 
 import base64
+import bokeh
 import html
 import io
 
@@ -83,7 +84,7 @@ class Cell(dawgie.Visitor):
         self.__content.append (AsIsText('<p>' + html.escape (content) + '</p>'))
         return
 
-    def add_table (self, clabels:[str], rows:int=0, title:str=None)->'TableVisitor':
+    def add_table (self, clabels:[str], rows:int=0, title:str=None)->'dawgie.TableVisitor':
         self.__content.append (Table(clabels, rows, title))
         return self.__content[-1]
 
@@ -211,7 +212,7 @@ class Visitor(Cell):
                 self.__title = html.escape(str(kwds['title']))
             else:
                 self.__title = html.escape(text)
-        
+
         # content + tags for presentation (e.g. __decl in class vars)
         # fully qualified (entire) tags for div -- maintain for backwards comp
         #     note: closing tag must subsequently be specified, also
