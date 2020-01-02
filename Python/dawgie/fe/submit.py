@@ -205,7 +205,7 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
             self.__process.failure (twisted.python.failure.Failure(Exception()))
         else:
             d = twisted.internet.defer.Deferred()
-            d.addCallback (self.__process.step_4, None)
+            d.addCallback (self.__process.step_4)
             d.addCallbacks (self.__process.step_5, self.__process.failure)
             twisted.internet.reactor.callLater(0, d.callback, None)
             pass
