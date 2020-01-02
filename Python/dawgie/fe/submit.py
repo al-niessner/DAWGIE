@@ -100,7 +100,7 @@ class Process(object):
                 pass
             self.__clear()
             self.__request = None
-            dawgie.tools.submit.mail_out (mail_list_all,
+            dawgie.tools.submit.mail_out (dawgie.tools.submit.mail_list_all,
                                           self.__msg['alert_message'])
         else: log.info ('Process.failure() self.__request is None')
         return fail
