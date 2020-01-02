@@ -175,7 +175,7 @@ def main():
     args = ap.parse_args()
     dawgie.context.ae_base_path = args.ae_dir
     dawgie.context.ae_base_package = args.ae_pkg
-    sys.path.append ('/'.join (args.ae_dir.split ('/')[:-len(args.ae_pkg.split ('.'))]))
+    sys.path.insert (0, '/'.join (args.ae_dir.split ('/')[:-len(args.ae_pkg.split ('.'))]))
     yes = True
 
     if args.log_file and args.log_file.startswith ('::') and args.log_file.endswith ('::'):
@@ -556,7 +556,7 @@ def verify (repo:str, silent:bool, verbose:bool, spawn):
     Function returns what spawn returns.
     '''
     cmd = ['python3', '-m', 'dawgie.tools.compliant',
-           '--ae-dir={0}'.format (repo),
+           '--ae-dir={0}/{1}'.format (repo, dawgie.context.ae_base_package.replace ('.', '/')),
            '--ae-pkg={0}'.format (dawgie.context.ae_base_package),
            '--log-file=::{0}::{1}::{2}::'.format (dawgie.context.db_host,
                                                   dawgie.context.log_port,
