@@ -83,8 +83,8 @@ then
            fi
 
            rm .ci/Dockerfile.1 .ci/Dockerfile.2 .ci/Dockerfile.3
-           docker tag cit:${citVersion} niessner/cit:${citVersion}
            docker login -p ${DOCKER_LOGIN_PASSWORD} -u ${DOCKER_LOGIN_ID}
+           docker tag cit:${citVersion} niessner/cit:${citVersion}
            docker push niessner/cit:${citVersion}
            docker logout
            docker rmi niessner/cit:${citVersion}
