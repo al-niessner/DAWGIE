@@ -63,38 +63,26 @@ then
        if [ -z "$(docker images niessner/cit | grep ${citVersion})" ]
        then
            echo "building CIT because $(docker images niessner/cit | grep ${citVersion})"
-           .ci/dcp.py --server .ci/Dockerfile.1 .ci/Dockerfile.2 .ci/Dockerfile.3 &
-           while [ ! -f .ci/Dockerfile.3.dcp ]
-           do
-               sleep 3
-           done
 
            if [ -z "$(docker images | awk -e '{print $1":"$2}' | grep os:$osVersion)" ]
            then
                echo "   Building OS layer $osVersion"
-               mkdir .ci/build
-               cp .ci/dcp.py .ci/build/dcp.py
-               cp .ci/Dockerfile.1.dcp .ci/build/Dockerfile
-               cd .ci/build
-               docker build --network=host -t os:${osVersion} .
-               cd ../..
-               rm -r .ci/build
+               docker build --network=host -t os:${osVersion} - < .ci/Dockerfile.1
            fi
 
            if [ -z "$(docker images | awk -e '{print $1":"$2}' | grep py:$pyVersion)" ]
            then
                echo "   Building Python layer $pyVersion"
-               docker build --network=host -t py:${pyVersion} - < .ci/Dockerfile.2.dcp
+               docker build --network=host -t py:${pyVersion} - < .ci/Dockerfile.2
            fi
 
            if [ -z "$(docker images | awk -e '{print $1":"$2}' | grep cit:$citVersion)" ]
            then
                echo "   Building CI Tools layer $citVersion"
-               docker build --network=host -t cit:${citVersion} - < .ci/Dockerfile.3.dcp
+               docker build --network=host -t cit:${citVersion} - < .ci/Dockerfile.3
            fi
 
            rm .ci/Dockerfile.1 .ci/Dockerfile.2 .ci/Dockerfile.3
-           rm .ci/Dockerfile.1.dcp .ci/Dockerfile.2.dcp .ci/Dockerfile.3.dcp
            docker tag cit:${citVersion} niessner/cit:${citVersion}
            docker login -p ${DOCKER_LOGIN_PASSWORD} -u ${DOCKER_LOGIN_ID}
            docker push niessner/cit:${citVersion}

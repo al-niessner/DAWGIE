@@ -36,12 +36,11 @@
 
 FROM os:ghrVersion
 RUN set -ex && \
-    /bin/dcp.py -p DCP_PORT_NUMBER .ci/pydot.patch /tmp && \
     pip3 install bokeh==0.13.0 \
                  boto3==1.7.80 \
                  GitPython==2.1.11 \
                  python-gnupg==0.4.3 \
-                 pydot3==1.0.9 \
+                 dawgie-pydot3==1.0.10 \
                  requests==2.19.1 \
                  transitions==0.6.8 \
                  twisted==18.7.0 && \
