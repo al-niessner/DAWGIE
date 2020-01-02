@@ -215,6 +215,6 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
         self.__command = ' '.join (cmd)
         log.info ('VerifyHandler.spawn_off (%s)', self.__command)
         twisted.internet.reactor.spawnProcess (self, cmd[0], args=cmd,
-                                               env=os.environ)
+                                               env=os.environ, usePTY=True)
         return
     pass
