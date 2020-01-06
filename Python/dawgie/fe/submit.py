@@ -48,14 +48,7 @@ import twisted.internet.reactor
 import twisted.web.server
 
 class Defer(absDefer):
-    def __init__(self):
-        absDefer.__init__(self)
-        self.__busy = False
-        return
-
-    def clear(self): self.__busy = False
-
-    def start (self, changeset:[str], submission:[str]):
+    def __call__ (self, changeset:[str], submission:[str]):
         if changeset[0].lower() != '':
             if not self.__busy:
                 self.__busy = True
@@ -69,6 +62,12 @@ class Defer(absDefer):
                         'alert_message':'Cannot submit a blank changeset'}
         return json.dumps (result).encode()
 
+    def __init__(self):
+        absDefer.__init__(self)
+        self.__busy = False
+        return
+
+    def clear(self): self.__busy = False
     pass
 
 class Process(object):

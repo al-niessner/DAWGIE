@@ -50,7 +50,7 @@ class Defer(absDefer):
         dawgie.db.view (display, int(runid), tn, task, alg, sv)
         return
 
-    def db_item (self, path:str):
+    def __call__ (self, path:str):
         display = dawgie.de.factory()
         d = twisted.internet.threads.deferToThread(self._db_item,
                                                    display=display, path=path)
