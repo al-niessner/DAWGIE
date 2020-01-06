@@ -60,11 +60,8 @@ class Defer(object):
 class DynamicContent(twisted.web.resource.Resource):
     # pylint: disable=dangerous-default-value
     isLeaf = True
-    def __init__ (self, fnc, uri: str,
-                  methods:[HttpMethod]=[HttpMethod.GET],
-                  defer:Defer=None):
+    def __init__ (self, fnc, uri: str, methods:[HttpMethod]=[HttpMethod.GET]):
         twisted.web.resource.Resource.__init__(self)
-        self.__defer = defer
         self.__fnc = fnc
         self.__methods = methods
         self.__uri = uri
@@ -95,7 +92,7 @@ class DynamicContent(twisted.web.resource.Resource):
                 pass
             pass
 
-        if self.__defer is not None: self.__defer.set_request (request)
+        if isinstance (self.__fnc, Defer): self.__fnc.set_request (request)
         if 0 < self.__methods.count (method): resp = self.__fnc(**kwds)
         else: resp = self.__err (method)
 
