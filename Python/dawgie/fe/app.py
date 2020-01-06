@@ -177,7 +177,7 @@ def start_state():
 start_submit = submit.Defer()
 sv_renderer = svrender.Defer()
 
-DynamicContent(sv_renderer, '/app/db/item', defer=sv_renderer)
+DynamicContent(sv_renderer.db_item, '/app/db/item', defer=sv_renderer)
 DynamicContent(db_lockview, '/app/db/lockview')
 DynamicContent(db_prime, '/app/db/prime')
 DynamicContent(db_targets, '/app/db/targets')
