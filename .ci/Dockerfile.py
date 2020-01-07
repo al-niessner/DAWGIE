@@ -36,13 +36,19 @@
 
 FROM os:ghrVersion
 RUN set -ex && \
-    pip3 install bokeh==0.13.0 \
-                 boto3==1.7.80 \
-                 GitPython==2.1.11 \
-                 python-gnupg==0.4.3 \
-                 dawgie-pydot3==1.0.10 \
-                 requests==2.19.1 \
-                 transitions==0.6.8 \
-                 twisted==18.7.0 && \
+    pip3 installbokeh>=1.2 \
+         boto3>=1.7.80 \
+         cryptography>=2.1.4 \
+         dawgie-pydot3==1.0.10 \
+         GitPython>=2.1.11 \
+         matplotlib>=2.1.1 \
+         psycopg2-binary>=2.7.4 \
+         pyparsing>=2.2 \
+         pyOpenSSL>=19.1.0 \
+         python-gnupg==0.4.4 \
+         pyxb==1.2.6 \
+         requests>=2.20.0 \
+         transitions==0.6.8 \
+         twisted>=18.7.0  && \
     cd /usr/local/lib/python3.6/dist-packages/pydot && \
     rm -rf ${HOME}/.cache /tmp/,ci
