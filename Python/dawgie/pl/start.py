@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 '''
 COPYRIGHT:
-Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -53,43 +53,6 @@ def _main():
 def _merge (old:int, new:int, offset:int, req:int):
     return req if (old + offset) != req else (new + offset)
 
-def submit(changeset, priority):
-    if not dawgie.pl.start.sdp.is_pipeline_active():
-        logging.warning("submit: pipeline is not active, cannot submit.")
-        return {'alert_status':'danger',
-                'alert_message':'The pipeline is not active so cannot submit.'}
-
-    if dawgie.tools.submit.already_applied \
-       (changeset, dawgie.tools.submit.repo_dir):
-        logging.warning("submit: changeset already in history")
-        return {'alert_status':'danger',
-                'alert_message':'The changeset is already in history.'}
-
-    # Go To: gitting state
-    dawgie.pl.start.sdp.gitting_trigger()
-    status = dawgie.tools.submit.auto_merge(changeset,
-                                            a_pre_ops=dawgie.tools.submit.pre_ops,
-                                            a_repo_dir=dawgie.tools.submit.repo_dir,
-                                            a_origin=dawgie.tools.submit.origin,
-                                            priority=priority)
-
-    # Go To: running state
-    dawgie.pl.start.sdp.running_trigger()
-    if status == dawgie.tools.submit.State.SUCCESS:
-        result = {'alert_status':'success',
-                  'alert_message':'Submission successful scheduling update.'}
-        logging.info("Going to the crossroads.")
-        dawgie.pl.start.sdp.set_submit_info(changeset, priority)
-        dawgie.pl.start.sdp.submit_crossroads()
-    else:
-        dawgie.tools.submit.mail_out(dawgie.tools.submit.mail_list_few,
-                                     "Failed to update_ops.")
-        result = {'alert_status':'danger',
-                  'alert_message':'Failed to merge changeset for operations.'}
-        pass
-    return result
-
-# pylint: disable=import-self,protected-access
 if __name__ == '__main__':
     root = os.path.dirname (__file__)
     for i in range(3): root = os.path.join (root, '..')
@@ -97,7 +60,7 @@ if __name__ == '__main__':
     sys.path.insert (0,root)
 
     import dawgie.context
-    import dawgie.pl.start
+    import dawgie.pl.start  # pylint: disable=import-self
     import dawgie.tools.submit
     import dawgie.util
 
@@ -116,6 +79,7 @@ if __name__ == '__main__':
     dawgie.pl.start.args = ap.parse_args()
 
     if dawgie.pl.start.args.port != dawgie.context.fe_port:
+        # pylint: disable=protected-access
         gnew = dawgie.pl.start.args.port +\
                dawgie.context.PortOffset.frontend.value
         dawgie.pl.start.args.context_cloud_port = \
@@ -144,13 +108,13 @@ if __name__ == '__main__':
 
     dawgie.context.log_level = dawgie.pl.start.args.log_level
     dawgie.context.override (dawgie.pl.start.args)
-    twisted.internet.reactor.callLater (0, dawgie.pl.LogDeferredException(dawgie.pl.start._main, 'starting the pipeline').callback, None)
+    twisted.internet.reactor.callLater (0, dawgie.pl.LogDeferredException(dawgie.pl.start._main, 'starting the pipeline').callback, None)  # pylint:  disable=protected-access
     twisted.internet.reactor.run()
     print ('calling system exit...')
     sys.exit()
 else:
     import dawgie.context
-    import dawgie.pl.start
+    import dawgie.pl.start  # pylint: disable=import-self
     import dawgie.pl.state
     import dawgie.tools.submit
     import dawgie.util

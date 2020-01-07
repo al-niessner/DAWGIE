@@ -1,4 +1,4 @@
-'''
+'''Define a deferred rendering of a state vector
 
 COPYRIGHT:
 Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
@@ -37,50 +37,50 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import ae
-import ae.disk
-import ae.disk.bot
-import dawgie
-import logging; log = logging.getLogger (__name__)
-import numpy
-import scipy.optimize
+from dawgie.fe import Defer as absDefer
 
-class Actor(dawgie.Task):
-    def list(self): return [Engine()]
+import dawgie
+import logging; log = logging.getLogger(__name__)
+import twisted.internet.threads
+
+class Defer(absDefer):
+    @staticmethod
+    def _db_item (display:dawgie.Visitor, path:str)->None:
+        runid,tn,task,alg,sv = path[0].split ('.')
+        dawgie.db.view (display, int(runid), tn, task, alg, sv)
+        return
+
+    def __call__ (self, path:str):
+        display = dawgie.de.factory()
+        d = twisted.internet.threads.deferToThread(self._db_item,
+                                                   display=display, path=path)
+        h = Renderer(display, self.get_request())
+        d.addCallbacks (h.success, h.failure)
+        return twisted.web.server.NOT_DONE_YET
     pass
 
-class Engine(dawgie.Algorithm):
-    def __init__(self):
-        dawgie.Algorithm.__init__(self)
-        self.__base = ae.disk.bot.Engine()
-        self.__clean = ae.StateVector()
-        self._version_ = dawgie.VERSION(1,0,0)
+class Renderer(object):
+    def __init__ (self, display, request):
+        object.__init__(self)
+        self.__display = display
+        self.__request = request
         return
 
-    @staticmethod
-    def _model (p, shape):
-        C,R = numpy.meshgrid (range(shape[1]), range(shape[0]))
-        return numpy.sin (R/p[0] + p[1]) * numpy.cos(C/p[2] + p[3])
-
-    @staticmethod
-    def _opt (p, known):
-        return numpy.abs (Engine._model (p, known.shape) - known).sum()
-
-    def name(self): return 'engine'
-    def previous(self): return [dawgie.ALG_REF(factory=ae.disk.task,
-                                               impl=self.__base)]
-
-    def run (self, ds, ps):
-        image = self.__base.sv_as_dict()['test']['image'].array()
-        p = [750, 0, 500, 0]
-        res = scipy.optimize.minimize (Engine._opt, p, (image,),
-                                       bounds=[(100, 1000), (-3.2, 3.2),
-                                               (100, 1000), (-3.2, 3.2)])
-        log.critical ('Coefficients: ' + str (res.x))
-        self.__clean['image'] = ae.Value(Engine._model (res.x, image.shape))
-        ds.update()
+    def failure (self, result):
+        # pylint: disable=bare-except
+        self.__request.write (b'<h1>Dynamic Content Generation Failed</h1><p>' +
+                              str (result).replace ('\n','<br/>').encode() +
+                              b'</p>')
+        try: self.__request.finish()
+        except: log.exception ('Failed to complete an error page: ' +
+                               str (result))
         return
 
-    def state_vectors (self): return [self.__clean]
-    def where(self): return dawgie.Distribution.cloud
+    def success (self, result):
+        # pylint: disable=bare-except
+        self.__request.write (self.__display.render().encode())
+        try: self.__request.finish()
+        except: log.exception ('Failed to complete a successful page: ' +
+                               str (result))
+        return
     pass

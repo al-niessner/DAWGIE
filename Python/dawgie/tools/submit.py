@@ -3,7 +3,7 @@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -78,17 +78,44 @@ class State(enum.IntEnum):
     pass
 
 mail_list_all = ["sdp@jpl.nasa.gov"]
-mail_list_few = ["al.niessner@jpl.nasa.gov", "ortega@jpl.nasa.gov"]
+mail_list_few = ["al.niessner@jpl.nasa.gov"]
+
+def _main(an_args):
+    # 1. Run auto merge tool
+    status = dawgie.tools.submit.auto_merge_prepare (an_args.changeset,
+                                                     an_args.pre_ops,
+                                                     an_args.repo_dir,
+                                                     an_args.origin)
+
+    if status == State.SUCCESS:\
+       status = dawgie.tools.submit.auto_merge_compliant (an_args.changeset,
+                                                          an_args.repo_dir,
+                                                          _spawn)
+    if status == State.SUCCESS:\
+       status = dawgie.tools.submit.auto_merge_push (an_args.changeset,
+                                                     an_args.repo_dir)
+
+    if status == State.SUCCESS:
+        # 2. Update master
+        if dawgie.tools.submit.update_ops() != State.SUCCESS: \
+            mail_out(mail_list_few, "update_ops failed.")
+    else: \
+        mail_out(mail_list_few, "Automerge failed; so, failed to update_ops.")
+    return
+
+def _spawn (cmd:[str]):
+    import subprocess
+    return subprocess.call (cmd) == 0
 
 def already_applied (changeset, a_repo_dir):
     g = git.cmd.Git(a_repo_dir)
     l = g.execute ('git log'.split())
     return -1 < l.find (changeset)
 
-def auto_merge(changeset, a_pre_ops=None,
-               a_repo_dir=None,
-               a_origin=None,
-               priority=Priority.TODO.value):
+def auto_merge_prepare(changeset,
+                       a_pre_ops=None,
+                       a_repo_dir=None,
+                       a_origin=None):
     # pylint: disable=too-many-return-statements
     if not a_pre_ops or not a_repo_dir or not a_origin:
         mail_out(mail_list_few, "auto_merge parameters are not all defined.")
@@ -134,19 +161,30 @@ def auto_merge(changeset, a_pre_ops=None,
 
         mail_out(mail_list_all, msg)
         return State.FAILED
+    return State.SUCCESS
 
+def auto_merge_compliant(changeset,
+                         a_repo_dir,
+                         spawn):
+    g = git.cmd.Git(a_repo_dir)
     # Validate compliance
     # run compliance
     # if failed then revert git reset --hard ORIG_HEAD
     # otherwise continue
-    if not dawgie.tools.compliant.verify (a_repo_dir, True, False):
+    if not dawgie.tools.compliant.verify (a_repo_dir, True, False, spawn):
         msg = "Compliancy check failed. Please run compliant.py for (%s)." % changeset
         status = git_execute(g, "git reset --hard ORIG_HEAD")
         if status == State.FAILED:
             msg += " And also failed to do a git reset. Please check this out Keepers of the Pipelie."
         mail_out(mail_list_all, msg)
         return State.FAILED
+    return State.SUCCESS
 
+def auto_merge_push(changeset,
+                    a_pre_ops=None,
+                    a_repo_dir=None,
+                    priority=Priority.TODO.value):
+    g = git.cmd.Git(a_repo_dir)
     status = git_execute(g, "git checkout %s" % a_pre_ops)
     if status == State.FAILED:
         mail_out(mail_list_few, "Failed to checkout %s" % a_pre_ops)
@@ -197,21 +235,6 @@ def mail_out(to, msg):
         s.send_message(message)
         s.quit()
     except OSError: logging.critical ('No email: %s', str(msg))
-
-def main(an_args):
-    # 1. Run auto merge tool
-    status = dawgie.tools.submit.auto_merge(an_args.changeset,
-                                            a_pre_ops=an_args.pre_ops,
-                                            a_repo_dir=an_args.repo_dir,
-                                            a_origin=an_args.origin)
-
-    if status == State.SUCCESS:
-        # 2. Update master
-        if dawgie.tools.submit.update_ops() != State.SUCCESS: \
-            mail_out(mail_list_few, "update_ops failed.")
-    else: \
-        mail_out(mail_list_few, "Automerge failed; so, failed to update_ops.")
-    return
 
 def merge_into(g, src, dst):
     status = git_execute(g, "git merge origin/%s" % src)
@@ -297,7 +320,7 @@ if __name__ == "__main__":
     dawgie.tools.submit.ops_dir = args.ops_dir
 
     logging.basicConfig(filename=args.log_file, level=args.log_level)
-    main(args)
+    _main(args)
 else:
     import dawgie.db.tools.sandbox
     import dawgie.tools.compliant

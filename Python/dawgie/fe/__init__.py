@@ -1,7 +1,7 @@
 ''' Front-End for SDP
 
 COPYRIGHT:
-Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -54,6 +54,12 @@ class HttpMethod(enum.Enum):
     DEL = 3
     pass
 
+class Defer(object):
+    def __init__(self): self.__request = None
+    def get_request(self): return self.__request
+    def set_request(self, req): self.__request = req
+    pass
+
 class DynamicContent(twisted.web.resource.Resource):
     # pylint: disable=dangerous-default-value
     isLeaf = True
@@ -82,22 +88,15 @@ class DynamicContent(twisted.web.resource.Resource):
 
     def __render (self, request, method:HttpMethod):
         sig = inspect.signature (self.__fnc)
-        display = 'display' in sig.parameters and \
-                  sig.parameters['display'].annotation == dawgie.Visitor
-        kwds = {} if not display else {'display':dawgie.de.factory()}
+        kwds = {}
         for ak in request.args.keys():
             if ak.decode() in sig.parameters:
                 kwds[ak.decode()] = [a.decode() for a in request.args[ak]]
                 pass
             pass
 
-        if 0 < self.__methods.count (method):
-            if 'display' in kwds:
-                d = twisted.internet.threads.deferToThread(self.__fnc, **kwds)
-                h = Renderer(kwds['display'], request)
-                d.addCallbacks (h.success, h.failure)
-                resp = twisted.web.server.NOT_DONE_YET
-            else: resp = self.__fnc(**kwds)
+        if isinstance (self.__fnc, Defer): self.__fnc.set_request (request)
+        if 0 < self.__methods.count (method): resp = self.__fnc(**kwds)
         else: resp = self.__err (method)
 
         return resp
@@ -118,32 +117,6 @@ class RedirectContent(twisted.web.resource.Resource):
 
     def render_GET (self, request):
         return twisted.web.util.redirectTo (self.__url.encode(), request)
-    pass
-
-class Renderer(object):
-    def __init__ (self, display, request):
-        object.__init__(self)
-        self.__display = display
-        self.__request = request
-        return
-
-    def failure (self, result):
-        # pylint: disable=bare-except
-        self.__request.write (b'<h1>Dynamic Content Generation Failed</h1><p>' +
-                              str (result).replace ('\n','<br/>').encode() +
-                              b'</p>')
-        try: self.__request.finish()
-        except: log.exception ('Failed to complete an error page: ' +
-                               str (result))
-        return
-
-    def success (self, result):
-        # pylint: disable=bare-except
-        self.__request.write (self.__display.render().encode())
-        try: self.__request.finish()
-        except: log.exception ('Failed to complete a successful page: ' +
-                               str (result))
-        return
     pass
 
 class RoutePoint(twisted.web.resource.Resource):

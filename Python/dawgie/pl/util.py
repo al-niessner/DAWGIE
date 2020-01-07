@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -37,6 +37,7 @@ NTR:
 '''
 
 import logging; log = logging.getLogger(__name__)
+import os
 import twisted.internet.error
 import twisted.internet.protocol
 import twisted.internet.reactor
@@ -59,5 +60,6 @@ def svgo (ifn, ofn):
     args = ['/usr/lib/node_modules/svgo/bin/svgo', ifn, ofn,
             '--disable=cleanupIDs', '--enable=removeStyleElement']
     handler = SVGOHandler(' '.join (args))
-    twisted.internet.reactor.spawnProcess (handler, args[0], args=args)
+    twisted.internet.reactor.spawnProcess (handler, args[0], args=args,
+                                           env=os.environ)
     return

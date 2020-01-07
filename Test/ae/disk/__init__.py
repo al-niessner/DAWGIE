@@ -1,7 +1,7 @@
 '''The algorithm engine for touching the local disk
 
 COPYRIGHT:
-Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -37,9 +37,6 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 ignore = False  # forces the pipeline to ignore this package (aka task)
-
-import calendar
-import datetime
 
 def task (prefix, ps_hint=0, runid=-1, target='__none__'):
     import ae.disk.bot
