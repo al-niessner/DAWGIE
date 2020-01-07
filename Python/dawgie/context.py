@@ -95,6 +95,7 @@ log_backup = 10
 log_capacity = 100
 log_level = logging.WARN
 log_port = int(os.environ.get('LOG_PORT', 8080 + PortOffset.log.value))
+ssl_pem_file = os.environ.get ('SSL_PEM_FILE', '')
 worker_backlog = 50
 
 def _rev():
@@ -169,6 +170,8 @@ def add_arguments (ap):
                      help='the port to the log server [%(default)s]')
     ap.add_argument ('--context-email-signature', default=email_signature, required=False,
                      help='Sign e-mail summary reports with this signature. [%(default)s]')
+    ap.add_argument ('--context-ssl-pem-file', default=ssl_pem_file, required=False,
+                     help='when pointing at an existing file, it will be used to initiate an https service')
     ap.add_argument ('--context-worker-backlog', default=worker_backlog,
                      required=False, type=int,
                      help='the number of expected workers that may try to contact the foreman at the same time [%(default)s]')
@@ -256,6 +259,7 @@ def override (args):
     dawgie.context.log_backup = args.context_log_backup
     dawgie.context.log_capacity = args.context_log_capacity
     dawgie.context.log_port = args.context_log_port
+    dawgie.context.ssl_pem_file = args.context_ssl_pem_file
     dawgie.context.worker_backlog = args.context_worker_backlog
 
     if not dawgie.context.ae_base_path.endswith (os.path.sep + dawgie.context.ae_base_package.replace ('.', os.path.sep)): raise ValueError('context-ae-dir ({0}) does not end with context-ae-pkg ({1})'.format (dawgie.context.ae_base_path,dawgie.context.ae_base_package))
