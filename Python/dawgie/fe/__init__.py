@@ -210,4 +210,5 @@ def root() -> bytes:
     _root.putChild (b'stylesheets', StaticContent())
     return _root
 
+# pylint: disable=ungrouped-imports
 import dawgie.fe.app  # build all of the dynamic hooks now
