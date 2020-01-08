@@ -85,6 +85,7 @@ db_rotate = os.environ.get('DB_ROTATES', 10)
 db_lock = False
 
 display = os.environ.get ('DISPLAY_TYPE', 'html')
+email_alerts_to = os.environ.get ('EMAIL_ALERTS_TO', '')
 email_signature = dawgie.resolve_username()
 farm_port = int(os.environ.get ('FARM_PORT', 8080 + PortOffset.farm.value))
 fe_path = '/tmp/' + os.environ.get ('USERNAME', 'unknown') + '/fe'
@@ -168,6 +169,8 @@ def add_arguments (ap):
                      help='the number of log messages to save for the front-end lists [%(default)s]')
     ap.add_argument ('--context-log-port', default=log_port, required=False, type=int,
                      help='the port to the log server [%(default)s]')
+    ap.add_argument ('--context-email-alerts-to', default=email_alerts_to, required=False,
+                     help='email address(es) to send alerts to using a , to separate them when more than one. [%(default)s]')
     ap.add_argument ('--context-email-signature', default=email_signature, required=False,
                      help='Sign e-mail summary reports with this signature. [%(default)s]')
     ap.add_argument ('--context-ssl-pem-file', default=ssl_pem_file, required=False,
@@ -251,6 +254,7 @@ def override (args):
     dawgie.context.db_rotate = args.context_db_rotate
     dawgie.context.db_rotate_path = args.context_db_rotate_path
     dawgie.context.display = dawgie.de.Type[args.context_display_type]
+    dawgie.context.email_alerts_to = args.context_email_alerts_to
     dawgie.context.email_signature = args.context_email_signature
     dawgie.context.farm_port = args.context_farm_port
     dawgie.context.fe_path = args.context_fe_path
