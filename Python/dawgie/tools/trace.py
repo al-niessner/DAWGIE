@@ -213,7 +213,7 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser(description='Follow targets through the pipeline and display the results.')
     ap.add_argument ('-f', '--file-name', default=None, required=False,
                      help='file name to write the report -- a temp file will be used and displayed in your browser is none is given')
-    ap.add_argument ('-l', '--log-file', default='sdp.log', required=False,
+    ap.add_argument ('-l', '--log-file', default='trace.log', required=False,
                      help='a filename to put all of the log messages into [%(default)s]')
     ap.add_argument ('-L', '--log-level', default=logging.ERROR, required=False,
                      type=dawgie.util.log_level,
