@@ -77,9 +77,6 @@ class State(enum.IntEnum):
     SUCCESS = 2
     pass
 
-mail_list_all = ["sdp@jpl.nasa.gov"]
-mail_list_few = ["al.niessner@jpl.nasa.gov"]
-
 def _main(an_args):
     # 1. Run auto merge tool
     status = dawgie.tools.submit.auto_merge_prepare (an_args.changeset,
@@ -98,9 +95,9 @@ def _main(an_args):
     if status == State.SUCCESS:
         # 2. Update master
         if dawgie.tools.submit.update_ops() != State.SUCCESS: \
-            mail_out(mail_list_few, "update_ops failed.")
+            mail_out("update_ops failed.")
     else: \
-        mail_out(mail_list_few, "Automerge failed; so, failed to update_ops.")
+        mail_out("Automerge failed; so, failed to update_ops.")
     return
 
 def _spawn (cmd:[str]):
@@ -118,7 +115,7 @@ def auto_merge_prepare(changeset,
                        a_origin=None):
     # pylint: disable=too-many-return-statements
     if not a_pre_ops or not a_repo_dir or not a_origin:
-        mail_out(mail_list_few, "auto_merge parameters are not all defined.")
+        mail_out("auto_merge parameters are not all defined.")
         return State.FAILED
 
     g = git.cmd.Git(a_repo_dir)
@@ -132,19 +129,19 @@ def auto_merge_prepare(changeset,
     # Check if commit exists
     status = git_execute(g, "git cat-file -t %s" % changeset)
     if status == State.FAILED:
-        mail_out(mail_list_all, "You forgot to push your changes (%s). Please, push them." % changeset)
+        mail_out("You forgot to push your changes (%s). Please, push them." % changeset)
         return State.FAILED
 
     # Check-out pre_ops
     status = git_execute(g, "git checkout %s" % a_pre_ops)
     if status == State.FAILED:
-        mail_out(mail_list_few, "Failed to checkout %s" % a_pre_ops)
+        mail_out("Failed to checkout %s" % a_pre_ops)
         return State.FAILED
 
     # Make sure checkout is clean.
     status = git_execute(g, "git pull origin %s" % a_pre_ops)
     if status == State.FAILED:
-        mail_out(mail_list_few, "Failed to pull in %s." % a_pre_ops)
+        mail_out("Failed to pull in %s." % a_pre_ops)
         return State.FAILED
 
     # Merge with changeset
@@ -159,7 +156,7 @@ def auto_merge_prepare(changeset,
         if status == State.FAILED:
             msg += "\nFailed to abort merge. Take Action! Take Action!"
 
-        mail_out(mail_list_all, msg)
+        mail_out(msg)
         return State.FAILED
     return State.SUCCESS
 
@@ -176,7 +173,7 @@ def auto_merge_compliant(changeset,
         status = git_execute(g, "git reset --hard ORIG_HEAD")
         if status == State.FAILED:
             msg += " And also failed to do a git reset. Please check this out Keepers of the Pipelie."
-        mail_out(mail_list_all, msg)
+        mail_out(msg)
         return State.FAILED
     return State.SUCCESS
 
@@ -187,23 +184,23 @@ def auto_merge_push(changeset,
     g = git.cmd.Git(a_repo_dir)
     status = git_execute(g, "git checkout %s" % a_pre_ops)
     if status == State.FAILED:
-        mail_out(mail_list_few, "Failed to checkout %s" % a_pre_ops)
+        mail_out("Failed to checkout %s" % a_pre_ops)
         return State.FAILED
 
     # Push changes
     status = git_execute(g, "git push origin %s" % a_pre_ops)
     if status == State.FAILED:
-        mail_out(mail_list_few, "Failed to push changes to " + a_pre_ops)
+        mail_out("Failed to push changes to " + a_pre_ops)
         return State.FAILED
 
     # Mail out the good news
     cmd = 'git show --no-patch ' + changeset
     status = git_execute(g, cmd)
     if status == State.FAILED:
-        mail_out(mail_list_few, "Failed to run: " + cmd)
+        mail_out("Failed to run: " + cmd)
         return State.FAILED
 
-    mail_out(mail_list_all, "Successfully merged " + changeset +" into " + a_pre_ops +
+    mail_out("Successfully merged " + changeset +" into " + a_pre_ops +
              ". The pipeline is reloading with your changes based on the scheduled priority.\n" +
              "Submission asks for the pipeline to reload: " + priority +".\n" +
              g.execute(cmd.split(' ')))
@@ -225,16 +222,20 @@ def git_execute(g, cmd):
     g.execute(cmd.split(' '))
     return State.SUCCESS
 
-def mail_out(to, msg):
-    message = email.mime.text.MIMEText(msg)
-    message['Subject'] = "SDP Submit results"
-    message["From"] = "no-reply@mentor.jpl.nasa.gov"
-    message["To"] = ",".join(to)
-    try:
-        s = smtplib.SMTP("localhost")
-        s.send_message(message)
-        s.quit()
-    except OSError: logging.critical ('No email: %s', str(msg))
+def mail_out(msg):
+    if dawgie.context.email_alerts_to:
+        message = email.mime.text.MIMEText(msg)
+        message['Subject'] = "DAWGIE Submit results"
+        message["From"] = "no-reply" + dawgie.context.email_alerts_to.split(',')[0].split('@')[1]
+        message["To"] = dawgie.context.email_alerts_to
+        try:
+            s = smtplib.SMTP("localhost")
+            s.send_message(message)
+            s.quit()
+            logging.critical ('Sent email alert with: %s', str(msg))
+        except OSError: logging.critical ('No email: %s', str(msg))
+    else: logging.critical ('Missing email destination: %s', str(msg))
+    return
 
 def merge_into(g, src, dst):
     status = git_execute(g, "git merge origin/%s" % src)
@@ -243,12 +244,9 @@ def merge_into(g, src, dst):
         status = git_execute(g, "git merge --abort")
         if status == State.FAILED: \
             msg += "\nFailed to abort merge. Take Action! Take Action!"
-        mail_out(mail_list_all, msg)
+        mail_out(msg)
         return State.FAILED
     return
-
-def sandboxdb():
-    dawgie.db.tools.sandbox.dbcopy("mentor01.jpl.nasa.gov", 6666, "/proj/sdp/data/sandboxdb", dawgie.db.shelf.Method.cp, "mentor.jpl.nasa.gov")
 
 def update_ops():
     g = git.cmd.Git(repo_dir)
@@ -281,14 +279,13 @@ def update_ops():
 
     # push ops
     if git_execute(g, "git push origin %s" % ops) == State.FAILED:
-        mail_out(mail_list_all, "update_ops: Failed to push to %s" % ops)
+        mail_out("update_ops: Failed to push to %s" % ops)
         return State.FAILED
 
     return State.SUCCESS
 
 if __name__ == "__main__":
-
-    import dawgie.db.tools.sandbox
+    import dawgie.context
     import dawgie.tools.compliant
     import dawgie.tools.submit
     import dawgie.util
@@ -311,8 +308,9 @@ if __name__ == "__main__":
                     help='The name of the pre_ops branch. [%(default)s]')
     ap.add_argument('-c', '--changeset', default=None, required=True,
                     help='The changeset hashtag to merge.')
-
+    dawgie.context.add_arguments (ap)
     args = ap.parse_args()
+    dawgie.context.override (args)
     dawgie.tools.submit.repo_dir = args.repo_dir
     dawgie.tools.submit.origin = args.origin
     dawgie.tools.submit.pre_ops = args.pre_ops
@@ -322,6 +320,5 @@ if __name__ == "__main__":
     logging.basicConfig(filename=args.log_file, level=args.log_level)
     _main(args)
 else:
-    import dawgie.db.tools.sandbox
     import dawgie.tools.compliant
     pass

@@ -39,6 +39,7 @@ NTR:
 
 from dawgie.fe import Defer as absDefer
 
+import dawgie.context
 import dawgie.pl.start
 import dawgie.tools.submit
 import json
@@ -99,12 +100,12 @@ class Process(object):
                 pass
             self.__clear()
             self.__request = None
-            dawgie.tools.submit.mail_out (dawgie.tools.submit.mail_list_all,
-                                          self.__msg['alert_message'])
+            dawgie.tools.submit.mail_out (self.__msg['alert_message'])
         else: log.info ('Process.failure() self.__request is None')
         return fail
 
     def step_0 (self):
+        dawgie.tools.submit.mail_list = dawgie.context.email_alerts_to
         d = twisted.internet.defer.Deferred()
         d.addCallback (self.step_1)
         d.addCallbacks (self.step_2, self.failure)

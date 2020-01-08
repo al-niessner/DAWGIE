@@ -213,6 +213,7 @@ def override (args):
 
     args - the result of ap.parse_args() {see add_arguments() in this module}
     '''
+    # pylint: disable=too-many-statements
     if args.context:
         mod_name = '.'.join (args.context.split ('.')[:-1])
         var_name = args.context.split ('.')[-1]
