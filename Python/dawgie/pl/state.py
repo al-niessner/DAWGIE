@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 '''The pipeline state machine
 
->>> sdp = SDP(doctest=True)
->>> sdp.starting_trigger()
+>>> fsm = FSM(doctest=True)
+>>> fsm.starting_trigger()
 self.start()
 self._gui()
 self._security()
@@ -10,15 +10,15 @@ self._logging()
 self.load()
 self._pipeline()
 True
->>> sdp.state
+>>> fsm.state
 'running'
->>> sdp.archiving_trigger()
+>>> fsm.archiving_trigger()
 self.archive()
 self._archive_done()
 True
->>> sdp.state
+>>> fsm.state
 'running'
->>> sdp.update_trigger()
+>>> fsm.update_trigger()
 self.reload()
 self._reload()
 self.archive()
@@ -26,7 +26,7 @@ self._archive_done()
 self.load()
 self._pipeline()
 True
->>> sdp.state
+>>> fsm.state
 'running'
 >>>
 
@@ -117,7 +117,7 @@ class Status(enum.Enum):
     paused = 3
     pass
 
-class SDP(object):
+class FSM(object):
     # pylint: disable=no-self-use,too-many-instance-attributes,too-many-public-methods
     args = None
     states = ['archiving',
@@ -130,7 +130,7 @@ class SDP(object):
     def __init__(self, initial_state='starting', doctest_=False):
         import dawgie.context
         self.machine = transitions.Machine(model=self,
-                                           states=SDP.states,
+                                           states=FSM.states,
                                            initial=initial_state)
         self.changeset = None
         self.__doctest = doctest_
@@ -422,8 +422,8 @@ class SDP(object):
         import dawgie.pl.schedule
 
         self.nodes[self.prior_state].set_fillcolor(self.inactive_color)
-        self.prior_state = dawgie.pl.start.sdp.state
-        self.nodes[dawgie.pl.start.sdp.state].set_fillcolor(self.active_color)
+        self.prior_state = dawgie.pl.start.fsm.state
+        self.nodes[dawgie.pl.start.fsm.state].set_fillcolor(self.active_color)
         return dawgie.pl.dag.Construct.graph (self.graph, [], 'current.svg')
 
     def submit_crossroads(self):
