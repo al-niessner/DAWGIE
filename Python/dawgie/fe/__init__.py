@@ -1,4 +1,4 @@
-''' Front-End for SDP
+'''Built-in Front-End for DAWGIE
 
 COPYRIGHT:
 Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
@@ -148,7 +148,7 @@ class StaticContent(twisted.web.resource.Resource):
 
 def _is_active (fn):
     try:
-        is_active = dawgie.pl.start.sdp.is_pipeline_active()
+        is_active = dawgie.pl.start.fsm.is_pipeline_active()
         is_active |= fn.endswith ('pages/pipelines/index.html')
     except NameError: is_active = True
     return is_active

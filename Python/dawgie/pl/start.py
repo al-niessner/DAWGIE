@@ -45,9 +45,9 @@ import sys
 import twisted.internet
 
 def _main():
-    dawgie.pl.start.sdp = dawgie.pl.state.SDP()
-    dawgie.pl.start.sdp.args = dawgie.pl.start.args
-    dawgie.pl.start.sdp.starting_trigger()
+    dawgie.pl.start.fsm = dawgie.pl.state.FSM()
+    dawgie.pl.start.fsm.args = dawgie.pl.start.args
+    dawgie.pl.start.fsm.starting_trigger()
     return
 
 def _merge (old:int, new:int, offset:int, req:int):
@@ -119,5 +119,5 @@ else:
     import dawgie.tools.submit
     import dawgie.util
 
-    sdp = dawgie.pl.state.SDP()
+    fsm = dawgie.pl.state.FSM()
     pass

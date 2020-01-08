@@ -761,7 +761,7 @@ def archive (done):
     args = ['/usr/bin/pg_dump',
             '-h', dawgie.context.db_host,
             '-p', '{0:d}'.format (dawgie.context.db_port),
-            '-U', 'sdppipded',
+            '-U', dawgie.context.db_path.split(':')[0],
             '-d', dawgie.context.db_name,
             '-f', os.path.join (path, bfn.format (0))]
     handler = ArchiveHandler(' '.join (args), done)

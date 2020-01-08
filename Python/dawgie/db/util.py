@@ -88,7 +88,7 @@ def rotate(path, orig, backup):
                 logging.getLogger(__name__).warning("orig db missing, copying from db %d", i)
                 for v in backup[i]:
                     t = v.split(".")[-1]
-                    shutil.copy(v, "%s/sdp.%s" % (path, t))
+                    shutil.copy(v, "%s/%s.%s" % (path,dawgie.context.db_name,t))
                     pass
                 break
         pass
@@ -102,10 +102,11 @@ def rotate(path, orig, backup):
             t = stack.pop()
             for v in backup[t]:
                 ext = v.split(".")[-1]
-                shutil.move(v, "%s/%d.sdp.%s" % (path, t+1, ext))
+                shutil.move(v, "%s/%d.%s.%s" % (path, dawgie.context.db_name,
+                                                t+1, ext))
         for v in orig:
             ext = v.split(".")[-1]
-            shutil.copy(v, "%s/0.sdp.%s" % (path, ext))
+            shutil.copy(v, "%s/0.%s.%s" % (path, dawgie.context.db_name, ext))
 
     return
 

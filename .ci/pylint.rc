@@ -286,7 +286,7 @@ ignored-classes=optparse.Values,thread._local,_thread._local
 # List of members which are set dynamically and missed by pylint inference
 # system, and so shouldn't trigger E1101 when accessed. Python regular
 # expressions are accepted.
-generated-members=git.exc.GitCommandError,numpy.random.rand,twisted.internet.reactor.spawnProcess,twisted.internet.reactor.callLater,twisted.internet.reactor.listenTCP,twisted.internet.reactor.listenSSL,twisted.internet.reactor.run,dawgie.pl.start._run,dawgie.pl.start.sdp.state,av.write_svg,dawgie.pl.start.sdp.archiving_trigger,dawgie.pl.start.sdp.starting_trigger,dawgie.pl.start.sdp.gitting_trigger,dawgie.pl.start.sdp.running_trigger,logging.handlers.StreamHandler,self.state,self.running_trigger,self.archiving_trigger,self.update_trigger,signed.data
+generated-members=git.exc.GitCommandError,numpy.random.rand,twisted.internet.reactor.spawnProcess,twisted.internet.reactor.callLater,twisted.internet.reactor.listenTCP,twisted.internet.reactor.listenSSL,twisted.internet.reactor.run,dawgie.pl.start._run,dawgie.pl.start.fsm.state,av.write_svg,dawgie.pl.start.fsm.archiving_trigger,dawgie.pl.start.fsm.starting_trigger,dawgie.pl.start.fsm.gitting_trigger,dawgie.pl.start.fsm.running_trigger,logging.handlers.StreamHandler,self.state,self.running_trigger,self.archiving_trigger,self.update_trigger,signed.data
 
 # List of decorators that produce context managers, such as
 # contextlib.contextmanager. Add to this list to register other decorators that

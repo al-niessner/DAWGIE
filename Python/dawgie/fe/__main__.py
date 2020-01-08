@@ -1,4 +1,4 @@
-''' Front-End for SDP
+'''Built-in Front-End for DAWGIE
 
 COPYRIGHT:
 Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
