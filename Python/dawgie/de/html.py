@@ -194,45 +194,45 @@ class Visitor(Cell):
         # escape double-quotes only, allow single-quotations for css
         # html.escape() rules out certain advanced constructs but they can
         # be inserted via a stylesheet
-        attrib_for_style = html.escape(str(kwds['style']),
-                                       quote=False).replace("\"", "&quot;")
-        style = f" style=\"{attrib_for_style}\" " if 'style' in kwds else ""
+        attrib_value = html.escape(str(kwds['style']),
+                                   quote=False).replace("\"", "&quot;")
+        style = f" style=\"{attrib_value}\" " if 'style' in kwds else ""
 
         # tags for configuration settings (e.g. __<custom_name> in class vars)
         # -- embed external files before inline scripts --
         # list of relative uris from SV display page directory,
         #     e.g. '../../javascripts/application.js'
         if 'javascript' in kwds:
-            tag_for_javascript = html.escape(str(kwds['javascript']))
-            tag_for_javascript = f"        <script type=\"text/javascript\" src=\"{tag_for_javascript}\"></script>"
-            self.__js.append(tag_for_javascript)
+            tag_value = html.escape(str(kwds['javascript']))
+            tag_value = f"        <script type=\"text/javascript\" src=\"{tag_value}\"></script>"
+            self.__js.append(tag_value)
         # list of relative uris from SV display page directory,
         #     e.g. '../../stylesheets/application.css'
         if 'stylesheet' in kwds:
             # <link rel = "stylesheet" type = "text/css" href = "myStyle.css" />
             # <link href="mystyles.css" rel="preload" as="style">
-            tag_for_stylesheet = html.escape(str(kwds['stylesheet']))
-            tag_for_stylesheet = f"        <link href=\"{tag_for_stylesheet}\" rel=\"preload\" as=\"style\">"
-            self.__css.append(tag_for_stylesheet)
+            tag_value = html.escape(str(kwds['stylesheet']))
+            tag_value = f"        <link href=\"{tag_value}\" rel=\"preload\" as=\"style\">"
+            self.__css.append(tag_value)
         # -- embed inline text after external files to allow customizations --
         # plain text representing a raw stylesheet that will be embedded directly
         #     into the document via a style tag
         if 'css' in kwds:
             # clean potential closing tags / limit malicious code
-            tag_for_css = sub(r"<\s*/\s*style\s*>", "", str(kwds['css']))
-            tag_for_css = f"        <style>{tag_for_css}</style>"
-            self.__css.append(tag_for_css)
+            tag_value = sub(r"<\s*/\s*style\s*>", "", str(kwds['css']))
+            tag_value = f"        <style>{tag_value}</style>"
+            self.__css.append(tag_value)
         # plain text representing a raw javascript block that will be embedded
         #     directly into the document via a script tag
         if 'js' in kwds:
             # clean potential closing tags / limit malicious code
-            tag_for_js = sub(r"<\s*/\s*script\s*>", "", str(kwds['js']))
-            tag_for_js = f"        <script type=\"text/javascript\">{tag_for_js}</script>"
-            self.__js.append(tag_for_js)
+            tag_value = sub(r"<\s*/\s*script\s*>", "", str(kwds['js']))
+            tag_value = f"        <script type=\"text/javascript\">{tag_value}</script>"
+            self.__js.append(tag_value)
         # title composed from text, value ignored -- maintain for backwards comp
         if 'title' in kwds:
             # if defined use title value and ignore text
-            if kwds['title'] is not None and len(str(kwds['title']).strip()) > 0:
+            if kwds['title'] is not None and len(str(kwds['title']).strip()):
                 self.__title = html.escape(str(kwds['title']))
             else:
                 self.__title = html.escape(text)
@@ -241,14 +241,14 @@ class Visitor(Cell):
         # the div value is inserted into the div -- useful for images, etc.
         if 'div' in kwds:
             # clean potential closing tags / limit malicious code
-            tag_for_div = sub(r"<\s*/\s*div\s*>", "", str(kwds['div']))
-            tag_for_div = f"        <div{idd}{claz}{style}>{tag_for_div}</div>"
-            self.__content.append(AsIsText(tag_for_div))
+            tag_value = sub(r"<\s*/\s*div\s*>", "", str(kwds['div']))
+            tag_value = f"        <div{idd}{claz}{style}>{tag_value}</div>"
+            self.__content.append(AsIsText(tag_value))
         # text content is escaped and embedded in paragraph tag by default
         #     unless different tag is specified in kwds
         if text and 'title' not in kwds:
             tag = str(kwds['tag']) if 'tag' in kwds else "p"
-            tag = tag if len(tag.strip()) > 0 else "p"
+            tag = tag if len(tag.strip()) else "p"
             tag_open = f"<{tag}{idd}{claz}{style}>"
             tag_close = f"</{tag}>" if tag.strip() not in self.void_elements else ""
             self.__content.append(AsIsText(tag_open + html.escape(text) + tag_close))
@@ -260,18 +260,18 @@ class Visitor(Cell):
         #          into its constituent chars
         if 'list' in kwds:
             # value of enum is ignored but presence implies numbered list
-            tag_for_list = "ol" if 'enum' in kwds else "ul"
-            self.__content.append(AsIsText(f"<{tag_for_list}{idd}{claz}{style}>"))
+            tag_value = "ol" if 'enum' in kwds else "ul"
+            self.__content.append(AsIsText(f"<{tag_value}{idd}{claz}{style}>"))
             for item in list(kwds['list']):
                 item = html.escape(item)
                 self.__content.append(AsIsText(f"<li>{item}</li>"))
-            self.__content.append(AsIsText(f"</{tag_for_list}>"))
+            self.__content.append(AsIsText(f"</{tag_value}>"))
         # pre -- display preformatted text
         if 'pre' in kwds:
             # clean potential closing tags / limit malicious code
-            tag_for_pre = sub(r"<\s*/\s*pre\s*>", "", str(kwds['pre']))
-            tag_for_pre = f"<pre{idd}{claz}{style}>{tag_for_pre}</pre>"
-            self.__content.append(AsIsText(tag_for_pre))
+            tag_value = sub(r"<\s*/\s*pre\s*>", "", str(kwds['pre']))
+            tag_value = f"<pre{idd}{claz}{style}>{tag_value}</pre>"
+            self.__content.append(AsIsText(tag_value))
         return
 
     def render(self) -> str:
