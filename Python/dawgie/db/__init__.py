@@ -8,7 +8,7 @@ The database interface has N goals:
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -54,10 +54,6 @@ import dawgie.db.test
 import dawgie.util
 import importlib
 import logging; log = logging.getLogger(__name__)
-import getpass
-import glob
-import os
-import subprocess
 
 METRIC_DATA = collections.namedtuple('METRIC_DATA', ['alg_name','alg_ver','sv',
                                                      'run_id','target','task'])

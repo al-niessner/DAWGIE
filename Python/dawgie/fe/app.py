@@ -1,7 +1,7 @@
 '''Define the bits of the front end that require some help from the server
 
 COPYRIGHT:
-Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -38,10 +38,13 @@ NTR:
 '''
 
 from dawgie.fe import DynamicContent, HttpMethod
+from . import submit
+from . import svrender
 
 import dawgie
 import dawgie.context
 import dawgie.db
+import dawgie.de
 import dawgie.pl.farm
 import dawgie.pl.logger.fe
 import dawgie.pl.schedule
@@ -56,11 +59,6 @@ class Axis(enum.Enum):
     svn = 1
     tn = 2
     pass
-
-def db_item(display:dawgie.Visitor, path:str)->None:
-    runid,tn,task,alg,sv = path[0].split ('.')
-    dawgie.db.view (display, int(runid), tn, task, alg, sv)
-    return
 
 def db_lockview():
     return json.dumps(dawgie.db.view_locks()).encode()
@@ -80,7 +78,7 @@ def log_messages():
     return json.dumps (dawgie.pl.logger.fe.remembered()).encode()
 
 def pl_state():
-    return json.dumps ({'name':dawgie.pl.start.sdp.state,
+    return json.dumps ({'name':dawgie.pl.start.fsm.state,
                         'status':'active'}).encode()
 
 def schedule_crew():
@@ -173,17 +171,13 @@ def start_changeset():
     return dawgie.context.git_rev.encode('utf-8')
 
 def start_state():
-    return json.dumps ({'name':dawgie.pl.start.sdp.state,
+    return json.dumps ({'name':dawgie.pl.start.fsm.state,
                         'status':'active'}).encode()
 
-def start_submit (changeset:[str], submission:[str]):
-    if changeset[0].lower() != '':
-        result = dawgie.pl.start.submit(changeset[0], submission[0])
-    else: result = {'alert_status':'danger',
-                    'alert_message':'Cannot submit a blank changeset'}
-    return json.dumps (result).encode()
+start_submit = submit.Defer()
+sv_renderer = svrender.Defer()
 
-DynamicContent(db_item, '/app/db/item')
+DynamicContent(sv_renderer, '/app/db/item')
 DynamicContent(db_lockview, '/app/db/lockview')
 DynamicContent(db_prime, '/app/db/prime')
 DynamicContent(db_targets, '/app/db/targets')

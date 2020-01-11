@@ -6,7 +6,7 @@ It does not support wildcarding.
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -879,19 +879,19 @@ def reset (runid:int, tn:str, tskn, alg)->None:
 def rotated_files(index=None):
     path = dawgie.context.db_rotate_path
     if index is None:
-        orig = glob.glob("%s/sdp.alg" % path)
-        orig += glob.glob("%s/sdp.prime" % path)
-        orig += glob.glob("%s/sdp.state" % path)
-        orig += glob.glob("%s/sdp.target" % path)
-        orig += glob.glob("%s/sdp.task" % path)
-        orig += glob.glob("%s/sdp.value" % path)
+        orig = glob.glob("%s/%s.alg" % (path, dawgie.context.db_name))
+        orig += glob.glob("%s/%s.prime" % (path, dawgie.context.db_name))
+        orig += glob.glob("%s/%s.state" % (path, dawgie.context.db_name))
+        orig += glob.glob("%s/%s.target" % (path, dawgie.context.db_name))
+        orig += glob.glob("%s/%s.task" % (path, dawgie.context.db_name))
+        orig += glob.glob("%s/%s.value" % (path, dawgie.context.db_name))
         return orig
-    orig = glob.glob("%s/%d.sdp.alg" % (path, index))
-    orig += glob.glob("%s/%d.sdp.prime" % (path, index))
-    orig += glob.glob("%s/%d.sdp.state" % (path, index))
-    orig += glob.glob("%s/%d.sdp.target" % (path, index))
-    orig += glob.glob("%s/%d.sdp.task" % (path, index))
-    orig += glob.glob("%s/%d.sdp.value" % (path, index))
+    orig = glob.glob("%s/%d.%s.alg" % (path, index, dawgie.context.db_name))
+    orig += glob.glob("%s/%d.%s.prime" % (path, index, dawgie.context.db_name))
+    orig += glob.glob("%s/%d.%s.state" % (path, index, dawgie.context.db_name))
+    orig += glob.glob("%s/%d.%s.target" % (path, index, dawgie.context.db_name))
+    orig += glob.glob("%s/%d.%s.task" % (path, index, dawgie.context.db_name))
+    orig += glob.glob("%s/%d.%s.value" % (path, index, dawgie.context.db_name))
     return orig
 
 def retreat (reg, ret):

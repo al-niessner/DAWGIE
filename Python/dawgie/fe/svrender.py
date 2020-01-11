@@ -1,4 +1,4 @@
-'''
+'''Define a deferred rendering of a state vector
 
 COPYRIGHT:
 Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
@@ -37,30 +37,50 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import dawgie.pl.dag
-import dawgie.pl.farm
-import unittest
+from dawgie.fe import Defer as absDefer
 
-class Farm(unittest.TestCase):
-    def test_rerunid (self):
-        n = dawgie.pl.dag.Node('a')
-        r = dawgie.pl.farm.rerunid (n)
-        self.assertEqual (2, r)
-        n.set ('runid', 17)
-        r = dawgie.pl.farm.rerunid (n)
-        self.assertEqual (17, r)
-        n.set ('runid', 0)
-        r = dawgie.pl.farm.rerunid (n)
-        self.assertEqual (0, r)
+import dawgie
+import logging; log = logging.getLogger(__name__)
+import twisted.internet.threads
+
+class Defer(absDefer):
+    @staticmethod
+    def _db_item (display:dawgie.Visitor, path:str)->None:
+        runid,tn,task,alg,sv = path[0].split ('.')
+        dawgie.db.view (display, int(runid), tn, task, alg, sv)
         return
 
-    def something_to_do():
-        self.assertFalse (dawgie.pl.farm.something_to_do())
-        dawgie.pl.farm._agency = True
-        self.assertFalse (dawgie.pl.farm.something_to_do())
-        dawgie.pl.start.fsm.wait_on_crew.clear()
-        self.assertFalse (dawgie.pl.farm.something_to_do())
-        dawgie.pl.start.fsm.start == 'running'
-        self.assertTrue (dawgie.pl.farm.something_to_do())
+    def __call__ (self, path:str):
+        display = dawgie.de.factory()
+        d = twisted.internet.threads.deferToThread(self._db_item,
+                                                   display=display, path=path)
+        h = Renderer(display, self.get_request())
+        d.addCallbacks (h.success, h.failure)
+        return twisted.web.server.NOT_DONE_YET
+    pass
+
+class Renderer(object):
+    def __init__ (self, display, request):
+        object.__init__(self)
+        self.__display = display
+        self.__request = request
+        return
+
+    def failure (self, result):
+        # pylint: disable=bare-except
+        self.__request.write (b'<h1>Dynamic Content Generation Failed</h1><p>' +
+                              str (result).replace ('\n','<br/>').encode() +
+                              b'</p>')
+        try: self.__request.finish()
+        except: log.exception ('Failed to complete an error page: ' +
+                               str (result))
+        return
+
+    def success (self, result):
+        # pylint: disable=bare-except
+        self.__request.write (self.__display.render().encode())
+        try: self.__request.finish()
+        except: log.exception ('Failed to complete a successful page: ' +
+                               str (result))
         return
     pass

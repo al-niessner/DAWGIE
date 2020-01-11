@@ -1,7 +1,7 @@
 '''
 --
 COPYRIGHT:
-Copyright (c) 2015-2019, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -85,6 +85,7 @@ db_rotate = os.environ.get('DB_ROTATES', 10)
 db_lock = False
 
 display = os.environ.get ('DISPLAY_TYPE', 'html')
+email_alerts_to = os.environ.get ('EMAIL_ALERTS_TO', '')
 email_signature = dawgie.resolve_username()
 farm_port = int(os.environ.get ('FARM_PORT', 8080 + PortOffset.farm.value))
 fe_path = '/tmp/' + os.environ.get ('USERNAME', 'unknown') + '/fe'
@@ -95,6 +96,7 @@ log_backup = 10
 log_capacity = 100
 log_level = logging.WARN
 log_port = int(os.environ.get('LOG_PORT', 8080 + PortOffset.log.value))
+ssl_pem_file = os.environ.get ('SSL_PEM_FILE', '')
 worker_backlog = 50
 
 def _rev():
@@ -167,8 +169,12 @@ def add_arguments (ap):
                      help='the number of log messages to save for the front-end lists [%(default)s]')
     ap.add_argument ('--context-log-port', default=log_port, required=False, type=int,
                      help='the port to the log server [%(default)s]')
+    ap.add_argument ('--context-email-alerts-to', default=email_alerts_to, required=False,
+                     help='email address(es) to send alerts to using a , to separate them when more than one. [%(default)s]')
     ap.add_argument ('--context-email-signature', default=email_signature, required=False,
                      help='Sign e-mail summary reports with this signature. [%(default)s]')
+    ap.add_argument ('--context-ssl-pem-file', default=ssl_pem_file, required=False,
+                     help='when pointing at an existing file, it will be used to initiate an https service')
     ap.add_argument ('--context-worker-backlog', default=worker_backlog,
                      required=False, type=int,
                      help='the number of expected workers that may try to contact the foreman at the same time [%(default)s]')
@@ -207,6 +213,7 @@ def override (args):
 
     args - the result of ap.parse_args() {see add_arguments() in this module}
     '''
+    # pylint: disable=too-many-statements
     if args.context:
         mod_name = '.'.join (args.context.split ('.')[:-1])
         var_name = args.context.split ('.')[-1]
@@ -248,6 +255,7 @@ def override (args):
     dawgie.context.db_rotate = args.context_db_rotate
     dawgie.context.db_rotate_path = args.context_db_rotate_path
     dawgie.context.display = dawgie.de.Type[args.context_display_type]
+    dawgie.context.email_alerts_to = args.context_email_alerts_to
     dawgie.context.email_signature = args.context_email_signature
     dawgie.context.farm_port = args.context_farm_port
     dawgie.context.fe_path = args.context_fe_path
@@ -256,6 +264,7 @@ def override (args):
     dawgie.context.log_backup = args.context_log_backup
     dawgie.context.log_capacity = args.context_log_capacity
     dawgie.context.log_port = args.context_log_port
+    dawgie.context.ssl_pem_file = args.context_ssl_pem_file
     dawgie.context.worker_backlog = args.context_worker_backlog
 
     if not dawgie.context.ae_base_path.endswith (os.path.sep + dawgie.context.ae_base_package.replace ('.', os.path.sep)): raise ValueError('context-ae-dir ({0}) does not end with context-ae-pkg ({1})'.format (dawgie.context.ae_base_path,dawgie.context.ae_base_package))
