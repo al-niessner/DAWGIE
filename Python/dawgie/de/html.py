@@ -232,7 +232,7 @@ class Visitor(Cell):
         # title composed from text, value ignored -- maintain for backwards comp
         if 'title' in kwds:
             # if defined use title value and ignore text
-            if kwds['title'] is not None and len(str(kwds['title']).strip()):
+            if kwds['title'] is not None and str(kwds['title']).strip():
                 self.__title = html.escape(str(kwds['title']))
             else:
                 self.__title = html.escape(text)
@@ -248,7 +248,7 @@ class Visitor(Cell):
         #     unless different tag is specified in kwds
         if text and 'title' not in kwds:
             tag = str(kwds['tag']) if 'tag' in kwds else "p"
-            tag = tag if len(tag.strip()) else "p"
+            tag = tag if tag.strip() else "p"
             tag_open = f"<{tag}{idd}{claz}{style}>"
             tag_close = f"</{tag}>" if tag.strip() not in self.void_elements else ""
             self.__content.append(AsIsText(tag_open + html.escape(text) + tag_close))
