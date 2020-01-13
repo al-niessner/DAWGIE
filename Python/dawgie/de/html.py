@@ -38,12 +38,10 @@ NTR:
 
 import base64
 import bokeh
+import dawgie
 import html
 import io
-from re import sub
-
-import dawgie
-
+impor re
 
 class AsIsText(object):
     # pylint: disable=too-few-public-methods
@@ -219,14 +217,14 @@ class Visitor(Cell):
         #     into the document via a style tag
         if 'css' in kwds:
             # clean potential closing tags / limit malicious code
-            tag_value = sub(r"<\s*/\s*style\s*>", "", str(kwds['css']))
+            tag_value = re.sub(r"<\s*/\s*style\s*>", "", str(kwds['css']))
             tag_value = f"        <style>{tag_value}</style>"
             self.__css.append(tag_value)
         # plain text representing a raw javascript block that will be embedded
         #     directly into the document via a script tag
         if 'js' in kwds:
             # clean potential closing tags / limit malicious code
-            tag_value = sub(r"<\s*/\s*script\s*>", "", str(kwds['js']))
+            tag_value = re.sub(r"<\s*/\s*script\s*>", "", str(kwds['js']))
             tag_value = f"        <script type=\"text/javascript\">{tag_value}</script>"
             self.__js.append(tag_value)
         # title composed from text, value ignored -- maintain for backwards comp
