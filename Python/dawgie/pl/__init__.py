@@ -63,10 +63,10 @@ class LogDeferredException(object):
     def run (self, *_args, **_kwds): return self.__cb()
     pass
 
-def _main(fsm_args):
+def _main(args):
     import dawgie.context
     dawgie.context.fsm = dawgie.pl.state.FSM()
-    dawgie.context.fsm.args = fsm_args
+    dawgie.context.fsm.args = args
     dawgie.context.fsm.starting_trigger()
     return
 
