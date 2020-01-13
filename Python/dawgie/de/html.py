@@ -239,7 +239,7 @@ class Visitor(Cell):
         # the div value is inserted into the div -- useful for images, etc.
         if 'div' in kwds:
             # clean potential closing tags / limit malicious code
-            tag_value = sub(r"<\s*/\s*div\s*>", "", str(kwds['div']))
+            tag_value = re.sub(r"<\s*/\s*div\s*>", "", str(kwds['div']))
             tag_value = f"        <div{idd}{claz}{style}>{tag_value}</div>"
             self.__content.append(AsIsText(tag_value))
         # text content is escaped and embedded in paragraph tag by default
@@ -267,7 +267,7 @@ class Visitor(Cell):
         # pre -- display preformatted text
         if 'pre' in kwds:
             # clean potential closing tags / limit malicious code
-            tag_value = sub(r"<\s*/\s*pre\s*>", "", str(kwds['pre']))
+            tag_value = re.sub(r"<\s*/\s*pre\s*>", "", str(kwds['pre']))
             tag_value = f"<pre{idd}{claz}{style}>{tag_value}</pre>"
             self.__content.append(AsIsText(tag_value))
         return
