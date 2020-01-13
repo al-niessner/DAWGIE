@@ -62,6 +62,7 @@ class LogDeferredException(object):
     def log (self, err): logging.exception (self.__label, exc_info=err.value)
     def run (self, *_args, **_kwds):
         import dawgie.context
+        import dawgile.pl.state
         dawgie.context.fsm = dawgie.pl.state.FSM()
         dawgie.context.fsm.args = self.__args
         dawgie.context.fsm.starting_trigger()
