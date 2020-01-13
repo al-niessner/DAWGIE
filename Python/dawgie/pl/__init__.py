@@ -62,3 +62,13 @@ class LogDeferredException(object):
     def log (self, err): logging.exception (self.__label, exc_info=err.value)
     def run (self, *_args, **_kwds): return self.__cb()
     pass
+
+def _main(fsm_args):
+    import dawgie.context
+    dawgie.context.fsm = dawgie.pl.state.FSM()
+    dawgie.context.fsm.args = fsm_args
+    dawgie.context.fsm.starting_trigger()
+    return
+
+def _merge (old:int, new:int, offset:int, req:int):
+    return req if (old + offset) != req else (new + offset)
