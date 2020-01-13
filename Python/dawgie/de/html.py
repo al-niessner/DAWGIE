@@ -41,7 +41,7 @@ import bokeh
 import dawgie
 import html
 import io
-impor re
+import re
 
 class AsIsText(object):
     # pylint: disable=too-few-public-methods
