@@ -44,7 +44,6 @@ import dawgie.db
 import dawgie.pl.farm
 import dawgie.pl.message
 import dawgie.pl.schedule
-import dawgie.pl.start
 import dawgie.security
 import dawgie.util
 import importlib
@@ -73,7 +72,7 @@ class Hand(twisted.internet.protocol.Protocol):
         elif msg.type == dawgie.pl.message.Type.response: self._res(msg)
         elif msg.type == dawgie.pl.message.Type.status:
             if msg.revision != dawgie.context.git_rev or \
-                   not dawgie.pl.start.fsm.is_pipeline_active():
+                   not dawgie.context.fsm.is_pipeline_active():
                 dawgie.pl.message.send (self._abort, self)
                 log.warning ('Worker and pipeline revisions are not the same.')
             else: dawgie.pl.message.send (self.__proceed, self)
@@ -149,7 +148,7 @@ class Hand(twisted.internet.protocol.Protocol):
         _time[_busy[-1]] = datetime.datetime.now()
         return dawgie.pl.message.send (task, self)
 
-    def notify (self, keep=dawgie.pl.start.fsm.is_pipeline_active()):
+    def notify (self, keep=dawgie.context.fsm.is_pipeline_active()):
         if not keep:
             dawgie.pl.message.send (self._abort, self)
             self.transport.loseConnection()
@@ -222,7 +221,7 @@ def dispatch():
     jobs = dawgie.pl.schedule.next_job_batch()
 
     if archive and not sum ([len(jobs),len(_busy),len(_cluster),len(_cloud)]):
-        dawgie.pl.start.fsm.archiving_trigger()
+        dawgie.context.fsm.archiving_trigger()
         pass
 
     for j in jobs:
@@ -271,7 +270,7 @@ def dispatch():
 
 def notifyAll():
     # pylint: disable=protected-access
-    keep = dawgie.pl.start.fsm.is_pipeline_active()
+    keep = dawgie.context.fsm.is_pipeline_active()
     dawgie.pl.farm._workers = [w for w in filter (lambda w:w.notify(keep),
                                                   _workers)]
     return
@@ -306,10 +305,10 @@ def rerunid (job):
 
 def something_to_do():
     # pylint: disable=too-many-branches,too-many-statements
-    if dawgie.pl.start.fsm.waiting_on_crew() and not _agency:
+    if dawgie.context.fsm.waiting_on_crew() and not _agency:
         log.info("farm.dispatch: Waiting for crew to finish...")
         return False
-    if not dawgie.pl.start.fsm.is_pipeline_active():
+    if not dawgie.context.fsm.is_pipeline_active():
         log.info("Pipeline is not active. Returning from farm.dispatch().")
         return False
     return True

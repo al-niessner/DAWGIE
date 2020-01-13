@@ -48,7 +48,6 @@ import dawgie.de
 import dawgie.pl.farm
 import dawgie.pl.logger.fe
 import dawgie.pl.schedule
-import dawgie.pl.start
 import enum
 import json
 import logging; log = logging.getLogger(__name__)
@@ -78,7 +77,7 @@ def log_messages():
     return json.dumps (dawgie.pl.logger.fe.remembered()).encode()
 
 def pl_state():
-    return json.dumps ({'name':dawgie.pl.start.fsm.state,
+    return json.dumps ({'name':dawgie.context.fsm.state,
                         'status':'active'}).encode()
 
 def schedule_crew():
@@ -171,7 +170,7 @@ def start_changeset():
     return dawgie.context.git_rev.encode('utf-8')
 
 def start_state():
-    return json.dumps ({'name':dawgie.pl.start.fsm.state,
+    return json.dumps ({'name':dawgie.context.fsm.state,
                         'status':'active'}).encode()
 
 start_submit = submit.Defer()
