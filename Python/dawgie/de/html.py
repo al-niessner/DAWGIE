@@ -41,6 +41,7 @@ import bokeh
 import dawgie
 import html
 import io
+import re
 
 class AsIsText(object):
     # pylint: disable=too-few-public-methods
@@ -50,7 +51,9 @@ class AsIsText(object):
         return
 
     def _render (self, buf:io.StringIO): buf.write (self.__text)
+
     pass
+
 
 class Cell(dawgie.Visitor):
     # pylint: disable=protected-access
@@ -80,10 +83,12 @@ class Cell(dawgie.Visitor):
         self.__content.append (AsIsText('<p>' + html.escape (content) + '</p>'))
         return
 
-    def add_table (self, clabels:[str], rows:int=0, title:str=None)->'TableVisitor':
+    def add_table (self, clabels:[str], rows:int=0, title:str=None)->'dawgie.TableVisitor':
         self.__content.append (Table(clabels, rows, title))
         return self.__content[-1]
+
     pass
+
 
 class Table(dawgie.TableVisitor):
     # pylint: disable=protected-access,too-few-public-methods
@@ -137,17 +142,24 @@ class Table(dawgie.TableVisitor):
                                                 range (c - len (col) + 1)])
             pass
         return self.__table[r][c]
+
     pass
 
+
 class Visitor(Cell):
-    def __init__ (self):
-        Cell.__init__ (self)
+    void_elements = ["area", "base", "br", "col", "embed", "hr", "img",
+                     "input", "link", "meta", "param", "source", "track",
+                     "wbr"]
+
+    def __init__(self):
+        Cell.__init__(self)
+        self.__css = []
         self.__decl = []
         self.__js = []
         self.__title = 'Undefined Visitee'
         pass
 
-    def add_declaration (self, text:str, **kwds)->None:
+    def add_declaration(self, text: str, **kwds) -> None:
         style = (' style="' + kwds['style'] + '" ') if 'style' in kwds else ''
 
         if 'div' in kwds: self.__decl.append (kwds['div'])
@@ -169,19 +181,124 @@ class Visitor(Cell):
             pass
         return
 
-    def render(self)->str:
+    def add_declaration_inline(self, text: str, **kwds) -> None:
+        # attributes that apply to presentation
+        # class allows application of predefined css within preloaded
+        #     stylesheets files -- if file isn't preloaded there is no effect
+        claz = f" class=\"{html.escape(str(kwds['class']))}\" " if 'class' in kwds else ""
+        # id allows reference via scripting and link references
+        idd = f" id=\"{html.escape(str(kwds['id']))}\" " if 'id' in kwds else ""
+        # style allows direct application of raw css to enclosed content
+        # escape double-quotes only, allow single-quotations for css
+        # html.escape() rules out certain advanced constructs but they can
+        # be inserted via a stylesheet
+        attrib_value = html.escape(str(kwds['style']),
+                                   quote=False).replace("\"", "&quot;")
+        style = f" style=\"{attrib_value}\" " if 'style' in kwds else ""
+
+        # tags for configuration settings (e.g. __<custom_name> in class vars)
+        # -- embed external files before inline scripts --
+        # list of relative uris from SV display page directory,
+        #     e.g. '../../javascripts/application.js'
+        if 'javascript' in kwds:
+            tag_value = html.escape(str(kwds['javascript']))
+            tag_value = f"        <script type=\"text/javascript\" src=\"{tag_value}\"></script>"
+            self.__js.append(tag_value)
+        # list of relative uris from SV display page directory,
+        #     e.g. '../../stylesheets/application.css'
+        if 'stylesheet' in kwds:
+            # <link rel = "stylesheet" type = "text/css" href = "myStyle.css" />
+            # <link href="mystyles.css" rel="preload" as="style">
+            tag_value = html.escape(str(kwds['stylesheet']))
+            tag_value = f"        <link href=\"{tag_value}\" rel=\"preload\" as=\"style\">"
+            self.__css.append(tag_value)
+        # -- embed inline text after external files to allow customizations --
+        # plain text representing a raw stylesheet that will be embedded directly
+        #     into the document via a style tag
+        if 'css' in kwds:
+            # clean potential closing tags / limit malicious code
+            tag_value = re.sub(r"<\s*/\s*style\s*>", "", str(kwds['css']))
+            tag_value = f"        <style>{tag_value}</style>"
+            self.__css.append(tag_value)
+        # plain text representing a raw javascript block that will be embedded
+        #     directly into the document via a script tag
+        if 'js' in kwds:
+            # clean potential closing tags / limit malicious code
+            tag_value = re.sub(r"<\s*/\s*script\s*>", "", str(kwds['js']))
+            tag_value = f"        <script type=\"text/javascript\">{tag_value}</script>"
+            self.__js.append(tag_value)
+        # title composed from text, value ignored -- maintain for backwards comp
+        if 'title' in kwds:
+            # if defined use title value and ignore text
+            if kwds['title'] is not None and str(kwds['title']).strip():
+                self.__title = html.escape(str(kwds['title']))
+            else:
+                self.__title = html.escape(text)
+
+        # content + tags for presentation (e.g. __decl in class vars)
+        # the div value is inserted into the div -- useful for images, etc.
+        if 'div' in kwds:
+            # clean potential closing tags / limit malicious code
+            tag_value = re.sub(r"<\s*/\s*div\s*>", "", str(kwds['div']))
+            tag_value = f"        <div{idd}{claz}{style}>{tag_value}</div>"
+            self.__content.append(AsIsText(tag_value))
+        # text content is escaped and embedded in paragraph tag by default
+        #     unless different tag is specified in kwds
+        if text and 'title' not in kwds:
+            tag = str(kwds['tag']) if 'tag' in kwds else "p"
+            tag = tag if tag.strip() else "p"
+            tag_open = f"<{tag}{idd}{claz}{style}>"
+            tag_close = f"</{tag}>" if tag.strip() not in self.void_elements else ""
+            self.__content.append(AsIsText(tag_open + html.escape(text) + tag_close))
+        # NOTE that list and pre are placed below text to allow a compound
+        #     add_declaration statement that includes text, tag, pre and/or
+        #     list that places a paragraph above the formatted content to
+        #     allow prose to describe the reported values
+        # lists -- list should actually be a list of items as a str will parse
+        #          into its constituent chars
+        if 'list' in kwds:
+            # value of enum is ignored but presence implies numbered list
+            tag_value = "ol" if 'enum' in kwds else "ul"
+            self.__content.append(AsIsText(f"<{tag_value}{idd}{claz}{style}>"))
+            for item in list(kwds['list']):
+                item = html.escape(item)
+                self.__content.append(AsIsText(f"<li>{item}</li>"))
+            self.__content.append(AsIsText(f"</{tag_value}>"))
+        # pre -- display preformatted text
+        if 'pre' in kwds:
+            # clean potential closing tags / limit malicious code
+            tag_value = re.sub(r"<\s*/\s*pre\s*>", "", str(kwds['pre']))
+            tag_value = f"<pre{idd}{claz}{style}>{tag_value}</pre>"
+            self.__content.append(AsIsText(tag_value))
+        return
+
+    def render(self) -> str:
         buf = io.StringIO()
-        buf.write ('<!DOCTYPE HTML><html lang="en-US"><head>')
-        buf.write ('<meta charset="UTF-8"><title>')
-        buf.write (self.__title)
-        buf.write ('</title>')
-        buf.write ('''<script src="https://cdn.pydata.org/bokeh/release/bokeh-{0}.min.js"></script>
-<script src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-{0}.min.js"></script>
-<script src="https://cdn.pydata.org/bokeh/release/bokeh-tables-{0}.min.js"></script>'''.format (bokeh.__version__))
-        for js in self.__js: buf.write (js)
-        buf.write ('</head><body>')
-        for d in self.__decl: buf.write (d)
-        self._render (buf)
-        buf.write ('</body></html>')
+        buf.write(f"<!DOCTYPE HTML>")
+        buf.write(f"<html lang=\"en-US\">")
+        buf.write(f"    <head>")
+        buf.write(f"        <meta charset=\"UTF-8\">")
+        buf.write(f"        <title>{self.__title}</title>")
+        buf.write(f"        <script type=\"text/javascript\" " +
+                  f"src=\"https://cdn.pydata.org/bokeh/release/bokeh-{bokeh.__version__}.min.js\"></script>")
+        buf.write(f"        <script type=\"text/javascript\" " +
+                  f"src=\"https://cdn.pydata.org/bokeh/release/bokeh-widgets-{bokeh.__version__}.min.js\"></script>")
+        buf.write(f"        <script type=\"text/javascript\" " +
+                  f"src=\"https://cdn.pydata.org/bokeh/release/bokeh-tables-{bokeh.__version__}.min.js\"></script>")
+        for js in self.__js:
+            buf.write(js)
+        for css in self.__css:
+            buf.write(css)
+        buf.write(f"    </head>")
+        buf.write(f"    <body>")
+        # 20200102: write self.__decl for backwards compatibility
+        for d in self.__decl:
+            buf.write(d)
+        # iff using add_declaration_inline(...) then declarations are
+        #     rendered in order with add_primitive(...), tables, etc.
+        self._render(buf)
+        buf.write(f"    </body>")
+        buf.write(f"</html>")
         return buf.getvalue()
+
     pass
