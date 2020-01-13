@@ -1,4 +1,4 @@
-''' Front-End for SDP
+'''Built-in Front-End for DAWGIE
 
 COPYRIGHT:
 Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
@@ -37,17 +37,24 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import os
-import sys
-sys.path.append (os.path.abspath (os.path.join (
-    os.path.dirname (os.path.abspath (__file__)), '../../..')))
-
 import dawgie.context
 import dawgie.fe
+import os
 import twisted.internet
 import twisted.web.resource
 import twisted.web.server
 
 factory = twisted.web.server.Site(dawgie.fe.root())
-twisted.internet.reactor.listenTCP (dawgie.context.fe_port, factory)
+
+if dawgie.context.ssl_pem_file:
+    if os.path.isfile (dawgie.context.ssl_pem_file):
+        with open (dawgie.context.ssl_pem_file, 'rt') as f: cert = f.read()
+        cert = twisted.internet.ssl.PrivateCertificate.loadPEM(cert)
+        twisted.internet.reactor.listenSSL (dawgie.context.fe_port,
+                                            factory,
+                                            cert.options())
+    else:
+        raise FileNotFoundError(dawgie.context.ssl_pem_file)
+else: twisted.internet.reactor.listenTCP (dawgie.context.fe_port, factory)
+
 twisted.internet.reactor.run()

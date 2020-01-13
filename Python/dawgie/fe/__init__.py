@@ -1,4 +1,4 @@
-''' Front-End for SDP
+'''Built-in Front-End for DAWGIE
 
 COPYRIGHT:
 Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
@@ -37,6 +37,9 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+import dawgie.context
+import dawgie.de
+import dawgie.pl.start
 import enum
 import inspect
 import logging; log = logging.getLogger(__name__)
@@ -145,7 +148,7 @@ class StaticContent(twisted.web.resource.Resource):
 
 def _is_active (fn):
     try:
-        is_active = dawgie.pl.start.sdp.is_pipeline_active()
+        is_active = dawgie.pl.start.fsm.is_pipeline_active()
         is_active |= fn.endswith ('pages/pipelines/index.html')
     except NameError: is_active = True
     return is_active
@@ -207,20 +210,5 @@ def root() -> bytes:
     _root.putChild (b'stylesheets', StaticContent())
     return _root
 
-if __name__ == '__main__':
-    import sys
-    sys.path.append (os.path.abspath (os.path.join (
-        os.path.dirname (os.path.abspath (__file__)), '../../..')))
-    import dawgie.context
-    import dawgie.db
-    import dawgie.fe.app
-    import dawgie.pl.start
-    dawgie.context.db_path = '/home/niessner/Data/Exoplanet/db'
-    dawgie.db.open()
-    # pylint: disable=protected-access
-    dawgie.pl.start._run (8181, root())
-else:
-    import dawgie.context
-    import dawgie.fe.app
-    import dawgie.pl.start
-    pass
+# pylint: disable=ungrouped-imports
+import dawgie.fe.app  # build all of the dynamic hooks now

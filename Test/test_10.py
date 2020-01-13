@@ -58,9 +58,9 @@ class Farm(unittest.TestCase):
         self.assertFalse (dawgie.pl.farm.something_to_do())
         dawgie.pl.farm._agency = True
         self.assertFalse (dawgie.pl.farm.something_to_do())
-        dawgie.pl.start.sdp.wait_on_crew.clear()
+        dawgie.pl.start.fsm.wait_on_crew.clear()
         self.assertFalse (dawgie.pl.farm.something_to_do())
-        dawgie.pl.start.sdp.start == 'running'
+        dawgie.pl.start.fsm.start == 'running'
         self.assertTrue (dawgie.pl.farm.something_to_do())
         return
     pass

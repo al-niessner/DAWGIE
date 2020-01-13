@@ -39,6 +39,7 @@ NTR:
 
 from dawgie.fe import Defer as absDefer
 
+import dawgie.context
 import dawgie.pl.start
 import dawgie.tools.submit
 import json
@@ -86,10 +87,10 @@ class Process(object):
 
     def failure (self, fail):
         if self.__request is not None:
-            if dawgie.pl.start.sdp.state == 'gitting':\
-               dawgie.pl.start.sdp.running_trigger()
+            if dawgie.pl.start.fsm.state == 'gitting':\
+               dawgie.pl.start.fsm.running_trigger()
             else: log.info ('Process.failure() state is not gitting: %s',
-                            str(dawgie.pl.start.sdp.state))
+                            str(dawgie.pl.start.fsm.state))
 
             self.__request.write (json.dumps (self.__msg).encode())
             try: self.__request.finish()
@@ -99,12 +100,12 @@ class Process(object):
                 pass
             self.__clear()
             self.__request = None
-            dawgie.tools.submit.mail_out (dawgie.tools.submit.mail_list_all,
-                                          self.__msg['alert_message'])
+            dawgie.tools.submit.mail_out (self.__msg['alert_message'])
         else: log.info ('Process.failure() self.__request is None')
         return fail
 
     def step_0 (self):
+        dawgie.tools.submit.mail_list = dawgie.context.email_alerts_to
         d = twisted.internet.defer.Deferred()
         d.addCallback (self.step_1)
         d.addCallbacks (self.step_2, self.failure)
@@ -114,7 +115,7 @@ class Process(object):
 
     def step_1(self, _result):
         '''transition pipeline state to gitting'''
-        if not dawgie.pl.start.sdp.is_pipeline_active():
+        if not dawgie.pl.start.fsm.is_pipeline_active():
             log.warning("submit: pipeline is not active, cannot submit.")
             self.__msg = {'alert_status':'danger',
                           'alert_message':'The pipeline is not active so cannot submit.'}
@@ -128,7 +129,7 @@ class Process(object):
             return twisted.python.failure.Failure(Exception())
 
         # Go To: gitting state
-        dawgie.pl.start.sdp.gitting_trigger()
+        dawgie.pl.start.fsm.gitting_trigger()
         return
 
     def step_2(self, _result):
@@ -169,7 +170,7 @@ class Process(object):
 
     def step_5(self, _result):
         '''go back to running and respond with status'''
-        dawgie.pl.start.sdp.running_trigger()
+        dawgie.pl.start.fsm.running_trigger()
         result = {'alert_status':'success',
                   'alert_message':'Submission successful scheduling update.'}
         log.info("Going to the crossroads.")
@@ -180,8 +181,8 @@ class Process(object):
                            str (result))
             pass
         self.__clear()
-        dawgie.pl.start.sdp.set_submit_info(self.__changeset, self.__submission)
-        dawgie.pl.start.sdp.submit_crossroads()
+        dawgie.pl.start.fsm.set_submit_info(self.__changeset, self.__submission)
+        dawgie.pl.start.fsm.submit_crossroads()
         return
     pass
 
