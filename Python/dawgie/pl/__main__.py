@@ -47,7 +47,7 @@ import matplotlib; matplotlib.use("Agg")
 import twisted.internet
 import sys
 
-from . import _main,_merge
+from . import _merge
 
 ap = argparse.ArgumentParser(description='The main routine to run the fully automated pipeline.')
 ap.add_argument ('-l', '--log-file', default='dawgie.log', required=False,
@@ -86,7 +86,7 @@ if args.port != dawgie.context.fe_port:
 
 dawgie.context.log_level = args.log_level
 dawgie.context.override (args)
-twisted.internet.reactor.callLater (0, dawgie.pl.LogDeferredException(_main, 'starting the pipeline').callback, (args,))
+twisted.internet.reactor.callLater (0, dawgie.pl.LogDeferredException(args, 'starting the pipeline').callback, None)
 twisted.internet.reactor.run()
 print ('calling system exit...')
 sys.exit()

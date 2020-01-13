@@ -48,8 +48,8 @@ import logging
 import twisted.internet.defer
 
 class LogDeferredException(object):
-    def __init__ (self, cb, label):
-        self.__cb = cb
+    def __init__ (self, args, label):
+        self.__args = args
         self.__deferred = twisted.internet.defer.Deferred()
         self.__deferred.addCallback (self.run).addErrback (self.log)
         self.__label = label
@@ -60,15 +60,13 @@ class LogDeferredException(object):
     @property
     def deferred (self): return self.__deferred
     def log (self, err): logging.exception (self.__label, exc_info=err.value)
-    def run (self, *_args, **_kwds): return self.__cb()
+    def run (self, *_args, **_kwds):
+        import dawgie.context
+        dawgie.context.fsm = dawgie.pl.state.FSM()
+        dawgie.context.fsm.args = self.__args
+        dawgie.context.fsm.starting_trigger()
+        return
     pass
-
-def _main(args):
-    import dawgie.context
-    dawgie.context.fsm = dawgie.pl.state.FSM()
-    dawgie.context.fsm.args = args
-    dawgie.context.fsm.starting_trigger()
-    return
 
 def _merge (old:int, new:int, offset:int, req:int):
     return req if (old + offset) != req else (new + offset)
