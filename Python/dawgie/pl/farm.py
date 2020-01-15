@@ -279,11 +279,11 @@ def plow():
     # necessary to do import here because items in dawgie.pl.aws depend on
     # classes defined in this module. Therefore, have to turn off some pylint.
     # pylint: disable=redefined-outer-name
-    import dawgie.pl.aws
+    import dawgie.pl.worker.aws
 
     if dawgie.context.cloud_provider == dawgie.context.CloudProvider.aws:
         # pylint: disable=protected-access
-        dawgie.pl.farm._agency = dawgie.pl.aws
+        dawgie.pl.farm._agency = dawgie.pl.worker.aws
         _agency.initialize()
         pass
 
