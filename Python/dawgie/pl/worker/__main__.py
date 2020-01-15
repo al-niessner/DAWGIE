@@ -41,6 +41,7 @@ NTR:
 
 import argparse
 import dawgie.context
+import dawgie.pl.state
 import dawgie.pl.worker
 import dawgie.pl.worker.aws
 import dawgie.pl.worker.cluster
@@ -77,6 +78,7 @@ sys.path.insert (0, python_path)
 dawgie.security.initialize (os.path.expandvars
                             (os.path.expanduser
                              (args.gpg_home)))
+dawgie.context.fsm = dawgie.pl.state.FSM()
 try:
     if args.cloud_provider == 'aws': \
        dawgie.pl.worker.aws.execute ((args.hostname, args.port),
