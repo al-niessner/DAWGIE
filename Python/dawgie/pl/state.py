@@ -326,7 +326,6 @@ class FSM(object):
 
     def is_todo_done(self):
         import dawgie.pl.schedule
-        import dawgie.pl.start
         while dawgie.pl.schedule.que and self.waiting_on_todo():
             time.sleep(0.2)
         return
@@ -417,13 +416,13 @@ class FSM(object):
         return
 
     def state_view(self):
+        import dawgie.context
         import dawgie.pl.dag
-        import dawgie.pl.start
         import dawgie.pl.schedule
 
         self.nodes[self.prior_state].set_fillcolor(self.inactive_color)
-        self.prior_state = dawgie.pl.start.fsm.state
-        self.nodes[dawgie.pl.start.fsm.state].set_fillcolor(self.active_color)
+        self.prior_state = dawgie.context.fsm.state
+        self.nodes[dawgie.context.fsm.state].set_fillcolor(self.active_color)
         return dawgie.pl.dag.Construct.graph (self.graph, [], 'current.svg')
 
     def submit_crossroads(self):
