@@ -164,7 +164,7 @@ class Func(enum.IntEnum):
 
 class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
     def __iter__(self):
-        for kv in self.__span.items: yield kv
+        for kv in self.__span.items(): yield kv
         return
 
     # pylint: disable=too-many-arguments
