@@ -163,7 +163,9 @@ class Func(enum.IntEnum):
     pass
 
 class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
-    def __iter__(self): raise StopIteration()
+    def __iter__(self):
+        for kv in self.__span.items: yield kv
+        return
 
     # pylint: disable=too-many-arguments
     def __to_key (self, runid, tn, taskn, algn, svn, vn):
@@ -184,8 +186,6 @@ class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
             result[3] = isinstance (value.implementation(), int)
         except: pass
         return all (result)
-
-    def as_dict (self) -> dict: return self.__span
 
     def _collect (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
         self.__span = {}
