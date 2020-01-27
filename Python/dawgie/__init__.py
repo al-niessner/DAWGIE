@@ -136,6 +136,16 @@ class Distribution(enum.Enum):
     pass
 
 # An enumeration of allowable factories in ae/<task>/__init__.py
+# The should follow this form:
+#     analysis (prefix:str, ps_hint:int=0, runid:int=-1)
+#     events()
+#     regression (prefix:str, ps_hint:int=0, target:str='__none__')
+#     task (prefix:str, ps_hint:int=0, runid:int=-1, target:str='__none__')
+# where
+#     prefix must be supplied
+#     ps_hint is a pool size hint for multiprocessing and should default to 0
+#     runid is the data to retrieve and should default to -1
+#     target is the name to be used for look up and should default to __none__
 class Factories(enum.Enum):
     analysis = enum.auto()  # create an dawgie.Analysis for all targets
     events = enum.auto()    # list of dawgie.EVENT

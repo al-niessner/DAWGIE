@@ -200,17 +200,30 @@ def main():
     return yes
 
 def rule_01 (task):
-    '''Verify that their is a factory function.
+    '''Verify that there is at least one factory function.
 
-    The architecture requires that each package within dawgie.ae have a
-    task() if they want to be detected. Obviously, if -t or --task-list
-    was not specified, then this unit will always pass because auto-detection
-    uses the task() in the package to identify the package as a task.
+    The architecture requires that AE packages either have ignore=True attribute
+    or one of the abstract factory names defined by dawgie.Factories. Each of
+    these abstract factories requires some number of parameters and some have
+    default values. They should look like:
+
+        analysis (prefix:str, ps_hint:int=0, runid:int=-1)
+        events()
+        regression (prefix:str, ps_hint:int=0, target:str='__none__')
+        task (prefix:str, ps_hint:int=0, runid:int=-1, target:str='__none__')
+
+    where
+        prefix must be supplied
+        ps_hint is a pool size hint for multiprocessing and should default to 0
+        runid is the data to retrieve and should default to -1
+        target is the name to be used for look up and should default to __none__
     '''
-    fargs = {dawgie.Factories.analysis:3,
-             dawgie.Factories.task:4,
-             dawgie.Factories.events:0,
-             dawgie.Factories.regress:3}
+    fargs = {dawgie.Factories.analysis:(3, ['', '=0', '=-1'], ['','int','int']),
+             dawgie.Factories.events:(0, [], []),
+             dawgie.Factories.regress:(3, ['', '=0', "='__none__'"],
+                                       ['','int','str']),
+             dawgie.Factories.task:(4, ['', '=0', '=-1', "='__none__'"],
+                                    ['','int','int','str'])}
     findings = []
     mod = importlib.import_module (task)
     names = dir (mod)
@@ -222,9 +235,29 @@ def rule_01 (task):
         f = getattr (mod, e.name)
         findings.append (inspect.isfunction (f) and
                          len (inspect.signature (f).parameters.keys()) ==
-                         fargs[e])
+                         fargs[e][0])
 
-        if not findings[-1]: logging.error ('Number of arguments for task %s in package %s', e.name, task)
+        if findings[-1]:
+            findings.append (True)
+            for d,v in zip (fargs[e][1],
+                            inspect.signature (f).parameters.values()):
+                if d: findings[-1] &= str(v).endswith (d)
+                pass
+
+            if findings[-1]:
+                findings.append (True)
+                for d,v in zip (fargs[e][2],
+                                inspect.signature (f).parameters.values()):
+                    if d: findings[-1] &= 0 < str(v).find (':' + d + '=')
+                    pass
+                if not findings[-1]:
+                    logging.error ('Args not typed of factory %s in package %s',
+                                   e.name, task)
+                    pass
+            else: logging.error ('Missing defaults of factory %s in package %s',
+                                 e.name, task)
+        else: logging.error ('Number of arguments for factory %s in package %s',
+                             e.name, task)
         pass
     return all (findings)
 
