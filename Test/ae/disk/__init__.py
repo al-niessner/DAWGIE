@@ -38,6 +38,6 @@ NTR:
 '''
 ignore = False  # forces the pipeline to ignore this package (aka task)
 
-def task (prefix, ps_hint=0, runid=-1, target='__none__'):
+def task (prefix, ps_hint:int=0, runid:int=-1, target:str='__none__'):
     import ae.disk.bot
     return ae.disk.bot.Actor(prefix, ps_hint, runid, target)

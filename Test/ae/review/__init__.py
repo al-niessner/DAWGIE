@@ -39,10 +39,10 @@ NTR:
 ignore = False  # forces the pipeline to ignore this package (aka task)
 
 # pylint: disable=redefined-builtin
-def analysis (prefix, ps_hint=0, runid=-1):
+def analysis (prefix, ps_hint:int=0, runid:int=-1):
     import ae.review.bot
     return ae.review.bot.Actor(prefix, ps_hint, runid)
 
-def regress (prefix, ps_hint=0, target='__none__'):
+def regress (prefix, ps_hint:int=0, target:str='__none__'):
     import ae.review.bot
     return ae.review.bot.Regress(prefix, ps_hint, target)
