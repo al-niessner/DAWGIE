@@ -219,7 +219,7 @@ def rule_01 (task):
         target is the name to be used for look up and should default to __none__
     '''
     fargs = {dawgie.Factories.analysis:(3, ['', '=0', '=-1'], ['','int','int']),
-             dawgie.Factories.events:(0, []),
+             dawgie.Factories.events:(0, [], []),
              dawgie.Factories.regress:(3, ['', '=0', "='__none__'"],
                                        ['','int','str']),
              dawgie.Factories.task:(4, ['', '=0', '=-1', "='__none__'"],
