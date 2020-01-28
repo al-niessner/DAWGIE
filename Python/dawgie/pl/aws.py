@@ -169,7 +169,7 @@ class Connect(object):
         self._log.info ('advertise: ' + response)
 
         if response != 'position posted': self._respond (self._job, False)
-        else: self._callLater (0, dawgie.pl.LogDeferredException (self.interview, 'while interviewing requester').callback, None)
+        else: self._callLater (0, dawgie.pl.LogDeferredException (self.interview, 'while interviewing requester', __name__).callback, None)
         return
 
     def interview (self):
@@ -187,8 +187,8 @@ class Connect(object):
             c,h,l,_i,s = json.loads (response)
 
             if c and h == 'Healthy' and l == 'InService' and s:
-                self._callLater (0, dawgie.pl.LogDeferredException(self.hire, 'while hiring requestor').callback, None)
-            else: self._callLater (15, dawgie.pl.LogDeferredException(self.interview, 'while interviewing requester').callback, None)
+                self._callLater (0, dawgie.pl.LogDeferredException(self.hire, 'while hiring requestor', __name__).callback, None)
+            else: self._callLater (15, dawgie.pl.LogDeferredException(self.interview, 'while interviewing requester', __name__).callback, None)
         pass
         return
 
@@ -296,7 +296,7 @@ def _sqs_push (msg):
     return
 
 def do (job, respond):
-    twisted.internet.reactor.callLater (0, dawgie.pl.LogDeferredException (Connect (job, respond).advertise, 'while advertising AWS service').callback, None)
+    twisted.internet.reactor.callLater (0, dawgie.pl.LogDeferredException (Connect (job, respond).advertise, 'while advertising AWS service', __name__).callback, None)
     return
 
 def exchange (message):  # AWS lambda function
