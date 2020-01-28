@@ -108,7 +108,7 @@ if __name__ == '__main__':
 
     dawgie.context.log_level = dawgie.pl.start.args.log_level
     dawgie.context.override (dawgie.pl.start.args)
-    twisted.internet.reactor.callLater (0, dawgie.pl.LogDeferredException(dawgie.pl.start._main, 'starting the pipeline').callback, None)  # pylint:  disable=protected-access
+    twisted.internet.reactor.callLater (0, dawgie.pl.LogDeferredException(dawgie.pl.start._main, 'starting the pipeline', __name__).callback, None)  # pylint:  disable=protected-access
     twisted.internet.reactor.run()
     print ('calling system exit...')
     sys.exit()
