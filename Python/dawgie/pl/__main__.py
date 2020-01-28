@@ -86,7 +86,7 @@ if args.port != dawgie.context.fe_port:
 
 dawgie.context.log_level = args.log_level
 dawgie.context.override (args)
-twisted.internet.reactor.callLater (0, dawgie.pl.LogDeferredException(args, 'starting the pipeline').callback, None)
+twisted.internet.reactor.callLater (0, dawgie.pl.LogDeferredException(args, 'starting the pipeline', 'dawgie.pl').callback, None)
 twisted.internet.reactor.run()
 print ('calling system exit...')
 sys.exit()

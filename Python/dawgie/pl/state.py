@@ -345,7 +345,7 @@ class FSM(object):
             dawgie.pl.farm.notifyAll()
             dawgie.pl.farm.clear()
             d = twisted.internet.threads.deferToThread(self._pipeline, 2)
-            d.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while loading the pipeline').log)
+            d.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while loading the pipeline', __name__).log)
             pass
         return
 
@@ -371,7 +371,7 @@ class FSM(object):
         else:
             log.info ('Reload the pipeline')
             d = twisted.internet.threads.deferToThread(self._reload, 2)
-            d.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while reloading the pipeline').log)
+            d.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while reloading the pipeline', __name__).log)
             pass
         return
 
@@ -463,7 +463,7 @@ class FSM(object):
 
         if self.crew_thread is None:
             self.crew_thread = twisted.internet.threads.deferToThread(self.is_crew_done)
-            self.crew_thread.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while signaling crew is done').log)
+            self.crew_thread.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while signaling crew is done', __name__).log)
             pass
         return
 
@@ -483,7 +483,7 @@ class FSM(object):
 
         if self.doing_thread is None:
             self.doing_thread = twisted.internet.threads.deferToThread(self.is_doing_done)
-            self.doing_thread.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while signaling doing is done').log)
+            self.doing_thread.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while signaling doing is done', __name__).log)
             pass
         return
 
@@ -510,7 +510,7 @@ class FSM(object):
 
         if self.todo_thread is None:
             self.todo_thread = twisted.internet.threads.deferToThread(self.is_todo_done)
-            self.todo_thread.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while signaling todo is done').log)
+            self.todo_thread.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while signaling todo is done', __name__).log)
             pass
         return
 

@@ -289,7 +289,7 @@ def plow():
 
     twisted.internet.reactor.listenTCP(int(dawgie.context.farm_port),
                                        Foreman(), dawgie.context.worker_backlog)
-    twisted.internet.task.LoopingCall(dispatch).start(5).addErrback (dawgie.pl.LogDeferredException(None, 'dispatching scheduled jobs to workers on the farm').log)
+    twisted.internet.task.LoopingCall(dispatch).start(5).addErrback (dawgie.pl.LogDeferredException(None, 'dispatching scheduled jobs to workers on the farm', __name__).log)
     return
 
 def rerunid (job):
