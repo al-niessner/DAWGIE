@@ -172,6 +172,21 @@ class FSM(object):
             pass
         return
 
+    def _archive(self, *_args, **_kwds):
+        import dawgie.context
+        import dawgie.db
+        import dawgie.pl.schedule
+        import dawgie.tools.trace
+
+        log.info ('entering state archive')
+        basedir = os.path.abspath (os.path.join (dawgie.context.fe_path,
+                                                 'pages/database'))
+        os.makedirs (basedir, exist_ok=True)
+        dawgie.tools.trace.main (os.path.join(basedir, 'trace_report.html'),
+                                 dawgie.pl.schedule.ae.at)
+        dawgie.db.archive (self._archive_done)
+        return
+
     def _archive_done(self):
         import dawgie.pl.farm
 
@@ -227,9 +242,18 @@ class FSM(object):
             pass
         return
 
-    def _pipeline(self, *args, **kwds):
+    def _navel_gaze (self, *_args, **_kwds):
+        import dawgie.db
+        import dawgie.pl.farm
+        import dawgie.pl.resources
+
+        log.info ('Enter state navel gaze')
+        dawgie.pl.farm.insights = dawgie.pl.resources.distribution\
+                                  (dawgie.db.metrics())
+        return
+
+    def _pipeline(self, *_args, **_kwds):
         # Begin the process of starting the pipeline
-        # pylint: disable=unused-argument
         import dawgie
         import dawgie.db
         import dawgie.pl.scan
@@ -276,23 +300,14 @@ class FSM(object):
         return
 
     def archive (self):
-        import dawgie.context
-        import dawgie.db
         import dawgie.pl.farm
-        import dawgie.pl.schedule
-        import dawgie.tools.trace
 
         if self.__doctest:
             print ('self.archive()')
             self._archive_done()
         elif dawgie.pl.farm.archive:
-            log.info ('entering state archive')
-            basedir = os.path.abspath (os.path.join (dawgie.context.fe_path,
-                                                     'pages/database'))
-            os.makedirs (basedir, exist_ok=True)
-            dawgie.tools.trace.main (os.path.join(basedir, 'trace_report.html'),
-                                     dawgie.pl.schedule.ae.at)
-            dawgie.db.archive (self._archive_done)
+            d = twisted.internet.threads.deferToThread(self._archive, 2)
+            d.addErrback (dawgie.pl.LogDeferredException(None, 'while archiving the pipeline', __name__).log)
         else: self._archive_done()
         return
 
@@ -350,13 +365,10 @@ class FSM(object):
         return
 
     def navel_gaze(self):
-        import dawgie.db
-        import dawgie.pl.farm
-        import dawgie.pl.resources
+        import dawgie.pl
 
-        log.info ('Enter state navel gaze')
-        dawgie.pl.farm.insights = dawgie.pl.resources.distribution\
-                                  (dawgie.db.metrics())
+        d = twisted.internet.threads.deferToThread(self._navel_gaze, 2)
+        d.addErrback (dawgie.pl.LogDeferredException(None, 'while navel gazing', __name__).log)
         return
 
     def reload(self):
