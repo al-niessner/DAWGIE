@@ -242,6 +242,16 @@ class FSM(object):
             pass
         return
 
+    def _navel_gaze (self, *_args, **_kwds):
+        import dawgie.db
+        import dawgie.pl.farm
+        import dawgie.pl.resources
+
+        log.info ('Enter state navel gaze')
+        dawgie.pl.farm.insights = dawgie.pl.resources.distribution\
+                                  (dawgie.db.metrics())
+        return
+
     def _pipeline(self, *_args, **_kwds):
         # Begin the process of starting the pipeline
         import dawgie
@@ -355,13 +365,10 @@ class FSM(object):
         return
 
     def navel_gaze(self):
-        import dawgie.db
-        import dawgie.pl.farm
-        import dawgie.pl.resources
+        import dawgie.pl
 
-        log.info ('Enter state navel gaze')
-        dawgie.pl.farm.insights = dawgie.pl.resources.distribution\
-                                  (dawgie.db.metrics())
+        d = twisted.internet.threads.deferToThread(self._navel_gaze, 2)
+        d.addErrback (dawgie.pl.LogDeferredException(None, 'while navel gazing', __name__).log)
         return
 
     def reload(self):
