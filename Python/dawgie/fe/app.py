@@ -50,8 +50,10 @@ import dawgie.pl.logger.fe
 import dawgie.pl.schedule
 import enum
 import json
+import importlib
 import logging; log = logging.getLogger(__name__)
 import os
+import sys
 
 class Axis(enum.Enum):
     runid = 0
@@ -173,6 +175,21 @@ def start_state():
     return json.dumps ({'name':dawgie.context.fsm.state,
                         'status':'active'}).encode()
 
+def versions():
+    fn = os.path.join (os.path.dirname (__file__), 'requirements.txt')
+    vers = {'dawgie':dawgie.__version__,
+            'python':sys.version}
+    with open (fn, 'rt') as f:
+        for mod_name in f.readlines():
+            mod = importlib.import_module (mod_name)
+
+            if '__version__' in dir(mod):
+                vers[mod_name] = getattr (mod, '__version__')
+            else: vers[mod_name] = 'not-specified'
+            pass
+        pass
+    return json.dumps (vers).encode()
+
 start_submit = submit.Defer()
 sv_renderer = svrender.Defer()
 
@@ -206,3 +223,4 @@ DynamicContent(search_tn, '/app/search/tn')
 DynamicContent(start_changeset, '/app/changeset.txt')
 DynamicContent(start_state, '/app/state/status')
 DynamicContent(start_submit, '/app/submit', [HttpMethod.POST])
+DynamicContent(versions, '/app/versions')

@@ -75,6 +75,15 @@ with open(read_me_file, "rt") as f:
     description = f.read()
 
 deps = read_requirements()
+with open ('dawgie/fe/requirements.txt', 'tw') as f:
+    for dep in sorted (deps):
+        if '>' in dep: dep = dep[:dep.find ('>')]
+        if '=' in dep: dep = dep[:dep.find ('=')]
+
+        f.write (dep)
+        f.write ('\n')
+        pass
+    pass
 setuptools.setup(name='dawgie',
                  version=version,
                  packages=['dawgie',
@@ -112,6 +121,7 @@ setuptools.setup(name='dawgie',
                                              'pages/schedule/index.html',
                                              'pages/search/index.html',
                                              'pages/tasks/index.html',
+                                             'requirements.txt',
                                              'stylesheets/*.css']},
                  author='Al Niessner',
                  author_email='Al.Niessner@jpl.nasa.gov',
