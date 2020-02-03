@@ -183,8 +183,8 @@ def versions():
             'python':sys.version}
     with open (fn, 'rt') as f:
         for name in f.readlines():
-            if name in dl: vars[dist_name] = dl[name]
-            else: vars[dist_name] = 'indeterminate'
+            if name in dl: vers[name] = dl[name]
+            else: vers[name] = 'indeterminate'
             pass
         pass
     return json.dumps (vers).encode()
