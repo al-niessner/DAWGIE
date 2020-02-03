@@ -176,7 +176,7 @@ def start_state():
                         'status':'active'}).encode()
 
 def versions():
-    dl = dict([(d.key, d.value.base_version)
+    dl = dict([(d.key, d.parsed_version.base_version)
                for d in pip.commands.list.get_installed_distributions()])
     fn = os.path.join (os.path.dirname (__file__), 'requirements.txt')
     vers = {'dawgie':dawgie.__version__,
