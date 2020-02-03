@@ -50,8 +50,8 @@ import dawgie.pl.logger.fe
 import dawgie.pl.schedule
 import enum
 import json
-import importlib
 import logging; log = logging.getLogger(__name__)
+import pip
 import os
 import sys
 
@@ -176,16 +176,15 @@ def start_state():
                         'status':'active'}).encode()
 
 def versions():
+    dl = dict([(d.key, d.value.base_version)
+               for d in pip.commands.list.get_installed_distributions()])
     fn = os.path.join (os.path.dirname (__file__), 'requirements.txt')
     vers = {'dawgie':dawgie.__version__,
             'python':sys.version}
     with open (fn, 'rt') as f:
-        for mod_name in f.readlines():
-            mod = importlib.import_module (mod_name)
-
-            if '__version__' in dir(mod):
-                vers[mod_name] = getattr (mod, '__version__')
-            else: vers[mod_name] = 'not-specified'
+        for name in f.readlines():
+            if name in dl: vars[dist_name] = dl[name]
+            else: vars[dist_name] = 'indeterminate'
             pass
         pass
     return json.dumps (vers).encode()
