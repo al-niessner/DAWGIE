@@ -190,6 +190,7 @@ class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
     def _collect (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
         self.__span = {}
         pk = {}
+        span = {}
         tnl = self._keys (Table.target)
         for k in filter (lambda k:k[0] != '-', self._keys (Table.primary)):
             runid = int(k.split ('.')[0])
@@ -203,17 +204,27 @@ class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
                               ref.impl.name(),
                               ref.item.name()])
 
-            if fsvn not in self.__span: self.__span[fsvn] = {}
+            if fsvn not in span: span[fsvn] = {}
 
-            self.__span[fsvn].update (dict([(tn,  pickle.loads (clone))
-                                            for tn in tnl]))
+            span[fsvn].update (dict([(tn, pickle.loads (clone)) for tn in tnl]))
             for vn in ref.item.keys():
                 if isinstance (ref, dawgie.V_REF) and vn != ref.feat: continue
-                for k in filter (lambda k:k.endswith ('.'.join (['',fsvn,vn])),
-                                 pk):
+
+                for k in filter (lambda k,vn=vn:k.endswith
+                                 ('.'.join (['',fsvn,vn])), pk):
                     tn = k.split ('.')[1]
-                    self.__span[fsvn][tn][vn] = self._get (k, Table.primary)
+                    span[fsvn][tn][vn] = self._get (k, Table.primary)
                     pass
+                pass
+            pass
+        for tn in tnl:
+            for fsvn in span:
+                if tn in span[fsvn]:
+                    for vn in span[fsvn][tn]:
+                        self.__span[tn][fsvn][vn] = span[fsvn][tn][vn]
+                        pass
+                    pass
+                pass
             pass
         return
 
