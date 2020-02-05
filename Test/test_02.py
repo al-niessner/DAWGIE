@@ -54,7 +54,8 @@ import unittest
 
 class AWS(unittest.TestCase):
     failed = False
-    def deprecate_test_handshake (self):
+    @unittest.skip ('changes in dawgie.pl.DeferLogException')
+    def test_handshake (self):
         global _https_in,_https_out,_sqs_in,_sqs_out
         kdir = tempfile.mkdtemp()
         _pgp = gnupg.GPG(gnupghome=kdir)
