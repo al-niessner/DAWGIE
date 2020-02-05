@@ -54,7 +54,6 @@ import unittest
 
 class AWS(unittest.TestCase):
     failed = False
-    @unittest.skip ('changes in dawgie.pl.DeferLogException')
     def test_handshake (self):
         global _https_in,_https_out,_sqs_in,_sqs_out
         kdir = tempfile.mkdtemp()
