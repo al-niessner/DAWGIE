@@ -182,7 +182,7 @@ def complete (job, runid, target, timing, status):
 
 def defer():
     if dawgie.pl.schedule.is_paused():
-        twisted.internet.reactor.callLater (10, dawgie.pl.LogDeferredException (defer, 'handling error while scheduling periodic event', __name__).callback, None)
+        twisted.internet.reactor.callLater (10, dawgie.pl.DeferWithLogOnError (defer, 'handling error while scheduling periodic event', __name__).callback, None)
         return
 
     delay = []
@@ -214,7 +214,7 @@ def defer():
         wait = min (delay)
         log.info ('defer() - next wake up time in ' + str (round (wait)) +
                   ' seconds.')
-        twisted.internet.reactor.callLater (round (wait), dawgie.pl.LogDeferredException (defer, 'handling error while scheduling periodic events', __name__).callback, None)
+        twisted.internet.reactor.callLater (round (wait), dawgie.pl.DeferWithLogOnError (defer, 'handling error while scheduling periodic events', __name__).callback, None)
         pass
     return
 
