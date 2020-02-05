@@ -39,7 +39,7 @@ NTR:
 
 import argparse
 import dawgie.context
-import dawgie.pl
+import dawgie.pl.state
 import dawgie.tools.submit
 import dawgie.util
 import logging
@@ -48,6 +48,27 @@ import twisted.internet
 import sys
 
 from . import _merge
+from . import LogFailure
+
+class Start(LogFailure):
+    def __init__ (self, cmdl_args, label, name):
+        LogFailure.__init__(self, label, name)
+        self.__args = cmdl_args
+        self.__deferred = twisted.internet.defer.Deferred()
+        self.__deferred.addCallback (self.run).addErrback (self.log)
+        return
+
+    @property
+    def callback (self): return self.__deferred.callback
+    @property
+    def deferred (self): return self.__deferred
+
+    def run (self, *_args, **_kwds):
+        dawgie.context.fsm = dawgie.pl.state.FSM()
+        dawgie.context.fsm.args = self.__args
+        dawgie.context.fsm.starting_trigger()
+        return
+    pass
 
 ap = argparse.ArgumentParser(description='The main routine to run the fully automated pipeline.')
 ap.add_argument ('-l', '--log-file', default='dawgie.log', required=False,
@@ -86,7 +107,8 @@ if args.port != dawgie.context.fe_port:
 
 dawgie.context.log_level = args.log_level
 dawgie.context.override (args)
-twisted.internet.reactor.callLater (0, dawgie.pl.LogDeferredException(args, 'starting the pipeline', 'dawgie.pl').callback, None)
+twisted.internet.reactor.callLater (0, Start(args, 'starting the pipeline',
+                                             'dawgie.pl').callback, 'main')
 twisted.internet.reactor.run()
 print ('calling system exit...')
 sys.exit()
