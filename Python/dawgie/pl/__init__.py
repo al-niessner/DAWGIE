@@ -48,12 +48,25 @@ import logging; log = logging.getLogger(__name__)
 import twisted.internet.defer
 import twisted.python.failure
 
-class LogDeferredException(object):
-    def __init__ (self, args, label, name):
-        self.__args = args
+class LogFailure(object):
+    # pylint: disable=too-few-public-methods
+    def __init__ (self, label, name):
+        self.__label = 'co: {1} -- {0}'.format (label, name)
+        return
+
+    def log (self, err):
+        if isinstance (err, (Exception,twisted.python.failure.Failure)):
+            log.exception (self.__label, exc_info=err)
+        else: log.error (self.__label)
+        return
+    pass
+
+class DeferWithLogOnError(LogFailure):
+    def __init__ (self, cb, label, name):
+        LogFailure.__init__ (self, label, name)
+        self.__cb = cb
         self.__deferred = twisted.internet.defer.Deferred()
         self.__deferred.addCallback (self.run).addErrback (self.log)
-        self.__label = 'co: {1} -- {0}'.format (label, name)
         return
 
     @property
@@ -61,19 +74,7 @@ class LogDeferredException(object):
     @property
     def deferred (self): return self.__deferred
 
-    def log (self, err):
-        if isinstance (err, (Exception,twisted.python.failure.Failure)):
-            log.exception (self.__label, exc_info=err)
-        else: log.error (self.__label)
-        return
-
-    def run (self, *_args, **_kwds):
-        import dawgie.context
-        import dawgie.pl.state
-        dawgie.context.fsm = dawgie.pl.state.FSM()
-        dawgie.context.fsm.args = self.__args
-        dawgie.context.fsm.starting_trigger()
-        return
+    def run (self, *_args, **_kwds): return self.__cb()
     pass
 
 def _merge (old:int, new:int, offset:int, req:int):
