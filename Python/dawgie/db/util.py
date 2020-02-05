@@ -102,8 +102,7 @@ def rotate(path, orig, backup):
             t = stack.pop()
             for v in backup[t]:
                 ext = v.split(".")[-1]
-                shutil.move(v, "%s/%d.%s.%s" % (path, dawgie.context.db_name,
-                                                t+1, ext))
+                shutil.move(v, "%s/%d.%s.%s" % (path, t+1, dawgie.context.db_name, ext))
         for v in orig:
             ext = v.split(".")[-1]
             shutil.copy(v, "%s/0.%s.%s" % (path, dawgie.context.db_name, ext))
