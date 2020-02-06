@@ -221,6 +221,10 @@ class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
             for fsvn in span:
                 if tn in span[fsvn]:
                     for vn in span[fsvn][tn]:
+                        if tn not in self.__span: self.__span[tn] = {}
+                        if fsvn not in self.__span[tn]:\
+                           self.__span[tn][fsvn] = {}
+
                         self.__span[tn][fsvn][vn] = span[fsvn][tn][vn]
                         pass
                     pass
