@@ -42,18 +42,19 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-# pylint: disable=attribute-defined-outside-init,cell-var-from-loop,import-self,no-self-use,protected-access,too-many-instance-attributes,ungrouped-imports
+# pylint: disable=import-self,protected-access
 
 import collections
 import datetime
 import enum
 import dawgie
 import dawgie.context
+import dawgie.db.lockview
 import dawgie.db.shelf
 import dawgie.db.util
+import dawgie.db.util.aspect
 import dawgie.security
 import dawgie.util
-import dawgie.db.lockview
 import glob
 import logging; log = logging.getLogger(__name__)
 import os
@@ -76,7 +77,8 @@ pipeline_paused = False
 
 class Connector(object):
     # pylint: disable=too-few-public-methods
-    def _acquire (self, name):
+    @staticmethod
+    def _acquire (name):
         s = dawgie.security.connect ((dawgie.context.db_host,
                                       dawgie.context.db_port))
         request = COMMAND(Func.acquire, None, None, name)
@@ -97,7 +99,8 @@ class Connector(object):
     def _copy (self, dst):
         return self.__do (COMMAND(Func.dbcopy, None, None, dst))
 
-    def __do (self, request):
+    @staticmethod
+    def __do (request):
         s = dawgie.security.connect ((dawgie.context.db_host,
                                       dawgie.context.db_port))
         msg = pickle.dumps (request, pickle.HIGHEST_PROTOCOL)
@@ -124,7 +127,8 @@ class Connector(object):
         log.info ('Connector._prime_keys() - get prime keys')
         return self._keys (Table.primary)
 
-    def _release (self, s):
+    @staticmethod
+    def _release (s):
         request = COMMAND(Func.release, None, None, None)
         msg = pickle.dumps (request, pickle.HIGHEST_PROTOCOL)
         s.sendall (struct.pack ('>I', len(msg)) + msg)
@@ -162,9 +166,12 @@ class Func(enum.IntEnum):
     ver = 7
     pass
 
-class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
-    def __iter__(self):
-        for kv in self.__span.items(): yield kv
+class Interface(Connector, dawgie.db.util.aspect.Container,
+                dawgie.Dataset, dawgie.Timeline):
+    def __init__(self, *args):
+        dawgie.Dataset.__init__(self, *args)
+        dawgie.db.util.aspect.Container.__init__(self)
+        self.__span = {}
         return
 
     # pylint: disable=too-many-arguments
@@ -176,7 +183,8 @@ class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
         self._update_cmd (taskn, Table.task, None)
         return dawgie.db.util.to_key (runid, tn, taskn, algn, svn, vn)
 
-    def __verify (self, value):
+    @staticmethod
+    def __verify (value):
         result = [False, False, False, False]
         result[0] = isinstance (value, dawgie.Value)
         # pylint: disable=bare-except
@@ -210,8 +218,7 @@ class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
             for vn in ref.item.keys():
                 if isinstance (ref, dawgie.V_REF) and vn != ref.feat: continue
 
-                for k in filter (lambda k,vn=vn:k.endswith
-                                 ('.'.join (['',fsvn,vn])), pk):
+                for k in filter (lambda k,a=fsvn,b=vn:k.endswith ('.'.join (['',a,b])), pk):
                     tn = k.split ('.')[1]
                     span[fsvn][tn][vn] = self._get (k, Table.primary)
                     pass
@@ -232,7 +239,13 @@ class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
             pass
         return
 
-    def ds (self): return self
+    def _ckeys (self, l1k, l2k):
+        if l2k: keys = self.__span[l1k][l2k].keys()
+        elif l1k: keys = self.__span[l1k].keys()
+        else: keys = self.__span.keys()
+        return keys
+
+    def _fill_item (self, l1k, l2k, l3k): return self.__span[l1k][l2k][l3k]
 
     def _load (self, algref=None, err=True, ver=None, lok=None):
         # pylint: disable=too-many-branches,too-many-nested-blocks,too-many-locals,too-many-statements
@@ -280,7 +293,7 @@ class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
                                           self._task(), self._algn(), sv.name(),
                                           None) + '.'
 
-                    if not [k for k in filter (lambda n:n.startswith (base),
+                    if not [k for k in filter (lambda n,base=base:n.startswith (base),
                                                self._keys (Table.primary))]:
                         base = self.__to_key (None, self._tn(), self._task(),
                                               self._algn(), sv.name(), None) + '.'
@@ -296,7 +309,7 @@ class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
 
                     base = self.__to_key (prev, self._tn(), self._task(),
                                           self._algn(), sv.name(), None) + '.'
-                    for k in filter (lambda n:n.startswith (base),
+                    for k in filter (lambda n,b=base:n.startswith (b),
                                      self._keys (Table.primary)):
                         sv[k.split ('.')[-1]] = self._get (k, Table.primary)
                         pass
@@ -311,8 +324,10 @@ class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
             pass
         return
 
+    def ds (self): return self
+
     def recede (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
-        self.__span = {}
+        span = {}
         pk = sorted (set ([k for k in
                            filter (lambda k:k.split('.')[1] == self._tn(),
                                    self._keys (Table.primary))]))
@@ -323,18 +338,32 @@ class Interface(Connector,dawgie.Aspect,dawgie.Dataset,dawgie.Timeline):
                               ref.impl.name(),
                               ref.item.name()])
 
-            if fsvn not in self.__span: self.__span[fsvn] = {}
+            if fsvn not in span: span[fsvn] = {}
 
-            self.__span[fsvn].update (dict([(rid,  pickle.loads (clone))
-                                            for rid in rids]))
-            for vn in filter (lambda n:(not isinstance (ref,dawgie.V_REF) or
-                                        n == ref.feat),
+            span[fsvn].update (dict([(rid,  pickle.loads (clone))
+                                     for rid in rids]))
+            for vn in filter (lambda n,ref=ref:(not isinstance
+                                                (ref,dawgie.V_REF) or
+                                                n == ref.feat),
                               ref.item.keys()):
-                for k in filter (lambda k:k.endswith ('.'.join (['',fsvn,vn])),
-                                 pk):
+                for k in filter (lambda k,a=fsvn,b=vn:k.endswith ('.'.join (['',a,b])), pk):
                     rid = int(k.split ('.')[0])
-                    self.__span[fsvn][rid][vn] = self._get (k, Table.primary)
+                    span[fsvn][rid][vn] = self._get (k, Table.primary)
                     pass
+                pass
+            pass
+        self.__span = {}
+        for rid in rids:
+            for fsvn in span:
+                if rid in span[fsvn]:
+                    for vn in span[fsvn][rid]:
+                        if rid not in self.__span: self.__span[rid] = {}
+                        if fsvn not in self.__span[rid]:\
+                           self.__span[rid][fsvn] = {}
+                        self.__span[rid][fsvn][vn] = span[fsvn][rid][vn]
+                        pass
+                    pass
+                pass
             pass
         return
 
@@ -446,6 +475,7 @@ class Table(enum.IntEnum):
     value = 5
     pass
 
+# pylint: disable=too-many-instance-attributes
 class Worker(twisted.internet.protocol.Protocol):
     def __init__ (self, address):
         twisted.internet.protocol.Protocol.__init__(self)
@@ -650,7 +680,8 @@ class Worker(twisted.internet.protocol.Protocol):
         else: self._send (False)
         return
 
-    def _get_db_lock_status(self):
+    @staticmethod
+    def _get_db_lock_status():
         s = dawgie.context.db_lock
         if not s:
             return Mutex.unlock
@@ -673,6 +704,7 @@ class Worker(twisted.internet.protocol.Protocol):
         return
 
     pass
+# pylint: enable=too-many-instance-attributes
 
 def _connect():
     return Connector()
