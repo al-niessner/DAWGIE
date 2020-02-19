@@ -48,9 +48,6 @@ NTR: 49811
 
 import collections
 import dawgie.context
-import dawgie.db.shelf
-import dawgie.db.post
-import dawgie.db.test
 import dawgie.util
 import importlib
 import logging; log = logging.getLogger(__name__)
@@ -60,11 +57,7 @@ METRIC_DATA = collections.namedtuple('METRIC_DATA', ['alg_name','alg_ver','sv',
 
 def _db_in_use():
     '''Internal function to select which database backend that is in use'''
-    if dawgie.context.db_impl == 'shelf': m = dawgie.db.shelf
-    elif dawgie.context.db_impl == 'post': m = dawgie.db.post
-    elif dawgie.context.db_impl == 'test': m = dawgie.db.test
-    else: raise ValueError('The database implementation "' +
-                           dawgie.context.db_impl + '" is not valid')
+    m = importlib.import_module ('dawgie.db.' + dawgie.context.db_impl)
     return m
 
 def _prime_keys():
