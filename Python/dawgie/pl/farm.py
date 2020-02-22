@@ -77,7 +77,7 @@ class Hand(twisted.internet.protocol.Protocol):
                 dawgie.pl.message.send (self._abort, self)
                 log.warning ('Worker and pipeline revisions are not the same. '+
                              'Sever version %s and worker version %s.',
-                             msg.revision, dawgie.context.git_rev)
+                             str(msg.revision), str(dawgie.context.git_rev))
             else: dawgie.pl.message.send (self.__proceed, self)
             self.transport.loseConnection()
         else:
