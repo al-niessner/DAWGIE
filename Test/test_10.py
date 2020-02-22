@@ -37,11 +37,31 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+import dawgie.context
 import dawgie.pl.dag
 import dawgie.pl.farm
+import dawgie.pl.message
 import unittest
 
 class Farm(unittest.TestCase):
+    @staticmethod
+    def loseConnection(): return
+    @staticmethod
+    def write (b:bytes): return
+
+    def test_hand__process(self):
+        dawgie.context.git_rev = 321
+        hand = dawgie.pl.farm.Hand(('localhost',666))
+        hand.transport = self
+        msg = dawgie.pl.message.make(rev=123,typ=dawgie.pl.message.Type.status)
+        with self.assertLogs ('dawgie.pl.farm', 'WARN') as logbook:
+            dawgie.pl.start.fsm.state = 'running'
+            hand._process (msg)
+            dawgie.pl.start.fsm.state = 'starting'
+            pass
+        self.assertEqual (['WARNING:dawgie.pl.farm:Worker and pipeline revisions are not the same. Sever version 123 and worker version 321.'], logbook.output)
+        return
+
     def test_rerunid (self):
         n = dawgie.pl.dag.Node('a')
         r = dawgie.pl.farm.rerunid (n)
@@ -54,13 +74,14 @@ class Farm(unittest.TestCase):
         self.assertEqual (0, r)
         return
 
-    def something_to_do():
+    def test_something_to_do(self):
         self.assertFalse (dawgie.pl.farm.something_to_do())
         dawgie.pl.farm._agency = True
         self.assertFalse (dawgie.pl.farm.something_to_do())
         dawgie.pl.start.fsm.wait_on_crew.clear()
         self.assertFalse (dawgie.pl.farm.something_to_do())
-        dawgie.pl.start.fsm.start == 'running'
+        dawgie.pl.start.fsm.state = 'running'
         self.assertTrue (dawgie.pl.farm.something_to_do())
+        dawgie.pl.start.fsm.state = 'starting'
         return
     pass
