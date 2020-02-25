@@ -55,9 +55,9 @@ class Farm(unittest.TestCase):
         hand.transport = self
         msg = dawgie.pl.message.make(rev=123,typ=dawgie.pl.message.Type.status)
         with self.assertLogs ('dawgie.pl.farm', 'WARN') as logbook:
-            dawgie.pl.start.fsm.state = 'running'
+            dawgie.context.fsm.state = 'running'
             hand._process (msg)
-            dawgie.pl.start.fsm.state = 'starting'
+            dawgie.context.fsm.state = 'starting'
             pass
         self.assertEqual (['WARNING:dawgie.pl.farm:Worker and pipeline revisions are not the same. Sever version 123 and worker version 321.'], logbook.output)
         return
@@ -78,10 +78,10 @@ class Farm(unittest.TestCase):
         self.assertFalse (dawgie.pl.farm.something_to_do())
         dawgie.pl.farm._agency = True
         self.assertFalse (dawgie.pl.farm.something_to_do())
-        dawgie.pl.start.fsm.wait_on_crew.clear()
+        dawgie.context.fsm.wait_on_crew.clear()
         self.assertFalse (dawgie.pl.farm.something_to_do())
-        dawgie.pl.start.fsm.state = 'running'
+        dawgie.context.fsm.state = 'running'
         self.assertTrue (dawgie.pl.farm.something_to_do())
-        dawgie.pl.start.fsm.state = 'starting'
+        dawgie.context.fsm.state = 'starting'
         return
     pass
