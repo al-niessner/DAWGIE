@@ -37,13 +37,12 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import dawgie
+import dawgie.context
 import unittest
 
-class Dawgie(unittest.TestCase):
-    def test_schedule(self):
-        self.assertRaises (ValueError, dawgie.schedule, None, None, 1, 1)
-        self.assertIsInstance (dawgie.schedule (None, None, True),
-                               dawgie.EVENT)
+class Context(unittest.TestCase):
+    def test_dumps(self):
+        b = dawgie.context.dumps()
+        self.assertTrue (0 < len (b))
         return
     pass
