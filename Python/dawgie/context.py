@@ -182,12 +182,15 @@ def add_arguments (ap):
 
 def dumps()->bytes:
     def isattribute (member):
+        # pylint: disable=redefined-outer-name
+        import dawgie.pl.state
         return not ((member[0].startswith ('__') and
                      member[0].endswith ('__')) or
                     inspect.isbuiltin (member[1]) or
                     inspect.isfunction (member[1]) or
                     inspect.ismodule (member[1]) or
-                    inspect.isroutine (member[1]))
+                    inspect.isroutine (member[1]) or
+                    isinstance (member[1], dawgie.pl.state.FSM))
 
     attributes = [a for a in filter (isattribute,
                                      inspect.getmembers (dawgie.context))]
