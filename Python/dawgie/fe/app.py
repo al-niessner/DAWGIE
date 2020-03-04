@@ -88,6 +88,9 @@ def schedule_crew():
 def schedule_doing():
     return json.dumps (dawgie.pl.schedule.view_doing()).encode()
 
+def schedule_events():
+    return json.dumps (dawgie.pl.schedule.view_events()).encode()
+
 def schedule_failure():
     return json.dumps (dawgie.pl.schedule.view_failure()).encode()
 
@@ -204,6 +207,7 @@ DynamicContent(pl_state, '/app/pl/state')
 
 DynamicContent(schedule_crew, '/app/schedule/crew')
 DynamicContent(schedule_doing, '/app/schedule/doing')
+DynamicContent(schedule_events, '/app/schedule/events')
 DynamicContent(schedule_failure, '/app/schedule/failure')
 DynamicContent(schedule_run, '/app/run', [HttpMethod.POST])
 DynamicContent(schedule_success, '/app/schedule/success')
