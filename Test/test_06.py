@@ -37,6 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+import datetime
 import dawgie.context
 import dawgie.pl.jobinfo
 import dawgie.pl.schedule
@@ -196,4 +197,31 @@ class Schedule(unittest.TestCase):
         for n in dawgie.pl.schedule.que:\
             self.assertEqual (12, n.get ('runid'), n.tag)
         return
+
+    def test_view_events(self):
+        dawgie.pl.schedule.periodics ([fake_events])
+        events = dawgie.pl.schedule.view_events()
+        events = dict ([(e['actor'],e['delays']) for e in events])
+        self.assertEqual (2, len(events))
+        self.assertTrue ('disk.engine' in events)
+        self.assertEqual (2, len (events['disk.engine']))
+        self.assertAlmostEqual (86400, events['disk.engine'][0], -1)
+        self.assertAlmostEqual (518400, events['disk.engine'][1], -1)
+        self.assertTrue ('network.analyzer' in events)
+        self.assertEqual (1, len (events['network.analyzer']))
+        self.assertEqual (0, events['network.analyzer'][0])
+        return
     pass
+
+def fake_events():
+    import ae.disk
+    import ae.disk.bot
+    import ae.network
+    import ae.network.bot
+    now = datetime.datetime.utcnow()
+    return [dawgie.schedule(ae.disk.task, ae.disk.bot.Engine(),
+                            dow=(now.weekday()+1) % 7, time=now.time()),
+            dawgie.schedule(ae.disk.task, ae.disk.bot.Engine(),
+                            dow=(now.weekday()-1) % 7, time=now.time()),
+            dawgie.schedule(ae.network.analysis, ae.network.bot.Analyzer(),
+                            boot=True)]

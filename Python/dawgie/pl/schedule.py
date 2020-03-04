@@ -350,6 +350,18 @@ def view_doing() -> dict:
               filter (lambda t:t.get ('status') == State.running, que)]
     return dict([(a.tag, sorted (list(a.get ('doing')))) for a in active])
 
+def view_events()->[{}]:
+    result = {}
+    for p in per:
+        if p.tag not in result: result[p.tag] = set()
+
+        for m in p.get ('period'):
+            try: result[p.tag].add (round(_delay (m).total_seconds()))
+            except _DelayNotKnowableError: result[p.tag].add (0)
+            pass
+        pass
+    return [{'actor':k, 'delays':sorted(result[k])} for k in sorted (result)]
+
 def view_failure() -> [dict]: return err
 def view_success() -> [dict]: return suc
 
