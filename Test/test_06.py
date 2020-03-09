@@ -124,6 +124,13 @@ class Schedule(unittest.TestCase):
         for e in dawgie.pl.schedule.que:
             self.assertEqual (State.waiting, e.get ('status'))
             pass
+        jobs = dawgie.pl.schedule.next_job_batch()
+        self.assertEqual (1, len (jobs))
+        self.assertSetEqual (set(['a', 'c', 'e', 'b', 'f', 'd', 'g']),
+                             jobs[0].get ('do'))
+        self.assertSetEqual (set(['a', 'c', 'e', 'b', 'f', 'd', 'g']),
+                             jobs[0].get ('doing'))
+        self.assertSetEqual (set(), jobs[0].get ('todo'))
         dawgie.pl.schedule.per.clear()
         dawgie.pl.schedule.que.clear()
         return
