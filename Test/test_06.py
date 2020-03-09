@@ -37,6 +37,8 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+from dawgie.pl.jobinfo import State
+
 import datetime
 import dawgie.context
 import dawgie.pl.jobinfo
@@ -104,6 +106,25 @@ class Schedule(unittest.TestCase):
         self.assertEqual (1, len (dawgie.pl.schedule.que))
         nodes[dei].get ('doing').clear()
         nodes[dei].get ('todo').clear()
+        dawgie.pl.schedule.que.clear()
+        return
+
+    def test_defer(self):
+        dawgie.pl.schedule.periodics ([fake_events_defer])
+        dawgie.pl.schedule.defer()
+        self.assertEqual (3, len (dawgie.pl.schedule.per))
+        for p in dawgie.pl.schedule.per:
+            if p.tag == 'disk.engine':
+                self.assertEqual (State.waiting, p.get ('status'))
+            elif p.tag == 'network.analyzer':
+                self.assertEqual (State.delayed, p.get ('status'))
+            else: self.assertTrue (False, 'unxpected element ' + p.tag)
+            pass
+        self.assertEqual (2, len (dawgie.pl.schedule.que))
+        for e in dawgie.pl.schedule.que:
+            self.assertEqual (State.waiting, e.get ('status'))
+            pass
+        dawgie.pl.schedule.per.clear()
         dawgie.pl.schedule.que.clear()
         return
 
@@ -199,7 +220,7 @@ class Schedule(unittest.TestCase):
         return
 
     def test_view_events(self):
-        dawgie.pl.schedule.periodics ([fake_events])
+        dawgie.pl.schedule.periodics ([fake_events_view])
         events = dawgie.pl.schedule.view_events()
         events = dict ([(e['actor'],e['delays']) for e in events])
         self.assertEqual (2, len(events))
@@ -210,10 +231,22 @@ class Schedule(unittest.TestCase):
         self.assertTrue ('network.analyzer' in events)
         self.assertEqual (1, len (events['network.analyzer']))
         self.assertEqual (0, events['network.analyzer'][0])
+        dawgie.pl.schedule.per.clear()
         return
     pass
 
-def fake_events():
+def fake_events_defer():
+    import ae.disk
+    import ae.disk.bot
+    import ae.network
+    import ae.network.bot
+    now = datetime.datetime.utcnow()
+    return [dawgie.schedule(ae.disk.task, ae.disk.bot.Engine(),
+                            dow=now.weekday(), time=now.time()),
+            dawgie.schedule(ae.network.analysis, ae.network.bot.Analyzer(),
+                            dow=(now.weekday() + 1) % 7, time=now.time())]
+
+def fake_events_view():
     import ae.disk
     import ae.disk.bot
     import ae.network
