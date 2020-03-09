@@ -55,6 +55,12 @@ import twisted.internet.task
 archive = False
 
 class Hand(twisted.internet.protocol.Protocol):
+    @staticmethod
+    def _translate (state):
+        if state is None: return dawgie.pl.schedule.State.invalid
+        if state: return dawgie.pl.schedule.State.success
+        return dawgie.pl.schedule.State.failure
+
     def __init__ (self, address):
         twisted.internet.protocol.Protocol.__init__(self)
         self._abort = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, suc=False)
@@ -111,8 +117,7 @@ class Hand(twisted.internet.protocol.Protocol):
                                          msg.runid,
                                          msg.incarnation if msg.incarnation else '__all__',
                                          msg.timing,
-                                         (dawgie.pl.schedule.State.success
-                                          if msg.success else dawgie.pl.schedule.State.failure))
+                                         self._translate (msg.success))
 
             if msg.success:
                 dawgie.pl.farm.archive |= any(msg.values)
