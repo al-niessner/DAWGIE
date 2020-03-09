@@ -345,6 +345,7 @@ def exchange (message):  # AWS lambda function
     return response
 
 def execute (address:(str,int), inc:int, ps_hint:int, rev:str):
+    # pylint: disable=too-many-statements
     log = None
     iid,myid,job = sqs_pop()
     try:
@@ -385,6 +386,14 @@ def execute (address:(str,int), inc:int, ps_hint:int, rev:str):
                                             suc=True,
                                             tim=job.timing,
                                             val=nv)
+            except (dawgie.NoValidInputDataError,dawgie.NoValidOutputDataError):
+                logging.getLogger(__name__).exception ('Job "%s" had invalid data for run id %s and target "%s"',  str(m.jobid), str(m.runid), str(m.target))
+                m = dawgie.pl.message.make (typ=dawgie.pl.message.Type.response,
+                                            inc=m.target,
+                                            jid=m.jobid,
+                                            rid=m.runid,
+                                            suc=None,
+                                            tim=m.timing)
             except:
                 logging.getLogger(__name__).exception ('Job "%s" failed to execute successfully for run id %s and target "%s"', str (job.jobid), str (job.runid), str (job.target))
                 m = dawgie.pl.message.make (typ=dawgie.pl.message.Type.response,
