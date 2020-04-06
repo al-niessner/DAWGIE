@@ -299,6 +299,9 @@ def periodics (factories):
     defer()
     return
 
+def purge (original:dawgie.pl.dag.Node, target:str):
+    return
+
 def state_tree_view(): return dawgie.pl.schedule.ae.svv
 def task_tree_view(): return dawgie.pl.schedule.ae.tv
 
