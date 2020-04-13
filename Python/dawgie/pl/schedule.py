@@ -299,7 +299,12 @@ def periodics (factories):
     defer()
     return
 
-def purge (original:dawgie.pl.dag.Node, target:str):
+def purge (node:dawgie.pl.dag.Node, target:str):
+    if target in node.get ('do',[]): node.get ('do').remove (target)
+    if target in node.get ('doing',[]): node.get ('doing').remove (target)
+    if target in node.get ('todo',[]): node.get ('todo').remove (target)
+
+    for child in node: purge (child, target)
     return
 
 def state_tree_view(): return dawgie.pl.schedule.ae.svv
