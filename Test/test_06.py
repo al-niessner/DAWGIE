@@ -41,6 +41,7 @@ from dawgie.pl.jobinfo import State
 
 import datetime
 import dawgie.context
+import dawgie.pl.dag
 import dawgie.pl.jobinfo
 import dawgie.pl.schedule
 import os
@@ -204,6 +205,35 @@ class Schedule(unittest.TestCase):
             pass
         self.assertEqual (1, len (dawgie.pl.schedule.que))
         dawgie.pl.schedule.que.clear()
+        return
+
+    def test_purge(self):
+        a = dawgie.pl.dag.Node('a')
+        b = dawgie.pl.dag.Node('b')
+        c = dawgie.pl.dag.Node('c')
+        d = dawgie.pl.dag.Node('d')
+        e = dawgie.pl.dag.Node('e')
+        f = dawgie.pl.dag.Node('f')
+        for n in [a, b, c, d, e, f]:
+            for l in ['do', 'doing', 'todo']:
+                n.set (l, [])
+                for t in ['A', 'B', 'C']: n.get (l).append (t)
+                pass
+            pass
+        a.add (c)
+        a.add (d)
+        b.add (d)
+        b.add (e)
+        d.add (f)
+        dawgie.pl.schedule.purge (b, 'B')
+        for l in ['do', 'doing', 'todo']:
+            self.assertEqual (['A', 'B', 'C'], a.get (l))
+            self.assertEqual (['A', 'C'], b.get (l))
+            self.assertEqual (['A', 'B', 'C'], c.get (l))
+            self.assertEqual (['A', 'C'], d.get (l))
+            self.assertEqual (['A', 'C'], e.get (l))
+            self.assertEqual (['A', 'C'], f.get (l))
+            pass
         return
 
     def test_tasks(self):
