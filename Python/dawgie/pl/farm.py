@@ -122,7 +122,7 @@ class Hand(twisted.internet.protocol.Protocol):
             if self._translate (msg.success):
                 dawgie.pl.farm.archive |= any(msg.values)
                 dawgie.pl.schedule.update (msg.values, job, msg.runid)
-            else: dawgie.pl.schedule.purge (job, m.inc)
+            else: dawgie.pl.schedule.purge (job, msg.inc)
 
         except IndexError: log.error('Could not find job with ID: ' + msg.jobid)
         return
