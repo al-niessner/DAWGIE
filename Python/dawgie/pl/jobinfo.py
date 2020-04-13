@@ -43,6 +43,7 @@ class State(enum.Enum):
     delayed = 0  # delayed until a certain time (periodic task)
     failure = 1  # task ran but it had an exception causing the pipeline to fail
     initial = 5  # initial value
+    invalid = 6  # worker threw an NoValid{Input,Output}DataError
     running = 2  # is currently running somewhere, somehow
     success = 3  # task ran and was successful
     waiting = 4  # waiting until there are no active parents
