@@ -55,6 +55,36 @@ import twisted.internet.task
 archive = False
 
 class Hand(twisted.internet.protocol.Protocol):
+    @staticmethod
+    def _res (msg):
+        done = (msg.jobid + '[' +
+                (msg.incarnation if msg.incarnation else '__all__') + ']')
+        while 0 < _busy.count (done):
+            _busy.remove (done)
+            if done in _time: del _time[done]
+            pass
+        print ('msg:', msg)
+        print ('suc:', Hand._translate (msg.success))
+        try:
+            job = dawgie.pl.schedule.find (msg.jobid)
+            inc = msg.incarnation if msg.incarnation else '__all__'
+            state = Hand._translate (msg.success)
+            dawgie.pl.schedule.complete (job, msg.runid, inc, msg.timing, state)
+
+            if state == dawgie.pl.schedule.State.success:
+                dawgie.pl.farm.archive |= any(msg.values)
+                dawgie.pl.schedule.update (msg.values, job, msg.runid)
+            else: dawgie.pl.schedule.purge (job, inc)
+
+        except IndexError: log.error('Could not find job with ID: ' + msg.jobid)
+        return
+
+    @staticmethod
+    def _translate (state):
+        if state is None: return dawgie.pl.schedule.State.invalid
+        if state: return dawgie.pl.schedule.State.success
+        return dawgie.pl.schedule.State.failure
+
     def __init__ (self, address):
         twisted.internet.protocol.Protocol.__init__(self)
         self._abort = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, suc=False)
@@ -69,7 +99,7 @@ class Hand(twisted.internet.protocol.Protocol):
 
     def _process (self, msg):
         if msg.type == dawgie.pl.message.Type.register: self._reg(msg)
-        elif msg.type == dawgie.pl.message.Type.response: self._res(msg)
+        elif msg.type == dawgie.pl.message.Type.response: Hand._res(msg)
         elif msg.type == dawgie.pl.message.Type.status:
             if msg.revision != dawgie.context.git_rev or \
                    not dawgie.context.fsm.is_pipeline_active():
@@ -95,30 +125,6 @@ class Hand(twisted.internet.protocol.Protocol):
             log.info ('Registered a worker for its %d incarnation.',
                       msg.incarnation)
             pass
-        return
-
-    def _res (self, msg):
-        # pylint: disable=no-self-use
-        done = (msg.jobid + '[' +
-                (msg.incarnation if msg.incarnation else '__all__') + ']')
-        while 0 < _busy.count (done):
-            _busy.remove (done)
-            if done in _time: del _time[done]
-            pass
-        try:
-            job = dawgie.pl.schedule.find (msg.jobid)
-            dawgie.pl.schedule.complete (job,
-                                         msg.runid,
-                                         msg.incarnation if msg.incarnation else '__all__',
-                                         msg.timing,
-                                         (dawgie.pl.schedule.State.success
-                                          if msg.success else dawgie.pl.schedule.State.failure))
-
-            if msg.success:
-                dawgie.pl.farm.archive |= any(msg.values)
-                dawgie.pl.schedule.update (msg.values, job, msg.runid)
-                pass
-        except IndexError: log.error('Could not find job with ID: ' + msg.jobid)
         return
 
     # pylint: disable=signature-differs
