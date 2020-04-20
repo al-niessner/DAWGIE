@@ -249,8 +249,8 @@ class Schedule(unittest.TestCase):
             if c.tag == 'disk.engine': c.get ('doing').add ('fred')
             pass
         dawgie.pl.schedule.que.clear()
-        dawgie.pl.schedule.update (['12.fred.network.analyzer.test.image'],
-                                   root, 12)
+        dawgie.pl.schedule.update ([('12.fred.network.analyzer.test.image',
+                                     True)], root, 12)
         self.assertEqual (len (root), len (dawgie.pl.schedule.que))
         for n in dawgie.pl.schedule.que:\
             self.assertEqual (12, n.get ('runid'), n.tag)
