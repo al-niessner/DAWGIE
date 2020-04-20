@@ -400,10 +400,8 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
                     runid, tn, task = self._runid(), self._tn(), self._task()
                     algn, svn, vn = self._algn(), sv.name(), k
                     vname = self.__to_key (runid, tn, task, algn, svn, vn)
-
-                    if not self._set (vname, Table.primary, sv[k]):
-                        self._bot().new_values (vname)
-                        pass
+                    isnew = self._set (vname, Table.primary, sv[k])
+                    self._bot().new_values ((vname, isnew))
                     pass
                 pass
         finally:
@@ -442,10 +440,8 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
                 runid, tn, task = self._runid(), self._tn(), self._task()
                 algn, svn, vn = self._algn(), msv.name(), k
                 vname = self.__to_key (runid, tn, task, algn, svn, vn)
-
-                if not self._set (vname, Table.primary, msv[k]):
-                    self._bot().new_values (vname)
-                    pass
+                isnew = self._set (vname, Table.primary, msv[k])
+                self._bot().new_values ((vname, isnew))
                 pass
         finally:
             logging.getLogger (__name__ + '.Interface').info("update: Releaseing for %s", name)

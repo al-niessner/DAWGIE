@@ -463,14 +463,12 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                 cur.execute('SELECT EXISTS (SELECT * from Prime where ' +
                             'blob_name = %s);', [result])
                 exists &= cur.fetchone()[0]
-
-                if not exists:
-                    self._bot().new_values ('.'.join ([str (self._runid()),
-                                                       self._tn(),
-                                                       self._task(),
-                                                       self._alg().name(),
-                                                       sv.name(), vn]))
-                    pass
+                self._bot().new_values (('.'.join ([str (self._runid()),
+                                                    self._tn(),
+                                                    self._task(),
+                                                    self._alg().name(),
+                                                    sv.name(), vn])),
+                                        not exists)
 
                 # Put result in primary. Make sure to get task_ID and other
                 # primary keys from their respective tables

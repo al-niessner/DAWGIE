@@ -312,7 +312,7 @@ def tasks():
 
 def unpause(): dawgie.pl.schedule.pipeline_paused = False
 
-def update (value_names:[str], original:dawgie.pl.dag.Node, rid:int):
+def update (value_names:[(str,bool)], original:dawgie.pl.dag.Node, rid:int):
     log.info ('update() - New values: %s', str(value_names))
     log.info ('update() - Node name: %s', original.tag)
     log.info ('update() - Run ID: %s', str(rid))
@@ -323,7 +323,7 @@ def update (value_names:[str], original:dawgie.pl.dag.Node, rid:int):
         targets = set()
         task_names = set()
         vns = set()
-        for vn in value_names:
+        for vn,_isnew in filter (lambda t:t[1], value_names):
             target = vn.split('.')[1]
             targets.add (target)
             fvn = '.'.join (vn.split('.')[2:])
