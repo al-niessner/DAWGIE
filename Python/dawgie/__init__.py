@@ -367,8 +367,8 @@ class Analysis(_Metric):
 
     def list(self)->'[Analyzer]': raise NotImplementedError()
 
-    def new_values (self, name:str=None)->[str]:
-        if name: self.__nv.append (name)
+    def new_values (self, value:(str,bool)=None)->[(str,bool)]:
+        if value: self.__nv.append (value)
         return self.__nv
 
     def timing (self): return self.__timing
@@ -579,8 +579,8 @@ class Regress(_Metric):
 
     def list(self)->'[Regression]': raise NotImplementedError()
 
-    def new_values (self, name:str=None)->[str]:
-        if name: self.__nv.append (name)
+    def new_values (self, value:(str,bool)=None)->[(str,bool)]:
+        if value: self.__nv.append (value)
         return self.__nv
 
     def timing (self): return self.__timing
@@ -737,8 +737,8 @@ class Task(_Metric):
 
     def list(self)->[Algorithm]: raise NotImplementedError()
 
-    def new_values (self, name:str=None)->[str]:
-        if name: self.__nv.append (name)
+    def new_values (self, value:(str,bool)=None)->[(str,bool)]:
+        if value: self.__nv.append (value)
         return self.__nv
 
     def timing (self): return self.__timing
