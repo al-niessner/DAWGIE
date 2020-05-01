@@ -37,20 +37,20 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import dawgie.pl.auto
+import dawgie.pl.promotion
 import unittest
 
-class AutoPromote(unittest.TestCase):
+class PromotionEngine(unittest.TestCase):
     @classmethod
-    def setUpClass(cls): cls.promote = dawgie.pl.auto.Promote()
+    def setUpClass(cls): cls.promote = dawgie.pl.promotion.Engine()
 
     def test_call(self):
-        with self.assertLogs ('dawgie.pl.auto', level=0) as al:
+        with self.assertLogs ('dawgie.pl.promotion', level=0) as al:
             more = self.promote ([('a.b.c',True)])
             pass
         self.assertFalse (more)
         print (al.output)
-        self.assertEqual (al.output, ['ERROR:dawgie.pl.auto:Inconsistent arguments. Ignoring request.'])
+        self.assertEqual (al.output, ['ERROR:dawgie.pl.promotion:Inconsistent arguments. Ignoring request.'])
         more = self.promote ([('a.b.c',True)], 'a.b', 1)
         self.assertFalse (more)
         more = self.promote ([('a.b.c',True), ('a.b.d',False)], 'a.b', 1)

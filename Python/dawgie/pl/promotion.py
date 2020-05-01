@@ -39,7 +39,7 @@ NTR:
 import dawgie.pl.dag
 import logging; log = logging.getLogger(__name__)
 
-class Promote:
+class Engine:
     def __call__ (self,
                   values:[(str,bool)]=None,
                   original:dawgie.pl.dag.Node=None,

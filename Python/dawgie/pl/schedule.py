@@ -44,8 +44,8 @@ import datetime
 import dawgie
 import dawgie.context
 import dawgie.db
-import dawgie.pl.auto
 import dawgie.pl.dag
+import dawgie.pl.promotion
 import dawgie.pl.schedule
 import dawgie.pl.version
 import dawgie.util
@@ -60,7 +60,7 @@ per = []
 suc = []
 
 pipeline_paused = False
-promote = dawgie.pl.auto.Promote()
+promote = dawgie.pl.promotion.Engine()
 
 class _DelayNotKnowableError(ArithmeticError): pass
 
