@@ -37,25 +37,33 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+import dawgie.context
 import dawgie.pl.promotion
 import unittest
 
 class PromotionEngine(unittest.TestCase):
     @classmethod
-    def setUpClass(cls): cls.promote = dawgie.pl.promotion.Engine()
+    def setUpClass(cls):
+        cls.promote = dawgie.pl.promotion.Engine()
+        dawgie.context.allow_promotion = True
+        return
 
     def test_call(self):
         with self.assertLogs ('dawgie.pl.promotion', level=0) as al:
-            more = self.promote ([('a.b.c',True)])
+            self.assertFalse (self.promote ([('a.b.c',True)]))
             pass
-        self.assertFalse (more)
         print (al.output)
         self.assertEqual (al.output, ['ERROR:dawgie.pl.promotion:Inconsistent arguments. Ignoring request.'])
-        more = self.promote ([('a.b.c',True)], 'a.b', 1)
-        self.assertFalse (more)
-        more = self.promote ([('a.b.c',True), ('a.b.d',False)], 'a.b', 1)
-        self.assertTrue (more)
+        self.assertFalse (self.promote ([('a.b.c',True)], 'a.b', 1))
+        self.assertTrue (self.promote ([('a.b.c',True), ('a.b.d',False)],
+                                       'a.b', 1))
         self.promote.clear()
         self.assertFalse (self.promote.more())
+        ac = dawgie.context.allow_promotion
+        dawgie.context.allow_promotion = False
+        self.assertTrue (self.promote ([('a.b.c',True), ('a.b.d',False)],
+                                       'a.b', 1))
+        self.assertFalse (self.promote.do())
+        dawgie.context.allow_promotion = ac
         return
     pass

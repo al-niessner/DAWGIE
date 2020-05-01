@@ -64,7 +64,7 @@ class Engine:
     def do (self):
         if self.more() and dawgie.context.allow_promotion:
             orig,rid,vals = self._todo.pop(0)
-            # 1: pop(0) value
+
             # 2: does decendent require subset of values
             #    if no, then break
             # 3: is the dependent schduled to run already or are running
