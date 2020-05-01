@@ -36,6 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+import dawgie.context
 import dawgie.pl.dag
 import logging; log = logging.getLogger(__name__)
 
@@ -61,7 +62,18 @@ class Engine:
     def clear(self): self._todo.clear()
 
     def do (self):
-        if self.more(): self.clear()
+        if self.more() and dawgie.context.allow_promotion:
+            orig,rid,vals = self._todo.pop(0)
+            # 1: pop(0) value
+            # 2: does decendent require subset of values
+            #    if no, then break
+            # 3: is the dependent schduled to run already or are running
+            #    if yes, then break
+            # 4: are any of the dependent's other ancestors are scheduled or running
+            #    if yes, then break
+            # 5: promote decendent state vectors
+            # 6: add decendent to todo list
+        elif not dawgie.context.allow_promotion: self.clear()
         return
 
     def more (self)->bool: return 0 < len (self._todo)
@@ -71,6 +83,8 @@ class Engine:
               rid:int=None,
               values:[(str,bool)]=None):
         if not all ([v[1] for v in values]):\
-           self._todo.append ((original, rid, values))
+           self._todo.append ((original, rid,
+                               [value for value,_isnew in
+                                filter (lambda t:not t[1], values)]))
         return
     pass
