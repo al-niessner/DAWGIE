@@ -44,6 +44,7 @@ import datetime
 import dawgie
 import dawgie.context
 import dawgie.db
+import dawgie.pl.auto
 import dawgie.pl.dag
 import dawgie.pl.schedule
 import dawgie.pl.version
@@ -59,6 +60,7 @@ per = []
 suc = []
 
 pipeline_paused = False
+promote = dawgie.pl.auto.Promote()
 
 class _DelayNotKnowableError(ArithmeticError): pass
 
@@ -227,7 +229,7 @@ def is_paused(): return dawgie.pl.schedule.pipeline_paused
 
 def next_job_batch():
     todo = []
-    if not dawgie.pl.schedule.is_paused():
+    if not (promote() or dawgie.pl.schedule.is_paused()):
         jobs = dict([(job.tag, job) for job in que])
         for job in filter (lambda j:j.get ('todo'), que):
             available = job.get ('todo').copy()
@@ -320,18 +322,18 @@ def tasks():
 
 def unpause(): dawgie.pl.schedule.pipeline_paused = False
 
-def update (value_names:[(str,bool)], original:dawgie.pl.dag.Node, rid:int):
-    log.info ('update() - New values: %s', str(value_names))
+def update (values:[(str,bool)], original:dawgie.pl.dag.Node, rid:int):
+    log.info ('update() - New values: %s', str(values))
     log.info ('update() - Node name: %s', original.tag)
     log.info ('update() - Run ID: %s', str(rid))
 
-    if value_names:
+    if values:
         event = None
         feedbacks = dawgie.pl.schedule.ae.feedbacks
         targets = set()
         task_names = set()
         vns = set()
-        for vn,_isnew in filter (lambda t:t[1], value_names):
+        for vn,_isnew in filter (lambda t:t[1], values):
             target = vn.split('.')[1]
             targets.add (target)
             fvn = '.'.join (vn.split('.')[2:])
@@ -350,7 +352,9 @@ def update (value_names:[(str,bool)], original:dawgie.pl.dag.Node, rid:int):
                 pass
             pass
         organize (sorted (task_names), rid, targets, event)
-        pass
+        promote (values, original, rid)
+    else: log.error('Node %s for run ID %d did not update its state vector',
+                    original.tag, rid)
     return
 
 def view_doing() -> dict:
