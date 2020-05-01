@@ -1,4 +1,5 @@
 '''
+
 COPYRIGHT:
 Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
@@ -36,41 +37,25 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import dawgie.pl.dag
-import logging; log = logging.getLogger(__name__)
+import dawgie.pl.auto
+import unittest
 
-class Promote:
-    def __call__ (self,
-                  values:[(str,bool)]=None,
-                  original:dawgie.pl.dag.Node=None,
-                  rid:int=None):
-        arg_state = (values is not None, original is not None, rid is not None)
+class AutoPromote(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls): cls.promote = dawgie.pl.auto.Promote()
 
-        if all (arg_state):  # new item to promote
-            self.todo (original, rid, values)
-        elif any (arg_state):  # error because its all or nothing
-            log.error ('Inconsistent arguments. Ignoring request.')
-        else: self.do()
-
-        return self.more()
-
-    def __init__ (self):
-        self._todo = []
-        return
-
-    def clear(self): self._todo.clear()
-
-    def do (self):
-        if self.more(): self.clear()
-        return
-
-    def more (self)->bool: return 0 < len (self._todo)
-
-    def todo (self,
-              original:dawgie.pl.dag.Node=None,
-              rid:int=None,
-              values:[(str,bool)]=None):
-        if not all ([v[1] for v in values]):\
-           self._todo.append ((original, rid, values))
+    def test_call(self):
+        with self.assertLogs ('dawgie.pl.auto', level=0) as al:
+            more = self.promote ([('a.b.c',True)])
+            pass
+        self.assertFalse (more)
+        print (al.output)
+        self.assertEqual (al.output, ['ERROR:dawgie.pl.auto:Inconsistent arguments. Ignoring request.'])
+        more = self.promote ([('a.b.c',True)], 'a.b', 1)
+        self.assertFalse (more)
+        more = self.promote ([('a.b.c',True), ('a.b.d',False)], 'a.b', 1)
+        self.assertTrue (more)
+        self.promote.clear()
+        self.assertFalse (self.promote.more())
         return
     pass
