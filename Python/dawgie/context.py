@@ -63,7 +63,7 @@ class PortOffset(enum.Enum):
 ae_base_path = os.environ.get ('AE_BASE_PATH', '/proj/src/ae')
 ae_base_package = os.environ.get ('AE_BASE_PACKAGE', 'ae')
 
-allow_promotion = bool(os.environ.get ('DAWGIE_PROMOTION', 'False'))
+allow_promotion = bool(os.environ.get ('DAWGIE_PROMOTION', ''))
 
 cloud_data = os.environ.get ('CLOUD_DATA','apikey@url@SQS_Name@AutoScalingGroupName@ClusterName@TaskDefinition')
 cloud_port = int(os.environ.get ('CLOUD_PORT', 8080 + PortOffset.cloud.value))

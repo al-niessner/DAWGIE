@@ -141,6 +141,7 @@ def algorithm_tree_view(): return dawgie.pl.schedule.ae.av
 def build (factories, latest, previous):
     log.info ('build() - starting to build DAG')
     dawgie.pl.schedule.ae = dawgie.pl.dag.Construct(factories)
+    promote.at = dawgie.pl.schedule.ae
     dawgie.pl.schedule.que = []
     dawgie.pl.schedule.per = []
     log.info ('build() - computing version differences')

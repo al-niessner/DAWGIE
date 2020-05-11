@@ -56,13 +56,22 @@ class Engine:
         return self.more()
 
     def __init__ (self):
+        self._ae = None
         self._todo = []
         return
+
+    @property
+    def ae(self)->dawgie.pl.dag.Construct: return self._ae
+
+    @ae.setter
+    def ae(self, ae:dawgie.pl.dag.Construct): self._ae = ae
 
     def clear(self): self._todo.clear()
 
     def do (self):
-        if self.more() and dawgie.context.allow_promotion:
+        if dawgie.context.allow_promotion and self.ae is None:
+            raise ValueError('AE is not set prior to data flow')
+        if dawgie.context.allow_promotion and self.more():
             orig,rid,vals = self._todo.pop(0)
 
             # 2: does decendent require subset of values

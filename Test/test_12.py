@@ -59,6 +59,7 @@ class PromotionEngine(unittest.TestCase):
                                        'a.b', 1))
         self.promote.clear()
         self.assertFalse (self.promote.more())
+        with self.assertRaises (ValueError): self.promote.do()
         ac = dawgie.context.allow_promotion
         dawgie.context.allow_promotion = False
         self.assertTrue (self.promote ([('a.b.c',True), ('a.b.d',False)],
