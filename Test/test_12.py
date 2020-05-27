@@ -59,6 +59,18 @@ class PromotionEngine(unittest.TestCase):
                                        'a.b', 1))
         self.promote.clear()
         self.assertFalse (self.promote.more())
+        return
+
+    def test_do_allows(self):
+        '''test allow to run conditions
+        1. dawgie.context.allow_promotion is False
+        2. No AE
+        3. No organizer
+        '''
+        self.promote.clear()
+        self.assertFalse (self.promote.more())
+        with self.assertRaises (ValueError): self.promote.do()
+        self.promote.ae = 1
         with self.assertRaises (ValueError): self.promote.do()
         ac = dawgie.context.allow_promotion
         dawgie.context.allow_promotion = False

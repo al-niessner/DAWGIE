@@ -52,6 +52,10 @@ import dawgie.util
 import importlib
 import logging; log = logging.getLogger(__name__)
 
+CONSTRAINT = collections.namedtuple('CONSTRAINT', ['runid', 'tgtn', 'ref'])
+ID = collections.namedtuple('ID', ['name', 'version'])
+REF = collections.namedtuple('REF', ['tid', 'aid', 'sid', 'vid'])
+
 METRIC_DATA = collections.namedtuple('METRIC_DATA', ['alg_name','alg_ver','sv',
                                                      'run_id','target','task'])
 
@@ -83,6 +87,25 @@ def connect (alg, bot, tn):
     '''
     return _db_in_use().connect (alg, bot, tn)
 
+def consistent (inputs:[REF], output:REF, values:[CONSTRAINT])->():
+    '''Find self consistent inputs for the output returning base table entry
+
+    REF - tid is Analysis/Regress/Task ID
+        - aid is Algorithm/Analyzer/Regression ID
+        - sid is StateVector ID
+        - vid is Value ID
+
+    inputs - list of consistent inputs to find
+    output - for this output
+    values - constraints for the output whose ending values are already known
+
+    returns a tuple that can be used by dawgie.db.promote to create a new entry
+            in the database that represents the same solution as if the AE
+            were run given the inputs as it was already done. Returns an empty
+            tuple or None if a consistent set of data could not be found.
+    '''
+    return _db_in_use().consistent (inputs, output, values)
+
 def copy (dst, method, gateway):
     '''Copy database to destination.'''
     return _db_in_use().copy(dst, method, gateway)
@@ -105,6 +128,15 @@ def next():
 def open():
     '''Open the database'''
     return _db_in_use().open()
+
+def promote (junctures:[()], runid:int):
+    '''Promote the junctures to the given runid
+
+    juncture : a list of results from dawgie.db.consistent
+
+    retuns the full value names promoted as
+    runid.target name.task name.alg name.state vector name.value name'''
+    return _db_in_use().promote (junctures, runid)
 
 def remove(runid, tn, taskn, algn, svn, vn):
     '''Remove the specified key from the primary table'''
