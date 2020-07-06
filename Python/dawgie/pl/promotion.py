@@ -108,14 +108,14 @@ class Engine:
                 # 2: is the dependent or ancestors are schduled to run already
                 #    or are running
                 #  if yes, then break
+
                 if _is_scheduled (algnode, child, targets): continue
 
                 # 3: find the consistent set of previous inputs for each output
                 #    in this child
-                juncture = [dawgie.db.consistent (_translate (o.get('parents')),
-                                                  _translate ([o])[0],
-                                                  constraints)
-                            for o in outputs]
+                juncture = dawgie.db.consistent (_translate (inputs),
+                                                 _translate (outputs),
+                                                 constraints)
 
                 # 4: are all of the inputs to dependent the same
                 #    if no, schedule dependent and break
@@ -174,7 +174,7 @@ def _translate (nodes:[dawgie.pl.dag.Node])->[dawgie.db.REF]:
         a = n.get ('alg')
         s = a.sv_as_dict()[sn]
         v = s[vn]
-        result.append (dawgie.db.REF(tid=dawgie.db.ID(tn, t),
+        result.append (dawgie.db.REF(tid=dawgie.db.ID(tn, None),
                                      aid=dawgie.db.ID(an, a),
                                      sid=dawgie.db.ID(sn, s),
                                      vid=dawgie.db.ID(vn, v)))

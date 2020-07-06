@@ -87,7 +87,7 @@ def connect (alg, bot, tn):
     '''
     return _db_in_use().connect (alg, bot, tn)
 
-def consistent (inputs:[REF], output:REF, values:[CONSTRAINT])->():
+def consistent (inputs:[REF], outputs:[REF], values:[CONSTRAINT])->():
     '''Find self consistent inputs for the output returning base table entry
 
     REF - tid is Analysis/Regress/Task ID
@@ -95,9 +95,9 @@ def consistent (inputs:[REF], output:REF, values:[CONSTRAINT])->():
         - sid is StateVector ID
         - vid is Value ID
 
-    inputs - list of consistent inputs to find
-    output - for this output
-    values - constraints for the output whose ending values are already known
+    inputs  - list of consistent inputs to find
+    outputs - consistent for these outputs
+    values  - constraints for the output whose ending values are already known
 
     returns a tuple that can be used by dawgie.db.promote to create a new entry
             in the database that represents the same solution as if the AE
