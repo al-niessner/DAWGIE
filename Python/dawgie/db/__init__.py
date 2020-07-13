@@ -52,7 +52,6 @@ import dawgie.util
 import importlib
 import logging; log = logging.getLogger(__name__)
 
-CONSTRAINT = collections.namedtuple('CONSTRAINT', ['runid', 'tgtn', 'ref'])
 ID = collections.namedtuple('ID', ['name', 'version'])
 REF = collections.namedtuple('REF', ['tid', 'aid', 'sid', 'vid'])
 
@@ -87,7 +86,7 @@ def connect (alg, bot, tn):
     '''
     return _db_in_use().connect (alg, bot, tn)
 
-def consistent (inputs:[REF], outputs:[REF], values:[CONSTRAINT])->():
+def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     '''Find self consistent inputs for the output returning base table entry
 
     REF - tid is Analysis/Regress/Task ID
@@ -97,14 +96,14 @@ def consistent (inputs:[REF], outputs:[REF], values:[CONSTRAINT])->():
 
     inputs  - list of consistent inputs to find
     outputs - consistent for these outputs
-    values  - constraints for the output whose ending values are already known
+    target_name - which target
 
     returns a tuple that can be used by dawgie.db.promote to create a new entry
             in the database that represents the same solution as if the AE
             were run given the inputs as it was already done. Returns an empty
             tuple or None if a consistent set of data could not be found.
     '''
-    return _db_in_use().consistent (inputs, output, values)
+    return _db_in_use().consistent (inputs, outputs, target_name)
 
 def copy (dst, method, gateway):
     '''Copy database to destination.'''

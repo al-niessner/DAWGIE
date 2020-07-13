@@ -49,7 +49,6 @@ import datetime
 import enum
 import dawgie
 import dawgie.context
-from dawgie.db import CONSTRAINT
 from dawgie.db import REF
 import dawgie.db.lockview
 import dawgie.db.shelf
@@ -772,7 +771,7 @@ def connect (alg, bot, tn):
         raise RuntimeError('called connect before open')
     return Interface(alg, bot, tn)
 
-def consistent (_inputs:[REF], _outputs:[REF], _values:[CONSTRAINT])->():
+def consistent (_inputs:[REF], _outputs:[REF], _target_name:str)->():
     raise NotImplementedError('Not ready for shelf')
 
 def copy(dst, method=Method.connector, gateway=dawgie.context.db_host):

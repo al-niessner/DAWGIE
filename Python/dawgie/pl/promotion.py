@@ -63,17 +63,6 @@ class Engine:
         self._todo = []
         return
 
-    def _as_constraints (self, values:[str])->[dawgie.db.CONSTRAINT]:
-        result = []
-        for v in values:
-            runid,target,tn,an,sn,vn = v.split ('.')
-            name = '.'.join ([tn,an,sn,vn])
-            result.append(dawgie.db.CONSTRAINT(runid=runid,
-                                               tgtn=target,
-                                               ref=_translate([self.ae[name]])))
-            pass
-        return result
-
     @property
     def ae(self)->dawgie.pl.dag.Construct: return self._ae
 
@@ -87,12 +76,18 @@ class Engine:
             raise ValueError('AE is not set prior to data flow')
         if dawgie.context.allow_promotion and self.organize is None:
             raise ValueError('Organizer is not set prior to data flow')
+
         if dawgie.context.allow_promotion and self.more():
             algnode,runid,values = self._todo.pop(0)
-            constraints = self._as_constraints (values)
             name = algnode.tag + '.'
             targets = set([v.split ('.')[1] for v in values])
             vals = set(['.'.join (v.split ('.')[2:]) for v in values])
+
+            if len (targets) == 1: target_name = targets.pop()
+            else:
+                raise ValueError('Inconsistent targets for a single result %s' %
+                                 str(targets))
+
             for child in algnode:
                 # 1: does decendent require subset of values
                 #  if no, then break
@@ -115,7 +110,7 @@ class Engine:
                 #    in this child
                 juncture = dawgie.db.consistent (_translate (inputs),
                                                  _translate (outputs),
-                                                 constraints)
+                                                 target_name)
 
                 # 4: are all of the inputs to dependent the same
                 #    if no, schedule dependent and break
@@ -170,7 +165,6 @@ def _translate (nodes:[dawgie.pl.dag.Node])->[dawgie.db.REF]:
     result = []
     for n in nodes:
         tn,an,sn,vn = n.tag.split('.')
-        t = n.get ('factory')(tn, -1)
         a = n.get ('alg')
         s = a.sv_as_dict()[sn]
         v = s[vn]

@@ -44,7 +44,6 @@ import collections
 import dawgie
 import dawgie.context
 import dawgie.db
-from dawgie.db import CONSTRAINT
 from dawgie.db import REF
 import dawgie.db.post
 import dawgie.db.util
@@ -780,56 +779,13 @@ def connect(alg, bot, tn):
     log.info ("connected")
     return Interface(alg, bot, tn)
 
-def consistent (inputs:[REF], outputs:[REF], values:[CONSTRAINT])->[()]:
+def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
+    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
     conn = dawgie.db.post._conn()
     cur = dawgie.db.post._cur (conn)
-    # 1: Use values to find previous earliest run id matching values
-    c_runids = []
-    u_runids = []
-    for value in values:
-        tn = value.tgtn
-        cur.execute('SELECT pk FROM Target WHERE name = %s;', [tn])
-        tn_ID = _fetchone (cur, 'Target "%s" is listed more than once' % tn)
-        tskn = value.ref.tid.name
-        cur.execute('SELECT pk FROM Task WHERE name = %s;', [tskn])
-        task_ID = _fetchone (cur, 'Task "%s" is listed more than once' % tskn)
-        algn = value.ref.aid.name
-        cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
-                    'task_ID = %s;', (algn, task_ID))
-        alg_IDs = cur.fetchall()
-        svn = value.ref.sid.name
-        cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
-                    'alg_ID = ANY(%s);', [svn, alg_IDs])
-        sv_IDs = list(set([pk[0] for pk in cur.fetchall()]))
-        vn = value.ref.vid.name
-        cur.execute('SELECT pk FROM Value WHERE name = %s AND sv_ID = ANY(%s);',
-                    [vn, sv_IDs])
-        val_IDs = list(set([pk[0] for pk in cur.fetchall()]))
-        rid = value.runid
-        cur.execute('SELECT blob_name FROM Primary WHERE runid = %s AND ' +
-                    'tn_ID = %s AND task_ID = %s AND alg_ID = ANY(%s) AND ' +
-                    'sv_ID = ANY(%s) AND val_IDs = ANY(%s);',
-                    [rid, tn_ID, task_ID, alg_IDs, sv_IDs, val_IDs])
-        bn = __fetchone (cur, 'More than one blob for a full name')
-        cur.execute('SELECT runid FROM Primary WHERE tn_ID = %s AND ' +
-                    'task_ID = %s AND alg_ID = ANY(%s) AND sv_ID = ANY(%s) ' +
-                    'AND val_IDs = ANY(%s) AND blob_name = %s;',
-                    [tn_ID, task_ID, alg_IDs, sv_IDs, val_IDs, bn])
-        c_runids.append (set([runid for runid in cur.fetchall()]))
-        c_runids[-1].remove (rid)
-        cur.execute('SELECT runid FROM Primary WHERE tn_ID = %s AND ' +
-                    'task_ID = %s AND alg_ID = ANY(%s) AND sv_ID = ANY(%s) ' +
-                    'AND val_IDs = ANY(%s);',
-                    [tn_ID, task_ID, alg_IDs, sv_IDs, val_IDs])
-        u_runids.append (set([runid for runid in cur.fetchall()]))
-        pass
-    c_runids = sorted (set.intersection (*c_runids), reverse=True)
-    u_runids = sorted (set.union (*u_runids), reverse=True)
-
-    # 2: If there are no consistent run IDs then return empty tuple
-    if not c_runids: return tuple()
-
-    # 3: Use runid from (1) to find relevant
+    cur.execute('SELECT pk FROM Target WHERE name = %s;', [target_name])
+    tn_ID = _fetchone(cur, 'Target "%s" is listed more than once' % target_name)
+    # 1: Find all the times this version ran and collect the run IDs
     o_runids = []
     for output in outputs:
         cur.execute('SELECT pk FROM Task WHERE name = %s;', [output.tid.name])
@@ -839,7 +795,8 @@ def consistent (inputs:[REF], outputs:[REF], values:[CONSTRAINT])->[()]:
                     'task_ID = %s AND design = %s AND implementation = %s ' +
                     'bugfix = %s;',
                     (output.aid.name, task_ID, output.aid.verion.design(),
-                     output.aid.verion.implementation(),output.aid.verion.bugfix()))
+                     output.aid.verion.implementation(),
+                     output.aid.verion.bugfix()))
         alg_ID = _fetchone (cur,
                             ('consistent(): Algorithm "%s %s" is not singular' %
                              (output.aid.name, output.aid.verion.asstring())))
@@ -847,7 +804,8 @@ def consistent (inputs:[REF], outputs:[REF], values:[CONSTRAINT])->[()]:
                     'alg_ID = %s AND design = %s AND implementation = %s ' +
                     'bugfix = %s;',
                     (output.sid.name, alg_ID, output.sid.verion.design(),
-                     output.sid.verion.implementation(),output.sid.verion.bugfix()))
+                     output.sid.verion.implementation(),
+                     output.sid.verion.bugfix()))
         sv_ID = _fetchone (cur,
                            ('consistent(): SV "%s %s" is not singular' %
                             (output.sid.name, output.sid.verion.asstring())))
@@ -855,97 +813,62 @@ def consistent (inputs:[REF], outputs:[REF], values:[CONSTRAINT])->[()]:
                     'sv_ID = %s AND design = %s AND implementation = %s ' +
                     'bugfix = %s;',
                     (output.vid.name, sv_ID, output.vid.verion.design(),
-                     output.vid.verion.implementation(),output.vid.verion.bugfix()))
+                     output.vid.verion.implementation(),
+                     output.vid.verion.bugfix()))
         v_ID = _fetchone (cur,
                           ('consistent(): Value "%s %s" is not singular' %
                            (output.vid.name, output.vid.verion.asstring())))
-        cur.execute('SELECT runid FROM Primary WHERE tn_ID = %s AND '+
-                    'task_ID = %s AND alg_ID = %s AND sv_ID = %s AND val_ID = %s;',
-                    [tn_id, task_ID, alg_ID, sv_ID, v_ID])
+        cur.execute('SELECT runid FROM Primary WHERE tn_ID = %s AND ' +
+                    'task_ID = %s AND alg_ID = %s AND sv_ID = %s AND ' +
+                    'val_ID = %s;',
+                    [tn_ID, task_ID, alg_ID, sv_ID, v_ID])
         o_runids.append (set([runid for runid in cur.fetchall()]))
         pass
     o_runids = sorted (set.intersection (*o_runids), reverse=True)
 
-    # 4: If there are no run IDs with this output, then return empty tuple
+    # 2: If there are no run IDs with this output, then return empty tuple
     if not o_runids: return tuple()
 
-    # 5: Use runid from (1) and (3) to reduce possible runids
-    # --   really need to run over the contraints as input and reduce the
-    # --   allowable outputs to just those that used the constriant
-    m_runids = []
-    to_runids = o_runids.copy()
-    for c in c_runids:
-        possible = []
-        previous = []
-        used = []
-        for u in u_runids:
-            if c <= u: previous.append (u)
-            else: break
-            pass
-        u_runids = u_runids[len(previous)-1:]
-        for o in to_runids:
-            if previous[-1] <= o < previous[-2]: possible.append (o)
-            if c <= o: used.append (o)
-            else: break
-            pass
-        to_runids = to_runids[len(used):]
-
-        if possible: m_runids.append ((c, possible))
-        pass
-
-    # 6: If there are no run IDs with this output, then return empty tuple
-    if not m_runids: return tuple()
-
+    # 3: Find all of the inputs keyed by name and save runid,blobname
     i_runids = {}
-    for input in inputs:
-        key = '.'.join ([input.tid.name, input.aid.name])
+    ridbns = {}
+    for inp in inputs:
+        key = '.'.join ([inp.tid.name, inp.aid.name])
         if key not in i_runids: i_runids[key] = []
+        if key not in ridbns: ridbns = []
 
-        cur.execute('SELECT pk FROM Task WHERE name = %s;', [input.tid.name])
+        cur.execute('SELECT pk FROM Task WHERE name = %s;', [inp.tid.name])
         task_ID = _fetchone (cur, ('Task "%s" is listed more than once' %
-                                   input.tid.name))
+                                   inp.tid.name))
         cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
-                    'task_ID = %s AND design = %s AND implementation = %s ' +
-                    'bugfix = %s;',
-                    (input.aid.name, task_ID, input.aid.verion.design(),
-                     input.aid.verion.implementation(),input.aid.verion.bugfix()))
-        alg_ID = _fetchone (cur,
-                            ('consistent(): Algorithm "%s %s" is not singular' %
-                             (input.aid.name, input.aid.verion.asstring())))
+                    'task_ID = %s;', (inp.aid.name, task_ID))
+        alg_IDs = cur.fetchall()
         cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
-                    'alg_ID = %s AND design = %s AND implementation = %s ' +
-                    'bugfix = %s;',
-                    (input.sid.name, alg_ID, input.sid.verion.design(),
-                     input.sid.verion.implementation(),input.sid.verion.bugfix()))
-        sv_ID = _fetchone (cur,
-                           ('consistent(): SV "%s %s" is not singular' %
-                            (input.sid.name, input.sid.verion.asstring())))
-        cur.execute('SELECT pk FROM Value WHERE name = %s AND ' +
-                    'sv_ID = %s AND design = %s AND implementation = %s ' +
-                    'bugfix = %s;',
-                    (input.vid.name, sv_ID, input.vid.verion.design(),
-                     input.vid.verion.implementation(),input.vid.verion.bugfix()))
-        v_ID = _fetchone (cur,
-                          ('consistent(): Value "%s %s" is not singular' %
-                           (input.vid.name, input.vid.verion.asstring())))
+                    'alg_ID = ANY(%s);', [inp.sid.name, alg_IDs])
+        sv_IDs = list(set([pk[0] for pk in cur.fetchall()]))
+        cur.execute('SELECT pk FROM Value WHERE name = %s AND sv_ID = ANY(%s);',
+                    [inp.vid.name, sv_IDs])
+        val_IDs = list(set([pk[0] for pk in cur.fetchall()]))
         cur.execute('SELECT runid,blob_name FROM Primary WHERE tn_ID = %s AND '+
-                    'task_ID = %s AND alg_ID = %s AND sv_ID = %s AND val_ID = %s;',
-                    [tn_id, task_ID, alg_ID, sv_ID, v_ID])
-        ridbns = sorted ([(runid,bn) for runid,bn in cur.fetchall()],
-                         key=lambda t:t[0])
-        i_runids[key].append (set([runid for runid,_bn in
-                                   filter(lambda t,k=ridbns[-1][1]:t[1] == k,
-                                          ribdns])))
+                    'task_ID = %s AND alg_ID = ANY(%s) AND ' +
+                    'sv_ID = ANY(%s) AND val_ID = ANY(%s);',
+                    [tn_ID, task_ID, alg_IDs, sv_IDs, val_IDs])
+        ridbns[key].append (sorted ([(runid,bn) for runid,bn in cur.fetchall()],
+                                    key=lambda t:t[0]))
+        kval = ridbns[key][-1][0][1]
+        i_runids[key].append (set([runid for runid,_bn in filter
+                                   (lambda t,k=kval:t[1] == k,
+                                    ridbns[key])]))
         pass
     for key in i_runids:
         i_runids[key] = sorted (set.intersection (*i_runids[key]),
                                 reverse=True)
         pass
 
-    # 8: If there are no run input IDs with version, then return empty tuple
+    # 4: If there are no run input IDs with version, then return empty tuple
     if any([not i_runids[k] for k in i_runids]): return tuple()
 
-    # 9: Use runids from (5) and (7) to find when in time to promote
+    # 5: Use runids from (1) and (3) to find when in time to promote
     # -- Here is the trick:
     # --   Use the m_runids to find the corresponding i_runids. If they match
     # --   and the input matching the constraint has the good runid in both
@@ -953,10 +876,71 @@ def consistent (inputs:[REF], outputs:[REF], values:[CONSTRAINT])->[()]:
     # --   possible outputs to between matching blob rids and all rids for that
     # --   constraint. Therefore only to check that there is a consistent runid
     # --   for i_runids and m_runids.
-    runids = []
+    runid = None
+    for rid in o_runids:
+        match = dict([(ik,-3) for ik in i_runids])
+        for k in i_runids:
+            m = -2
+            for r,_bn in ridbns[k]:
+                if r <= rid:
+                    m = r
+                    break
+                pass
+
+            if m in i_runids[k]: match[k] = m
+            pass
+
+        if all ([0 <= m for m in match]):
+            runid = rid
+            break
+        pass
+
+    # 6: If no workable runID found, then return empty tuple
+    if not runid: return tuple()
+
+    # 7: Build the juncture from the runid and output
+    juncture = []
+    for output in outputs:
+        cur.execute('SELECT pk FROM Task WHERE name = %s;', [output.tid.name])
+        task_ID = _fetchone (cur, ('Task "%s" is listed more than once' %
+                                   output.tid.name))
+        cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
+                    'task_ID = %s AND design = %s AND implementation = %s ' +
+                    'bugfix = %s;',
+                    (output.aid.name, task_ID, output.aid.verion.design(),
+                     output.aid.verion.implementation(),
+                     output.aid.verion.bugfix()))
+        alg_ID = _fetchone (cur,
+                            ('consistent(): Algorithm "%s %s" is not singular' %
+                             (output.aid.name, output.aid.verion.asstring())))
+        cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
+                    'alg_ID = %s AND design = %s AND implementation = %s ' +
+                    'bugfix = %s;',
+                    (output.sid.name, alg_ID, output.sid.verion.design(),
+                     output.sid.verion.implementation(),
+                     output.sid.verion.bugfix()))
+        sv_ID = _fetchone (cur,
+                           ('consistent(): SV "%s %s" is not singular' %
+                            (output.sid.name, output.sid.verion.asstring())))
+        cur.execute('SELECT pk FROM Value WHERE name = %s AND ' +
+                    'sv_ID = %s AND design = %s AND implementation = %s ' +
+                    'bugfix = %s;',
+                    (output.vid.name, sv_ID, output.vid.verion.design(),
+                     output.vid.verion.implementation(),
+                     output.vid.verion.bugfix()))
+        v_ID = _fetchone (cur,
+                          ('consistent(): Value "%s %s" is not singular' %
+                           (output.vid.name, output.vid.verion.asstring())))
+        cur.execute('SELECT blob_name FROM Primary WHERE runid = %s AND ' +
+                    'tn_ID = %s AND task_ID = %s AND alg_ID = %s AND ' +
+                    'sv_ID = %s AND val_ID = %s;',
+                    [runid, tn_ID, task_ID, alg_ID, sv_ID, v_ID])
+        bn = _fetchone (cur, 'No matchiing entry')
+        juncture.append ((tn_ID, task_ID, alg_ID, sv_ID, v_ID, bn))
+        pass
     cur.close()
     conn.close()
-    return tuple(runids)
+    return juncture
 
 def copy (_dst, _method, _gateway):
     raise NotImplementedError('Not ready for postgresql')
