@@ -128,14 +128,14 @@ def open():
     '''Open the database'''
     return _db_in_use().open()
 
-def promote (junctures:[()], runid:int):
+def promote (juncture:(), runid:int):
     '''Promote the junctures to the given runid
 
     juncture : a list of results from dawgie.db.consistent
 
     retuns the full value names promoted as
     runid.target name.task name.alg name.state vector name.value name'''
-    return _db_in_use().promote (junctures, runid)
+    return _db_in_use().promote (juncture, runid)
 
 def remove(runid, tn, taskn, algn, svn, vn):
     '''Remove the specified key from the primary table'''

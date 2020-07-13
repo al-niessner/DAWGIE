@@ -902,7 +902,7 @@ def open_shelve(path):
                   task=shelve.open (path + '.task'),
                   value=shelve.open (path + '.value'))
 
-def promote (_junctures:[()], _runid:int):
+def promote (_junctures:(), _runid:int):
     raise NotImplementedError('Not ready for shelf')
 
 # pylint: disable=too-many-arguments

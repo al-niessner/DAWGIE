@@ -94,7 +94,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
     # pylint: disable=too-many-arguments
     @staticmethod
     def __fill (cur, sv, alg_ID, run_ID, task_ID, tn_ID, sv_ID):
-        # Get rows from primary table that have these algorithm primary keys
+        # Get rows from prime table that have these algorithm primary keys
         cur.execute('SELECT val_ID,blob_name from Prime WHERE run_ID = %s ' +
                     'and alg_ID = %s and tn_ID = %s ' +
                     'and task_ID = %s and sv_ID = %s;',
@@ -266,7 +266,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
 
     def _load (self, algref=None, err=True, ver=None):
         # Load state vectors with data from db into algorithm
-        # Take highest run number row from primary table for that task,
+        # Take highest run number row from prime table for that task,
         #   algorithm, state vector if current run does not exist in
         #   Primary table.
         # pylint: disable=too-many-locals,too-many-statements
@@ -818,7 +818,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
         v_ID = _fetchone (cur,
                           ('consistent(): Value "%s %s" is not singular' %
                            (output.vid.name, output.vid.verion.asstring())))
-        cur.execute('SELECT runid FROM Primary WHERE tn_ID = %s AND ' +
+        cur.execute('SELECT runid FROM Prime WHERE tn_ID = %s AND ' +
                     'task_ID = %s AND alg_ID = %s AND sv_ID = %s AND ' +
                     'val_ID = %s;',
                     [tn_ID, task_ID, alg_ID, sv_ID, v_ID])
@@ -827,7 +827,10 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     o_runids = sorted (set.intersection (*o_runids), reverse=True)
 
     # 2: If there are no run IDs with this output, then return empty tuple
-    if not o_runids: return tuple()
+    if not o_runids:
+        cur.close()
+        conn.close()
+        return tuple()
 
     # 3: Find all of the inputs keyed by name and save runid,blobname
     i_runids = {}
@@ -849,7 +852,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
         cur.execute('SELECT pk FROM Value WHERE name = %s AND sv_ID = ANY(%s);',
                     [inp.vid.name, sv_IDs])
         val_IDs = list(set([pk[0] for pk in cur.fetchall()]))
-        cur.execute('SELECT runid,blob_name FROM Primary WHERE tn_ID = %s AND '+
+        cur.execute('SELECT runid,blob_name FROM Prime WHERE tn_ID = %s AND '+
                     'task_ID = %s AND alg_ID = ANY(%s) AND ' +
                     'sv_ID = ANY(%s) AND val_ID = ANY(%s);',
                     [tn_ID, task_ID, alg_IDs, sv_IDs, val_IDs])
@@ -866,7 +869,10 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
         pass
 
     # 4: If there are no run input IDs with version, then return empty tuple
-    if any([not i_runids[k] for k in i_runids]): return tuple()
+    if any([not i_runids[k] for k in i_runids]):
+        cur.close()
+        conn.close()
+        return tuple()
 
     # 5: Use runids from (1) and (3) to find when in time to promote
     # -- Here is the trick:
@@ -896,7 +902,10 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
         pass
 
     # 6: If no workable runID found, then return empty tuple
-    if not runid: return tuple()
+    if not runid:
+        cur.close()
+        conn.close()
+        return tuple()
 
     # 7: Build the juncture from the runid and output
     juncture = []
@@ -931,7 +940,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
         v_ID = _fetchone (cur,
                           ('consistent(): Value "%s %s" is not singular' %
                            (output.vid.name, output.vid.verion.asstring())))
-        cur.execute('SELECT blob_name FROM Primary WHERE runid = %s AND ' +
+        cur.execute('SELECT blob_name FROM Prime WHERE runid = %s AND ' +
                     'tn_ID = %s AND task_ID = %s AND alg_ID = %s AND ' +
                     'sv_ID = %s AND val_ID = %s;',
                     [runid, tn_ID, task_ID, alg_ID, sv_ID, v_ID])
@@ -1065,7 +1074,7 @@ def open():
     dawgie.db.post._db = True
     return
 
-def promote (_junctures:[()], _runid:int):
+def promote (juncture:(), runid:int):
     # to test or not to test? Should it be checked (can it be?) that the primary
     # table does not contain a similar entry already?
     #
@@ -1074,7 +1083,39 @@ def promote (_junctures:[()], _runid:int):
     #    that a different version of same value is not already written. Throw an
     #    exception if something already exists or just log it? Log at first to
     #    prevent killing of main twisted thread.
-    raise NotImplementedError('Not ready for postgresql')
+    conn = dawgie.db.post._conn()
+    cur = dawgie.db.post._cur (conn)
+    entries = []
+    for tn_ID,task_ID,alg_ID,sv_ID,v_ID,_bn in juncture:
+        cur.execute('SELECT blob_name FROM Prime WHERE runid = %s AND ' +
+                    'tn_ID = %s AND task_ID = %s AND alg_ID = %s AND ' +
+                    'sv_ID = %s AND val_ID = %s;',
+                    [runid, tn_ID, task_ID, alg_ID, sv_ID, v_ID])
+        entries.append ([e for e in cur.fetch()])
+        pass
+    cur.close()
+    conn.close()
+
+    if not all([not e for e in entries]): return False
+
+    conn = dawgie.db.post._conn()
+    cur = dawgie.db.post._cur (conn)
+    try:
+        for tn_ID,task_ID,alg_ID,sv_ID,v_ID,bn in juncture:
+            cur.execute('INSERT INTO Prime (run_ID, tn_ID, task_ID, ' +
+                        'alg_ID, sv_ID, val_ID, blob_name) values ' +
+                        '(%s, %s, %s, %s, %s, %s, %s);',
+                        [runid, tn_ID, task_ID, alg_ID, sv_ID, v_ID, bn])
+            pass
+        conn.commit()
+    except psycopg2.IntegrityError:
+        conn.rollback()
+        cur.close()
+        conn.close()
+        return False
+    cur.close()
+    conn.close()
+    return True
 
 def remove (runid):
     # Remove all rows with the given run ID from the primary table

@@ -120,7 +120,11 @@ class Engine:
                     continue
 
                 # 5: promote decendent state vectors
-                outputs = dawgie.db.promote (juncture, runid)
+                if not dawgie.db.promote (juncture, runid):
+                    self._organize ([child.tag], runid, targets,
+                                    'promition failed to insert')
+                    continue
+
                 # 6: add decendent to todo list
                 self._todo.append (child, runid, outputs)
                 pass
