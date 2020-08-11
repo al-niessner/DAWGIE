@@ -48,6 +48,15 @@ class PromotionEngine(unittest.TestCase):
         dawgie.context.allow_promotion = True
         return
 
+    def test_ae(self):
+        ae = self.promote.ae
+        self.promote.ae = None
+        self.assertTrue (self.promote.ae is None)
+        self.promote.ae = 1
+        self.assertEqual (1, self.promote.ae)
+        self.promote.ae = ae
+        return
+
     def test_call(self):
         with self.assertLogs ('dawgie.pl.promotion', level=0) as al:
             self.assertFalse (self.promote ([('a.b.c',True)]))
@@ -78,5 +87,39 @@ class PromotionEngine(unittest.TestCase):
                                        'a.b', 1))
         self.assertFalse (self.promote.do())
         dawgie.context.allow_promotion = ac
+        return
+
+    def test_do(self):
+        return
+
+    def test_more(self):
+        self.promote.clear()
+        self.assertFalse (self.promote.more())
+        self.promote._todo = [1]
+        self.assertTrue (self.promote.more())
+        self.promote.clear()
+        self.assertFalse (self.promote.more())
+        return
+
+    def test_organize(self):
+        organize = self.promote.organize
+        self.promote.organize = None
+        self.assertTrue (self.promote.organize is None)
+        self.promote.organize = 1
+        self.assertEqual (1, self.promote.organize)
+        self.promote.organize = organize
+        return
+
+    def test_todo(self):
+        self.promote.clear()
+        self.assertFalse (self.promote.more())
+        self.promote.todo (values=[('a',True),('b',True),('c',True)])
+        self.assertFalse (self.promote.more())
+        self.promote.clear()
+        self.assertFalse (self.promote.more())
+        self.promote.todo (values=[('a',True),('b',False),('c',True)])
+        self.assertTrue (self.promote.more())
+        self.promote.clear()
+        self.assertFalse (self.promote.more())
         return
     pass
