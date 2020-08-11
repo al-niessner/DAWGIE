@@ -48,7 +48,14 @@ post_state "$context" "$description" "$state"
 
 if current_state
 then
-    docker run --rm -e PYTHONPATH=${PWD}/Python -e USERNAME="$(whoami)" -v $PWD:$PWD -u $UID -w $PWD cit:$(cit_version) python3 -m pytest --cov=dawgie --cov-branch --cov-report term-missing -v Test | tee unittest.rpt.txt
+    if [[ $# -gt 0 ]]
+    then
+        units="$@"
+    else
+        units=Test
+    fi
+
+    docker run --rm -e PYTHONPATH=${PWD}/Python -e USERNAME="$(whoami)" -v $PWD:$PWD -u $UID -w $PWD cit:$(cit_version) python3 -m pytest --cov=dawgie --cov-branch --cov-report term-missing -v ${units} | tee unittest.rpt.txt
     [ 0 -lt `grep FAILED unittest.rpt.txt | wc -l` ]  && echo 'failure' > .ci/status.txt
     state=`get_state`
 fi
