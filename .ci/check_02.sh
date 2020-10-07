@@ -52,6 +52,7 @@ then
     python3 <<EOF
 mn = '<unknown>'
 count = 0
+rated = False
 with open ('pylint.rpt.txt', 'rt') as f:
     for l in f.readlines():
         if l.startswith ('***'): mn = l.split()[2]
@@ -60,10 +61,11 @@ with open ('pylint.rpt.txt', 'rt') as f:
         if 0 < l.find ('(missing-docstring)'): continue
         if 0 < l.find ('(locally-disabled)'): continue
         count += 1
+        rated |= 0 < l.find ('code has been rated at')
         print (count, mn, l.strip())
         pass
     pass
-if 0 < count:
+if 0 < count or not rated:
     print ('pylint check failed', count)
     with open ('.ci/status.txt', 'tw') as f: f.write ('failure')
 EOF
