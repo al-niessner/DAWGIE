@@ -127,12 +127,13 @@ class RoutePoint(twisted.web.resource.Resource):
         return
 
     def getChild (self, path, request):
+        msg = request.uri.decode() if os.environ.get('DAWGIE_FE_DEBUG','') else 'DAWGIE_FE_DEBUG'
         return twisted.web.resource.ErrorPage(404,
                                               'Could not locate requested URI',
                                               '<p>%(my_name)s.getChild().name:         %(name)s<br>%(my_name)s.getChild().request.uri:  %(uri)s</p>' %
                                               {'my_name':self.__name,
                                                'name': path.decode(),
-                                               'uri':request.uri.decode()})
+                                               'uri':msg})
     pass
 
 class StaticContent(twisted.web.resource.Resource):
