@@ -48,11 +48,12 @@ import dawgie.de
 import dawgie.pl.farm
 import dawgie.pl.logger.fe
 import dawgie.pl.schedule
-import dawgie.pl.start
 import enum
 import json
 import logging; log = logging.getLogger(__name__)
+import pip
 import os
+import sys
 
 class Axis(enum.Enum):
     runid = 0
@@ -78,7 +79,7 @@ def log_messages():
     return json.dumps (dawgie.pl.logger.fe.remembered()).encode()
 
 def pl_state():
-    return json.dumps ({'name':dawgie.pl.start.fsm.state,
+    return json.dumps ({'name':dawgie.context.fsm.state,
                         'status':'active'}).encode()
 
 def schedule_crew():
@@ -86,6 +87,9 @@ def schedule_crew():
 
 def schedule_doing():
     return json.dumps (dawgie.pl.schedule.view_doing()).encode()
+
+def schedule_events():
+    return json.dumps (dawgie.pl.schedule.view_events()).encode()
 
 def schedule_failure():
     return json.dumps (dawgie.pl.schedule.view_failure()).encode()
@@ -171,8 +175,22 @@ def start_changeset():
     return dawgie.context.git_rev.encode('utf-8')
 
 def start_state():
-    return json.dumps ({'name':dawgie.pl.start.fsm.state,
+    return json.dumps ({'name':dawgie.context.fsm.state,
                         'status':'active'}).encode()
+
+def versions():
+    dl = dict([(d.key, d.parsed_version.base_version)
+               for d in pip.commands.list.get_installed_distributions()])
+    fn = os.path.join (os.path.dirname (__file__), 'requirements.txt')
+    vers = {'dawgie':dawgie.__version__,
+            'python':sys.version}
+    with open (fn, 'rt') as f:
+        for name in f.readlines():
+            if name in dl: vers[name] = dl[name]
+            else: vers[name] = 'indeterminate'
+            pass
+        pass
+    return json.dumps (vers).encode()
 
 start_submit = submit.Defer()
 sv_renderer = svrender.Defer()
@@ -189,6 +207,7 @@ DynamicContent(pl_state, '/app/pl/state')
 
 DynamicContent(schedule_crew, '/app/schedule/crew')
 DynamicContent(schedule_doing, '/app/schedule/doing')
+DynamicContent(schedule_events, '/app/schedule/events')
 DynamicContent(schedule_failure, '/app/schedule/failure')
 DynamicContent(schedule_run, '/app/run', [HttpMethod.POST])
 DynamicContent(schedule_success, '/app/schedule/success')
@@ -207,3 +226,4 @@ DynamicContent(search_tn, '/app/search/tn')
 DynamicContent(start_changeset, '/app/changeset.txt')
 DynamicContent(start_state, '/app/state/status')
 DynamicContent(start_submit, '/app/submit', [HttpMethod.POST])
+DynamicContent(versions, '/app/versions')

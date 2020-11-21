@@ -169,7 +169,7 @@ class Connect(object):
         self._log.info ('advertise: ' + response)
 
         if response != 'position posted': self._respond (self._job, False)
-        else: self._callLater (0, dawgie.pl.LogDeferredException (self.interview, 'while interviewing requester', __name__).callback, None)
+        else: self._callLater (0, dawgie.pl.DeferWithLogOnError (self.interview, 'while interviewing requester', __name__).callback, None)
         return
 
     def interview (self):
@@ -187,8 +187,8 @@ class Connect(object):
             c,h,l,_i,s = json.loads (response)
 
             if c and h == 'Healthy' and l == 'InService' and s:
-                self._callLater (0, dawgie.pl.LogDeferredException(self.hire, 'while hiring requestor', __name__).callback, None)
-            else: self._callLater (15, dawgie.pl.LogDeferredException(self.interview, 'while interviewing requester', __name__).callback, None)
+                self._callLater (0, dawgie.pl.DeferWithLogOnError(self.hire, 'while hiring requestor', __name__).callback, None)
+            else: self._callLater (15, dawgie.pl.DeferWithLogOnError(self.interview, 'while interviewing requester', __name__).callback, None)
         pass
         return
 
@@ -296,7 +296,7 @@ def _sqs_push (msg):
     return
 
 def do (job, respond):
-    twisted.internet.reactor.callLater (0, dawgie.pl.LogDeferredException (Connect (job, respond).advertise, 'while advertising AWS service', __name__).callback, None)
+    twisted.internet.reactor.callLater (0, dawgie.pl.DeferWithLogOnError (Connect (job, respond).advertise, 'while advertising AWS service', __name__).callback, None)
     return
 
 def exchange (message):  # AWS lambda function
@@ -345,6 +345,7 @@ def exchange (message):  # AWS lambda function
     return response
 
 def execute (address:(str,int), inc:int, ps_hint:int, rev:str):
+    # pylint: disable=too-many-statements
     log = None
     iid,myid,job = sqs_pop()
     try:
@@ -385,6 +386,14 @@ def execute (address:(str,int), inc:int, ps_hint:int, rev:str):
                                             suc=True,
                                             tim=job.timing,
                                             val=nv)
+            except (dawgie.NoValidInputDataError,dawgie.NoValidOutputDataError):
+                logging.getLogger(__name__).exception ('Job "%s" had invalid data for run id %s and target "%s"',  str(m.jobid), str(m.runid), str(m.target))
+                m = dawgie.pl.message.make (typ=dawgie.pl.message.Type.response,
+                                            inc=m.target,
+                                            jid=m.jobid,
+                                            rid=m.runid,
+                                            suc=None,
+                                            tim=m.timing)
             except:
                 logging.getLogger(__name__).exception ('Job "%s" failed to execute successfully for run id %s and target "%s"', str (job.jobid), str (job.runid), str (job.target))
                 m = dawgie.pl.message.make (typ=dawgie.pl.message.Type.response,

@@ -45,6 +45,7 @@ import dawgie
 import dawgie.context
 import dawgie.db
 import dawgie.pl.dag
+import dawgie.pl.promotion
 import dawgie.pl.schedule
 import dawgie.pl.version
 import dawgie.util
@@ -59,6 +60,7 @@ per = []
 suc = []
 
 pipeline_paused = False
+promote = dawgie.pl.promotion.Engine()
 
 class _DelayNotKnowableError(ArithmeticError): pass
 
@@ -182,7 +184,7 @@ def complete (job, runid, target, timing, status):
 
 def defer():
     if dawgie.pl.schedule.is_paused():
-        twisted.internet.reactor.callLater (10, dawgie.pl.LogDeferredException (defer, 'handling error while scheduling periodic event', __name__).callback, None)
+        twisted.internet.reactor.callLater (10, dawgie.pl.DeferWithLogOnError (defer, 'handling error while scheduling periodic event', __name__).callback, None)
         return
 
     delay = []
@@ -214,7 +216,7 @@ def defer():
         wait = min (delay)
         log.info ('defer() - next wake up time in ' + str (round (wait)) +
                   ' seconds.')
-        twisted.internet.reactor.callLater (round (wait), dawgie.pl.LogDeferredException (defer, 'handling error while scheduling periodic events', __name__).callback, None)
+        twisted.internet.reactor.callLater (round (wait), dawgie.pl.DeferWithLogOnError (defer, 'handling error while scheduling periodic events', __name__).callback, None)
         pass
     return
 
@@ -227,7 +229,7 @@ def is_paused(): return dawgie.pl.schedule.pipeline_paused
 
 def next_job_batch():
     todo = []
-    if not dawgie.pl.schedule.is_paused():
+    if not (promote() or dawgie.pl.schedule.is_paused()):
         jobs = dict([(job.tag, job) for job in que])
         for job in filter (lambda j:j.get ('todo'), que):
             available = job.get ('todo').copy()
@@ -299,6 +301,14 @@ def periodics (factories):
     defer()
     return
 
+def purge (node:dawgie.pl.dag.Node, target:str):
+    if target in node.get ('do',[]): node.get ('do').remove (target)
+    if target in node.get ('doing',[]): node.get ('doing').remove (target)
+    if target in node.get ('todo',[]): node.get ('todo').remove (target)
+
+    for child in node: purge (child, target)
+    return
+
 def state_tree_view(): return dawgie.pl.schedule.ae.svv
 def task_tree_view(): return dawgie.pl.schedule.ae.tv
 
@@ -312,18 +322,18 @@ def tasks():
 
 def unpause(): dawgie.pl.schedule.pipeline_paused = False
 
-def update (value_names:[str], original:dawgie.pl.dag.Node, rid:int):
-    log.info ('update() - New values: %s', str(value_names))
+def update (values:[(str,bool)], original:dawgie.pl.dag.Node, rid:int):
+    log.info ('update() - New values: %s', str(values))
     log.info ('update() - Node name: %s', original.tag)
     log.info ('update() - Run ID: %s', str(rid))
 
-    if value_names:
+    if values:
         event = None
         feedbacks = dawgie.pl.schedule.ae.feedbacks
         targets = set()
         task_names = set()
         vns = set()
-        for vn in value_names:
+        for vn,_isnew in filter (lambda t:t[1], values):
             target = vn.split('.')[1]
             targets.add (target)
             fvn = '.'.join (vn.split('.')[2:])
@@ -342,13 +352,27 @@ def update (value_names:[str], original:dawgie.pl.dag.Node, rid:int):
                 pass
             pass
         organize (sorted (task_names), rid, targets, event)
-        pass
+        promote (values, original, rid)
+    else: log.error('Node %s for run ID %d did not update its state vector',
+                    original.tag, rid)
     return
 
 def view_doing() -> dict:
     active = [t for t in
               filter (lambda t:t.get ('status') == State.running, que)]
     return dict([(a.tag, sorted (list(a.get ('doing')))) for a in active])
+
+def view_events()->[{}]:
+    result = {}
+    for p in per:
+        if p.tag not in result: result[p.tag] = set()
+
+        for m in p.get ('period'):
+            try: result[p.tag].add (round(_delay (m).total_seconds()))
+            except _DelayNotKnowableError: result[p.tag].add (0)
+            pass
+        pass
+    return [{'actor':k, 'delays':sorted(result[k])} for k in sorted (result)]
 
 def view_failure() -> [dict]: return err
 def view_success() -> [dict]: return suc

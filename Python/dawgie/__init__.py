@@ -367,8 +367,8 @@ class Analysis(_Metric):
 
     def list(self)->'[Analyzer]': raise NotImplementedError()
 
-    def new_values (self, name:str=None)->[str]:
-        if name: self.__nv.append (name)
+    def new_values (self, value:(str,bool)=None)->[(str,bool)]:
+        if value: self.__nv.append (value)
         return self.__nv
 
     def timing (self): return self.__timing
@@ -418,9 +418,20 @@ class Aspect(object):
     '''The Aspect is the data pertaining to all targets
 
     Implementations are done in dawgie.db.
-    '''
-    def __iter__(self): raise NotImplementedError()
 
+    Access to the data is provided by making the Aspect look behave like
+    a dictionary. The data is arranged as [tn][fsvn][vn] where
+        tm - target name
+        fsvn - algorithm name and state vector name
+        vn - value or feature name
+
+    While access is granted as a dictionary, it is just a portion of it and
+    is read-only.
+    '''
+    def __contains__(self, item): raise NotImplementedError()
+    def __getitem__(self, key): raise NotImplementedError()
+    def __iter__(self): raise NotImplementedError()
+    def __len__(self): raise NotImplementedError()
     def _collect (self, refs:[(SV_REF,V_REF)])->None:
         raise NotImplementedError()
 
@@ -429,6 +440,10 @@ class Aspect(object):
         return
 
     def ds(self)->'Dataset': raise NotImplementedError()
+    def items(self)->[(str,{str:{str:'dagie.Value'}})]:
+        raise NotImplementedError()
+    def keys(self)->[str]: raise NotImplementedError()
+    def values(self)->[{str:{str:'dawgie.Value'}}]: raise NotImplementedError()
     pass
 
 class Dataset(_Metric):
@@ -564,8 +579,8 @@ class Regress(_Metric):
 
     def list(self)->'[Regression]': raise NotImplementedError()
 
-    def new_values (self, name:str=None)->[str]:
-        if name: self.__nv.append (name)
+    def new_values (self, value:(str,bool)=None)->[(str,bool)]:
+        if value: self.__nv.append (value)
         return self.__nv
 
     def timing (self): return self.__timing
@@ -722,8 +737,8 @@ class Task(_Metric):
 
     def list(self)->[Algorithm]: raise NotImplementedError()
 
-    def new_values (self, name:str=None)->[str]:
-        if name: self.__nv.append (name)
+    def new_values (self, value:(str,bool)=None)->[(str,bool)]:
+        if value: self.__nv.append (value)
         return self.__nv
 
     def timing (self): return self.__timing
@@ -733,14 +748,31 @@ class Timeline(object):
     '''The Aspect is the data pertaining to all targets
 
     Implementations are done in dawgie.db.
+
+    Access to the data is provided by making the Timeline look behave like
+    a dictionary. The data is arranged as [rid][fsvn][vn] where
+        rid - run ID
+        fsvn - algorithm name and state vector name
+        vn - value or feature name
+
+    While access is granted as a dictionary, it is just a portion of it and
+    is read-only.
     '''
+    def __contains__(self, item): raise NotImplementedError()
+    def __getitem__(self, key): raise NotImplementedError()
     def __iter__(self): raise NotImplementedError()
+    def __len__(self): raise NotImplementedError()
     def _recede (self, data:Regression)->None: raise NotImplementedError()
     def ds(self)->'Dataset': raise NotImplementedError()
+    def items(self)->[(str,{str:{str:'dagie.Value'}})]:
+        raise NotImplementedError()
+    def keys(self)->[str]: raise NotImplementedError()
 
     def recede (self, data:Regression)->None:
         self.ds().measure (self._recede, (data,))
         return
+
+    def values(self)->[{str:{str:'dawgie.Value'}}]: raise NotImplementedError()
     pass
 
 class Value(Version):

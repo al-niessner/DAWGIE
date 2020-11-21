@@ -1,5 +1,4 @@
 '''
-
 COPYRIGHT:
 Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
@@ -37,13 +36,41 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import dawgie
-import unittest
+import dawgie.pl.dag
+import logging; log = logging.getLogger(__name__)
 
-class Dawgie(unittest.TestCase):
-    def test_schedule(self):
-        self.assertRaises (ValueError, dawgie.schedule, None, None, 1, 1)
-        self.assertIsInstance (dawgie.schedule (None, None, True),
-                               dawgie.EVENT)
+class Engine:
+    def __call__ (self,
+                  values:[(str,bool)]=None,
+                  original:dawgie.pl.dag.Node=None,
+                  rid:int=None):
+        arg_state = (values is not None, original is not None, rid is not None)
+
+        if all (arg_state):  # new item to promote
+            self.todo (original, rid, values)
+        elif any (arg_state):  # error because its all or nothing
+            log.error ('Inconsistent arguments. Ignoring request.')
+        else: self.do()
+
+        return self.more()
+
+    def __init__ (self):
+        self._todo = []
+        return
+
+    def clear(self): self._todo.clear()
+
+    def do (self):
+        if self.more(): self.clear()
+        return
+
+    def more (self)->bool: return 0 < len (self._todo)
+
+    def todo (self,
+              original:dawgie.pl.dag.Node=None,
+              rid:int=None,
+              values:[(str,bool)]=None):
+        if not all ([v[1] for v in values]):\
+           self._todo.append ((original, rid, values))
         return
     pass

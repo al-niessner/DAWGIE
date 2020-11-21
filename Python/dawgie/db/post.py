@@ -46,6 +46,7 @@ import dawgie.context
 import dawgie.db
 import dawgie.db.post
 import dawgie.db.util
+import dawgie.db.util.aspect
 import dawgie.util
 import logging; log = logging.getLogger(__name__)
 import os
@@ -82,11 +83,16 @@ class ArchiveHandler(twisted.internet.protocol.ProcessProtocol):
         return
     pass
 
-class Interface(dawgie.Aspect, dawgie.Dataset, dawgie.Timeline):
-    # pylint: disable=attribute-defined-outside-init,no-self-use,too-many-arguments
-    def __iter__(self): return TableIterator(self.__span, self.__reverse)
+class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
+    def __init__(self, *args):
+        dawgie.db.util.aspect.Container.__init__(self)
+        dawgie.Dataset.__init__(self, *args)
+        self.__span = {}
+        return
 
-    def __fill (self, cur, sv, alg_ID, run_ID, task_ID, tn_ID, sv_ID):
+    # pylint: disable=too-many-arguments
+    @staticmethod
+    def __fill (cur, sv, alg_ID, run_ID, task_ID, tn_ID, sv_ID):
         # Get rows from primary table that have these algorithm primary keys
         cur.execute('SELECT val_ID,blob_name from Prime WHERE run_ID = %s ' +
                     'and alg_ID = %s and tn_ID = %s ' +
@@ -105,13 +111,21 @@ class Interface(dawgie.Aspect, dawgie.Dataset, dawgie.Timeline):
             sv[val_name] = dawgie.db.util.decode(data_valPickle)
             pass
         return
+    # pylint: enable=too-many-arguments
 
     def __purge (self):
         table = self.__span['table']
-        for k in [k for k in table]:
-            if not table[k]:
-                log.warning ('No data found for key: ' + str(k))
-                del table[k]
+        for k1 in [k for k in table]:
+            for k2 in [k for k in table[k1]]:
+                if not table[k1][2]:
+                    log.warning ('No data found for keys [%s][%s]',
+                                 str(k1), str(k2))
+                    del table[k1][k2]
+                pass
+
+            if not table[k1]:
+                log.warning ('No data found for key %s ', str(k1))
+                del table[k1]
                 pass
             pass
         return
@@ -128,7 +142,8 @@ class Interface(dawgie.Aspect, dawgie.Dataset, dawgie.Timeline):
         tn_ID = _fetchone(cur,'Dataset: Could not find target ID')
         return tn_ID
 
-    def __verify (self, value):
+    @staticmethod
+    def __verify (value):
         # pylint: disable=bare-except
         result = [False, False, False, False]
         result[0] = isinstance (value, dawgie.Value)
@@ -139,11 +154,16 @@ class Interface(dawgie.Aspect, dawgie.Dataset, dawgie.Timeline):
         except: pass
         return all (result)
 
+    def _ckeys (self, l1k, l2k):
+        if l2k: keys = self.__span['table'][l1k][l2k].keys()
+        elif l1k: keys = self.__span['table'][l1k].keys()
+        else: keys = self.__span['table'].keys()
+        return keys
+
     def _collect (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
         # pylint: disable=too-many-locals
         conn = dawgie.db.post._conn()
         cur = dawgie.db.post._cur (conn)
-        self.__reverse = False
         self.__span = {'sv_templates':
                        dict([('.'.join ([dawgie.util.task_name (ref.factory),
                                          ref.impl.name(),
@@ -193,7 +213,7 @@ class Interface(dawgie.Aspect, dawgie.Dataset, dawgie.Timeline):
                     log.warning ('Aspect collect: Could not find any ' +
                                  'values for ' + str (ref))
                 elif tn[1] not in self.__span['table']:
-                    self.__span['table'][tn[1]] = []
+                    self.__span['table'][tn[1]] = {}
                     pass
 
                 for vid in vids:
@@ -201,11 +221,14 @@ class Interface(dawgie.Aspect, dawgie.Dataset, dawgie.Timeline):
                     vn = cur.fetchone()[0]
                     entry = ENTRY(run_ID, tn[0], task_ID, alg_ID, sv_ID, vid)
 
+                    if fsvn not in self.__span['table'][tn[1]]:\
+                       self.__span['table'][tn[1]][fsvn] = {}
+
                     if isinstance (ref, dawgie.SV_REF):
-                        self.__span['table'][tn[1]].append ((fsvn, vn, entry))
+                        self.__span['table'][tn[1]][fsvn][vn] = entry
                     elif isinstance (ref, dawgie.V_REF):
                         if ref.feat == vn:
-                            self.__span['table'][tn[1]].append ((fsvn,vn,entry))
+                            self.__span['table'][tn[1]][fsvn][vn] = entry
                             pass
                         pass
                     else: log.critical ('Need to improve compliant because ' +
@@ -220,7 +243,25 @@ class Interface(dawgie.Aspect, dawgie.Dataset, dawgie.Timeline):
         self.__purge()
         return
 
-    def ds(self): return self
+    def _fill_item (self, l1k, l2k, l3k):
+        if isinstance (self.__span['table'][l1k][l2k][l3k], ENTRY):
+            conn = dawgie.db.post._conn()
+            cur = dawgie.db.post._cur (conn)
+            cur.execute ('SELECT blob_name from Prime WHERE run_ID = %s and ' +
+                         'tn_ID = %s and task_ID = %s and alg_ID = %s and ' +
+                         'sv_ID = %s and val_ID = %s;',
+                         self.__span['table'][l1k][l2k][l3k])
+            value = dawgie.db.util.decode (*cur.fetchone())
+            cur.execute ('SELECT design,implementation,bugfix ' +
+                         'FROM StateVector WHERE pk= %s;',
+                         [self.__span['table'][l1k][l2k][l3k].sv_ID])
+            value._set_ver (dawgie.VERSION(*cur.fetchone()))
+            self.__span['table'][l1k][l2k][l3k] = value
+            conn.commit()
+            cur.close()
+            conn.close()
+        else: value = self.__span['table'][l1k][l2k][l3k]
+        return value
 
     def _load (self, algref=None, err=True, ver=None):
         # Load state vectors with data from db into algorithm
@@ -317,11 +358,12 @@ class Interface(dawgie.Aspect, dawgie.Dataset, dawgie.Timeline):
         conn.close()
         return
 
+    def ds(self): return self
+
     def recede (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
         # pylint: disable=too-many-locals,too-many-statements
         conn = dawgie.db.post._conn()
         cur = dawgie.db.post._cur (conn)
-        self.__reverse = True
         self.__span = {'sv_templates':
                        dict([('.'.join ([dawgie.util.task_name (ref.factory),
                                          ref.impl.name(),
@@ -375,7 +417,7 @@ class Interface(dawgie.Aspect, dawgie.Dataset, dawgie.Timeline):
                     log.warning ('Regress recede: Could not find any ' +
                                  'values for ' + str (ref))
                 elif rid not in self.__span['table']:
-                    self.__span['table'][rid] = []
+                    self.__span['table'][rid] = {}
                     pass
 
                 for vid in vids:
@@ -383,11 +425,14 @@ class Interface(dawgie.Aspect, dawgie.Dataset, dawgie.Timeline):
                     vn = cur.fetchone()[0]
                     entry = ENTRY(rid, tnid, task_ID, alg_ID, sv_ID, vid)
 
+                    if fsvn not in self.__span['table'][rid]:\
+                       self.__span['table'][rid][fsvn] = {}
+
                     if isinstance (ref, dawgie.SV_REF):
-                        self.__span['table'][rid].append ((fsvn, vn, entry))
+                        self.__span['table'][rid][fsvn][vn] = entry
                     elif isinstance (ref, dawgie.V_REF):
                         if ref.feat == vn:
-                            self.__span['table'][rid].append ((fsvn,vn,entry))
+                            self.__span['table'][rid][fsvn][vn] = entry
                             pass
                         pass
                     else: log.critical ('Need to improve compliant because ' +
@@ -418,14 +463,12 @@ class Interface(dawgie.Aspect, dawgie.Dataset, dawgie.Timeline):
                 cur.execute('SELECT EXISTS (SELECT * from Prime where ' +
                             'blob_name = %s);', [result])
                 exists &= cur.fetchone()[0]
-
-                if not exists:
-                    self._bot().new_values ('.'.join ([str (self._runid()),
-                                                       self._tn(),
-                                                       self._task(),
-                                                       self._alg().name(),
-                                                       sv.name(), vn]))
-                    pass
+                self._bot().new_values (('.'.join ([str (self._runid()),
+                                                    self._tn(),
+                                                    self._task(),
+                                                    self._alg().name(),
+                                                    sv.name(), vn])),
+                                        not exists)
 
                 # Put result in primary. Make sure to get task_ID and other
                 # primary keys from their respective tables
@@ -623,47 +666,6 @@ class MyVersion(dawgie.Version):
         dawgie.Version.__init__ (self)
         self._version_ = dawgie.VERSION(design, impl, bf)
         return
-    pass
-
-class TableIterator(object):
-    # pylint: disable=too-few-public-methods
-    def __init__(self, span, reverse):
-        self.__cur = 0
-        self.__keys = sorted (span['table'].keys(), reverse=reverse)
-        self.__svts = span['sv_templates']
-        self.__table = span['table']
-        return
-
-    def __iter__(self): return self
-
-    def __next__(self):
-        if -1 < self.__cur < len (self.__keys):
-            result = (self.__keys[self.__cur],
-                      self.__fill (self.__keys[self.__cur]))
-            self.__cur += 1
-        else: raise StopIteration
-        return result
-
-    def __fill (self, key):
-        conn = dawgie.db.post._conn()
-        cur = dawgie.db.post._cur (conn)
-        result = dict([(svn, pickle.loads(t)) for svn,t in self.__svts.items()])
-        for svn,vn,entry in self.__table[key]:
-            cur.execute ('SELECT blob_name from Prime WHERE run_ID = %s and ' +
-                         'tn_ID = %s and task_ID = %s and alg_ID = %s and ' +
-                         'sv_ID = %s and val_ID = %s;', entry)
-            result[svn][vn] = dawgie.db.util.decode (*cur.fetchone())
-            pass
-        for svn,sv_id in set ([(svn, entry.sv_ID)
-                               for svn,vn,entry in self.__table[key]]):
-            cur.execute ('SELECT design,implementation,bugfix ' +
-                         'FROM StateVector WHERE pk= %s;', [sv_id])
-            result[svn]._set_ver (dawgie.VERSION(*cur.fetchone()))
-            pass
-        conn.commit()
-        cur.close()
-        conn.close()
-        return result
     pass
 
 def _append_ver (d:dict, k:str, v:str):

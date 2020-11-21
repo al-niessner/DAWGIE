@@ -37,7 +37,11 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+from dawgie.pl.jobinfo import State
+
+import datetime
 import dawgie.context
+import dawgie.pl.dag
 import dawgie.pl.jobinfo
 import dawgie.pl.schedule
 import os
@@ -103,6 +107,32 @@ class Schedule(unittest.TestCase):
         self.assertEqual (1, len (dawgie.pl.schedule.que))
         nodes[dei].get ('doing').clear()
         nodes[dei].get ('todo').clear()
+        dawgie.pl.schedule.que.clear()
+        return
+
+    def test_defer(self):
+        dawgie.pl.schedule.periodics ([fake_events_defer])
+        dawgie.pl.schedule.defer()
+        self.assertEqual (3, len (dawgie.pl.schedule.per))
+        for p in dawgie.pl.schedule.per:
+            if p.tag == 'disk.engine':
+                self.assertEqual (State.waiting, p.get ('status'))
+            elif p.tag == 'network.analyzer':
+                self.assertEqual (State.delayed, p.get ('status'))
+            else: self.assertTrue (False, 'unxpected element ' + p.tag)
+            pass
+        self.assertEqual (2, len (dawgie.pl.schedule.que))
+        for e in dawgie.pl.schedule.que:
+            self.assertEqual (State.waiting, e.get ('status'))
+            pass
+        jobs = dawgie.pl.schedule.next_job_batch()
+        self.assertEqual (1, len (jobs))
+        self.assertSetEqual (set(['a', 'c', 'e', 'b', 'f', 'd', 'g']),
+                             jobs[0].get ('do'))
+        self.assertSetEqual (set(['a', 'c', 'e', 'b', 'f', 'd', 'g']),
+                             jobs[0].get ('doing'))
+        self.assertSetEqual (set(), jobs[0].get ('todo'))
+        dawgie.pl.schedule.per.clear()
         dawgie.pl.schedule.que.clear()
         return
 
@@ -177,6 +207,35 @@ class Schedule(unittest.TestCase):
         dawgie.pl.schedule.que.clear()
         return
 
+    def test_purge(self):
+        a = dawgie.pl.dag.Node('a')
+        b = dawgie.pl.dag.Node('b')
+        c = dawgie.pl.dag.Node('c')
+        d = dawgie.pl.dag.Node('d')
+        e = dawgie.pl.dag.Node('e')
+        f = dawgie.pl.dag.Node('f')
+        for n in [a, b, c, d, e, f]:
+            for l in ['do', 'doing', 'todo']:
+                n.set (l, [])
+                for t in ['A', 'B', 'C']: n.get (l).append (t)
+                pass
+            pass
+        a.add (c)
+        a.add (d)
+        b.add (d)
+        b.add (e)
+        d.add (f)
+        dawgie.pl.schedule.purge (b, 'B')
+        for l in ['do', 'doing', 'todo']:
+            self.assertEqual (['A', 'B', 'C'], a.get (l))
+            self.assertEqual (['A', 'C'], b.get (l))
+            self.assertEqual (['A', 'B', 'C'], c.get (l))
+            self.assertEqual (['A', 'C'], d.get (l))
+            self.assertEqual (['A', 'C'], e.get (l))
+            self.assertEqual (['A', 'C'], f.get (l))
+            pass
+        return
+
     def test_tasks(self):
         tasks = dawgie.pl.schedule.tasks()
         self.assertEqual (12, len (tasks))
@@ -190,10 +249,49 @@ class Schedule(unittest.TestCase):
             if c.tag == 'disk.engine': c.get ('doing').add ('fred')
             pass
         dawgie.pl.schedule.que.clear()
-        dawgie.pl.schedule.update (['12.fred.network.analyzer.test.image'],
-                                   root, 12)
+        dawgie.pl.schedule.update ([('12.fred.network.analyzer.test.image',
+                                     True)], root, 12)
         self.assertEqual (len (root), len (dawgie.pl.schedule.que))
         for n in dawgie.pl.schedule.que:\
             self.assertEqual (12, n.get ('runid'), n.tag)
         return
+
+    def test_view_events(self):
+        dawgie.pl.schedule.periodics ([fake_events_view])
+        events = dawgie.pl.schedule.view_events()
+        events = dict ([(e['actor'],e['delays']) for e in events])
+        self.assertEqual (2, len(events))
+        self.assertTrue ('disk.engine' in events)
+        self.assertEqual (2, len (events['disk.engine']))
+        self.assertAlmostEqual (86400, events['disk.engine'][0], -1)
+        self.assertAlmostEqual (518400, events['disk.engine'][1], -1)
+        self.assertTrue ('network.analyzer' in events)
+        self.assertEqual (1, len (events['network.analyzer']))
+        self.assertEqual (0, events['network.analyzer'][0])
+        dawgie.pl.schedule.per.clear()
+        return
     pass
+
+def fake_events_defer():
+    import ae.disk
+    import ae.disk.bot
+    import ae.network
+    import ae.network.bot
+    now = datetime.datetime.utcnow()
+    return [dawgie.schedule(ae.disk.task, ae.disk.bot.Engine(),
+                            dow=now.weekday(), time=now.time()),
+            dawgie.schedule(ae.network.analysis, ae.network.bot.Analyzer(),
+                            dow=(now.weekday() + 1) % 7, time=now.time())]
+
+def fake_events_view():
+    import ae.disk
+    import ae.disk.bot
+    import ae.network
+    import ae.network.bot
+    now = datetime.datetime.utcnow()
+    return [dawgie.schedule(ae.disk.task, ae.disk.bot.Engine(),
+                            dow=(now.weekday()+1) % 7, time=now.time()),
+            dawgie.schedule(ae.disk.task, ae.disk.bot.Engine(),
+                            dow=(now.weekday()-1) % 7, time=now.time()),
+            dawgie.schedule(ae.network.analysis, ae.network.bot.Analyzer(),
+                            boot=True)]

@@ -38,8 +38,11 @@ NTR:
 '''
 
 import base64
-import dawgie.pl.aws
+import dawgie.context
+import dawgie.pl.state
+dawgie.context.fsm = dawgie.pl.state.FSM()
 import dawgie.pl.message
+import dawgie.pl.worker.aws
 import dawgie.security
 import gnupg
 import multiprocessing
@@ -79,16 +82,19 @@ class AWS(unittest.TestCase):
                                         passphrase='1234567890'))
         dawgie.security.initialize (kdir)
         _https_in, _https_out = multiprocessing.Queue(),multiprocessing.Queue()
-        originals = (dawgie.pl.aws._advertise, dawgie.pl.aws._interview, dawgie.pl.aws._hire,
-                     dawgie.pl.aws._https_push,
-                     dawgie.pl.aws._sqs_pop, dawgie.pl.aws._sqs_push)
+        originals = (dawgie.pl.worker.aws._advertise,
+                     dawgie.pl.worker.aws._interview,
+                     dawgie.pl.worker.aws._hire,
+                     dawgie.pl.worker.aws._https_push,
+                     dawgie.pl.worker.aws._sqs_pop,
+                     dawgie.pl.worker.aws._sqs_push)
         _sqs_in,_sqs_out = multiprocessing.Queue(),multiprocessing.Queue()
         task = multiprocessing.Process(target=_aws, args=(_https_out, _https_in,
                                                           _sqs_out, _sqs_in,
                                                           kdir))
         task.start()
         _subs()
-        do = dawgie.pl.aws.Connect(dawgie.pl.message.make(val=kdir), _respond, _callLater)
+        do = dawgie.pl.worker.aws.Connect(dawgie.pl.message.make(val=kdir), _respond, _callLater)
         do.advertise()
         self.assertFalse (AWS.failed)
         task.join()
@@ -113,9 +119,9 @@ def _aws (https_in, https_out, sqs_in, sqs_out, kdir):
     _sqs_out = sqs_out
     _subs()
     dawgie.security.initialize (kdir)
-    _https_out.put (dawgie.pl.aws.exchange (_https_in.get()))
-    _https_out.put (dawgie.pl.aws.exchange (_https_in.get()))
-    _https_out.put (dawgie.pl.aws.exchange (_https_in.get()))
+    _https_out.put (dawgie.pl.worker.aws.exchange (_https_in.get()))
+    _https_out.put (dawgie.pl.worker.aws.exchange (_https_in.get()))
+    _https_out.put (dawgie.pl.worker.aws.exchange (_https_in.get()))
     return
 
 def _advertise(): return 'position posted'
@@ -140,12 +146,12 @@ def _sqs_push (msg):
     return _sqs_out.put (msg)
 
 def _subs (funcs=(_advertise,_interview,_hire,_https_push,_sqs_pop,_sqs_push)):
-    dawgie.pl.aws._advertise = funcs[0]
-    dawgie.pl.aws._interview = funcs[1]
-    dawgie.pl.aws._hire = funcs[2]
-    dawgie.pl.aws._https_push = funcs[3]
-    dawgie.pl.aws._sqs_pop = funcs[4]
-    dawgie.pl.aws._sqs_push = funcs[5]
+    dawgie.pl.worker.aws._advertise = funcs[0]
+    dawgie.pl.worker.aws._interview = funcs[1]
+    dawgie.pl.worker.aws._hire = funcs[2]
+    dawgie.pl.worker.aws._https_push = funcs[3]
+    dawgie.pl.worker.aws._sqs_pop = funcs[4]
+    dawgie.pl.worker.aws._sqs_push = funcs[5]
     return
 
 if __name__ == '__main__': AWS().test_handshake()

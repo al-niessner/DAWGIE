@@ -172,6 +172,21 @@ class FSM(object):
             pass
         return
 
+    def _archive(self, *_args, **_kwds):
+        import dawgie.context
+        import dawgie.db
+        import dawgie.pl.schedule
+        import dawgie.tools.trace
+
+        log.info ('entering state archive')
+        basedir = os.path.abspath (os.path.join (dawgie.context.fe_path,
+                                                 'pages/database'))
+        os.makedirs (basedir, exist_ok=True)
+        dawgie.tools.trace.main (os.path.join(basedir, 'trace_report.html'),
+                                 dawgie.pl.schedule.ae.at)
+        dawgie.db.archive (self._archive_done)
+        return
+
     def _archive_done(self):
         import dawgie.pl.farm
 
@@ -227,9 +242,18 @@ class FSM(object):
             pass
         return
 
-    def _pipeline(self, *args, **kwds):
+    def _navel_gaze (self, *_args, **_kwds):
+        import dawgie.db
+        import dawgie.pl.farm
+        import dawgie.pl.resources
+
+        log.info ('Enter state navel gaze')
+        dawgie.pl.farm.insights = dawgie.pl.resources.distribution\
+                                  (dawgie.db.metrics())
+        return
+
+    def _pipeline(self, *_args, **_kwds):
         # Begin the process of starting the pipeline
-        # pylint: disable=unused-argument
         import dawgie
         import dawgie.db
         import dawgie.pl.scan
@@ -276,23 +300,14 @@ class FSM(object):
         return
 
     def archive (self):
-        import dawgie.context
-        import dawgie.db
         import dawgie.pl.farm
-        import dawgie.pl.schedule
-        import dawgie.tools.trace
 
         if self.__doctest:
             print ('self.archive()')
             self._archive_done()
         elif dawgie.pl.farm.archive:
-            log.info ('entering state archive')
-            basedir = os.path.abspath (os.path.join (dawgie.context.fe_path,
-                                                     'pages/database'))
-            os.makedirs (basedir, exist_ok=True)
-            dawgie.tools.trace.main (os.path.join(basedir, 'trace_report.html'),
-                                     dawgie.pl.schedule.ae.at)
-            dawgie.db.archive (self._archive_done)
+            d = twisted.internet.threads.deferToThread(self._archive, 2)
+            d.addErrback (dawgie.pl.LogFailure('while archiving the pipeline', __name__).log)
         else: self._archive_done()
         return
 
@@ -326,7 +341,6 @@ class FSM(object):
 
     def is_todo_done(self):
         import dawgie.pl.schedule
-        import dawgie.pl.start
         while dawgie.pl.schedule.que and self.waiting_on_todo():
             time.sleep(0.2)
         return
@@ -346,18 +360,15 @@ class FSM(object):
             dawgie.pl.farm.notifyAll()
             dawgie.pl.farm.clear()
             d = twisted.internet.threads.deferToThread(self._pipeline, 2)
-            d.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while loading the pipeline', __name__).log)
+            d.addCallbacks (done, dawgie.pl.LogFailure('while loading the pipeline', __name__).log)
             pass
         return
 
     def navel_gaze(self):
-        import dawgie.db
-        import dawgie.pl.farm
-        import dawgie.pl.resources
+        import dawgie.pl
 
-        log.info ('Enter state navel gaze')
-        dawgie.pl.farm.insights = dawgie.pl.resources.distribution\
-                                  (dawgie.db.metrics())
+        d = twisted.internet.threads.deferToThread(self._navel_gaze, 2)
+        d.addErrback (dawgie.pl.LogFailure('while navel gazing', __name__).log)
         return
 
     def reload(self):
@@ -372,7 +383,7 @@ class FSM(object):
         else:
             log.info ('Reload the pipeline')
             d = twisted.internet.threads.deferToThread(self._reload, 2)
-            d.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while reloading the pipeline', __name__).log)
+            d.addCallbacks (done, dawgie.pl.LogFailure('while reloading the pipeline', __name__).log)
             pass
         return
 
@@ -417,13 +428,13 @@ class FSM(object):
         return
 
     def state_view(self):
+        import dawgie.context
         import dawgie.pl.dag
-        import dawgie.pl.start
         import dawgie.pl.schedule
 
         self.nodes[self.prior_state].set_fillcolor(self.inactive_color)
-        self.prior_state = dawgie.pl.start.fsm.state
-        self.nodes[dawgie.pl.start.fsm.state].set_fillcolor(self.active_color)
+        self.prior_state = dawgie.context.fsm.state
+        self.nodes[dawgie.context.fsm.state].set_fillcolor(self.active_color)
         return dawgie.pl.dag.Construct.graph (self.graph, [], 'current.svg')
 
     def submit_crossroads(self):
@@ -464,7 +475,7 @@ class FSM(object):
 
         if self.crew_thread is None:
             self.crew_thread = twisted.internet.threads.deferToThread(self.is_crew_done)
-            self.crew_thread.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while signaling crew is done', __name__).log)
+            self.crew_thread.addCallbacks (done, dawgie.pl.LogFailure('while signaling crew is done', __name__).log)
             pass
         return
 
@@ -484,7 +495,7 @@ class FSM(object):
 
         if self.doing_thread is None:
             self.doing_thread = twisted.internet.threads.deferToThread(self.is_doing_done)
-            self.doing_thread.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while signaling doing is done', __name__).log)
+            self.doing_thread.addCallbacks (done, dawgie.pl.LogFailure('while signaling doing is done', __name__).log)
             pass
         return
 
@@ -511,7 +522,7 @@ class FSM(object):
 
         if self.todo_thread is None:
             self.todo_thread = twisted.internet.threads.deferToThread(self.is_todo_done)
-            self.todo_thread.addCallbacks (done, dawgie.pl.LogDeferredException(None, 'while signaling todo is done', __name__).log)
+            self.todo_thread.addCallbacks (done, dawgie.pl.LogFailure('while signaling todo is done', __name__).log)
             pass
         return
 
