@@ -83,7 +83,7 @@ class Engine:
             targets = set([v.split ('.')[1] for v in values])
             vals = set(['.'.join (v.split ('.')[2:]) for v in values])
 
-            if len (targets) == 1: target_name = targets.pop()
+            if len (targets) == 1: target_name = targets.copy().pop()
             else:
                 raise ValueError('Inconsistent targets for a single result %s' %
                                  str(targets))
@@ -94,7 +94,7 @@ class Engine:
                 inputs = set()
                 outputs = self._ae[child.tag]
                 for o in outputs: inputs.update (o.get('parents'))
-                dependents = [d for d in
+                dependents = [d.tag for d in
                               filter (lambda i,n=name:i.tag.startswith(n),
                                       inputs)]
 
@@ -103,7 +103,6 @@ class Engine:
                 # 2: is the dependent or ancestors are schduled to run already
                 #    or are running
                 #  if yes, then break
-
                 if _is_scheduled (algnode, child, targets): continue
 
                 # 3: find the consistent set of previous inputs for each output
@@ -114,15 +113,15 @@ class Engine:
 
                 # 4: are all of the inputs to dependent the same
                 #    if no, schedule dependent and break
-                if not all (juncture):
+                if not juncture or not all (juncture):
                     self._organize ([child.tag], runid, targets,
-                                    'promition not possible')
+                                    'promotion not possible')
                     continue
 
                 # 5: promote decendent state vectors
                 if not dawgie.db.promote (juncture, runid):
                     self._organize ([child.tag], runid, targets,
-                                    'promition failed to insert')
+                                    'promotion failed to insert')
                     continue
 
                 # 6: add decendent to todo list
@@ -153,9 +152,9 @@ class Engine:
 def _is_scheduled (ignore:dawgie.pl.dag.Node,
                    node:dawgie.pl.dag.Node,
                    targets:[str])->bool:
-    result = any (targets.issubset (node.get ('do')),
-                  targets.issubset (node.get ('doing')),
-                  targets.issubset (node.get ('todo')))
+    result = any ([targets.issubset (node.get ('do')),
+                   targets.issubset (node.get ('doing')),
+                   targets.issubset (node.get ('todo'))])
 
     if not result:
         for parent in node.get ('parents'):

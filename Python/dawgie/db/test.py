@@ -39,11 +39,15 @@ NTR: 49811
 
 # pylint: disable=redefined-builtin,too-many-arguments,unused-argument
 
+from dawgie.db import REF
+
 def archive (done): raise NotImplementedError()
 
 def close(): return
 
 def connect (alg, bot, tn): raise NotImplementedError()
+
+def consistent (inputs:[REF], outputs:[REF], target_name:str)->(): raise NotImplementedError()
 
 def copy (dst, method, gateway): raise NotImplementedError()
 
@@ -54,6 +58,8 @@ def metrics()->'[dawgie.db.METRIC_DATA]': raise NotImplementedError()
 def next(): raise NotImplementedError()
 
 def open(): raise NotImplementedError()
+
+def promote (juncture:(), runid:int): raise NotImplementedError()
 
 def remove(runid, tn, taskn, algn, svn, vn): raise NotImplementedError()
 

@@ -794,30 +794,30 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
         cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
                     'task_ID = %s AND design = %s AND implementation = %s ' +
                     'bugfix = %s;',
-                    (output.aid.name, task_ID, output.aid.verion.design(),
-                     output.aid.verion.implementation(),
-                     output.aid.verion.bugfix()))
+                    (output.aid.name, task_ID, output.aid.version.design(),
+                     output.aid.version.implementation(),
+                     output.aid.version.bugfix()))
         alg_ID = _fetchone (cur,
                             ('consistent(): Algorithm "%s %s" is not singular' %
-                             (output.aid.name, output.aid.verion.asstring())))
+                             (output.aid.name, output.aid.version.asstring())))
         cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
                     'alg_ID = %s AND design = %s AND implementation = %s ' +
                     'bugfix = %s;',
-                    (output.sid.name, alg_ID, output.sid.verion.design(),
-                     output.sid.verion.implementation(),
-                     output.sid.verion.bugfix()))
+                    (output.sid.name, alg_ID, output.sid.version.design(),
+                     output.sid.version.implementation(),
+                     output.sid.version.bugfix()))
         sv_ID = _fetchone (cur,
                            ('consistent(): SV "%s %s" is not singular' %
-                            (output.sid.name, output.sid.verion.asstring())))
+                            (output.sid.name, output.sid.version.asstring())))
         cur.execute('SELECT pk FROM Value WHERE name = %s AND ' +
                     'sv_ID = %s AND design = %s AND implementation = %s ' +
                     'bugfix = %s;',
-                    (output.vid.name, sv_ID, output.vid.verion.design(),
-                     output.vid.verion.implementation(),
-                     output.vid.verion.bugfix()))
+                    (output.vid.name, sv_ID, output.vid.version.design(),
+                     output.vid.version.implementation(),
+                     output.vid.version.bugfix()))
         v_ID = _fetchone (cur,
                           ('consistent(): Value "%s %s" is not singular' %
-                           (output.vid.name, output.vid.verion.asstring())))
+                           (output.vid.name, output.vid.version.asstring())))
         cur.execute('SELECT runid FROM Prime WHERE tn_ID = %s AND ' +
                     'task_ID = %s AND alg_ID = %s AND sv_ID = %s AND ' +
                     'val_ID = %s;',
@@ -916,30 +916,30 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
         cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
                     'task_ID = %s AND design = %s AND implementation = %s ' +
                     'bugfix = %s;',
-                    (output.aid.name, task_ID, output.aid.verion.design(),
-                     output.aid.verion.implementation(),
-                     output.aid.verion.bugfix()))
+                    (output.aid.name, task_ID, output.aid.version.design(),
+                     output.aid.version.implementation(),
+                     output.aid.version.bugfix()))
         alg_ID = _fetchone (cur,
                             ('consistent(): Algorithm "%s %s" is not singular' %
-                             (output.aid.name, output.aid.verion.asstring())))
+                             (output.aid.name, output.aid.version.asstring())))
         cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
                     'alg_ID = %s AND design = %s AND implementation = %s ' +
                     'bugfix = %s;',
-                    (output.sid.name, alg_ID, output.sid.verion.design(),
-                     output.sid.verion.implementation(),
-                     output.sid.verion.bugfix()))
+                    (output.sid.name, alg_ID, output.sid.version.design(),
+                     output.sid.version.implementation(),
+                     output.sid.version.bugfix()))
         sv_ID = _fetchone (cur,
                            ('consistent(): SV "%s %s" is not singular' %
-                            (output.sid.name, output.sid.verion.asstring())))
+                            (output.sid.name, output.sid.version.asstring())))
         cur.execute('SELECT pk FROM Value WHERE name = %s AND ' +
                     'sv_ID = %s AND design = %s AND implementation = %s ' +
                     'bugfix = %s;',
-                    (output.vid.name, sv_ID, output.vid.verion.design(),
-                     output.vid.verion.implementation(),
-                     output.vid.verion.bugfix()))
+                    (output.vid.name, sv_ID, output.vid.version.design(),
+                     output.vid.version.implementation(),
+                     output.vid.version.bugfix()))
         v_ID = _fetchone (cur,
                           ('consistent(): Value "%s %s" is not singular' %
-                           (output.vid.name, output.vid.verion.asstring())))
+                           (output.vid.name, output.vid.version.asstring())))
         cur.execute('SELECT blob_name FROM Prime WHERE runid = %s AND ' +
                     'tn_ID = %s AND task_ID = %s AND alg_ID = %s AND ' +
                     'sv_ID = %s AND val_ID = %s;',
