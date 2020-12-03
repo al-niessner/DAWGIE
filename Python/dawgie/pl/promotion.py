@@ -136,7 +136,15 @@ class Engine:
     def organize (self): return self._organize
 
     @organize.setter
-    def organize (self, organizer): self._organize = organizer
+    def organize (self, organizer):
+        '''a function used to organize the work to be done
+
+        Should have the same arguments as dawgie.pl.schedule.organize.
+        In fact, the default behavior of the pipeline is to use
+        dawgie.pl.schedule.organize
+        '''
+        self._organize = organizer
+        return
 
     def todo (self,
               original:dawgie.pl.dag.Node=None,
