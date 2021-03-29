@@ -1,4 +1,4 @@
-'''
+''' show that add DBs behave the same
 
 COPYRIGHT:
 Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
