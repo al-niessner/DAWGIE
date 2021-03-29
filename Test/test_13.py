@@ -37,8 +37,8 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-## Save the actual work for another day, but this shows how to write one set
-## of tests in DB then test each instance by two other objects that extend it.
+# Save the actual work for another day, but this shows how to write one set
+# of tests in DB then test each instance by two other objects that extend it.
 
 import dawgie.context
 import unittest
