@@ -39,7 +39,7 @@ NTR:
 ignore = False  # forces the pipeline to ignore this package (aka task)
 
 # pylint: disable=redefined-builtin
-def analysis (prefix, ps_hint:int=0, runid:int=-1):
+def analysis (prefix:str, ps_hint:int=0, runid:int=-1):
     import ae.network.bot
     return ae.network.bot.Actor(prefix, ps_hint, runid)
 
@@ -48,6 +48,6 @@ def events():
     import dawgie
     return [dawgie.schedule(analysis, ae.network.bot.Analyzer(), True)]
 
-def task (prefix, ps_hint:int=0, runid:int=-1, target:str='__none__'):
+def task (prefix:str, ps_hint:int=0, runid:int=-1, target:str='__none__'):
     import ae.network.bot
     return ae.network.bot.Agent(prefix, ps_hint, runid, target)
