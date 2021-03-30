@@ -3,7 +3,7 @@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2020, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -218,12 +218,13 @@ def rule_01 (task):
         runid is the data to retrieve and should default to -1
         target is the name to be used for look up and should default to __none__
     '''
-    fargs = {dawgie.Factories.analysis:(3, ['', '=0', '=-1'], ['','int','int']),
+    fargs = {dawgie.Factories.analysis:(3, [inspect.Parameter.empty, 0, -1],
+                                        [inspect.Parameter.empty,int,int]),
              dawgie.Factories.events:(0, [], []),
-             dawgie.Factories.regress:(3, ['', '=0', "='__none__'"],
-                                       ['','int','str']),
-             dawgie.Factories.task:(4, ['', '=0', '=-1', "='__none__'"],
-                                    ['','int','int','str'])}
+             dawgie.Factories.regress:(3,[inspect.Parameter.empty,0,'__none__'],
+                                       [inspect.Parameter.empty,int,str]),
+             dawgie.Factories.task:(4,[inspect.Parameter.empty,0,-1,'__none__'],
+                                    [inspect.Parameter.empty,int,int,str])}
     findings = []
     mod = importlib.import_module (task)
     names = dir (mod)
@@ -241,14 +242,14 @@ def rule_01 (task):
             findings.append (True)
             for d,v in zip (fargs[e][1],
                             inspect.signature (f).parameters.values()):
-                if d: findings[-1] &= str(v).endswith (d)
+                findings[-1] &= v.default == d
                 pass
 
             if findings[-1]:
                 findings.append (True)
-                for d,v in zip (fargs[e][2],
+                for a,v in zip (fargs[e][2],
                                 inspect.signature (f).parameters.values()):
-                    if d: findings[-1] &= 0 < str(v).find (':' + d + '=')
+                    findings[-1] &= v.annotation == a
                     pass
                 if not findings[-1]:
                     logging.error ('Args not typed of factory %s in package %s',
