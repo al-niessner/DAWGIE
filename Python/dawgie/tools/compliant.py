@@ -219,12 +219,12 @@ def rule_01 (task):
         target is the name to be used for look up and should default to __none__
     '''
     fargs = {dawgie.Factories.analysis:(3, [inspect.Parameter.empty, 0, -1],
-                                        [inspect.Parameter.empty,int,int]),
+                                        [str,int,int]),
              dawgie.Factories.events:(0, [], []),
              dawgie.Factories.regress:(3,[inspect.Parameter.empty,0,'__none__'],
-                                       [inspect.Parameter.empty,int,str]),
+                                       [str,int,str]),
              dawgie.Factories.task:(4,[inspect.Parameter.empty,0,-1,'__none__'],
-                                    [inspect.Parameter.empty,int,int,str])}
+                                    [str,int,int,str])}
     findings = []
     mod = importlib.import_module (task)
     names = dir (mod)
