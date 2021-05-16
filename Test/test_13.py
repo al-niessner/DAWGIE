@@ -40,16 +40,92 @@ NTR:
 # Save the actual work for another day, but this shows how to write one set
 # of tests in DB then test each instance by two other objects that extend it.
 
+import dawgie
+import dawgie.db.testdata
 import dawgie.context
 import unittest
 
 class DB:
     @classmethod
     def setup(cls):
+        dawgie.db.open()
+        for tsk,alg,sv,vn,v in dawgie.db.testdata.KNOWNS:
+            dawgie.db.update (tsk, alg, sv, vn, v)
+            pass
+        for tgt,tsk,alg in dawgie.db.testdata.DATASETS:
+            dawgie.db.connect (alg, tsk, tgt).update()
+            pass
+        for tsk,alg in dawgie.db.testdata.ASPECTS:
+            dawgie.db.gather (alg, tsk).ds().update()
+            pass
+        for tsk,alg in dawgie.db.testdata.TIMELINES:
+            dawgie.db.retreat (alg, tsk).ds().update()
+            pass
+        for juncture in dawgie.db.testdata.testdata.JUNCTURES:
+            dawgie.db.promote (juncture)
+            pass
+        dawgie.db.close()
+        return
+
+    def test__prime_keys(self):
+        return
+
+    def test__prime_values(self):
         return
 
     def test_archive(self):
         self.assertTrue (True)
+        return
+
+    def test_close(self):
+        return
+
+    def test_connect(self):
+        return
+
+    def test_consistent(self):
+        return
+
+    def test_copy(self):
+        return
+
+    def test_gather(self):
+        return
+
+    def test_metrics(self):
+        return
+
+    def test_next(self):
+        return
+
+    def test_open(self):
+        return
+
+    def test_promote(self):
+        return
+
+    def test_remove(self):
+        return
+
+    def test_reopen(self):
+        return
+
+    def test_retreat(self):
+        return
+
+    def test_targets(self):
+        return
+
+    def test_trace(self):
+        return
+
+    def test_update (self):
+        return
+
+    def test_versions(self):
+        return
+
+    def test_locks(self):
         return
     pass
 
