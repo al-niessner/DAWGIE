@@ -41,7 +41,6 @@ import dawgie
 
 ASPECTS = []
 DATASETS = []
-JUNCTURES = []
 KNOWNS = []
 RUNID = 17
 TARGET = 'test'

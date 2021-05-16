@@ -242,7 +242,7 @@ def view (visitor, runid, tn, tskn, algn, svn):
         visitor.add_declaration (msg)
         return
 
-    _db_in_use().reset (runid, tn, tskn, alg)
+    _db_in_use().reset (runid, tn, tskn, alg)  # set the alg version
     ds = connect (alg, bot, tn)
     ds.load()
 

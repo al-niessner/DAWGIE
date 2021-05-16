@@ -946,7 +946,7 @@ def rotated_files(index=None):
 def retreat (reg, ret):
     if dawgie.db.shelf._db is None:
         raise RuntimeError('called connect before open')
-    return Interface(reg, ret, ret._target)
+    return Interface(reg, ret, ret._target())
 
 def targets():
     if isinstance (dawgie.db.shelf._db, bool): result = Connector()._keys (Table.target)
