@@ -59,7 +59,7 @@ def copy_blobs (blobs:[str], blobpath:str, outpath:str)->None:
     return
 
 def mkdirs (outpath:str)->None:
-    for subdir in ['db', 'dbs', 'fe', 'gnupg', 'logs', 'stg']:
+    for subdir in ['db', 'dbs', 'fe', 'logs', 'stg']:
         fullpath = os.path.join (outpath, subdir)
         if not os.path.exists (fullpath): os.mkdir (fullpath)
         pass
