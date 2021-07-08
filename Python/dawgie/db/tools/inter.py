@@ -3,6 +3,7 @@
 
 import argparse
 import os
+import shutil
 import sys
 
 def _clean(line:str)->str:
@@ -46,7 +47,25 @@ def _ref (ident:str)->str:
     if ident.count ('.') != 5: raise ValueError('Malformed reference: ' + ident)
     return ident
 
-def postgres (args:argparse.Namespace, items:[str], outdir:str)->None:
+def copy_blobs (blobs:[str], blobpath:str, outpath:str)->None:
+    for bfn in blobs:
+        ifn = os.path.join (blobpath, bfn)
+        ofn = os.path.join (os.path.join (outpath, 'dbs'), bfn)
+
+        if not os.path.exists (ofn) and os.path.isfile (ifn):
+            shutil.copy (ifn, ofn)
+            pass
+        pass
+    return
+
+def mkdirs (outpath:str)->None:
+    for subdir in ['db', 'dbs', 'fe', 'gnupg', 'logs', 'stg']:
+        fullpath = os.path.join (outpath, subdir)
+        if not os.path.exists (fullpath): os.mkdir (fullpath)
+        pass
+    return
+
+def postgres (args:argparse.Namespace, items:[str], outdir:str)->[str]:
     '''inter postgresql dataset'''
     # Need two pasees to decode a postgresql backup file. First pass will change
     # the item name, specifically target, task, alg, sv, and value names, to
@@ -55,7 +74,8 @@ def postgres (args:argparse.Namespace, items:[str], outdir:str)->None:
     blobs = []
     ifn = 'interred.' + os.path.basename (args.backup_file)
     seconds = postgres_extract_secondary_tables (args.backup_file)
-    with open (os.path.join (outdir, ifn), 'tw') as output_file:
+    with open (os.path.join
+               (os.path.join (outdir, 'db'), ifn), 'tw') as output_file:
         key = ''
         with open (args.backup_file, 'rt') as input_file:
             for line in input_file.readlines():
@@ -73,7 +93,7 @@ def postgres (args:argparse.Namespace, items:[str], outdir:str)->None:
                 pass
             pass
         pass
-    return
+    return blobs
 
 def postgres_extract_secondary_tables (filename:str)->{}:
     '''build a lookup table from name to set of foriegn keys'''
@@ -101,8 +121,6 @@ def postgres_is_match (ref:str, items:[str])->bool:
     '''does this ref match any of the items'''
     matches = []
     sref = ref.split('.')
-    if ref.startswith ('187.'):
-        print (ref)
     for item in items:
         matches.append (all([_compare (r,i) for r,i in zip(sref,
                                                            item.split('.'))]))
@@ -126,6 +144,8 @@ if __name__ == '__main__':
     PDB.add_argument('-b', '--backup-file', default='', type=_file,
                      help='postgresql backup file made with pgdump')
     PDB.set_defaults(func=postgres)
+    AP.add_argument ('-B', '--blob-path', required=True, type=_path,
+                     help='path to the blob data that the database references')
     AP.add_argument ('-O', '--output-path', required=True, type=_path,
                      help='path to output inter information')
     AP.add_argument ('items', default=[sys.stdin], metavar='items', nargs='*',
@@ -138,6 +158,7 @@ if __name__ == '__main__':
         ITEMS = [_clean (line) for line in sys.stdin.readlines()]
         ARGS.items.extend ([_ref(item) for item in filter (lambda s:s, ITEMS)])
         pass
-
-    ARGS.func (ARGS, ITEMS, ARGS.output_path)
+    mkdirs (ARGS.output_path)
+    copy_blobs (ARGS.func (ARGS, ITEMS, ARGS.output_path),
+                ARGS.blob_path, ARGS.output_path)
     pass
