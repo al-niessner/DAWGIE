@@ -74,7 +74,7 @@ if __name__ == '__main__':
     import dawgie.util
 
     unique_fn = '.'.join (['worm', getpass.getuser(), 'log'])
-    ap = argparse.ArgumentParser(description='Crawls throught the database and removes all the matching keys from the primary table. It does not remove the referenced data in the store. There is no undo of this operation and it must be done to a database that is not active (the pipeline is not running.')
+    ap = argparse.ArgumentParser(description='Crawls through the database and removes all the matching keys from the primary table. It does not remove the referenced data in the store. There is no undo of this operation and it must be done to a database that is not active (the pipeline is not running.')
     ap.add_argument ('-l', '--log-file', default=unique_fn, required=False,
                      help='a filename to put all of the log messages into [%(default)s]')
     ap.add_argument ('-L', '--log-level', default=logging.INFO, required=False,
