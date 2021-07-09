@@ -37,9 +37,6 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-# Save the actual work for another day, but this shows how to write one set
-# of tests in DB then test each instance by two other objects that extend it.
-
 import dawgie
 import dawgie.db.testdata
 import dawgie.context
@@ -47,6 +44,9 @@ import os
 import shutil
 import tempfile
 import unittest
+
+# Save the actual work for another day, but this shows how to write one set
+# of tests in DB then test each instance by two other objects that extend it.
 
 class DB:
     @classmethod
@@ -129,7 +129,14 @@ class DB:
         return
     pass
 
-@unittest.skip ('no generic way to build postgres database')
+# to test postgres:
+#   docker pull postgres:13.3
+#   docker network create cit
+#   docker run --detach --env POSTGRES_PASSWORD=password --env POSTGRES_USER=tester --name postgres --network cit --rm  postgres:13.3
+#   docker exec -i postgres createdb -U tester testspace
+#   CIT_NETWORK=cit .ci/check_03.sh ; git checkout .ci/status.txt
+#   docker network rm cit
+@unittest.skip ('no automatic way to build postgres database')
 class Post(DB,unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -138,11 +145,15 @@ class Post(DB,unittest.TestCase):
         os.mkdir (os.path.join (cls.root, 'dbs'))
         os.mkdir (os.path.join (cls.root, 'logs'))
         os.mkdir (os.path.join (cls.root, 'stg'))
+        dawgie.context.db_host = 'postgres'
         dawgie.context.db_impl = 'post'
+        dawgie.context.db_name = 'testspace'
+        dawgie.context.db_path = 'tester:password'
+        dawgie.context.db_port = 5432
         dawgie.context.data_dbs = os.path.join (cls.root, 'dbs')
         dawgie.context.data_log = os.path.join (cls.root, 'logs')
         dawgie.context.data_stg = os.path.join (cls.root, 'stg')
-        dawgie.db_rotate_path = dawgie.context.db_path
+        dawgie.db_rotate_path = os.path.join (cls.root, 'db')
         DB.setup()
         return
 
@@ -162,6 +173,7 @@ class Shelf(DB,unittest.TestCase):
         os.mkdir (os.path.join (cls.root, 'logs'))
         os.mkdir (os.path.join (cls.root, 'stg'))
         dawgie.context.db_impl = 'shelf'
+        dawgie.context.db_name = 'testspace'
         dawgie.context.db_path = os.path.join (cls.root, 'db')
         dawgie.context.data_dbs = os.path.join (cls.root, 'dbs')
         dawgie.context.data_log = os.path.join (cls.root, 'logs')
