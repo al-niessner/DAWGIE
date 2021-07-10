@@ -468,8 +468,8 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                                                     self._tn(),
                                                     self._task(),
                                                     self._alg().name(),
-                                                    sv.name(), vn])),
-                                        not exists)
+                                                    sv.name(), vn]),
+                                        not exists))
 
                 # Put result in primary. Make sure to get task_ID and other
                 # primary keys from their respective tables
