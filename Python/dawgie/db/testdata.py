@@ -46,6 +46,12 @@ RUNID = 17
 TARGET = 'test'
 TIMELINES = []
 
+ALG_CNT = 11
+SVN_CNT = 7
+TSK_CNT = 13
+VAL_CNT = 5
+VER_CNT = 3
+
 class Fake(dawgie.Algorithm,dawgie.Analyzer,dawgie.Regression):
     def __init__(self, name, bug):
         self._version_ = dawgie.VERSION(1,1,bug)
@@ -96,16 +102,16 @@ class Task(dawgie.Task):
     pass
 
 class Value(dawgie.Value):
-    def __init__(self, val):
+    def __init__(self, val=None):
         self._version_ = dawgie.VERSION(5,6,7)
-        self.val = val
+        if not val: self.val = val
         return
     def features(self): return []
     def get(self): return self.val
     def set(self, val): self.val = val
     pass
 
-for tsk_idx in range(13):
+for tsk_idx in range(TSK_CNT):
     rem = tsk_idx % 3
     tidx = tsk_idx // 3
 
@@ -113,19 +119,22 @@ for tsk_idx in range(13):
     if rem == 1: tsk = Regress('Regress_{:02d}'.format (tidx), 0, TARGET)
     if rem == 2: tsk = Task('Task_{:02d}'.format (tidx), 0, RUNID, TARGET)
 
-    for ver_idx in range(3):
-        for alg_idx in range(11):
+    for ver_idx in range(VER_CNT):
+        for alg_idx in range(ALG_CNT):
             if rem == 0: base = 'Analyzer'
             if rem == 1: base = 'Regression'
-            if rem == 2: base = 'Task'
+            if rem == 2: base = 'Algorithm'
 
             base += '_{:02d}'
             alg = Fake(base.format (alg_idx), ver_idx)
             tsk.mylist.append (alg)
-            for svn_idx in range(7):
-                sv = StateVector('StateVector_{:02d}'.format(svn_idx))
+            for svn_idx in range(SVN_CNT):
+                if svn_idx < SVN_CNT-1:
+                    sv = StateVector('StateVector_{:02d}'.format(svn_idx))
+                else: sv = StateVector('__metric__')
+
                 alg.sv.append (sv)
-                for val_idx in range(5):
+                for val_idx in range(VAL_CNT):
                     vn = 'Value_{:02d}'.format (val_idx)
                     sv[vn] = Value(-(len(KNOWNS)+1))
                     KNOWNS.append ((tsk, alg, sv, vn, sv[vn]))

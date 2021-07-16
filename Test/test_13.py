@@ -45,6 +45,8 @@ import shutil
 import tempfile
 import unittest
 
+from datetime import datetime as dt
+
 # Save the actual work for another day, but this shows how to write one set
 # of tests in DB then test each instance by two other objects that extend it.
 
@@ -68,64 +70,198 @@ class DB:
         return
 
     def test__prime_keys(self):
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db._prime_keys)
+        dawgie.db.open()
+        keys = dawgie.db._prime_keys()
+        self.assertEqual ((dawgie.db.testdata.TSK_CNT *
+                           dawgie.db.testdata.SVN_CNT *
+                           dawgie.db.testdata.VAL_CNT), len(keys))
         return
 
     def test__prime_values(self):
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db._prime_values)
+        dawgie.db.open()
+        values = dawgie.db._prime_keys()
+        self.assertEqual ((dawgie.db.testdata.TSK_CNT *
+                           dawgie.db.testdata.SVN_CNT *
+                           dawgie.db.testdata.VAL_CNT), len(values))
         return
 
     def test_archive(self):
-        self.assertTrue (True)
+        self.assertTrue (True)  # not testable in a reasonable sense
         return
 
     def test_close(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
+        dawgie.db.open()
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
         return
 
     def test_connect(self):
+        tgt,tsk,alg = dawgie.db.testdata.DATASETS[0]
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.connect, alg, tsk, tgt)
+        dawgie.db.open()
+        self.assertIsNotNone (dawgie.db.connect (alg, tsk, tgt))
+        dawgie.db.close()
         return
 
     def test_consistent(self):
+        self.assertTrue (False)
         return
 
     def test_copy(self):
+        self.assertTrue (False)
         return
 
     def test_gather(self):
+        ans,anz = dawgie.db.testdata.ASPECTS[0]
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.gather, anz, ans)
+        dawgie.db.open()
+        self.assertIsNotNone (dawgie.db.gather (anz, ans))
+        dawgie.db.close()
         return
 
     def test_metrics(self):
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.metrics)
+        dawgie.db.open()
+        self.assertEqual (dawgie.db.testdata.TSK_CNT, len (dawgie.db.metrics()))
+        dawgie.db.close()
         return
 
     def test_next(self):
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.next)
+        dawgie.db.open()
+        self.assertEqual (dawgie.db.testdata.RUNID+1, dawgie.db.next())
+        dawgie.db.close()
         return
 
     def test_open(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
+        dawgie.db.open()
+        self.assertTrue (dawgie.db.post._db)
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
         return
 
     def test_promote(self):
+        self.assertTrue (False)
         return
 
     def test_remove(self):
+        dawgie.db.close()
+        tgt,tsk,alg = dawgie.db.testdata.DATASETS[0]
+        svn = alg.state_vectors()[0].name()
+        vn = [k for k in alg.state_vectors()[0].keys()][0]
+        self.assertRaises (RuntimeError, dawgie.db.remove,
+                           tsk._runid(), tgt, tsk._name(), alg.name(), svn, vn)
+        dawgie.db.open()
+        dawgie.db.remove (tsk._runid(), tgt, tsk._name(), alg.name(), svn, vn)
+        keys = dawgie.db._prime_keys()
+        self.assertEqual ((dawgie.db.testdata.TSK_CNT *
+                           dawgie.db.testdata.SVN_CNT *
+                           dawgie.db.testdata.VAL_CNT) - 1, len(keys))
+        dawgie.db.connect (alg, tsk, tgt).update()
+        keys = dawgie.db._prime_keys()
+        self.assertEqual ((dawgie.db.testdata.TSK_CNT *
+                           dawgie.db.testdata.SVN_CNT *
+                           dawgie.db.testdata.VAL_CNT), len(keys))
+        dawgie.db.close()
         return
 
     def test_reopen(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
+        dawgie.db.reopen()
+        self.assertTrue (dawgie.db.post._db)
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
         return
 
     def test_retreat(self):
+        ret,reg = dawgie.db.testdata.TIMELINES[0]
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.retreat, reg, ret)
+        dawgie.db.open()
+        self.assertIsNotNone (dawgie.db.retreat (reg, ret))
+        dawgie.db.close()
         return
 
     def test_targets(self):
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.targets)
+        dawgie.db.open()
+        targets = dawgie.db.targets()
+        self.assertEqual (1, len(targets))
+        self.assertEqual (dawgie.db.testdata.TARGET, targets[0])
         return
 
     def test_trace(self):
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.trace, ['a'])
+        dawgie.db.open()
+        last_alg = dawgie.db.testdata.ALG_CNT-1
+        tans = ['Analysis_00.Analyzer_{:02d}'.format (last_alg),
+                'Regress_01.Regression_{:02d}'.format (last_alg),
+                'Task_02.Algorithm_{:02d}'.format (last_alg)]
+        runids = dawgie.db.trace (tans)
+        dawgie.db.close()
+        self.assertEqual (1, len(runids))
+        self.assertEqual (3, len(runids[dawgie.db.testdata.TARGET]))
+        self.assertEqual (17, runids[dawgie.db.testdata.TARGET][tans[0]])
+        self.assertEqual (0, runids[dawgie.db.testdata.TARGET][tans[1]])
+        self.assertEqual (17, runids[dawgie.db.testdata.TARGET][tans[2]])
         return
 
     def test_update (self):
+        dawgie.db.close()
+        tgt,tsk,alg = dawgie.db.testdata.DATASETS[0]
+        svn = alg.state_vectors()[0].name()
+        vn = [k for k in alg.state_vectors()[0].keys()][0]
+        self.assertRaises (RuntimeError, dawgie.db.remove,
+                           tsk._runid(), tgt, tsk._name(), alg.name(), svn, vn)
+        dawgie.db.open()
+        dawgie.db.remove (tsk._runid(), tgt, tsk._name(), alg.name(), svn, vn)
+        keys = dawgie.db._prime_keys()
+        self.assertEqual ((dawgie.db.testdata.TSK_CNT *
+                           dawgie.db.testdata.SVN_CNT *
+                           dawgie.db.testdata.VAL_CNT) - 1, len(keys))
+        dawgie.db.connect (alg, tsk, tgt).update()
+        keys = dawgie.db._prime_keys()
+        self.assertEqual ((dawgie.db.testdata.TSK_CNT *
+                           dawgie.db.testdata.SVN_CNT *
+                           dawgie.db.testdata.VAL_CNT), len(keys))
+        dawgie.db.close()
         return
 
+    @unittest.skip ('takes too long while developing other tests')
     def test_versions(self):
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.versions)
+        dawgie.db.open()
+        tskv,algv,svv,vv = dawgie.db.versions()
+        self.assertEqual (dawgie.db.testdata.TSK_CNT, len(tskv))
+        self.assertEqual ((dawgie.db.testdata.TSK_CNT *
+                           dawgie.db.testdata.ALG_CNT), len(algv))
+        self.assertEqual ((dawgie.db.testdata.TSK_CNT *
+                           dawgie.db.testdata.ALG_CNT *
+                           dawgie.db.testdata.SVN_CNT), len(svv))
+        self.assertEqual ((dawgie.db.testdata.TSK_CNT *
+                           dawgie.db.testdata.ALG_CNT *
+                           dawgie.db.testdata.SVN_CNT *
+                           dawgie.db.testdata.VAL_CNT), len(vv))
         return
 
     def test_locks(self):
+        self.assertTrue (False)
         return
     pass
 
@@ -136,7 +272,11 @@ class DB:
 #   docker exec -i postgres createdb -U tester testspace
 #   CIT_NETWORK=cit .ci/check_03.sh ; git checkout .ci/status.txt
 #   docker network rm cit
-@unittest.skip ('no automatic way to build postgres database')
+#
+# notes:
+#   takes about 5 minutes to load the database
+#   once loaded it can simply be re-used (no reason to dump and start again)
+#unittest.skip ('no automatic way to build postgres database')
 class Post(DB,unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -160,6 +300,14 @@ class Post(DB,unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree (cls.root, True)
+        return
+
+    def test_copy(self):
+        self.assertRaises (NotImplementedError, dawgie.db.copy, 1, 2, 3)
+        return
+
+    def test_locks(self):
+        self.assertTrue (True)  # locks not used in postgres
         return
     pass
 

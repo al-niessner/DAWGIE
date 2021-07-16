@@ -708,6 +708,9 @@ def _find (da:[dict], **kwds)->dict:
     return result
 
 def _prime_keys():
+    if not dawgie.db.post._db:
+        raise RuntimeError('called _prime_keys before open')
+
     conn = _conn()
     cur = _cur (conn, True)
     cur.execute('SELECT * from Prime;')
@@ -738,6 +741,9 @@ def _prime_keys():
     return sorted([k for k in keys])
 
 def _prime_values():
+    if not dawgie.db.post._db:
+        raise RuntimeError('called _prime_values before open')
+
     conn = _conn()
     cur = _cur (conn)
     cur.execute('SELECT blob_name from Prime;')
@@ -771,16 +777,20 @@ def archive (done):
     twisted.internet.reactor.spawnProcess (handler, args[0], args=args, env=os.environ)
     return
 
-def close(): return
+def close():
+    dawgie.db.post._db = False
+    return
 
 def connect(alg, bot, tn):
     # attempt the connection, assume everything exists
-    if not dawgie.db.post._db:raise RuntimeError('called connect before open')
+    if not dawgie.db.post._db: raise RuntimeError('called connect before open')
     log.info ("connected")
     return Interface(alg, bot, tn)
 
 def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     # pylint: disable=too-many-branches,too-many-locals,too-many-statements
+    if not dawgie.db.post._db: raise RuntimeError('called consistent before open')
+
     conn = dawgie.db.post._conn()
     cur = dawgie.db.post._cur (conn)
     cur.execute('SELECT pk FROM Target WHERE name = %s;', [target_name])
@@ -955,11 +965,12 @@ def copy (_dst, _method, _gateway):
     raise NotImplementedError('Not ready for postgresql')
 
 def gather (anz, ans):
-    if dawgie.db.post._db is None:
-        raise RuntimeError('called connect before open')
+    if not dawgie.db.post._db: raise RuntimeError('called gather before open')
     return Interface(anz, ans, '__all__')
 
 def metrics()->'[dawgie.db.METRIC_DATA]':
+    if not dawgie.db.post._db: raise RuntimeError('called metrics before open')
+
     result = []
     svs = {}
     conn = dawgie.db.post._conn()
@@ -974,8 +985,10 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
                                             dawgie.METRIC(-2,-2,-2,-2,-2,-2))
         cur.execute ('SELECT name FROM Value WHERE PK = %s;', (row[6],))
         vn = cur.fetchone()[0]
-        msv[vn] = dawgie.db.util.decode(row[7])
-        svs[key] = msv
+        try:
+            msv[vn] = dawgie.db.util.decode(row[7])
+            svs[key] = msv
+        except FileNotFoundError: log.error ('possible database corruption because cannot fine __metric__ state vector value: %s', row[7])
         pass
     for key,msv in svs.items():
         cur.execute ('SELECT name FROM Target where PK = %s;', (key[2],))
@@ -1083,6 +1096,8 @@ def promote (juncture:(), runid:int):
     #    that a different version of same value is not already written. Throw an
     #    exception if something already exists or just log it? Log at first to
     #    prevent killing of main twisted thread.
+    if not dawgie.db.post._db: raise RuntimeError('called promote before open')
+
     conn = dawgie.db.post._conn()
     cur = dawgie.db.post._cur (conn)
     entries = []
@@ -1117,11 +1132,30 @@ def promote (juncture:(), runid:int):
     conn.close()
     return True
 
-def remove (runid):
+def remove (runid:int, tn:str, tskn:str, algn:str, svn:str, vn:str):
+    if not dawgie.db.post._db: raise RuntimeError('called remove before open')
+
     # Remove all rows with the given run ID from the primary table
     conn = _conn()
     cur = _cur (conn)
-    cur.execute('REMOVE FROM Prime WHERE run_ID = %s;', [runid])
+    cur.execute('SELECT * from Target WHERE name = %s;', [tn])
+    tn_ID = _fetchone(cur,'Dataset: Could not find target ID')
+    cur.execute('SELECT * from TASK WHERE name = %s;', [tskn])
+    task_ID = _fetchone (cur, 'Dataset load: Could not find task ID')
+    cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND task_ID = %s;',
+                [algn, task_ID])
+    alg_ID = list(set([pk[0] for pk in cur.fetchall()]))
+    cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
+                'alg_ID = ANY(%s);', [svn, alg_ID])
+    sv_ID = list(set([pk[0] for pk in cur.fetchall()]))
+    cur.execute('SELECT pk FROM Value WHERE name = %s AND ' +
+                'sv_ID = ANY(%s);', [vn, sv_ID])
+    val_ID = list(set([pk[0] for pk in cur.fetchall()]))
+
+    cur.execute('DELETE FROM Prime WHERE run_ID = %s AND tn_ID = %s AND ' +
+                'task_ID = %s AND alg_ID = ANY(%s) AND sv_ID = ANY(%s) AND ' +
+                'val_ID = ANY(%s);',
+                [runid, tn_ID, task_ID, alg_ID, sv_ID, val_ID])
     conn.commit()
     cur.close()
     conn.close()
@@ -1132,6 +1166,8 @@ def reopen():
     return
 
 def reset (runid:int, tn:str, tskn, alg)->None:
+    if not dawgie.db.post._db: raise RuntimeError('called reset before open')
+
     conn = dawgie.db.post._conn()
     cur = dawgie.db.post._cur (conn)
     cur.execute('SELECT * from Target WHERE name = %s;', [tn])
@@ -1181,11 +1217,12 @@ def reset (runid:int, tn:str, tskn, alg)->None:
     return
 
 def retreat (reg, ret):
-    if dawgie.db.post._db is None:
-        raise RuntimeError('called connect before open')
+    if not dawgie.db.post._db: raise RuntimeError('called retreat before open')
     return Interface(reg, ret, ret._target())
 
 def targets():
+    if not dawgie.db.post._db: raise RuntimeError('called targets before open')
+
     log.info ("in targets()")
     conn = _conn()
     cur = _cur (conn)
@@ -1196,6 +1233,8 @@ def targets():
     return [r[0] for r in result]
 
 def trace (task_alg_names):
+    if not dawgie.db.post._db: raise RuntimeError('called trace before open')
+
     target_list = dawgie.db.targets()
     conn = _conn()
     cur = _cur (conn)
@@ -1230,6 +1269,8 @@ def trace (task_alg_names):
     return result
 
 def update (tsk, alg, sv, vn, v):
+    if not dawgie.db.post._db: raise RuntimeError('called update before open')
+
     log.info ("In databse update")
     # Just adds these things to their respective tables
     # Check if connection to DB is already open
@@ -1290,6 +1331,8 @@ def update (tsk, alg, sv, vn, v):
 def versions():
     # Returns Algorithm, StateVector, and Value as a list of dictionaries
     # where each dictionary represents a row in the table
+    if not dawgie.db.post._db: raise RuntimeError('called versions before open')
+
     log.info ('versions() - starting')
     conn = _conn()
     cur = _cur (conn, True)

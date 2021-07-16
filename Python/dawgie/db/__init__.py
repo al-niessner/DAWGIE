@@ -137,7 +137,7 @@ def promote (juncture:(), runid:int):
     runid.target name.task name.alg name.state vector name.value name'''
     return _db_in_use().promote (juncture, runid)
 
-def remove(runid, tn, taskn, algn, svn, vn):
+def remove(runid:int, tn:str, taskn:str, algn:str, svn:str, vn:str):
     '''Remove the specified key from the primary table'''
     return _db_in_use().remove (runid, tn, taskn, algn, svn, vn)
 
@@ -163,7 +163,11 @@ def targets (fulllist:bool=False):
                                  (s.startswith ('__') and s.endswith ('__')),
                                  _db_in_use().targets())]
 
-def trace (task_alg_names):
+def trace (task_alg_names:[str])->{str:{str:int}}:
+    '''trace the task_alg_names to find the lastest runid for each target
+
+    returns {target_name:{task_alg_name:runid}}
+    '''
     return _db_in_use().trace (task_alg_names)
 
 def update (tsk, alg, sv, vn, v):
