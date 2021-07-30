@@ -469,7 +469,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                                                     self._task(),
                                                     self._alg().name(),
                                                     sv.name(), vn]),
-                                        not exists))
+                                         not exists))
 
                 # Put result in primary. Make sure to get task_ID and other
                 # primary keys from their respective tables
@@ -1132,6 +1132,7 @@ def promote (juncture:(), runid:int):
     conn.close()
     return True
 
+# pylint: disable=too-many-arguments
 def remove (runid:int, tn:str, tskn:str, algn:str, svn:str, vn:str):
     if not dawgie.db.post._db: raise RuntimeError('called remove before open')
 
