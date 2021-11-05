@@ -2,6 +2,7 @@ version: 2.1
 jobs:
   build:
     machine:
+      image: ubuntu-2004:202107-02
     steps:
       - run:
           name: Build docker container if necessary
