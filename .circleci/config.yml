@@ -1,6 +1,7 @@
 version: 2.1
 jobs:
   build:
+    machine:
     steps:
       - run:
           name: Build docker container if necessary
