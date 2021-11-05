@@ -1,0 +1,7 @@
+version: 2.1
+jobs:
+  build:
+    steps:
+      - run:
+          name: Build docker container if necessary
+          command: echo "Made it here!!"
