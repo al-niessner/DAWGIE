@@ -1,7 +1,8 @@
 version: 2.1
 jobs:
   build:
-    machine: true
+    machine: # executor type
+      image: ubuntu-2004:202010-01
     steps:
       - checkout
       - run:
