@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      image: niessner/cit:254e0fca57c4
+      - image: niessner/cit:254e0fca57c4
     steps:
       - checkout
       - run:
