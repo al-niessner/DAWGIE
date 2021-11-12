@@ -6,6 +6,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Show the environment
+          command: env
+      - run:
           name: Prepare the machine to run the checks
           command: .ci/step_00.sh
       - run:
