@@ -1,9 +1,10 @@
 version: 2.1
 jobs:
   build:
-    machine:
-      image: ubuntu-2004:202107-02
+    docker:
+      image: niessner/cit:254e0fca57c4
     steps:
+      - checkout
       - run:
-          name: Build docker container if necessary
-          command: echo "Made it here!!"
+          name: PEP-8 compliance
+          command: .ci/check_01.sh
