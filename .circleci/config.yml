@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run:
           name: Prepare the machine to run the checks
-          command: python3 --version
+          command: .ci/step_00.sh
       - run:
           name: PEP-8 compliance
           command: .ci/check_01.sh
