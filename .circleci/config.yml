@@ -6,23 +6,20 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Show the environment
-          command: env
-      - run:
           name: Prepare the machine to run the checks
           command: .ci/step_00.sh
       - run:
           name: PEP-8 compliance
           command: .ci/check_01.sh
-      - run:
-          name: PyLint compliance
-          command: .ci/check_02.sh
-      - run:
-          name: Unittest compliance
-          command: .ci/check_03.sh
-      - run:
-          name: Legal (licensing) compliance
-          command: .ci/check_04.sh
-      - run:
-          name: Conclude the checks
-          command: .ci/step_99.sh
+ #     - run:
+ #         name: PyLint compliance
+ #         command: .ci/check_02.sh
+ #     - run:
+ #         name: Unittest compliance
+ #         command: .ci/check_03.sh
+ #     - run:
+ #         name: Legal (licensing) compliance
+ #         command: .ci/check_04.sh
+ #     - run:
+ #         name: Conclude the checks
+ #         command: .ci/step_99.sh
