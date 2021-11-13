@@ -79,18 +79,13 @@ then
            if [ -z "$(docker images | awk -e '{print $1":"$2}' | grep cit:$citVersion)" ]
            then
                echo "   Building CI Tools layer $citVersion"
-               docker build --network=host -t cit:${citVersion} - < .ci/Dockerfile.3
+               docker build --network=host -t niessner/cit:${citVersion} - < .ci/Dockerfile.3
            fi
 
            rm .ci/Dockerfile.1 .ci/Dockerfile.2 .ci/Dockerfile.3
            docker login -p ${DOCKER_LOGIN_PASSWORD} -u ${DOCKER_LOGIN_ID}
-           docker tag cit:${citVersion} niessner/cit:${citVersion}
            docker push niessner/cit:${citVersion}
            docker logout
-           docker rmi niessner/cit:${citVersion}
-       else
-           docker tag niessner/cit:${citVersion} cit:${citVersion}
-           docker rmi niessner/cit:${citVersion}
        fi
     fi
     state=`get_state`
