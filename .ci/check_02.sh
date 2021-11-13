@@ -48,7 +48,7 @@ post_state "$context" "$description" "$state"
 
 if current_state
 then
-    docker run --rm -v $PWD:$PWD -u $UID -w $PWD cit:$(cit_version) pylint --rcfile=.ci/pylint.rc Python/dawgie Test/ae | tee pylint.rpt.txt
+    docker run --rm -v $PWD:$PWD -u $UID -w $PWD niessner/cit:$(cit_version) pylint --rcfile=.ci/pylint.rc Python/dawgie Test/ae | tee pylint.rpt.txt
     python3 <<EOF
 mn = '<unknown>'
 count = 0

@@ -46,7 +46,7 @@ post_state "$context" "$description" "$state"
 
 if current_state
 then
-    docker run --rm -e PYTHONPATH=${PWD}/Python -e USERNAME="$(whoami)" -v $PWD:$PWD -u $UID -w $PWD -i cit:$(cit_version) python3 <<EOF
+    docker run --rm -e PYTHONPATH=${PWD}/Python -e USERNAME="$(whoami)" -v $PWD:$PWD -u $UID -w $PWD -i niessner/cit:$(cit_version) python3 <<EOF
 import datetime
 import os
 
