@@ -48,7 +48,7 @@ post_state "$context" "$description" "$state"
 
 if current_state
 then
-    docker run --rm -v $PWD:$PWD -u $UID -w $PWD cit:$(cit_version) pycodestyle \
+    docker run --rm -v $PWD:$PWD -u $UID -w $PWD niessner/cit:$(cit_version) pycodestyle \
            --ignore=E24,E121,E123,E124,E126,E127,E211,E225,E226,E231,E252,E301,E302,E305,E402,E501,W504,E701,E702,E704,E722,E741 \
            --exclude=binding.py \
            --statistics Python Test | tee pep8.rpt.txt

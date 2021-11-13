@@ -38,7 +38,7 @@
 GHE_API_URL=https://api.github.com
 ghrVersion=${ghrVersion:-"`git describe --tags`"}
 PYTHONPATH=${PWD}/Python:${PWD}/Test
-REPO=niessner/DAWGIE
+REPO=al-niessner/DAWGIE
 
 export GHE_API_URL PATH PYTHONPATH
 
@@ -128,8 +128,8 @@ post_state ()
 
     curl -XPOST \
          -H "Authorization: token ${GHE_TOKEN}" \
-         ${GHE_API_URL}/repos/${TRAVIS_REPO_SLUG}/statuses/${TRAVIS_PULL_REQUEST_SHA} \
-         -d "{\"state\": \"${3}\", \"target_url\": \"${TRAVIS_BUILD_WEB_URL}\", \"description\": \"${2}\", \"context\": \"${1}\"}" > /dev/null 2>&1
+         ${GHE_API_URL}/repos/${REPO}/statuses/${CIRCLE_SHA1} \
+         -d "{\"state\": \"${3}\", \"target_url\": \"${CIRCLE_BUILD_URL}\", \"description\": \"${2}\", \"context\": \"${1}\"}"  > /dev/null 2>&1
 }
 
 which_port ()
