@@ -130,7 +130,7 @@ post_state ()
     echo "    -H \"Authorization: token {GHE_TOKEN}\""
     echo "     ${GHE_API_URL}/repos/${REPO}/statuses/${CIRCLE_SHA1}"
     echo "     -d \"{\"state\": \"${3}\", \"target_url\": \"${CIRCLE_BUILD_URL}\", \"description\": \"${2}\", \"context\": \"${1}\"}\" "
-}
+
     curl -XPOST \
          -H "Authorization: token ${GHE_TOKEN}" \
          ${GHE_API_URL}/repos/${REPO}/statuses/${CIRCLE_SHA1} \
