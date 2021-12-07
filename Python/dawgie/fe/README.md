@@ -10,10 +10,12 @@ Describes the REST API (endpoints) that DAWGIE provides to access the data it ma
 actual description
 
 ### Inputs
-- varname:type description
+- varname:type  
+  description
 
 ### Outputs
-- varname:type description
+- varname:type  
+  description
     
 ### Example
 
