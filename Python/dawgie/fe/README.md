@@ -92,12 +92,22 @@ e716cd9eb32ce97653112d8bc8be140357085f58
 
 ## `/app/db/item` (GET) (html)
 ### Description
+
+Render a specific state vector to HTML.
+
 ### Inputs
+
+- path:string  
+  '.' separate complete name of a state vector.
+
 ### Outputs
+ - _unnamed_:string  
+   a complete HTML page
+
 ### Example
 
 ```
-curl -X GET "<URL base>/app/db/item"
+curl -X GET "<URL base>/app/db/item?path="
 abc
 ```
 
