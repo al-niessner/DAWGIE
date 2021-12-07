@@ -5,13 +5,13 @@ Describes the REST API (endpoints) that DAWGIE provides to access the data it ma
 
 ## Endpoint (Get/Post)
 __Description__  
-    actual description
+  actual description
 
 __Inputs__  
-    - var:type description
+  - varname:type description
 
 __Outputs__  
-    - var:type description
+  - varname:type description
     
 __Example__
 
