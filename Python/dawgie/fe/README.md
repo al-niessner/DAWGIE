@@ -1,17 +1,17 @@
-# Available Endpoints
+# REST API
 
 Describes the REST API (endpoints) that DAWGIE provides to access the data it manages. Inputs to the REST API are mostly if not all URL parameters. The outputs are always JSON. The endpoints are documented as:
 
 
 ## Endpoint (Get/Post)
-__Description__  
-  actual description
+__Description__
+> actual description
 
 __Inputs__
 - varname:type description
 
 __Outputs__
-* varname:type description
+- varname:type description
     
 __Example__
 
