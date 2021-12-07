@@ -68,13 +68,23 @@ and results
 
 ## `/app/changeset.txt` (GET)
 ### Description
+
+Returns the GIT changeset ID of the Algorithm Engine (AE) -- aka science code -- that this server is using.
+
 ### Inputs
+
+_no inputs_
+
 ### Outputs
+
+- _no name_:string  
+  the GIT changeset ID
+
 ### Example
 
 ```
 curl -X GET "<URL base>/app/changeset.txt"
-abc
+e716cd9eb32ce97653112d8bc8be140357085f58
 ```
 
 `/app/db/item`
