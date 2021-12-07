@@ -11,7 +11,7 @@ __Inputs__
 - varname:type description
 
 __Outputs__
-- varname:type description
+* varname:type description
     
 __Example__
 
