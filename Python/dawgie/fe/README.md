@@ -3,22 +3,26 @@
 Describes the REST API (endpoints) that DAWGIE provides to access the data it manages. Inputs to the REST API are mostly if not all URL parameters. The outputs are always JSON. The endpoints are documented as:
 
 
-## Endpoint (Get/Post)
-__Description__
-> actual description
+---
 
-__Inputs__
+## Endpoint (Get/Post)
+### Description
+actual description
+
+### Inputs
 - varname:type description
 
-__Outputs__
+### Outputs
 - varname:type description
     
-__Example__
+### Example
 
 ```
 curl command
 and results
 ```
+
+---
 
 Each endpoint begins with `/app`, short for application, to identify the REST API that can be programatically accessed. These endpoints are different than the endpoints that return fixed pages like /pages/index.html that is the front page. The endpoints are then further subdivided into logical groups: `/app/db`, `/app/filter`, `/app/pl`, `/app/schedule`, `/app/search`. There are several endpoints that do not fall into these logical groups as well.
 
