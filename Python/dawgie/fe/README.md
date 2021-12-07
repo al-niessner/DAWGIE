@@ -37,7 +37,7 @@ and results
 
 ## TOC
 
-- ['/app/changeset.txt'](#appchangesettxt-get)
+- ['/app/changeset.txt'](#appchangesettxt-get-get)
 - ['/app/db/item'](#appdbitem-get)
 - ['/app/db/lockview'](#appdblockview-get)
 - ['/app/db/prime'](#appdbprime-get)
