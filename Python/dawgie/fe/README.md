@@ -66,7 +66,17 @@ and results
 - [`app/versions`](#ppversions-get`)
 
 
-`/app/changeset.txt`
+## `/app/changeset.txt` (GET)
+### Description
+### Inputs
+### Outputs
+### Example
+
+```
+curl -X GET "<URL base>/app/changeset.txt"
+abc
+```
+
 `/app/db/item`
 `/app/db/lockview`
 `/app/db/prime`
