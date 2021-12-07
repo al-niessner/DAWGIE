@@ -37,59 +37,59 @@ and results
 
 ## TOC
 
-- ['/app/changeset.txt'](#appchangesettxt-get-get)
-- ['/app/db/item'](#appdbitem-get)
-- ['/app/db/lockview'](#appdblockview-get)
-- ['/app/db/prime'](#appdbprime-get)
-- ['/app/db/targets'](#appdbtargets-get)
-- ['/app/db/versions'](#appdbversions-get)
-- ['/app/filter/admin'](#appfilteradmin-get)
-- ['/app/filter/dev'](#appfilterdev-get)
-- ['/app/filter/user'](#appfilteruser-get)
-- ['/app/pl/log'](#apppllog-get)
-- ['/app/pl/state'](#appplstate-get)
-- ['/app/run'](#apprun') , [HttpMethod.POST]
-- ['app/schedule/crew-get'](#ppschedulecrew-get-get)
-- ['/app/schedule/doing'](#appscheduledoing-get)
-- ['/app/schedule/events'](#appscheduleevents-get)
-- ['/app/schedule/failure'](#appschedulefailure-get)
-- ['/app/schedule/success'](#appschedulesuccess-get)
-- ['/app/schedule/tasks'](#appscheduletasks-get)
-- ['/app/schedule/todo'](#appscheduletodo-get)
-- ['/app/search/completion/sv'](#appsearchcompletion/sv-get)
-- ['/app/search/completion/tn'](#appsearchcompletion/tn-get)
-- ['/app/search/ri'](#appsearchri-get)
-- ['/app/search/sv'](#appsearchsv-get)
-- ['/app/search/tn'](#appsearchtn-get)
-- ['/app/state/status'](#appstatestatus-get)
-- ['/app/submit'](#appsubmit') , [HttpMethod.POST]
-- ['app/versions'](#ppversions-get')
+- [`/app/changeset.txt`](#appchangesettxt-get)
+- [`/app/db/item`](#appdbitem-get)
+- [`/app/db/lockview`](#appdblockview-get)
+- [`/app/db/prime`](#appdbprime-get)
+- [`/app/db/targets`](#appdbtargets-get)
+- [`/app/db/versions`](#appdbversions-get)
+- [`/app/filter/admin`](#appfilteradmin-get)
+- [`/app/filter/dev`](#appfilterdev-get)
+- [`/app/filter/user`](#appfilteruser-get)
+- [`/app/pl/log`](#apppllog-get)
+- [`/app/pl/state`](#appplstate-get)
+- [`/app/run`](#apprun-post)
+- [`app/schedule/crew-get`](#ppschedulecrew-get-get)
+- [`/app/schedule/doing`](#appscheduledoing-get)
+- [`/app/schedule/events`](#appscheduleevents-get)
+- [`/app/schedule/failure`](#appschedulefailure-get)
+- [`/app/schedule/success`](#appschedulesuccess-get)
+- [`/app/schedule/tasks`](#appscheduletasks-get)
+- [`/app/schedule/todo`](#appscheduletodo-get)
+- [`/app/search/completion/sv`](#appsearchcompletion/sv-get)
+- [`/app/search/completion/tn`](#appsearchcompletion/tn-get)
+- [`/app/search/ri`](#appsearchri-get)
+- [`/app/search/sv`](#appsearchsv-get)
+- [`/app/search/tn`](#appsearchtn-get)
+- [`/app/state/status`](#appstatestatus-get)
+- [`/app/submit`](#appsubmit-post)
+- [`app/versions`](#ppversions-get`)
 
 
-## `app/changeset.txt` (GET-get)
-'/app/db/item'
-'/app/db/lockview'
-'/app/db/prime'
-'/app/db/targets'
-'/app/db/versions'
-'/app/filter/admin'
-'/app/filter/dev'
-'/app/filter/user'
-'/app/pl/log'
-'/app/pl/state'
-'/app/run', [HttpMethod.POST]
-'/app/schedule/crew'
-'/app/schedule/doing'
-'/app/schedule/events'
-'/app/schedule/failure'
-'/app/schedule/success'
-'/app/schedule/tasks'
-'/app/schedule/todo'
-'/app/search/completion/sv'
-'/app/search/completion/tn'
-'/app/search/ri'
-'/app/search/sv'
-'/app/search/tn'
-'/app/state/status'
-'/app/submit', [HttpMethod.POST]
-'/app/versions'
+`/app/changeset.txt`
+`/app/db/item`
+`/app/db/lockview`
+`/app/db/prime`
+`/app/db/targets`
+`/app/db/versions`
+`/app/filter/admin`
+`/app/filter/dev`
+`/app/filter/user`
+`/app/pl/log`
+`/app/pl/state`
+`/app/run`, [HttpMethod.POST]
+`/app/schedule/crew`
+`/app/schedule/doing`
+`/app/schedule/events`
+`/app/schedule/failure`
+`/app/schedule/success`
+`/app/schedule/tasks`
+`/app/schedule/todo`
+`/app/search/completion/sv`
+`/app/search/completion/tn`
+`/app/search/ri`
+`/app/search/sv`
+`/app/search/tn`
+`/app/state/status`
+`/app/submit`, [HttpMethod.POST]
+`/app/versions`
