@@ -37,8 +37,8 @@ and results
 
 ## TOC
 
-'/app/changeset.txt'
-'/app/db/item'
+- ['/app/changeset.txt'](#appchangesettxt-get)
+- '/app/db/item'
 '/app/db/lockview'
 '/app/db/prime'
 '/app/db/targets'
