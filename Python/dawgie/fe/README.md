@@ -7,11 +7,11 @@ Describes the REST API (endpoints) that DAWGIE provides to access the data it ma
 __Description__  
   actual description
 
-__Inputs__  
-  - varname:type description
+__Inputs__
+- varname:type description
 
-__Outputs__  
-  - varname:type description
+__Outputs__
+- varname:type description
     
 __Example__
 
