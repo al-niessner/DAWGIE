@@ -50,5 +50,4 @@ RUN set -ex && \
                  requests>=2.20.0 \
                  transitions==0.6.8 \
                  twisted>=18.7.0  && \
-    cd /usr/local/lib/python3.6/dist-packages/pydot && \
-    rm -rf ${HOME}/.cache /tmp/,ci
+    rm -rf ${HOME}/.cache
