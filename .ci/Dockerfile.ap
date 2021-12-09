@@ -41,7 +41,7 @@ RUN set -ex && \
     curl -X GET "http://ddnp:5000/tar?" --output /tmp/src.tgz && \
     cd /tmp && tar -zxf src.tgz && cd - && \
     mkdir ${HOME}/.gnupg && chmod 600 ${HOME}/.gnupg && \
-    mv /tmp/.ci/dawgie.bot.pub ${HOME}/.gnupg/ && \
+    mv /tmp/dawgie.bot.pub ${HOME}/.gnupg/ && \
     cd /tmp/Python && \
     python3 setup.py build install && \
-    cd && rm -rf /tmp/Python /tmp/.ci
+    cd && rm -rf /tmp/Python /tmp/dawgie.bot.pub /tmp/src.tgz
