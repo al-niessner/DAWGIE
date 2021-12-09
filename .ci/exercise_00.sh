@@ -37,7 +37,6 @@
 # NTR:
 
 . .ci/util.sh
-$(dirname $0)/step_00.sh
 
 state="pending" # "success" "pending" "failure" "error"
 description="Build an environment for CI"
@@ -49,8 +48,8 @@ if current_state
 then
     git reset --hard HEAD
     git clean -df
-    declare -i count=3
-    for filename in .ci/Dockerfile.ap .ci/Dockerfile.ex
+    declare -i count=1
+    for filename in .ci/Dockerfile.os .ci/Dockerfile.py .ci/Dockerfile.ap .ci/Dockerfile.ex
     do
         python3 <<EOF
 with open ("${filename}", 'rt') as f: text = f.read()
@@ -64,13 +63,21 @@ with open ('Python/setup.py', 'rt') as f: text = f.read()
 with open ('Python/setup.py', 'tw') as f:
     f.write (text.replace ("ghrVersion", "${ghrVersion}"))
 EOF
-
-    .ci/dcp.py --server .ci/Dockerfile.3 &
-    while [ ! -f .ci/Dockerfile.3.dcp ]
+    docker build --network=host -t os:${ghrVersion} - < .ci/Dockerfile.1
+    docker build --network=host -t py:${ghrVersion} - < .ci/Dockerfile.2
+    root=$(realpath $(dirname $(realpath $0))/..)
+    docker run --detach --rm \
+           --name dawgie_ddnp \
+           --network=host \
+           -v ${root}:/media/dawgie \
+           niessner/ddnp:1.0.1 --volume=/media/dawgie
+    curl -sfX GET "http://localhost:5000/env"
+    while [[ $? -ne 0 ]]
     do
         sleep 3
-    done
-    docker build --network=host -t ap:${ghrVersion} - < .ci/Dockerfile.3.dcp
+        curl -sfX GET "http://localhost:5000/env" > /dev/null
+    done  
+    docker build --network=host -t ap:${ghrVersion} - < .ci/Dockerfile.3
 
         DOCKER_GIT_REVISION=`git rev-parse HEAD`
     python3 <<EOF
@@ -78,6 +85,7 @@ with open ('.ci/Dockerfile.4', 'rt') as f: txt = f.read()
 with open ('.ci/Dockerfile.4', 'tw') as f: f.write (txt.replace ('FROM dawgie', 'FROM ap:${ghrVersion}').replace ('##DOCKER_GIT_REVISION##', '$DOCKER_GIT_REVISION'))
 EOF
     docker build --network=host -t ex:${ghrVersion} - < .ci/Dockerfile.4
+    docker stop dawgie_ddnp
     git reset --hard HEAD
     git clean -df
     state=`get_state`

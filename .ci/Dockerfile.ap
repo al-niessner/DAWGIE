@@ -36,7 +36,10 @@
 
 FROM py:ghrVersion
 RUN set -ex && \
-    /bin/dcp.py -p DCP_PORT_NUMBER -r .ci/dawgie.bot.pub Python /tmp && \
+    apt-get install -y curl && \
+    curl -X GET "http://ddnp:5000/file?.ci/dawgie.bot.pub --output /tmp/dawgie.bot.pub" && \
+    curl -X GET "http://ddnp:5000/tar?" --output /tmp/src.tgz && \
+    cd /tmp && tar -zxf src.tgz && cd - && \
     mkdir ${HOME}/.gnupg && chmod 600 ${HOME}/.gnupg && \
     mv /tmp/.ci/dawgie.bot.pub ${HOME}/.gnupg/ && \
     cd /tmp/Python && \
