@@ -38,6 +38,8 @@ FROM py:ghrVersion
 RUN set -ex && \
     apt-get install -y curl && \
     curl -X GET "http://localhost:5000/file?.ci/dawgie.bot.pub" --output /tmp/dawgie.bot.pub && \
+    curl -X GET "http://localhost:5000/file?README.md" --output /tmp/README.md && \
+    curl -X GET "http://localhost:5000/file?LICENSE.txt" --output /tmp/LICENSE.txt && \
     curl -X GET "http://localhost:5000/tar?Python" --output /tmp/src.tgz && \
     cd /tmp && tar -zxf src.tgz && cd - && \
     mkdir ${HOME}/.gnupg && chmod 600 ${HOME}/.gnupg && \
