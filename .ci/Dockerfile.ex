@@ -36,5 +36,5 @@
 
 FROM ap:ghrVersion
 ENV DOCKER_GIT_REVISION='##DOCKER_GIT_REVISION##' PYTHONPATH='/proj/src'
-RUN pip3 install scipy==1.1.0
+RUN pip3 install scipy
 ENTRYPOINT [ "python3", "-m" ]
