@@ -167,7 +167,7 @@ curl -X GET "${baseurl}/app/db/targets"
 ["__all__", "/tmp/tmp659wit5v"]
 ```
 
-## `/app/db/versions` (GET)
+## `/app/db/versions` (GET) (JSON)
 ### Description
 
 Fetch all versions of all software elements known to the system. Tasks have no version while algorithms, state vectors, and values do. The version list for tasks will always be null while the other are a list of X.Y.Z matching [semantic versioning](https://semver.org/).
@@ -205,7 +205,7 @@ curl -X GET "${baseurl}/app/filter/admin"
 {"include": {".__metric__$": []}}
 ```
 
-## `/app/filter/dev` (GET)
+## `/app/filter/dev` (GET) (JSON)
 ### Description
 
 Fetch the filter critera that defines what to include and what to exclude for state vectors of Algorithm Engine (AE) developer interest.
@@ -224,7 +224,7 @@ curl -X GET "${baseurl}/app/filter/dev"
 {"exclude": {".__metric__$": []}}
 ```
 
-## `/app/filter/user` (GET)
+## `/app/filter/user` (GET) (JSON)
 ### Description
 
 Fetch the filter critera that defines what to include and what to exclude for state vectors of Algorithm Engine (AE) end user interest.
@@ -243,26 +243,42 @@ curl -X GET "${baseurl}/app/filter/user"
 {"exclude": {".__metric__$": []}}
 ```
 
-## `/app/pl/log` (GET)
+## `/app/pl/log` (GET) (JSON)
 ### Description
+
+Fetch the last N message sent to the log file. N is configurable via the DAWGIE context file and arguments.
+
 ### Inputs
+_no inputs_
+
 ### Outputs
+- _unnamed_:list[{"timeStamp":datestring, "name":pythonmodule, "level":string, "message":string}]  
+  each element of the list represents the information in a line of the log file
+  
 ### Example
 
 ```
 curl -X GET "${baseurl}/app/pl/log"
-abc
+[{"timeStamp": "2021-12-10 13:47:06,211", "name": "dawgie.db.shelf", "level": "CRITICAL", "message": "called _rotate after open"}, {"timeStamp": "2021-12-10 13:46:35,820", "name": "dawgie.pl.farm", "level": "CRITICAL", "message": "New run ID (2) for algorithm review.aspect trigger by the event: New software changeset baff80d5ecb08ef1370507fb055759973bc462f9"}, {"timeStamp": "2021-12-10 12:50:50,819", "name": "dawgie.pl.farm", "level": "CRITICAL", "message": "New run ID (1) for algorithm network.analyzer trigger by the event: New software changeset baff80d5ecb08ef1370507fb055759973bc462f9"}]
 ```
 
-## `/app/pl/state` (GET)
+## `/app/pl/state` (GET) (JSON)
 ### Description
+
+The current state of the DAWGIE server (pipline).
+
 ### Inputs
+_no inputs_
+
 ### Outputs
+- _unnamed_:{"name":string, "status":string}  
+  the name is string representation of the current state and status is always active.
+
 ### Example
 
 ```
 curl -X GET "${baseurl}/app/pl/state"
-abc
+{"name": "running", "status": "active"}
 ```
 
 ## `/app/run`, (POST)
@@ -278,13 +294,21 @@ abc
 
 ## `/app/schedule/crew` (GET)
 ### Description
+
+Describe the status of the of workers (crew) as to whether they are busy or idle.
+
 ### Inputs
+_no inputs_
+
 ### Outputs
+- _unnamed_:{"busy":[string], "idle":integer}  
+  each busy list element is the string representation of the task being worked and idle states the number of idle workers waiting for a job
+  
 ### Example
 
 ```
 curl -X GET "${baseurl}/app/schedule/crew"
-abc
+{"busy": [], "idle": "1"}
 ```
 
 ## `/app/schedule/doing` (GET)
