@@ -186,37 +186,61 @@ curl -X GET "${baseurl}/app/db/versions"
 [{"review": null, "network": null}, {"network.analyzer": ["1.0.0"], "review.aspect": ["1.0.0"]}, {"review.aspect.test": ["1.0.0"], "network.analyzer.test": ["1.0.0"]}, {"network.analyzer.test.image": ["1.0.0"], "review.aspect.test.image": ["1.0.0"]}]
 ```
 
-## `/app/filter/admin` (GET)
+## `/app/filter/admin` (GET) (JSON)
 ### Description
+
+Fetch the filter critera that defines what to include and what to exclude for state vectors of DAWGIE adminstrative interest.
+
 ### Inputs
+_no inputs_
+
 ### Outputs
+- _unnamed_:{"exclude":{_regex_:[runid]}, "include":{_regex_:[runid]}}
+  a JSON object with exclude/include elements that are both dictionaries of the same structure: a set of regular expresions with corresponding runids with an empty list meaning all.
+
 ### Example
 
 ```
 curl -X GET "${baseurl}/app/filter/admin"
-abc
+{"include": {".__metric__$": []}}
 ```
 
 ## `/app/filter/dev` (GET)
 ### Description
+
+Fetch the filter critera that defines what to include and what to exclude for state vectors of Algorithm Engine (AE) developer interest.
+
 ### Inputs
+_no inputs_
+
 ### Outputs
+- _unnamed_:{"exclude":{_regex_:[runid]}, "include":{_regex_:[runid]}}
+  a JSON object with exclude/include elements that are both dictionaries of the same structure: a set of regular expresions with corresponding runids with an empty list meaning all.
+
 ### Example
 
 ```
 curl -X GET "${baseurl}/app/filter/dev"
-abc
+{"exclude": {".__metric__$": []}}
 ```
 
 ## `/app/filter/user` (GET)
 ### Description
+
+Fetch the filter critera that defines what to include and what to exclude for state vectors of Algorithm Engine (AE) end user interest.
+
 ### Inputs
+_no inputs_
+
 ### Outputs
+- _unnamed_:{"exclude":{_regex_:[runid]}, "include":{_regex_:[runid]}}
+  a JSON object with exclude/include elements that are both dictionaries of the same structure: a set of regular expresions with corresponding runids with an empty list meaning all.
+
 ### Example
 
 ```
 curl -X GET "${baseurl}/app/filter/user"
-abc
+{"exclude": {".__metric__$": []}}
 ```
 
 ## `/app/pl/log` (GET)
