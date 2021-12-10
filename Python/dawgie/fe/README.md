@@ -38,6 +38,8 @@ and results
 
 """Note: all examples are using the Algorithm Engine (AE) defined in DAWGIE/Test/ae"""
 
+"""Note: ${baseurl} should be something like `http://localhost:8080`"""
+
 ## TOC
 
 - [`/app/changeset.txt`](#appchangesettxt-get-text)
@@ -75,28 +77,25 @@ and results
 Returns the GIT changeset ID of the Algorithm Engine (AE) -- aka science code -- that this server is using.
 
 ### Inputs
-
 _no inputs_
 
 ### Outputs
-
 - _unnamed_:string  
   the GIT changeset ID
 
 ### Example
 
 ```
-curl -X GET "<URL base>/app/changeset.txt"
-e716cd9eb32ce97653112d8bc8be140357085f58
+curl -X GET "${baseurl}/app/changeset.txt"
+baff80d5ecb08ef1370507fb055759973bc462f9
 ```
 
-## `/app/db/item` (GET) (html)
+## `/app/db/item` (GET) (HTML)
 ### Description
 
 Render a specific state vector to HTML.
 
 ### Inputs
-
 - path:string  
   '.' separate complete name of a state vector.
 
@@ -107,52 +106,84 @@ Render a specific state vector to HTML.
 ### Example
 
 ```
-curl -X GET "<URL base>/app/db/item?path="
+curl -X GET "${baseurl}/app/db/item?path="
 abc
 ```
 
-## `/app/db/lockview` (GET)
+## `/app/db/lockview` (GET) (JSON)
 ### Description
+
+When using the shelf database system, locks are required to synchronize access to the database (postgresql provides this natively). At times, it was important to understand which tasks had locks on the database. This call returns the list of tasks that hold locks on the database.
+
 ### Inputs
+_no inputs_
+
 ### Outputs
+- tasks:list(string)  
+  each element of tasks is a string which is a task name
+  
 ### Example
 
 ```
-curl -X GET "<URL base>/app/db/lockview"
-abc
+curl -X GET "${baseurl}/app/db/lockview"
+{"tasks": ["2021-12-10T21:47:03.230179 update: __all__.review.aspect Lock_Release_End", "2021-12-10T21:47:03.230161 update: __all__.review.aspect Lock_Release_Begin", "2021-12-10T21:47:03.230150 update: __all__.review.aspect Lock_Acquire_End", "2021-12-10T21:47:01.853538 update: __all__.review.aspect Lock_Acquire_Begin", "2021-12-10T21:47:01.853536 update: __all__.review.aspect Lock_Request_End", "2021-12-10T21:47:01.853446 update: __all__.review.aspect Lock_Request_Begin", "2021-12-10T21:46:33.127596 update: __all__.network.analyzer Lock_Release_End", "2021-12-10T21:46:33.127580 update: __all__.network.analyzer Lock_Release_Begin", "2021-12-10T21:46:33.127570 update: __all__.network.analyzer Lock_Acquire_End", "2021-12-10T21:46:32.548059 update: __all__.network.analyzer Lock_Acquire_Begin", "2021-12-10T21:46:32.548056 update: __all__.network.analyzer Lock_Request_End", "2021-12-10T21:46:32.547927 update: __all__.network.analyzer Lock_Request_Begin", "2021-12-10T21:46:32.484747 load: /tmp/tmp659wit5v.network.engine Lock_Release_End", "2021-12-10T21:46:32.484720 load: /tmp/tmp659wit5v.network.engine Lock_Release_Begin", "2021-12-10T21:46:32.484710 load: /tmp/tmp659wit5v.network.engine Lock_Acquire_End", "2021-12-10T21:46:31.555293 load: /tmp/tmp659wit5v.network.engine Lock_Acquire_Begin", "2021-12-10T21:46:31.555285 load: /tmp/tmp659wit5v.network.engine Lock_Request_End", "2021-12-10T21:46:31.555060 load: /tmp/tmp659wit5v.network.engine Lock_Request_Begin"]}
 ```
 
-## `/app/db/prime` (GET)
+## `/app/db/prime` (GET) (JSON)
 ### Description
+
+Fetch a list of all known state vectors by full name.
+
 ### Inputs
+_no inputs_
+
 ### Outputs
+- _unnamed_:list(string)  
+  each element of the list is a '.' delimited full name of each state vector of the form `runid.target_name.task_name.algoritm_name.state_vector_name`.
+  
 ### Example
 
 ```
-curl -X GET "<URL base>/app/db/prime"
-abc
+curl -X GET "${baseurl}/app/db/prime"
+["1.__all__.network.analyzer.test", "2.__all__.review.aspect.test", "2.__all__.review.aspect.__metric__"]
 ```
 
-## `/app/db/targets` (GET)
+## `/app/db/targets` (GET) (JSON)
 ### Description
+
+Fetch a list of all known targets
+
 ### Inputs
+_no inputs_
+
 ### Outputs
+- _unnamed_:list(string)  
+  each element of the list is a string representing a target name
+
 ### Example
 
 ```
-curl -X GET "<URL base>/app/db/targets"
-abc
+curl -X GET "${baseurl}/app/db/targets"
+["__all__", "/tmp/tmp659wit5v"]
 ```
 
 ## `/app/db/versions` (GET)
 ### Description
+
+Fetch all versions of all software elements known to the system. Tasks have no version while algorithms, state vectors, and values do. The version list for tasks will always be null while the other are a list of X.Y.Z matching [semantic versioning](https://semver.org/).
+
 ### Inputs
+_no inputs_
+
 ### Outputs
+- _unnamed_:[{string:[string]}]  
+  each element of the list is a dictionary whose keys are tasks, algorithms, state vectors, and values
+
 ### Example
 
 ```
-curl -X GET "<URL base>/app/db/versions"
-abc
+curl -X GET "${baseurl}/app/db/versions"
+[{"review": null, "network": null}, {"network.analyzer": ["1.0.0"], "review.aspect": ["1.0.0"]}, {"review.aspect.test": ["1.0.0"], "network.analyzer.test": ["1.0.0"]}, {"network.analyzer.test.image": ["1.0.0"], "review.aspect.test.image": ["1.0.0"]}]
 ```
 
 ## `/app/filter/admin` (GET)
@@ -162,7 +193,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/filter/admin"
+curl -X GET "${baseurl}/app/filter/admin"
 abc
 ```
 
@@ -173,7 +204,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/filter/dev"
+curl -X GET "${baseurl}/app/filter/dev"
 abc
 ```
 
@@ -184,7 +215,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/filter/user"
+curl -X GET "${baseurl}/app/filter/user"
 abc
 ```
 
@@ -195,7 +226,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/pl/log"
+curl -X GET "${baseurl}/app/pl/log"
 abc
 ```
 
@@ -206,7 +237,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/pl/state"
+curl -X GET "${baseurl}/app/pl/state"
 abc
 ```
 
@@ -217,7 +248,7 @@ abc
 ### Example
 
 ```
-curl -X POST "<URL base>/app/run"
+curl -X POST "${baseurl}/app/run"
 abc
 ```
 
@@ -228,7 +259,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/schedule/crew"
+curl -X GET "${baseurl}/app/schedule/crew"
 abc
 ```
 
@@ -239,7 +270,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/schedule/doing"
+curl -X GET "${baseurl}/app/schedule/doing"
 abc
 ```
 
@@ -250,7 +281,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/schedule/events"
+curl -X GET "${baseurl}/app/schedule/events"
 abc
 ```
 
@@ -261,7 +292,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/schedule/failure"
+curl -X GET "${baseurl}/app/schedule/failure"
 abc
 ```
 
@@ -272,7 +303,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/schedule/success"
+curl -X GET "${baseurl}/app/schedule/success"
 abc
 ```
 
@@ -283,7 +314,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/schedule/tasks"
+curl -X GET "${baseurl}/app/schedule/tasks"
 abc
 ```
 
@@ -294,7 +325,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/schedule/todo"
+curl -X GET "${baseurl}/app/schedule/todo"
 abc
 ```
 
@@ -305,7 +336,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/search/completion/sv"
+curl -X GET "${baseurl}/app/search/completion/sv"
 abc
 ```
 
@@ -316,7 +347,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/search/completion/tn"
+curl -X GET "${baseurl}/app/search/completion/tn"
 abc
 ```
 
@@ -327,7 +358,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/search/ri"
+curl -X GET "${baseurl}/app/search/ri"
 abc
 ```
 
@@ -338,7 +369,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/search/sv"
+curl -X GET "${baseurl}/app/search/sv"
 abc
 ```
 
@@ -349,7 +380,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/search/tn"
+curl -X GET "${baseurl}/app/search/tn"
 abc
 ```
 
@@ -360,7 +391,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/state/status"
+curl -X GET "${baseurl}/app/state/status"
 abc
 ```
 
@@ -371,7 +402,7 @@ abc
 ### Example
 
 ```
-curl -X POST "<URL base>/app/submit"
+curl -X POST "${baseurl}/app/submit"
 abc
 ```
 
@@ -382,7 +413,7 @@ abc
 ### Example
 
 ```
-curl -X GET "<URL base>/app/versions"
+curl -X GET "${baseurl}/app/versions"
 abc
 ```
 
