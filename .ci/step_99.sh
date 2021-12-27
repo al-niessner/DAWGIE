@@ -43,6 +43,6 @@ if current_state
 then
     echo ''
 else
-    echo 'exiting with code 1'
+    echo 'exiting with code 1: $(cat .ci/status.txt)'
     exit 1
 fi
