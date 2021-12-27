@@ -276,7 +276,7 @@ class DB:
 # notes:
 #   takes about 5 minutes to load the database
 #   once loaded it can simply be re-used (no reason to dump and start again)
-#unittest.skip ('no automatic way to build postgres database')
+# unittest.skip ('no automatic way to build postgres database')
 class Post(DB,unittest.TestCase):
     @classmethod
     def setUpClass(cls):
