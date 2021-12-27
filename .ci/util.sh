@@ -130,7 +130,7 @@ post_state ()
          -H "Authorization: token ${GHE_TOKEN}" \
          ${GHE_API_URL}/repos/${REPO}/statuses/${CIRCLE_SHA1} \
          -d "{\"state\": \"${3}\", \"target_url\": \"${CIRCLE_BUILD_URL}\", \"description\": \"${2}\", \"context\": \"${1}\"}"  > /dev/null 2>&1
-    exit $(check_state)
+    exit $(current_state)
 }
 
 which_port ()
