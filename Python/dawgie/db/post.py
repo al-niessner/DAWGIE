@@ -789,7 +789,8 @@ def connect(alg, bot, tn):
 
 def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     # pylint: disable=too-many-branches,too-many-locals,too-many-statements
-    if not dawgie.db.post._db: raise RuntimeError('called consistent before open')
+    if not dawgie.db.post._db:
+        raise RuntimeError('called consistent before open')
 
     conn = dawgie.db.post._conn()
     cur = dawgie.db.post._cur (conn)
@@ -803,7 +804,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
                                    output.tid.name))
         cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
                     'task_ID = %s AND design = %s AND implementation = %s ' +
-                    'bugfix = %s;',
+                    'AND bugfix = %s;',
                     (output.aid.name, task_ID, output.aid.version.design(),
                      output.aid.version.implementation(),
                      output.aid.version.bugfix()))
@@ -812,7 +813,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
                              (output.aid.name, output.aid.version.asstring())))
         cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
                     'alg_ID = %s AND design = %s AND implementation = %s ' +
-                    'bugfix = %s;',
+                    'AND bugfix = %s;',
                     (output.sid.name, alg_ID, output.sid.version.design(),
                      output.sid.version.implementation(),
                      output.sid.version.bugfix()))
@@ -821,18 +822,18 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
                             (output.sid.name, output.sid.version.asstring())))
         cur.execute('SELECT pk FROM Value WHERE name = %s AND ' +
                     'sv_ID = %s AND design = %s AND implementation = %s ' +
-                    'bugfix = %s;',
+                    'AND bugfix = %s;',
                     (output.vid.name, sv_ID, output.vid.version.design(),
                      output.vid.version.implementation(),
                      output.vid.version.bugfix()))
         v_ID = _fetchone (cur,
                           ('consistent(): Value "%s %s" is not singular' %
                            (output.vid.name, output.vid.version.asstring())))
-        cur.execute('SELECT runid FROM Prime WHERE tn_ID = %s AND ' +
+        cur.execute('SELECT run_ID FROM Prime WHERE tn_ID = %s AND ' +
                     'task_ID = %s AND alg_ID = %s AND sv_ID = %s AND ' +
                     'val_ID = %s;',
                     [tn_ID, task_ID, alg_ID, sv_ID, v_ID])
-        o_runids.append (set([runid for runid in cur.fetchall()]))
+        o_runids.append (set([runid[0] for runid in cur.fetchall()]))
         pass
     o_runids = sorted (set.intersection (*o_runids), reverse=True)
 
@@ -840,6 +841,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     if not o_runids:
         cur.close()
         conn.close()
+        log.info ('step 1: no run ids with this output')
         return tuple()
 
     # 3: Find all of the inputs keyed by name and save runid,blobname
@@ -848,7 +850,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     for inp in inputs:
         key = '.'.join ([inp.tid.name, inp.aid.name])
         if key not in i_runids: i_runids[key] = []
-        if key not in ridbns: ridbns = []
+        if key not in ridbns: ridbns[key] = []
 
         cur.execute('SELECT pk FROM Task WHERE name = %s;', [inp.tid.name])
         task_ID = _fetchone (cur, ('Task "%s" is listed more than once' %
@@ -862,7 +864,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
         cur.execute('SELECT pk FROM Value WHERE name = %s AND sv_ID = ANY(%s);',
                     [inp.vid.name, sv_IDs])
         val_IDs = list(set([pk[0] for pk in cur.fetchall()]))
-        cur.execute('SELECT runid,blob_name FROM Prime WHERE tn_ID = %s AND '+
+        cur.execute('SELECT run_ID,blob_name FROM Prime WHERE tn_ID = %s AND '+
                     'task_ID = %s AND alg_ID = ANY(%s) AND ' +
                     'sv_ID = ANY(%s) AND val_ID = ANY(%s);',
                     [tn_ID, task_ID, alg_IDs, sv_IDs, val_IDs])
@@ -871,7 +873,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
         kval = ridbns[key][-1][0][1]
         i_runids[key].append (set([runid for runid,_bn in filter
                                    (lambda t,k=kval:t[1] == k,
-                                    ridbns[key])]))
+                                    ridbns[key][-1])]))
         pass
     for key in i_runids:
         i_runids[key] = sorted (set.intersection (*i_runids[key]),
@@ -882,6 +884,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     if any([not i_runids[k] for k in i_runids]):
         cur.close()
         conn.close()
+        log.info ('Step 3: no input runids - %s %s', str(key), str(i_runids))
         return tuple()
 
     # 5: Use runids from (1) and (3) to find when in time to promote
@@ -894,19 +897,18 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     # --   for i_runids and m_runids.
     runid = None
     for rid in o_runids:
-        match = dict([(ik,-3) for ik in i_runids])
-        for k in i_runids:
+        match = dict([(key,-3) for key in i_runids])
+        for key in i_runids:
             m = -2
-            for r,_bn in ridbns[k]:
+            for r in i_runids[key]:
                 if r <= rid:
                     m = r
                     break
                 pass
-
-            if m in i_runids[k]: match[k] = m
+            match[key] = m
             pass
 
-        if all ([0 <= m for m in match]):
+        if all ([0 <= vrid for vrid in match.values()]):
             runid = rid
             break
         pass
@@ -915,6 +917,8 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     if not runid:
         cur.close()
         conn.close()
+        log.info ('step 5: no run ids found -- %s %s %s',
+                  str(o_runids), str(i_runids), str(m_runids))
         return tuple()
 
     # 7: Build the juncture from the runid and output
@@ -925,7 +929,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
                                    output.tid.name))
         cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
                     'task_ID = %s AND design = %s AND implementation = %s ' +
-                    'bugfix = %s;',
+                    'AND bugfix = %s;',
                     (output.aid.name, task_ID, output.aid.version.design(),
                      output.aid.version.implementation(),
                      output.aid.version.bugfix()))
@@ -934,7 +938,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
                              (output.aid.name, output.aid.version.asstring())))
         cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
                     'alg_ID = %s AND design = %s AND implementation = %s ' +
-                    'bugfix = %s;',
+                    'AND bugfix = %s;',
                     (output.sid.name, alg_ID, output.sid.version.design(),
                      output.sid.version.implementation(),
                      output.sid.version.bugfix()))
@@ -943,14 +947,14 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
                             (output.sid.name, output.sid.version.asstring())))
         cur.execute('SELECT pk FROM Value WHERE name = %s AND ' +
                     'sv_ID = %s AND design = %s AND implementation = %s ' +
-                    'bugfix = %s;',
+                    'AND bugfix = %s;',
                     (output.vid.name, sv_ID, output.vid.version.design(),
                      output.vid.version.implementation(),
                      output.vid.version.bugfix()))
         v_ID = _fetchone (cur,
                           ('consistent(): Value "%s %s" is not singular' %
                            (output.vid.name, output.vid.version.asstring())))
-        cur.execute('SELECT blob_name FROM Prime WHERE runid = %s AND ' +
+        cur.execute('SELECT blob_name FROM Prime WHERE run_id = %s AND ' +
                     'tn_ID = %s AND task_ID = %s AND alg_ID = %s AND ' +
                     'sv_ID = %s AND val_ID = %s;',
                     [runid, tn_ID, task_ID, alg_ID, sv_ID, v_ID])

@@ -52,7 +52,7 @@ import dawgie.util
 import importlib
 import logging; log = logging.getLogger(__name__)
 
-ID = collections.namedtuple('ID', ['name', 'version'])
+ID = collections.namedtuple('ID', ['name', 'version'])  # version == dawgie.Version implementation
 REF = collections.namedtuple('REF', ['tid', 'aid', 'sid', 'vid'])
 
 METRIC_DATA = collections.namedtuple('METRIC_DATA', ['alg_name','alg_ver','sv',
@@ -89,10 +89,10 @@ def connect (alg, bot, tn):
 def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     '''Find self consistent inputs for the output returning base table entry
 
-    REF - tid is Analysis/Regress/Task ID
-        - aid is Algorithm/Analyzer/Regression ID
-        - sid is StateVector ID
-        - vid is Value ID
+    REF - tid is Analysis/Regress/Task dawgie.db.ID (use None for version)
+        - aid is Algorithm/Analyzer/Regression dawgie.db.ID
+        - sid is StateVector dawgie.db.ID
+        - vid is Value dawgie.db.ID
 
     inputs  - list of consistent inputs to find
     outputs - consistent for these outputs
