@@ -111,7 +111,65 @@ class DB:
         return
 
     def test_consistent(self):
-        self.assertTrue (False)
+        '''given a new data element, find all items after that can be promoted
+
+        Pretend there isw a structure to the testdata: each aspect collects the
+        regressions while the regression of the task. There are 6 taasks total
+        where task 2 depnds on task 1, task 3 depends on tasks 1 and 2,
+        task 4 depends on task 1. task 5 depends on task 3, and task 6 depnds
+        on task 1.
+
+        If task 2 is updated then it should update only tasks 3, 5, and 6.
+
+        The structure is emulated in dawgie.db.testdata but since the DAG is
+        never built, it is not important if it exists not because the database
+        erases the structure anyway.
+
+        Need to build the refs for consistency to reflect the structure being
+        suggested in dawgie.db.testdata. The referneces here are completely
+        artificial and would normally be built from the DAG. However this is
+        test of the database not the DAG (see test_12).
+        '''
+        ins = []
+        outs = []
+        for tn,tsk,alg in dawgie.db.testdata.DATASETS[:2]:
+            for sv in alg.sv:
+                for vn,v in sv.items():
+                    ins.append (dawgie.db.REF(dawgie.db.ID(tsk._name(), None),
+                                              dawgie.db.ID(alg.name(), alg),
+                                              dawgie.db.ID(sv.name(), sv),
+                                              dawgie.db.ID(vn, v)))
+                    pass
+                pass
+            pass
+        tn,tsk,alg = dawgie.db.testdata.DATASETS[2]
+        for sv in alg.sv:
+            for vn,v in sv.items():
+                outs.append (dawgie.db.REF(dawgie.db.ID(tsk._name(), None),
+                                           dawgie.db.ID(alg.name(), alg),
+                                           dawgie.db.ID(sv.name(), sv),
+                                           dawgie.db.ID(vn, v)))
+                pass
+            pass
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.consistent, ins, outs, tn)
+        dawgie.db.open()
+        juncture = dawgie.db.consistent (ins, outs, tn)
+        self.assertEqual (len (outs), len (juncture))
+        tns,tsks,algs,svs,vs = set(),set(),set(),set(),set()
+        for tnid,tskid,algid,svid,vid,_bn in juncture:
+            tns.add (tnid)
+            tsks.add (tskid)
+            algs.add (algid)
+            svs.add (svid)
+            vs.add (vid)
+            pass
+        self.assertEqual (len (tns), 1)
+        self.assertEqual (len (tsks), 1)
+        self.assertEqual (len (algs), 1)
+        self.assertEqual (len (svs), len (alg.sv))
+        self.assertEqual (len (vs), len (outs))
+        dawgie.db.close()
         return
 
     def test_copy(self):
@@ -153,7 +211,58 @@ class DB:
         return
 
     def test_promote(self):
-        self.assertTrue (False)
+        ins = []
+        outs = []
+        for tn,tsk,alg in dawgie.db.testdata.DATASETS[:2]:
+            for sv in alg.sv:
+                for vn,v in sv.items():
+                    ins.append (dawgie.db.REF(dawgie.db.ID(tsk._name(), None),
+                                              dawgie.db.ID(alg.name(), alg),
+                                              dawgie.db.ID(sv.name(), sv),
+                                              dawgie.db.ID(vn, v)))
+                    pass
+                pass
+            pass
+        tn,tsk,alg = dawgie.db.testdata.DATASETS[2]
+        for sv in alg.sv:
+            for vn,v in sv.items():
+                outs.append (dawgie.db.REF(dawgie.db.ID(tsk._name(), None),
+                                           dawgie.db.ID(alg.name(), alg),
+                                           dawgie.db.ID(sv.name(), sv),
+                                           dawgie.db.ID(vn, v)))
+                pass
+            pass
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.consistent, ins, outs, tn)
+        self.assertRaises (RuntimeError, dawgie.db.promote, (1,1,1), 1)
+        dawgie.db.open()
+        juncture = dawgie.db.consistent (ins, outs, tn)
+        self.assertEqual (len (outs), len (juncture))
+        tns,tsks,algs,svs,vs = set(),set(),set(),set(),set()
+        for tnid,tskid,algid,svid,vid,_bn in juncture:
+            tns.add (tnid)
+            tsks.add (tskid)
+            algs.add (algid)
+            svs.add (svid)
+            vs.add (vid)
+            pass
+        self.assertEqual (len (tns), 1)
+        self.assertEqual (len (tsks), 1)
+        self.assertEqual (len (algs), 1)
+        self.assertEqual (len (svs), len (alg.sv))
+        self.assertEqual (len (vs), len (outs))
+        self.assertFalse (dawgie.db.promote (juncture, dawgie.db.testdata.RUNID))
+        self.assertTrue (dawgie.db.promote
+                         (juncture, dawgie.db.testdata.RUNID+12))
+        # clean up the promotion
+        tgt,tsk,alg = dawgie.db.testdata.DATASETS[2]
+        for sv in alg.state_vectors():
+            for vn in sv.keys():
+                r = dawgie.db.remove (dawgie.db.testdata.RUNID+12,
+                                      tgt, tsk._name(), alg.name(), sv.name(), vn)
+                pass
+            pass
+        dawgie.db.close()
         return
 
     def test_remove(self):
@@ -266,9 +375,9 @@ class DB:
     pass
 
 # to test postgres:
-#   docker pull postgres:13.3
+#   docker pull postgres:latest
 #   docker network create cit
-#   docker run --detach --env POSTGRES_PASSWORD=password --env POSTGRES_USER=tester --name postgres --network cit --rm  postgres:13.3
+#   docker run --detach --env POSTGRES_PASSWORD=password --env POSTGRES_USER=tester --name postgres --network cit --rm  postgres:latest
 #   docker exec -i postgres createdb -U tester testspace
 #   CIT_NETWORK=cit .ci/check_03.sh ; git checkout .ci/status.txt
 #   docker network rm cit

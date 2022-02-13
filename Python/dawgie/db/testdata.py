@@ -48,7 +48,7 @@ TIMELINES = []
 
 ALG_CNT = 11
 SVN_CNT = 7
-TSK_CNT = 13
+TSK_CNT = 19
 VAL_CNT = 5
 VER_CNT = 3
 
@@ -56,10 +56,11 @@ class Fake(dawgie.Algorithm,dawgie.Analyzer,dawgie.Regression):
     def __init__(self, name, bug):
         self._version_ = dawgie.VERSION(1,1,bug)
         self.myname = name
+        self.prev = []
         self.sv = []
         pass
     def name(self): return self.myname
-    def previous(self): return []
+    def previous(self): return self.prev
     # pylint: disable=arguments-differ,unused-argument
     def run(self, *args, **kwds): return
     # pylint: enable=arguments-differ,unused-argument
@@ -147,3 +148,22 @@ for tsk_idx in range(TSK_CNT):
     if rem == 1: TIMELINES.append ((tsk, alg))
     if rem == 2: DATASETS.append ((TARGET, tsk, alg))
     pass
+
+# If these change, then will need to update
+# test_13.{test_consistent,test_promote}
+for a,r,t in zip(ASPECTS,TIMELINES,DATASETS):
+    a[1].prev = [dawgie.SV_REF(None, r[1], sv) for sv in r[1].sv]
+    r[1].prev = [dawgie.SV_REF(None, t[2], sv) for sv in t[2].sv]
+    pass
+DATASETS[1][2].prev = [dawgie.SV_REF(None, DATASETS[0][2], sv)
+                       for sv in DATASETS[0][2].sv]
+DATASETS[2][2].prev = ([dawgie.SV_REF(None, DATASETS[0][2], sv)
+                        for sv in DATASETS[0][2].sv] +
+                       [dawgie.SV_REF(None, DATASETS[1][2], sv)
+                        for sv in DATASETS[1][2].sv])
+DATASETS[3][2].prev = [dawgie.SV_REF(None, DATASETS[0][2], sv)
+                       for sv in DATASETS[0][2].sv]
+DATASETS[4][2].prev = [dawgie.SV_REF(None, DATASETS[2][2], sv)
+                       for sv in DATASETS[2][2].sv]
+DATASETS[5][2].prev = [dawgie.SV_REF(None, DATASETS[1][2], sv)
+                       for sv in DATASETS[1][2].sv]

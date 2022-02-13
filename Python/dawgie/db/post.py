@@ -917,8 +917,8 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     if not runid:
         cur.close()
         conn.close()
-        log.info ('step 5: no run ids found -- %s %s %s',
-                  str(o_runids), str(i_runids), str(m_runids))
+        log.info ('step 5: no run ids found -- %s %s',
+                  str(o_runids), str(i_runids))
         return tuple()
 
     # 7: Build the juncture from the runid and output
@@ -1106,16 +1106,16 @@ def promote (juncture:(), runid:int):
     cur = dawgie.db.post._cur (conn)
     entries = []
     for tn_ID,task_ID,alg_ID,sv_ID,v_ID,_bn in juncture:
-        cur.execute('SELECT blob_name FROM Prime WHERE runid = %s AND ' +
+        cur.execute('SELECT blob_name FROM Prime WHERE run_ID = %s AND ' +
                     'tn_ID = %s AND task_ID = %s AND alg_ID = %s AND ' +
                     'sv_ID = %s AND val_ID = %s;',
                     [runid, tn_ID, task_ID, alg_ID, sv_ID, v_ID])
-        entries.append ([e for e in cur.fetch()])
+        entries.extend ([e[0] if e else None for e in cur.fetchall()])
         pass
     cur.close()
     conn.close()
 
-    if not all([not e for e in entries]): return False
+    if any([e is not None for e in entries]): return False
 
     conn = dawgie.db.post._conn()
     cur = dawgie.db.post._cur (conn)
@@ -1141,6 +1141,7 @@ def remove (runid:int, tn:str, tskn:str, algn:str, svn:str, vn:str):
     if not dawgie.db.post._db: raise RuntimeError('called remove before open')
 
     # Remove all rows with the given run ID from the primary table
+    removed = tuple()
     conn = _conn()
     cur = _cur (conn)
     cur.execute('SELECT * from Target WHERE name = %s;', [tn])
@@ -1161,10 +1162,11 @@ def remove (runid:int, tn:str, tskn:str, algn:str, svn:str, vn:str):
                 'task_ID = %s AND alg_ID = ANY(%s) AND sv_ID = ANY(%s) AND ' +
                 'val_ID = ANY(%s);',
                 [runid, tn_ID, task_ID, alg_ID, sv_ID, val_ID])
+    removed = (runid, tn_ID, task_ID, alg_ID, sv_ID, val_ID)
     conn.commit()
     cur.close()
     conn.close()
-    return
+    return removed
 
 def reopen():
     if not dawgie.db.post._db: open()
