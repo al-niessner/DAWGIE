@@ -4,7 +4,7 @@ dawgie.context.cloud_data = "api-key@https_url@sqs-name@scale-name@cluster-name@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
