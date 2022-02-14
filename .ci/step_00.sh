@@ -64,19 +64,19 @@ then
        then
            echo "building CIT because $(docker images niessner/cit | grep ${citVersion})"
 
-           if [ -z "$(docker images | awk -e '{print $1":"$2}' | grep os:$osVersion)" ]
+           if [ -z "$(docker images | awk '{print $1":"$2}' | grep os:$osVersion)" ]
            then
                echo "   Building OS layer $osVersion"
                docker build --network=host -t os:${osVersion} - < .ci/Dockerfile.1
            fi
 
-           if [ -z "$(docker images | awk -e '{print $1":"$2}' | grep py:$pyVersion)" ]
+           if [ -z "$(docker images | awk '{print $1":"$2}' | grep py:$pyVersion)" ]
            then
                echo "   Building Python layer $pyVersion"
                docker build --network=host -t py:${pyVersion} - < .ci/Dockerfile.2
            fi
 
-           if [ -z "$(docker images | awk -e '{print $1":"$2}' | grep cit:$citVersion)" ]
+           if [ -z "$(docker images | awk '{print $1":"$2}' | grep cit:$citVersion)" ]
            then
                echo "   Building CI Tools layer $citVersion"
                docker build --network=host -t niessner/cit:${citVersion} - < .ci/Dockerfile.3

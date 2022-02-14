@@ -77,6 +77,6 @@ class Logger(unittest.TestCase):
         print ('log file:')
         print (text)
         self.assertTrue (text)
-        self.assertTrue (text.find ('%s') < 0)
+        self.assertLess (text.find ('%s') < 0)
         return
     pass

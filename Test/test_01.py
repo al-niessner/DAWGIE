@@ -77,10 +77,11 @@ class Metric(unittest.TestCase):
         m = dawgie._Metric()
         m.measure (Metric._io, (100,))
         s = m.sum()
+        print ('metric:', s)
         # self.assertTrue (1400000 < s.input)
-        self.assertTrue (1400000 < s.output)
-        self.assertTrue (3000 < s.mem)
-        self.assertTrue (0.0 < s.sys)
-        self.assertTrue (0.0 < s.user)
+        self.assertLess (1400000, s.output)
+        self.assertLess (3000, s.mem)
+        self.assertLess (0.0, s.sys)
+        self.assertLess (0.0, s.user)
         return
     pass

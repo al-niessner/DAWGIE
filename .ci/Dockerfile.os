@@ -34,7 +34,7 @@
 #
 # NTR:
 
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 RUN set -ex && \
     export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
@@ -43,15 +43,11 @@ RUN set -ex && \
             graphviz \
             haveged \
             python3 \
-            python3-cryptography \
             python3-dev \
             python3-gdbm \
-            python3-levenshtein \
-            python3-matplotlib \
             python3-numpy \
             python3-pip \
             python3-psycopg2 \
-            python3-pyparsing \
             python3-setuptools && \
     apt-get clean && apt-get autoremove && \
     ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime && \
