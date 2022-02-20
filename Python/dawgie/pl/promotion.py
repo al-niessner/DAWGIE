@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -36,7 +36,10 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+import dawgie.db
+import dawgie.context
 import dawgie.pl.dag
+import dawgie.util
 import logging; log = logging.getLogger(__name__)
 
 class Engine:
@@ -55,22 +58,130 @@ class Engine:
         return self.more()
 
     def __init__ (self):
+        self._ae = None
+        self._organize = None
         self._todo = []
         return
+
+    @property
+    def ae(self)->dawgie.pl.dag.Construct: return self._ae
+
+    @ae.setter
+    def ae(self, ae:dawgie.pl.dag.Construct): self._ae = ae
 
     def clear(self): self._todo.clear()
 
     def do (self):
-        if self.more(): self.clear()
+        if dawgie.context.allow_promotion and self.ae is None:
+            raise ValueError('AE is not set prior to data flow')
+        if dawgie.context.allow_promotion and self.organize is None:
+            raise ValueError('Organizer is not set prior to data flow')
+
+        if dawgie.context.allow_promotion and self.more():
+            algnode,runid,values = self._todo.pop(0)
+            name = algnode.tag + '.'
+            targets = set([v.split ('.')[1] for v in values])
+            vals = set(['.'.join (v.split ('.')[2:]) for v in values])
+
+            if len (targets) == 1: target_name = targets.copy().pop()
+            else:
+                raise ValueError('Inconsistent targets for a single result %s' %
+                                 str(targets))
+
+            for child in algnode:
+                # 1: does decendent require subset of values
+                #  if no, then break
+                inputs = set()
+                outputs = self._ae[child.tag]
+                for o in outputs: inputs.update (o.get('parents'))
+                dependents = [d.tag for d in
+                              filter (lambda i,n=name:i.tag.startswith(n),
+                                      inputs)]
+
+                if not set(dependents).issubset (vals): continue
+
+                # 2: is the dependent or ancestors are schduled to run already
+                #    or are running
+                #  if yes, then break
+                if _is_scheduled (algnode, child, targets): continue
+
+                # 3: find the consistent set of previous inputs for each output
+                #    in this child
+                juncture = dawgie.db.consistent (_translate (inputs),
+                                                 _translate (outputs),
+                                                 target_name)
+
+                # 4: are all of the inputs to dependent the same
+                #    if no, schedule dependent and break
+                if not juncture or not all (juncture):
+                    self._organize ([child.tag], runid, targets,
+                                    'promotion not possible')
+                    continue
+
+                # 5: promote decendent state vectors
+                if not dawgie.db.promote (juncture, runid):
+                    self._organize ([child.tag], runid, targets,
+                                    'promotion failed to insert')
+                    continue
+
+                # 6: add decendent to todo list
+                self._todo.append (child, runid, outputs)
+                pass
+        elif not dawgie.context.allow_promotion: self.clear()
         return
 
     def more (self)->bool: return 0 < len (self._todo)
+
+    @property
+    def organize (self): return self._organize
+
+    @organize.setter
+    def organize (self, organizer):
+        '''a function used to organize the work to be done
+
+        Should have the same arguments as dawgie.pl.schedule.organize.
+        In fact, the default behavior of the pipeline is to use
+        dawgie.pl.schedule.organize
+        '''
+        self._organize = organizer
+        return
 
     def todo (self,
               original:dawgie.pl.dag.Node=None,
               rid:int=None,
               values:[(str,bool)]=None):
         if not all ([v[1] for v in values]):\
-           self._todo.append ((original, rid, values))
+           self._todo.append ((original, rid,
+                               [value for value,_isnew in
+                                filter (lambda t:not t[1], values)]))
         return
     pass
+
+def _is_scheduled (ignore:dawgie.pl.dag.Node,
+                   node:dawgie.pl.dag.Node,
+                   targets:[str])->bool:
+    result = any ([targets.issubset (node.get ('do')),
+                   targets.issubset (node.get ('doing')),
+                   targets.issubset (node.get ('todo'))])
+
+    if not result:
+        for parent in node.get ('parents'):
+            if parent == ignore: continue
+            result |= _is_scheduled (ignore, parent, targets)
+            pass
+        pass
+    return result
+
+def _translate (nodes:[dawgie.pl.dag.Node])->[dawgie.db.REF]:
+    result = []
+    for n in nodes:
+        tn,an,sn,vn = n.tag.split('.')
+        a = n.get ('alg')
+        s = a.sv_as_dict()[sn]
+        v = s[vn]
+        result.append (dawgie.db.REF(tid=dawgie.db.ID(tn, None),
+                                     aid=dawgie.db.ID(an, a),
+                                     sid=dawgie.db.ID(sn, s),
+                                     vid=dawgie.db.ID(vn, v)))
+        pass
+    return result

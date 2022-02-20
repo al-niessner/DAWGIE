@@ -6,7 +6,7 @@ It does not support wildcarding.
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -49,6 +49,7 @@ import datetime
 import enum
 import dawgie
 import dawgie.context
+from dawgie.db import REF
 import dawgie.db.lockview
 import dawgie.db.shelf
 import dawgie.db.util
@@ -65,7 +66,6 @@ import twisted.internet.protocol
 import twisted.internet.reactor
 import twisted.internet.task
 import twisted.internet.threads
-
 
 COMMAND = collections.namedtuple('COMMAND', ['func', 'key', 'table', 'value'])
 TABLES = collections.namedtuple('TABLES', ['alg', 'primary',
@@ -771,6 +771,9 @@ def connect (alg, bot, tn):
         raise RuntimeError('called connect before open')
     return Interface(alg, bot, tn)
 
+def consistent (_inputs:[REF], _outputs:[REF], _target_name:str)->():
+    raise NotImplementedError('Not ready for shelf')
+
 def copy(dst, method=Method.connector, gateway=dawgie.context.db_host):
     if dawgie.db.shelf._db is None:
         raise RuntimeError('called copy before open')
@@ -899,6 +902,9 @@ def open_shelve(path):
                   task=shelve.open (path + '.task'),
                   value=shelve.open (path + '.value'))
 
+def promote (_junctures:(), _runid:int):
+    raise NotImplementedError('Not ready for shelf')
+
 # pylint: disable=too-many-arguments
 def remove (runid, tn, taskn, algn, svn, vn):
     k = dawgie.db.util.to_key (runid, tn, taskn, algn, svn, vn)
@@ -940,7 +946,7 @@ def rotated_files(index=None):
 def retreat (reg, ret):
     if dawgie.db.shelf._db is None:
         raise RuntimeError('called connect before open')
-    return Interface(reg, ret, ret._target)
+    return Interface(reg, ret, ret._target())
 
 def targets():
     if isinstance (dawgie.db.shelf._db, bool): result = Connector()._keys (Table.target)

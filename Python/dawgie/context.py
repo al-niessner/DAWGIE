@@ -1,7 +1,7 @@
 '''
 --
 COPYRIGHT:
-Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -63,6 +63,8 @@ class PortOffset(enum.Enum):
 ae_base_path = os.environ.get ('AE_BASE_PATH', '/proj/src/ae')
 ae_base_package = os.environ.get ('AE_BASE_PACKAGE', 'ae')
 
+allow_promotion = bool(os.environ.get ('DAWGIE_PROMOTION', ''))
+
 cloud_data = os.environ.get ('CLOUD_DATA','apikey@url@SQS_Name@AutoScalingGroupName@ClusterName@TaskDefinition')
 cloud_port = int(os.environ.get ('CLOUD_PORT', 8080 + PortOffset.cloud.value))
 cloud_provider = CloudProvider.none
@@ -122,6 +124,8 @@ def add_arguments (ap):
                      help='the complete path to the AE directory [%(default)s]')
     ap.add_argument ('--context-ae-pkg', default=ae_base_package,required=False,
                      help='the package prefix for the AE [%(default)s]')
+    ap.add_argument ('--context-allow-promotion', action='store_true',required=False,
+                     help='allow the dawgie to promote state vectors')
     ap.add_argument ('--context-cloud-data', default=cloud_data, required=False,
                      help='data used to communicate with the cloud provider')
     ap.add_argument ('--context-cloud-port', default=cloud_port, required=False, type=int,
@@ -242,6 +246,7 @@ def override (args):
 
     dawgie.context.ae_base_path = args.context_ae_dir
     dawgie.context.ae_base_package = args.context_ae_pkg
+    dawgie.context.allow_promotion = args.context_allow_promotion
     dawgie.context.cloud_data = args.context_cloud_data
     dawgie.context.cloud_port = args.context_cloud_port
     dawgie.context.cloud_provider = CloudProvider[args.context_cloud_provider]

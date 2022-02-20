@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -49,6 +49,18 @@ import xml.etree.ElementTree
 
 class Construct(object):
     # pylint: disable=too-many-instance-attributes
+    def __getitem__(self, key):
+        result = []
+
+        if key.count ('.') == 3: result.append (self._flat[key])
+        else:
+            key = key + '.'
+            for k in self._flat:
+                if k.startswith (key): result.append (self._flat[k])
+                pass
+            pass
+        return result
+
     def __init__(self, factories):
         self._flat = {}
         self._roots = set()

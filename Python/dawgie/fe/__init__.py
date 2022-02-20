@@ -1,7 +1,7 @@
 '''Built-in Front-End for DAWGIE
 
 COPYRIGHT:
-Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -127,11 +127,13 @@ class RoutePoint(twisted.web.resource.Resource):
 
     def getChild (self, path, request):
         msg = request.uri.decode() if os.environ.get('DAWGIE_FE_DEBUG','') else 'DAWGIE_FE_DEBUG'
+        try: dpath = path.decode()
+        except UnicodeDecodeError: dpath = 'cannot decode "path"'
         return twisted.web.resource.ErrorPage(404,
                                               'Could not locate requested URI',
                                               '<p>%(my_name)s.getChild().name:         %(name)s<br>%(my_name)s.getChild().request.uri:  %(uri)s</p>' %
                                               {'my_name':self.__name,
-                                               'name': path.decode(),
+                                               'name': dpath,
                                                'uri':msg})
     pass
 

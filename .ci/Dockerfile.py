@@ -1,5 +1,5 @@
 # COPYRIGHT:
-# Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
+# Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
 # U.S. Government sponsorship acknowledged.
 #
 # All rights reserved.
@@ -43,12 +43,12 @@ RUN set -ex && \
                  GitPython>=2.1.11 \
                  matplotlib>=2.1.1 \
                  psycopg2-binary>=2.7.4 \
-                 pyparsing>=2.2 \
+                 pyparsing==2.4.7 \
                  pyOpenSSL>=19.1.0 \
                  python-gnupg==0.4.4 \
                  pyxb==1.2.6 \
                  requests>=2.20.0 \
+                 service_identity \
                  transitions==0.6.8 \
                  twisted>=18.7.0  && \
-    cd /usr/local/lib/python3.6/dist-packages/pydot && \
     rm -rf ${HOME}/.cache /tmp/,ci

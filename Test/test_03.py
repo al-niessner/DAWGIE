@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -50,19 +50,28 @@ class Logger(unittest.TestCase):
         unittest.TestCase.__init__(self, *args)
         fid,self.log_path = tempfile.mkstemp()
         os.close(fid)
+        with open (self.log_path, 'tw') as file: file.write ('yup\n')
+        self.aborted = False
         pass
 
+    def _abort (self):
+        self.aborted = True
+        self._stop()
+        return
+
     def _log_msg (self):
-        logging.getLogger (__name__).warning ('some text %s', ', more text')
+        self.mylog.warning ('some text %s', ', more text')
         twisted.internet.reactor.callLater (1, self._stop)
         return
 
     def _start_logger (self):
         dawgie.pl.logger.start (self.log_path, dawgie.context.log_port)
-        handler = dawgie.pl.logger.TwistedHandler\
-                  (host='localhost', port=dawgie.context.log_port)
-        logging.basicConfig (handlers=[handler], level=logging.WARN)
+        self.handler = dawgie.pl.logger.TwistedHandler\
+                       (host='localhost', port=dawgie.context.log_port)
+        logging.basicConfig (level=logging.INFO)
         logging.captureWarnings (True)
+        self.mylog = logging.getLogger (__name__)
+        self.mylog.addHandler (self.handler)
         return
 
     def _stop (self):
@@ -72,11 +81,12 @@ class Logger(unittest.TestCase):
     def test_issue_45(self):
         twisted.internet.reactor.callLater (0, self._start_logger)
         twisted.internet.reactor.callLater (1, self._log_msg)
+        twisted.internet.reactor.callLater (11, self._abort)
         twisted.internet.reactor.run()
+        self.assertFalse (self.aborted)
+        self.assertTrue (os.path.isfile (self.log_path))
         with open (self.log_path, 'rt') as f: text = f.read()
-        print ('log file:')
-        print (text)
         self.assertTrue (text)
-        self.assertTrue (text.find ('%s') < 0)
+        self.assertLess (text.find ('%s'), 0)
         return
     pass

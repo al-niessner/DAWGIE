@@ -2,7 +2,7 @@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -44,6 +44,7 @@ import collections
 import dawgie
 import dawgie.context
 import dawgie.db
+from dawgie.db import REF
 import dawgie.db.post
 import dawgie.db.util
 import dawgie.db.util.aspect
@@ -93,7 +94,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
     # pylint: disable=too-many-arguments
     @staticmethod
     def __fill (cur, sv, alg_ID, run_ID, task_ID, tn_ID, sv_ID):
-        # Get rows from primary table that have these algorithm primary keys
+        # Get rows from prime table that have these algorithm primary keys
         cur.execute('SELECT val_ID,blob_name from Prime WHERE run_ID = %s ' +
                     'and alg_ID = %s and tn_ID = %s ' +
                     'and task_ID = %s and sv_ID = %s;',
@@ -265,7 +266,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
 
     def _load (self, algref=None, err=True, ver=None):
         # Load state vectors with data from db into algorithm
-        # Take highest run number row from primary table for that task,
+        # Take highest run number row from prime table for that task,
         #   algorithm, state vector if current run does not exist in
         #   Primary table.
         # pylint: disable=too-many-locals,too-many-statements
@@ -467,8 +468,8 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                                                     self._tn(),
                                                     self._task(),
                                                     self._alg().name(),
-                                                    sv.name(), vn])),
-                                        not exists)
+                                                    sv.name(), vn]),
+                                         not exists))
 
                 # Put result in primary. Make sure to get task_ID and other
                 # primary keys from their respective tables
@@ -707,6 +708,9 @@ def _find (da:[dict], **kwds)->dict:
     return result
 
 def _prime_keys():
+    if not dawgie.db.post._db:
+        raise RuntimeError('called _prime_keys before open')
+
     conn = _conn()
     cur = _cur (conn, True)
     cur.execute('SELECT * from Prime;')
@@ -737,6 +741,9 @@ def _prime_keys():
     return sorted([k for k in keys])
 
 def _prime_values():
+    if not dawgie.db.post._db:
+        raise RuntimeError('called _prime_values before open')
+
     conn = _conn()
     cur = _cur (conn)
     cur.execute('SELECT blob_name from Prime;')
@@ -770,24 +777,204 @@ def archive (done):
     twisted.internet.reactor.spawnProcess (handler, args[0], args=args, env=os.environ)
     return
 
-def close(): return
-
-def gather (anz, ans):
-    if dawgie.db.post._db is None:
-        raise RuntimeError('called connect before open')
-    return Interface(anz, ans, '__all__')
+def close():
+    dawgie.db.post._db = False
+    return
 
 def connect(alg, bot, tn):
     # attempt the connection, assume everything exists
-    if not dawgie.db.post._db:raise RuntimeError('called connect before open')
+    if not dawgie.db.post._db: raise RuntimeError('called connect before open')
     log.info ("connected")
     return Interface(alg, bot, tn)
 
-# pylint: disable=unused-argument
-def copy (dst, method, gateway):
+def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
+    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
+    if not dawgie.db.post._db:
+        raise RuntimeError('called consistent before open')
+
+    conn = dawgie.db.post._conn()
+    cur = dawgie.db.post._cur (conn)
+    cur.execute('SELECT pk FROM Target WHERE name = %s;', [target_name])
+    tn_ID = _fetchone(cur, 'Target "%s" is listed more than once' % target_name)
+    # 1: Find all the times this version ran and collect the run IDs
+    o_runids = []
+    for output in outputs:
+        cur.execute('SELECT pk FROM Task WHERE name = %s;', [output.tid.name])
+        task_ID = _fetchone (cur, ('Task "%s" is listed more than once' %
+                                   output.tid.name))
+        cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
+                    'task_ID = %s AND design = %s AND implementation = %s ' +
+                    'AND bugfix = %s;',
+                    (output.aid.name, task_ID, output.aid.version.design(),
+                     output.aid.version.implementation(),
+                     output.aid.version.bugfix()))
+        alg_ID = _fetchone (cur,
+                            ('consistent(): Algorithm "%s %s" is not singular' %
+                             (output.aid.name, output.aid.version.asstring())))
+        cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
+                    'alg_ID = %s AND design = %s AND implementation = %s ' +
+                    'AND bugfix = %s;',
+                    (output.sid.name, alg_ID, output.sid.version.design(),
+                     output.sid.version.implementation(),
+                     output.sid.version.bugfix()))
+        sv_ID = _fetchone (cur,
+                           ('consistent(): SV "%s %s" is not singular' %
+                            (output.sid.name, output.sid.version.asstring())))
+        cur.execute('SELECT pk FROM Value WHERE name = %s AND ' +
+                    'sv_ID = %s AND design = %s AND implementation = %s ' +
+                    'AND bugfix = %s;',
+                    (output.vid.name, sv_ID, output.vid.version.design(),
+                     output.vid.version.implementation(),
+                     output.vid.version.bugfix()))
+        v_ID = _fetchone (cur,
+                          ('consistent(): Value "%s %s" is not singular' %
+                           (output.vid.name, output.vid.version.asstring())))
+        cur.execute('SELECT run_ID FROM Prime WHERE tn_ID = %s AND ' +
+                    'task_ID = %s AND alg_ID = %s AND sv_ID = %s AND ' +
+                    'val_ID = %s;',
+                    [tn_ID, task_ID, alg_ID, sv_ID, v_ID])
+        o_runids.append (set([runid[0] for runid in cur.fetchall()]))
+        pass
+    o_runids = sorted (set.intersection (*o_runids), reverse=True)
+
+    # 2: If there are no run IDs with this output, then return empty tuple
+    if not o_runids:
+        cur.close()
+        conn.close()
+        log.info ('step 1: no run ids with this output')
+        return tuple()
+
+    # 3: Find all of the inputs keyed by name and save runid,blobname
+    i_runids = {}
+    ridbns = {}
+    for inp in inputs:
+        key = '.'.join ([inp.tid.name, inp.aid.name])
+        if key not in i_runids: i_runids[key] = []
+        if key not in ridbns: ridbns[key] = []
+
+        cur.execute('SELECT pk FROM Task WHERE name = %s;', [inp.tid.name])
+        task_ID = _fetchone (cur, ('Task "%s" is listed more than once' %
+                                   inp.tid.name))
+        cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
+                    'task_ID = %s;', (inp.aid.name, task_ID))
+        alg_IDs = cur.fetchall()
+        cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
+                    'alg_ID = ANY(%s);', [inp.sid.name, alg_IDs])
+        sv_IDs = list(set([pk[0] for pk in cur.fetchall()]))
+        cur.execute('SELECT pk FROM Value WHERE name = %s AND sv_ID = ANY(%s);',
+                    [inp.vid.name, sv_IDs])
+        val_IDs = list(set([pk[0] for pk in cur.fetchall()]))
+        cur.execute('SELECT run_ID,blob_name FROM Prime WHERE tn_ID = %s AND '+
+                    'task_ID = %s AND alg_ID = ANY(%s) AND ' +
+                    'sv_ID = ANY(%s) AND val_ID = ANY(%s);',
+                    [tn_ID, task_ID, alg_IDs, sv_IDs, val_IDs])
+        ridbns[key].append (sorted ([(runid,bn) for runid,bn in cur.fetchall()],
+                                    key=lambda t:t[0]))
+        kval = ridbns[key][-1][0][1]
+        i_runids[key].append (set([runid for runid,_bn in filter
+                                   (lambda t,k=kval:t[1] == k,
+                                    ridbns[key][-1])]))
+        pass
+    for key in i_runids:
+        i_runids[key] = sorted (set.intersection (*i_runids[key]),
+                                reverse=True)
+        pass
+
+    # 4: If there are no run input IDs with version, then return empty tuple
+    if any([not i_runids[k] for k in i_runids]):
+        cur.close()
+        conn.close()
+        log.info ('Step 3: no input runids - %s %s', str(key), str(i_runids))
+        return tuple()
+
+    # 5: Use runids from (1) and (3) to find when in time to promote
+    # -- Here is the trick:
+    # --   Use the m_runids to find the corresponding i_runids. If they match
+    # --   and the input matching the constraint has the good runid in both
+    # --   the we can promote. Matching constraints was done in (5) by reducing
+    # --   possible outputs to between matching blob rids and all rids for that
+    # --   constraint. Therefore only to check that there is a consistent runid
+    # --   for i_runids and m_runids.
+    runid = None
+    for rid in o_runids:
+        match = dict([(key,-3) for key in i_runids])
+        for key in i_runids:
+            m = -2
+            for r in i_runids[key]:
+                if r <= rid:
+                    m = r
+                    break
+                pass
+            match[key] = m
+            pass
+
+        if all ([0 <= vrid for vrid in match.values()]):
+            runid = rid
+            break
+        pass
+
+    # 6: If no workable runID found, then return empty tuple
+    if not runid:
+        cur.close()
+        conn.close()
+        log.info ('step 5: no run ids found -- %s %s',
+                  str(o_runids), str(i_runids))
+        return tuple()
+
+    # 7: Build the juncture from the runid and output
+    juncture = []
+    for output in outputs:
+        cur.execute('SELECT pk FROM Task WHERE name = %s;', [output.tid.name])
+        task_ID = _fetchone (cur, ('Task "%s" is listed more than once' %
+                                   output.tid.name))
+        cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
+                    'task_ID = %s AND design = %s AND implementation = %s ' +
+                    'AND bugfix = %s;',
+                    (output.aid.name, task_ID, output.aid.version.design(),
+                     output.aid.version.implementation(),
+                     output.aid.version.bugfix()))
+        alg_ID = _fetchone (cur,
+                            ('consistent(): Algorithm "%s %s" is not singular' %
+                             (output.aid.name, output.aid.version.asstring())))
+        cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
+                    'alg_ID = %s AND design = %s AND implementation = %s ' +
+                    'AND bugfix = %s;',
+                    (output.sid.name, alg_ID, output.sid.version.design(),
+                     output.sid.version.implementation(),
+                     output.sid.version.bugfix()))
+        sv_ID = _fetchone (cur,
+                           ('consistent(): SV "%s %s" is not singular' %
+                            (output.sid.name, output.sid.version.asstring())))
+        cur.execute('SELECT pk FROM Value WHERE name = %s AND ' +
+                    'sv_ID = %s AND design = %s AND implementation = %s ' +
+                    'AND bugfix = %s;',
+                    (output.vid.name, sv_ID, output.vid.version.design(),
+                     output.vid.version.implementation(),
+                     output.vid.version.bugfix()))
+        v_ID = _fetchone (cur,
+                          ('consistent(): Value "%s %s" is not singular' %
+                           (output.vid.name, output.vid.version.asstring())))
+        cur.execute('SELECT blob_name FROM Prime WHERE run_id = %s AND ' +
+                    'tn_ID = %s AND task_ID = %s AND alg_ID = %s AND ' +
+                    'sv_ID = %s AND val_ID = %s;',
+                    [runid, tn_ID, task_ID, alg_ID, sv_ID, v_ID])
+        bn = _fetchone (cur, 'No matchiing entry')
+        juncture.append ((tn_ID, task_ID, alg_ID, sv_ID, v_ID, bn))
+        pass
+    cur.close()
+    conn.close()
+    return juncture
+
+def copy (_dst, _method, _gateway):
     raise NotImplementedError('Not ready for postgresql')
 
+def gather (anz, ans):
+    if not dawgie.db.post._db: raise RuntimeError('called gather before open')
+    return Interface(anz, ans, '__all__')
+
 def metrics()->'[dawgie.db.METRIC_DATA]':
+    if not dawgie.db.post._db: raise RuntimeError('called metrics before open')
+
     result = []
     svs = {}
     conn = dawgie.db.post._conn()
@@ -802,8 +989,10 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
                                             dawgie.METRIC(-2,-2,-2,-2,-2,-2))
         cur.execute ('SELECT name FROM Value WHERE PK = %s;', (row[6],))
         vn = cur.fetchone()[0]
-        msv[vn] = dawgie.db.util.decode(row[7])
-        svs[key] = msv
+        try:
+            msv[vn] = dawgie.db.util.decode(row[7])
+            svs[key] = msv
+        except FileNotFoundError: log.error ('possible database corruption because cannot fine __metric__ state vector value: %s', row[7])
         pass
     for key,msv in svs.items():
         cur.execute ('SELECT name FROM Target where PK = %s;', (key[2],))
@@ -902,21 +1091,90 @@ def open():
     dawgie.db.post._db = True
     return
 
-def remove (runid):
+def promote (juncture:(), runid:int):
+    # to test or not to test? Should it be checked (can it be?) that the primary
+    # table does not contain a similar entry already?
+    #
+    # Test:
+    #    Get all of the known primary tables with the run id then make sure that
+    #    that a different version of same value is not already written. Throw an
+    #    exception if something already exists or just log it? Log at first to
+    #    prevent killing of main twisted thread.
+    if not dawgie.db.post._db: raise RuntimeError('called promote before open')
+
+    conn = dawgie.db.post._conn()
+    cur = dawgie.db.post._cur (conn)
+    entries = []
+    for tn_ID,task_ID,alg_ID,sv_ID,v_ID,_bn in juncture:
+        cur.execute('SELECT blob_name FROM Prime WHERE run_ID = %s AND ' +
+                    'tn_ID = %s AND task_ID = %s AND alg_ID = %s AND ' +
+                    'sv_ID = %s AND val_ID = %s;',
+                    [runid, tn_ID, task_ID, alg_ID, sv_ID, v_ID])
+        entries.extend ([e[0] if e else None for e in cur.fetchall()])
+        pass
+    cur.close()
+    conn.close()
+
+    if any([e is not None for e in entries]): return False
+
+    conn = dawgie.db.post._conn()
+    cur = dawgie.db.post._cur (conn)
+    try:
+        for tn_ID,task_ID,alg_ID,sv_ID,v_ID,bn in juncture:
+            cur.execute('INSERT INTO Prime (run_ID, tn_ID, task_ID, ' +
+                        'alg_ID, sv_ID, val_ID, blob_name) values ' +
+                        '(%s, %s, %s, %s, %s, %s, %s);',
+                        [runid, tn_ID, task_ID, alg_ID, sv_ID, v_ID, bn])
+            pass
+        conn.commit()
+    except psycopg2.IntegrityError:
+        conn.rollback()
+        cur.close()
+        conn.close()
+        return False
+    cur.close()
+    conn.close()
+    return True
+
+# pylint: disable=too-many-arguments
+def remove (runid:int, tn:str, tskn:str, algn:str, svn:str, vn:str):
+    if not dawgie.db.post._db: raise RuntimeError('called remove before open')
+
     # Remove all rows with the given run ID from the primary table
+    removed = tuple()
     conn = _conn()
     cur = _cur (conn)
-    cur.execute('REMOVE FROM Prime WHERE run_ID = %s;', [runid])
+    cur.execute('SELECT * from Target WHERE name = %s;', [tn])
+    tn_ID = _fetchone(cur,'Dataset: Could not find target ID')
+    cur.execute('SELECT * from TASK WHERE name = %s;', [tskn])
+    task_ID = _fetchone (cur, 'Dataset load: Could not find task ID')
+    cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND task_ID = %s;',
+                [algn, task_ID])
+    alg_ID = list(set([pk[0] for pk in cur.fetchall()]))
+    cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
+                'alg_ID = ANY(%s);', [svn, alg_ID])
+    sv_ID = list(set([pk[0] for pk in cur.fetchall()]))
+    cur.execute('SELECT pk FROM Value WHERE name = %s AND ' +
+                'sv_ID = ANY(%s);', [vn, sv_ID])
+    val_ID = list(set([pk[0] for pk in cur.fetchall()]))
+
+    cur.execute('DELETE FROM Prime WHERE run_ID = %s AND tn_ID = %s AND ' +
+                'task_ID = %s AND alg_ID = ANY(%s) AND sv_ID = ANY(%s) AND ' +
+                'val_ID = ANY(%s);',
+                [runid, tn_ID, task_ID, alg_ID, sv_ID, val_ID])
+    removed = (runid, tn_ID, task_ID, alg_ID, sv_ID, val_ID)
     conn.commit()
     cur.close()
     conn.close()
-    return
+    return removed
 
 def reopen():
     if not dawgie.db.post._db: open()
     return
 
 def reset (runid:int, tn:str, tskn, alg)->None:
+    if not dawgie.db.post._db: raise RuntimeError('called reset before open')
+
     conn = dawgie.db.post._conn()
     cur = dawgie.db.post._cur (conn)
     cur.execute('SELECT * from Target WHERE name = %s;', [tn])
@@ -966,11 +1224,12 @@ def reset (runid:int, tn:str, tskn, alg)->None:
     return
 
 def retreat (reg, ret):
-    if dawgie.db.post._db is None:
-        raise RuntimeError('called connect before open')
+    if not dawgie.db.post._db: raise RuntimeError('called retreat before open')
     return Interface(reg, ret, ret._target())
 
 def targets():
+    if not dawgie.db.post._db: raise RuntimeError('called targets before open')
+
     log.info ("in targets()")
     conn = _conn()
     cur = _cur (conn)
@@ -981,6 +1240,8 @@ def targets():
     return [r[0] for r in result]
 
 def trace (task_alg_names):
+    if not dawgie.db.post._db: raise RuntimeError('called trace before open')
+
     target_list = dawgie.db.targets()
     conn = _conn()
     cur = _cur (conn)
@@ -1015,6 +1276,8 @@ def trace (task_alg_names):
     return result
 
 def update (tsk, alg, sv, vn, v):
+    if not dawgie.db.post._db: raise RuntimeError('called update before open')
+
     log.info ("In databse update")
     # Just adds these things to their respective tables
     # Check if connection to DB is already open
@@ -1075,6 +1338,8 @@ def update (tsk, alg, sv, vn, v):
 def versions():
     # Returns Algorithm, StateVector, and Value as a list of dictionaries
     # where each dictionary represents a row in the table
+    if not dawgie.db.post._db: raise RuntimeError('called versions before open')
+
     log.info ('versions() - starting')
     conn = _conn()
     cur = _cur (conn, True)

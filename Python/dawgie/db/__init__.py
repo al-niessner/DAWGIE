@@ -8,7 +8,7 @@ The database interface has N goals:
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -52,6 +52,9 @@ import dawgie.util
 import importlib
 import logging; log = logging.getLogger(__name__)
 
+ID = collections.namedtuple('ID', ['name', 'version'])  # version == dawgie.Version implementation
+REF = collections.namedtuple('REF', ['tid', 'aid', 'sid', 'vid'])
+
 METRIC_DATA = collections.namedtuple('METRIC_DATA', ['alg_name','alg_ver','sv',
                                                      'run_id','target','task'])
 
@@ -83,6 +86,25 @@ def connect (alg, bot, tn):
     '''
     return _db_in_use().connect (alg, bot, tn)
 
+def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
+    '''Find self consistent inputs for the output returning base table entry
+
+    REF - tid is Analysis/Regress/Task dawgie.db.ID (use None for version)
+        - aid is Algorithm/Analyzer/Regression dawgie.db.ID
+        - sid is StateVector dawgie.db.ID
+        - vid is Value dawgie.db.ID
+
+    inputs  - list of consistent inputs to find
+    outputs - consistent for these outputs
+    target_name - which target
+
+    returns a tuple that can be used by dawgie.db.promote to create a new entry
+            in the database that represents the same solution as if the AE
+            were run given the inputs as it was already done. Returns an empty
+            tuple or None if a consistent set of data could not be found.
+    '''
+    return _db_in_use().consistent (inputs, outputs, target_name)
+
 def copy (dst, method, gateway):
     '''Copy database to destination.'''
     return _db_in_use().copy(dst, method, gateway)
@@ -106,7 +128,16 @@ def open():
     '''Open the database'''
     return _db_in_use().open()
 
-def remove(runid, tn, taskn, algn, svn, vn):
+def promote (juncture:(), runid:int):
+    '''Promote the junctures to the given runid
+
+    juncture : a list of results from dawgie.db.consistent
+
+    retuns the full value names promoted as
+    runid.target name.task name.alg name.state vector name.value name'''
+    return _db_in_use().promote (juncture, runid)
+
+def remove(runid:int, tn:str, taskn:str, algn:str, svn:str, vn:str):
     '''Remove the specified key from the primary table'''
     return _db_in_use().remove (runid, tn, taskn, algn, svn, vn)
 
@@ -132,7 +163,11 @@ def targets (fulllist:bool=False):
                                  (s.startswith ('__') and s.endswith ('__')),
                                  _db_in_use().targets())]
 
-def trace (task_alg_names):
+def trace (task_alg_names:[str])->{str:{str:int}}:
+    '''trace the task_alg_names to find the lastest runid for each target
+
+    returns {target_name:{task_alg_name:runid}}
+    '''
     return _db_in_use().trace (task_alg_names)
 
 def update (tsk, alg, sv, vn, v):
@@ -211,7 +246,7 @@ def view (visitor, runid, tn, tskn, algn, svn):
         visitor.add_declaration (msg)
         return
 
-    _db_in_use().reset (runid, tn, tskn, alg)
+    _db_in_use().reset (runid, tn, tskn, alg)  # set the alg version
     ds = connect (alg, bot, tn)
     ds.load()
 

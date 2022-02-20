@@ -2,7 +2,7 @@
 # need to signal the parent Jenkins script of failure if any step fails
 
 # COPYRIGHT:
-# Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
+# Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
 # U.S. Government sponsorship acknowledged.
 #
 # All rights reserved.
@@ -43,6 +43,6 @@ if current_state
 then
     echo ''
 else
-    echo 'exiting with code 1'
+    echo "exiting with code 1: $(cat .ci/status.txt)"
     exit 1
 fi

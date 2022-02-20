@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 # COPYRIGHT:
-# Copyright (c) 2015-2021, California Institute of Technology ("Caltech").
+# Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
 # U.S. Government sponsorship acknowledged.
 #
 # All rights reserved.
@@ -52,18 +52,23 @@ then
     python3 <<EOF
 mn = '<unknown>'
 count = 0
+rated = False
 with open ('pylint.rpt.txt', 'rt') as f:
     for l in f.readlines():
+        rated |= 0 < l.find ('code has been rated at')
+
         if l.startswith ('***'): mn = l.split()[2]
         if len (l) < 2: continue
         if l[0] not in 'CEFIRW' or l[1] != ':': continue
         if 0 < l.find ('(missing-docstring)'): continue
         if 0 < l.find ('(locally-disabled)'): continue
+
         count += 1
         print (count, mn, l.strip())
         pass
     pass
-if 0 < count:
+
+if 0 < count or not rated:
     print ('pylint check failed', count)
     with open ('.ci/status.txt', 'tw') as f: f.write ('failure')
 EOF
