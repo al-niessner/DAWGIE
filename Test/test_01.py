@@ -58,7 +58,7 @@ class Metric(unittest.TestCase):
         fid,fn = tempfile.mkstemp()
         os.close (fid)
         for n in range(N):
-            x = numpy.random.rand (1000,1000)
+            x = numpy.random.rand (1200,1200)
             with open (fn, 'bw') as f: pickle.dump (x, f)
             with open (fn, 'br') as f: y = pickle.load (f)
             pass
