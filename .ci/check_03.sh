@@ -62,22 +62,22 @@ then
         docker pull postgres:latest
     fi
 
-    if [[ $(docker network inspect ${CIT_NETWORK:-bridge} | wc -l) -eq 1 ]]
+    if [[ $(docker network inspect ${CIT_NETWORK:-citnet} | wc -l) -eq 1 ]]
     then
-        echo "create the docker network: ${CIT_NETWORK:-bridge}"
-        docker network create ${CIT_NETWORK:-bridge}
+        echo "create the docker network: ${CIT_NETWORK:-citnet}"
+        docker network create ${CIT_NETWORK:-citnet}
     fi
 
     if [[ $(docker container inspect cit_postgres | wc -l) -eq 1 ]]
     then
         echo "starting a posgresql container (cit_postgres) then enabling it"
-        docker run --detach --env POSTGRES_PASSWORD=password --env POSTGRES_USER=tester --name cit_postgres --network ${CIT_NETWORK:-bridge} --rm  postgres:latest
+        docker run --detach --env POSTGRES_PASSWORD=password --env POSTGRES_USER=tester --name cit_postgres --network ${CIT_NETWORK:-citnet} --rm  postgres:latest
         sleep 3
         docker exec -i cit_postgres createdb -U tester testspace
     fi
 
     # run pytest
-    docker run --rm -e PYTHONPATH=${PWD}/Python -e USERNAME="$(whoami)" --network ${CIT_NETWORK:-bridge} -v $PWD:$PWD -u $UID -w $PWD niessner/cit:$(cit_version) python3 -m pytest --cov=dawgie --cov-branch --cov-report term-missing -v ${units} | tee unittest.rpt.txt
+    docker run --rm -e PYTHONPATH=${PWD}/Python -e USERNAME="$(whoami)" --network ${CIT_NETWORK:-citnet} -v $PWD:$PWD -u $UID -w $PWD niessner/cit:$(cit_version) python3 -m pytest --cov=dawgie --cov-branch --cov-report term-missing -v ${units} | tee unittest.rpt.txt
     [ 0 -lt `grep FAILED unittest.rpt.txt | wc -l` ]  && echo 'failure' > .ci/status.txt
     [ 0 -lt `grep "ERROR at" unittest.rpt.txt | wc -l` ]  && echo 'failure' > .ci/status.txt
 
