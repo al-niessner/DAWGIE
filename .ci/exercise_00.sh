@@ -72,10 +72,10 @@ EOF
     done
     docker build --network=host -t ap:${ghrVersion} - < .ci/Dockerfile.3.dcp
 
-        DOCKER_GIT_REVISION=`git rev-parse HEAD`
+        DAWGIE_DOCKERIZED_AE_GIT_REVISION=`git rev-parse HEAD`
     python3 <<EOF
 with open ('.ci/Dockerfile.4', 'rt') as f: txt = f.read()
-with open ('.ci/Dockerfile.4', 'tw') as f: f.write (txt.replace ('FROM dawgie', 'FROM ap:${ghrVersion}').replace ('##DOCKER_GIT_REVISION##', '$DOCKER_GIT_REVISION'))
+with open ('.ci/Dockerfile.4', 'tw') as f: f.write (txt.replace ('FROM dawgie', 'FROM ap:${ghrVersion}').replace ('##DAWGIE_DOCKERIZED_AE_GIT_REVISION##', '$DAWGIE_DOCKERIZED_AE_GIT_REVISION'))
 EOF
     docker build --network=host -t ex:${ghrVersion} - < .ci/Dockerfile.4
     git reset --hard HEAD
