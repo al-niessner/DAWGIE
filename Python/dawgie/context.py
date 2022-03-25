@@ -60,49 +60,52 @@ class PortOffset(enum.Enum):
     shelf = 3
     pass
 
-ae_base_path = os.environ.get ('AE_BASE_PATH', '/proj/src/ae')
-ae_base_package = os.environ.get ('AE_BASE_PACKAGE', 'ae')
+ae_base_path = os.environ.get ('DAWGIE_AE_BASE_PATH', '/proj/src/ae')
+ae_base_package = os.environ.get ('DAWGIE_AE_BASE_PACKAGE', 'ae')
 
 allow_promotion = bool(os.environ.get ('DAWGIE_PROMOTION', ''))
 
-cloud_data = os.environ.get ('CLOUD_DATA','apikey@url@SQS_Name@AutoScalingGroupName@ClusterName@TaskDefinition')
-cloud_port = int(os.environ.get ('CLOUD_PORT', 8080 + PortOffset.cloud.value))
+cloud_data = os.environ.get ('DAWGIE_CLOUD_DATA','apikey@url@SQS_Name@AutoScalingGroupName@ClusterName@TaskDefinition')
+cloud_port = int(os.environ.get ('DAWGIE_CLOUD_PORT',
+                                 8080 + PortOffset.cloud.value))
 cloud_provider = CloudProvider.none
 
-cpu_threshold = int(os.environ.get ('CPU_THRESH', 30))
+cpu_threshold = int(os.environ.get ('DAWGIE_CPU_THRESH', 30))
 
-data_dbs = os.environ.get ('DATA_DBSTOR', '/proj/data/dbs')
-data_log = os.environ.get ('DATA_LOGDIR', '/proj/data/logs')
-data_stg = os.environ.get ('DATA_STAGED', '/proj/data/stg')
+data_dbs = os.environ.get ('DAWGIE_DATA_DBSTOR', '/proj/data/dbs')
+data_log = os.environ.get ('DAWGIE_DATA_LOGDIR', '/proj/data/logs')
+data_stg = os.environ.get ('DAWGIE_DATA_STAGED', '/proj/data/stg')
 
-db_host = os.environ.get ('DB_HOST', 'localhost')
-db_impl = os.environ.get ('DB_IMPL', 'shelf')
-db_name = os.environ.get ('DB_NAME', 'undefined')
-db_path = os.environ.get ('DB_PATH', '/proj/data/db')
-db_post2shelve_prefix = os.environ.get ('DB_POST2SHELVE_PREFIX', 'undefined')
-db_rotate_path = os.environ.get ('DB_ROTATE_PATH', '/proj/data/db')
-db_copy_path = os.environ.get ('DB_COPY_PATH', '/tmp')
-db_port = int(os.environ.get ('DB_PORT', 8080 + PortOffset.shelf.value))
-db_rotate = os.environ.get('DB_ROTATES', 10)
+db_host = os.environ.get ('DAWGIE_DB_HOST', 'localhost')
+db_impl = os.environ.get ('DAWGIE_DB_IMPL', 'shelf')
+db_name = os.environ.get ('DAWGIE_DB_NAME', 'undefined')
+db_path = os.environ.get ('DAWGIE_DB_PATH', '/proj/data/db')
+db_post2shelve_prefix = os.environ.get ('DAWGIE_DB_POST2SHELVE_PREFIX',
+                                        'undefined')
+db_rotate_path = os.environ.get ('DAWGIE_DB_ROTATE_PATH', '/proj/data/db')
+db_copy_path = os.environ.get ('DAWGIE_DB_COPY_PATH', '/tmp')
+db_port = int(os.environ.get ('DAWGIE_DB_PORT', 8080 + PortOffset.shelf.value))
+db_rotate = os.environ.get('DAWGIE_DB_ROTATES', 10)
 db_lock = False
 
-display = os.environ.get ('DISPLAY_TYPE', 'html')
-email_alerts_to = os.environ.get ('EMAIL_ALERTS_TO', '')
+display = os.environ.get ('DAWGIE_DISPLAY_TYPE', 'html')
+email_alerts_to = os.environ.get ('DAWGIE_EMAIL_ALERTS_TO', '')
 email_signature = dawgie.resolve_username()
-farm_port = int(os.environ.get ('FARM_PORT', 8080 + PortOffset.farm.value))
+farm_port = int(os.environ.get ('DAWGIE_FARM_PORT',
+                                8080 + PortOffset.farm.value))
 fe_path = '/tmp/' + os.environ.get ('USERNAME', 'unknown') + '/fe'
-fe_port = int(os.environ.get ('FE_PORT', 8080 + PortOffset.frontend.value))
+fe_port = int(os.environ.get ('DAWGIE_FE_PORT',8080 + PortOffset.frontend.value))
 git_rev = None
 gpg_home = os.environ.get ('GNUPGHOME', '~/.gnupg')
 log_backup = 10
 log_capacity = 100
 log_level = logging.WARN
-log_port = int(os.environ.get('LOG_PORT', 8080 + PortOffset.log.value))
-ssl_pem_file = os.environ.get ('SSL_PEM_FILE', '')
+log_port = int(os.environ.get('DAWGIE_LOG_PORT', 8080 + PortOffset.log.value))
+ssl_pem_file = os.environ.get ('DAWGIE_SSL_PEM_FILE', '')
 worker_backlog = 50
 
 def _rev():
-    rev = os.environ.get ('DOCKER_GIT_REVISION', '')
+    rev = os.environ.get ('DAWGIE_DOCKERIZED_AE_GIT_REVISION', '')
 
     if not rev:
         cdir = os.path.abspath (os.curdir)
