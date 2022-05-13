@@ -34,7 +34,7 @@
 #
 # NTR:
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 RUN set -ex && \
     export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
@@ -48,7 +48,8 @@ RUN set -ex && \
             python3-numpy \
             python3-pip \
             python3-psycopg2 \
-            python3-setuptools && \
+            python3-setuptools \
+            tzdata && \
     apt-get clean && apt-get autoremove && \
     ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime && \
     dpkg-reconfigure --frontend noninteractive tzdata
