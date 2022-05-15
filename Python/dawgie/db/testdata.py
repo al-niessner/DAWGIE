@@ -116,9 +116,9 @@ for tsk_idx in range(TSK_CNT):
     rem = tsk_idx % 3
     tidx = tsk_idx // 3
 
-    if rem == 0: tsk = Analysis('Analysis_{:02d}'.format (tidx), 0, RUNID)
-    if rem == 1: tsk = Regress('Regress_{:02d}'.format (tidx), 0, TARGET)
-    if rem == 2: tsk = Task('Task_{:02d}'.format (tidx), 0, RUNID, TARGET)
+    if rem == 0: tsk = Analysis(f'Analysis_{tidx:02d}', 0, RUNID)
+    if rem == 1: tsk = Regress('Regress_{tidx:02d}', 0, TARGET)
+    if rem == 2: tsk = Task('Task_{tidx:02d}', 0, RUNID, TARGET)
 
     for ver_idx in range(VER_CNT):
         for alg_idx in range(ALG_CNT):
@@ -131,12 +131,12 @@ for tsk_idx in range(TSK_CNT):
             tsk.mylist.append (alg)
             for svn_idx in range(SVN_CNT):
                 if svn_idx < SVN_CNT-1:
-                    sv = StateVector('StateVector_{:02d}'.format(svn_idx))
+                    sv = StateVector('StateVector_{svn_idx:02d}')
                 else: sv = StateVector('__metric__')
 
                 alg.sv.append (sv)
                 for val_idx in range(VAL_CNT):
-                    vn = 'Value_{:02d}'.format (val_idx)
+                    vn = f'Value_{val_idx:02d}'
                     sv[vn] = Value(-(len(KNOWNS)+1))
                     KNOWNS.append ((tsk, alg, sv, vn, sv[vn]))
                     pass

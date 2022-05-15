@@ -46,7 +46,7 @@ import sys
 # pylint: disable=protected-access,too-many-arguments
 def consume (runid, tn, taskn, algn, svn, vn):
     req = [runid, tn, taskn, algn, svn, vn]
-    if all ([x is None for x in req]):
+    if all ((x is None for x in req)):
         print ('All parameters are None which means it would be simpler to delete and restart the database. Cowardly doing nothing.')
         logging.getLogger (__name__).warning ('Cowardly doing nothing.')
         return
@@ -56,8 +56,8 @@ def consume (runid, tn, taskn, algn, svn, vn):
         ids = k.split ('.')
         ids[0] = int (ids[0])
 
-        if all ([(e is None or i == e)
-                 for i,e in zip (ids, req)]): dawgie.db.remove (*ids)
+        if all (((e is None or i == e)
+                 for i,e in zip (ids, req))): dawgie.db.remove (*ids)
         pass
     dawgie.db.close()
     return

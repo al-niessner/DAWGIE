@@ -72,6 +72,7 @@ class ArchiveHandler(twisted.internet.protocol.ProcessProtocol):
 
     def processEnded(self, reason):
         if isinstance (reason.value, twisted.internet.error.ProcessTerminated):
+            # more readable this way so pylint: disable=logging-not-lazy
             log.critical ('Error in archiving of data.    EXIT CODE: %s' +
                           '   SIGNAL: %s    STATUS: %s   COMMAND: "%s"',
                           str (reason.value.exitCode),
@@ -101,8 +102,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                     (run_ID, alg_ID, tn_ID, task_ID, sv_ID))
         runs = cur.fetchall()
 
-        if not runs: log.info ('Dataset load: Could not find any ' +
-                               'runs that match given values')
+        if not runs: log.info ('Dataset load: Could not find any runs that match given values')
 
         for r in runs:
             val_ID = r[0]
@@ -116,6 +116,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
 
     def __purge (self):
         table = self.__span['table']
+        # modifying table in loop so pylint: disable=unnecessary-comprehension
         for k1 in [k for k in table]:
             for k2 in [k for k in table[k1]]:
                 if not table[k1][2]:
@@ -166,10 +167,10 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         conn = dawgie.db.post._conn()
         cur = dawgie.db.post._cur (conn)
         self.__span = {'sv_templates':
-                       dict([('.'.join ([dawgie.util.task_name (ref.factory),
-                                         ref.impl.name(),
-                                         ref.item.name()]),
-                              pickle.dumps (ref.item)) for ref in refs]),
+                       {'.'.join ([dawgie.util.task_name (ref.factory),
+                                   ref.impl.name(),
+                                   ref.item.name()]):pickle.dumps (ref.item)
+                        for ref in refs},
                        'table':{}}
         cur.execute ('SELECT PK,name from Target;')
         tnl = cur.fetchall()
@@ -196,14 +197,15 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                 cur.execute('SELECT run_ID FROM Prime WHERE tn_ID = %s AND ' +
                             'task_ID = %s AND alg_ID = %s AND sv_ID = %s;',
                             [tn[0], task_ID, alg_ID, sv_ID])
-                run_ID = set([rid[0] for rid in cur.fetchall()])
+                run_ID = {rid[0] for rid in cur.fetchall()}
 
                 if not run_ID:
-                    log.warning ('Aspect collect: Could not find any ' +
-                                 'runids for ' + str (ref))
+                    log.warning ('Aspect collect: Could not find any runids for %s',
+                                 str (ref))
                     continue
 
                 run_ID = max (run_ID) if 1 < len (run_ID) else run_ID.pop()
+                # long message more readable so pylint: disable=logging-not-lazy
                 cur.execute('SELECT val_ID from Prime WHERE run_ID = %s AND ' +
                             'alg_ID = %s AND tn_ID = %s and task_ID = %s and ' +
                             'sv_ID = %s;',
@@ -232,9 +234,12 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                             self.__span['table'][tn[1]][fsvn][vn] = entry
                             pass
                         pass
-                    else: log.critical ('Need to improve compliant because ' +
-                                        'received soemthing that was neither ' +
-                                        'SV_REF or V_REF: ' + str (type (ref)))
+                    else:
+                        # long msg readable so pylint: disable=logging-not-lazy
+                        log.critical ('Need to improve compliant because ' +
+                                      'received soemthing that was neither ' +
+                                      'SV_REF or V_REF: ' + str (type (ref)))
+                        pass
                     pass
                 pass
             pass
@@ -295,8 +300,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                         self._bot()._runid(),
                         self._tn())
             else:
-                raise KeyError('Unknown factory type {}'.format
-                               (algref.factory.__name__))
+                raise KeyError(f'Unknown factory type {algref.factory.__name__}')
 
             child = connect (algref.impl, algref.factory (*args), tn)
             child.load(err=err, ver=ver)
@@ -309,33 +313,35 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
             task_ID = _fetchone (cur, 'Dataset load: Could not find task ID')
             cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
                         'task_ID = %s;', [self._alg().name(), task_ID])
-            alg_ID = list(set([pk[0] for pk in cur.fetchall()]))
+            alg_ID = list({pk[0] for pk in cur.fetchall()})
             msv = dawgie.util.MetricStateVector(dawgie.METRIC(-1,-1,-1,-1,-1,-1),
                                                 dawgie.METRIC(-1,-1,-1,-1,-1,-1))
             for sv in self._alg().state_vectors() + [msv]:
                 cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
                             'alg_ID = ANY(%s);', [sv.name(), alg_ID])
-                sv_ID = list(set([pk[0] for pk in cur.fetchall()]))
+                sv_ID = list({pk[0] for pk in cur.fetchall()})
                 cur.execute('SELECT run_ID FROM Prime WHERE tn_ID = %s AND ' +
                             'task_ID = %s AND alg_ID = ANY(%s) AND '+
                             'sv_ID = ANY(%s);',
                             [tn_ID, task_ID, alg_ID, sv_ID])
-                run_ID = set([pk[0] for pk in cur.fetchall()])
+                run_ID = {pk[0] for pk in cur.fetchall()}
 
                 if not run_ID:
+                    # long msg more readable so pylint: disable=logging-not-lazy
                     log.info ('Dataset load: Could not find any runs that ' +
                               'match given the algorithm and state vector')
                     continue
-                else:
-                    run_ID = self._runid() if self._runid() in run_ID \
-                                           else max(run_ID)
-                    cur.execute ('SELECT alg_ID,sv_ID FROM Prime WHERE ' +
-                                 'run_ID = %s AND tn_ID = %s AND task_ID = %s '+
-                                 ' AND alg_ID = ANY(%s) and sv_ID = ANY(%s);',
-                                 [run_ID, tn_ID, task_ID, alg_ID, sv_ID])
-                    narrowed = set(cur.fetchall())
+
+                run_ID = self._runid() if self._runid() in run_ID \
+                                       else max(run_ID)
+                cur.execute ('SELECT alg_ID,sv_ID FROM Prime WHERE ' +
+                             'run_ID = %s AND tn_ID = %s AND task_ID = %s '+
+                             ' AND alg_ID = ANY(%s) and sv_ID = ANY(%s);',
+                             [run_ID, tn_ID, task_ID, alg_ID, sv_ID])
+                narrowed = set(cur.fetchall())
 
                 if len (narrowed) != 1:
+                    # long msg more readable so pylint: disable=logging-not-lazy
                     log.critical ('Dataset load: The postgres db is corrupt '+
                                   'because found %d IDs', len (narrowed))
                     pass
@@ -359,6 +365,8 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         conn.close()
         return
 
+    def _recede(self, data): return NotImplementedError()
+
     def ds(self): return self
 
     def recede (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
@@ -366,10 +374,10 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         conn = dawgie.db.post._conn()
         cur = dawgie.db.post._cur (conn)
         self.__span = {'sv_templates':
-                       dict([('.'.join ([dawgie.util.task_name (ref.factory),
-                                         ref.impl.name(),
-                                         ref.item.name()]),
-                              pickle.dumps (ref.item)) for ref in refs]),
+                       {'.'.join ([dawgie.util.task_name (ref.factory),
+                                   ref.impl.name(),
+                                   ref.item.name()]):pickle.dumps (ref.item)
+                        for ref in refs},
                        'table':{}}
         cur.execute ('SELECT PK FROM Target WHERE name = %s;', [self._tn()])
         tnid = cur.fetchone()[0]
@@ -391,7 +399,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
             cur.execute ('SELECT run_ID FROM Prime WHERE tn_ID = %s AND ' +
                          'task_ID = %s AND alg_ID = ANY(%s) AND ' +
                          'sv_ID = ANY(%s);', [tnid, task_ID, alg_IDs, sv_IDs])
-            rids = sorted (set ([r[0] for r in cur.fetchall()]))
+            rids = sorted ({r[0] for r in cur.fetchall()})
             for rid in rids:
                 cur.execute ('SELECT alg_ID,sv_ID FROM Prime WHERE ' +
                              'run_ID = %s AND  tn_ID = %s AND ' +
@@ -399,15 +407,14 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                              'sv_ID = ANY(%s);',
                              [rid, tnid, task_ID, alg_IDs, sv_IDs])
                 ids = cur.fetchall()
-                aids = set ([id[0] for id in ids])
-                svids = set ([id[1] for id in ids])
+                aids = {id[0] for id in ids}
+                svids = {id[1] for id in ids}
 
                 if len (aids) != 1 and len (svids) != 1:
-                    log.critical ('Database corruption from many versions ' +
-                                  'at one run id.')
+                    log.critical ('Database corruption from many versions at one run id.')
                     continue
-                else: alg_ID,sv_ID = aids.pop(),svids.pop()
 
+                alg_ID,sv_ID = aids.pop(),svids.pop()
                 cur.execute('SELECT val_ID from Prime WHERE run_ID = %s AND ' +
                             'alg_ID = %s AND tn_ID = %s and task_ID = %s and ' +
                             'sv_ID = %s;',
@@ -415,6 +422,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                 vids = [vid[0] for vid in cur.fetchall()]
 
                 if not vids:
+                    # long msg more readable so pylint: disable=logging-not-lazy
                     log.warning ('Regress recede: Could not find any ' +
                                  'values for ' + str (ref))
                 elif rid not in self.__span['table']:
@@ -436,9 +444,12 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                             self.__span['table'][rid][fsvn][vn] = entry
                             pass
                         pass
-                    else: log.critical ('Need to improve compliant because ' +
-                                        'received soemthing that was neither ' +
-                                        'SV_REF or V_REF: ' + str (type (ref)))
+                    else:
+                        # long msg readable so pylint: disable=logging-not-lazy
+                        log.critical ('Need to improve compliant because ' +
+                                      'received soemthing that was neither ' +
+                                      'SV_REF or V_REF: ' + str (type (ref)))
+                        pass
                     pass
                 pass
             pass
@@ -504,7 +515,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
 
                 # Get the value id that matches the value
                 if not self.__verify (val):
-                    log.critical ('offending item is ' +
+                    log.critical ('offending item is %s',
                                   '.'.join ([self._task(), self._alg().name(),
                                              sv.name(), vn]))
                     valid = False
@@ -608,7 +619,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
 
             # Get the value id that matches the value
             if not self.__verify (val):
-                log.critical ('offending item is ' +
+                log.critical ('offending item is %s',
                               '.'.join ([self._task(), self._alg().name(),
                                          msv.name(), vn]))
                 valid = False

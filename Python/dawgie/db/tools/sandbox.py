@@ -50,7 +50,7 @@ import os
 import sys
 
 def mkDir(dst):
-    return os.system("mkdir -p %s" % dst)
+    return os.system(f"mkdir -p {dst}")
 
 def dbcopy(host, port, dst, method, gateway):
     print(host, port, dst, method, gateway)
@@ -102,5 +102,5 @@ if __name__ == "__main__":
                         args.method,
                         args.gateway)
     print(returnCode)
-    exit(returnCode)
+    sys.exit(returnCode)
     pass

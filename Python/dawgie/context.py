@@ -189,7 +189,7 @@ def add_arguments (ap):
 
 def dumps()->bytes:
     def isattribute (member):
-        # pylint: disable=redefined-outer-name
+        # pylint: disable=import-outside-toplevel,redefined-outer-name
         import dawgie.pl.state
         return not ((member[0].startswith ('__') and
                      member[0].endswith ('__')) or
@@ -199,8 +199,7 @@ def dumps()->bytes:
                     inspect.isroutine (member[1]) or
                     isinstance (member[1], dawgie.pl.state.FSM))
 
-    attributes = [a for a in filter (isattribute,
-                                     inspect.getmembers (dawgie.context))]
+    attributes = list(filter (isattribute, inspect.getmembers (dawgie.context)))
     return pickle.dumps (attributes, pickle.HIGHEST_PROTOCOL)
 
 def loads (b:bytes)->None:
@@ -278,7 +277,7 @@ def override (args):
     dawgie.context.ssl_pem_file = args.context_ssl_pem_file
     dawgie.context.worker_backlog = args.context_worker_backlog
 
-    if not dawgie.context.ae_base_path.endswith (os.path.sep + dawgie.context.ae_base_package.replace ('.', os.path.sep)): raise ValueError('context-ae-dir ({0}) does not end with context-ae-pkg ({1})'.format (dawgie.context.ae_base_path,dawgie.context.ae_base_package))
+    if not dawgie.context.ae_base_path.endswith (os.path.sep + dawgie.context.ae_base_package.replace ('.', os.path.sep)): raise ValueError(f'context-ae-dir ({0}) does not end with context-ae-pkg ({dawgie.context.ae_base_path,dawgie.context.ae_base_package})')
     return
 
 def unlock_db():

@@ -37,6 +37,9 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+# it works and needs to be redone when shelf is update to support all the
+# functionality in postgres. Therefore pylint: disable=consider-using-f-string
+
 import argparse
 import logging
 import os

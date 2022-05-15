@@ -48,10 +48,10 @@ import logging; log = logging.getLogger(__name__)
 import twisted.internet.defer
 import twisted.python.failure
 
-class LogFailure(object):
+class LogFailure:
     # pylint: disable=too-few-public-methods
     def __init__ (self, label, name):
-        self.__label = 'co: {1} -- {0}'.format (label, name)
+        self.__label = f'co: {name} -- {label}'
         return
 
     def log (self, err):

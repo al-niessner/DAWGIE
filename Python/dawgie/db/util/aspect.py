@@ -61,7 +61,7 @@ class Container(dawgie.Aspect):
         for k in self.__parent._ckeys (self.__l1, self.__l2): yield k
         return
 
-    def __len__(self): return len ([k for k in self])
+    def __len__(self): return len (list(self))
 
     def _ckeys (self, l1k, l2k): raise NotImplementedError()
     def _fill_item (self, l1k, l2k, l3k): raise NotImplementedError()
@@ -78,6 +78,7 @@ class Container(dawgie.Aspect):
 
     def values(self):
         '''generator of current level of values'''
+        # not a full dict so pylint: disable=consider-using-dict-items
         for k in self.keys(): yield self[k]
         return
     pass

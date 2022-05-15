@@ -46,8 +46,7 @@ import sys
 def info (runid, tn, taskn, algn, svn):
     # pylint: disable=protected-access
     dawgie.db.reopen()
-    svl = list (set (['.'.join (k.split ('.')[:-1])
-                      for k in dawgie.db._prime_keys()]))
+    svl = list ({'.'.join (k.split ('.')[:-1]) for k in dawgie.db._prime_keys()})
     dawgie.db.close()
     dawgie.security.finalize()
     svl.sort()

@@ -70,7 +70,7 @@ if __name__ == '__main__':
                                                 args.log_file),
                          level=args.log_level)
     dawgie.db.open()
-    values = [v for v in dawgie.db._prime_values()]
+    values = list(dawgie.db._prime_values())
 
     if not values:
         logging.critical ('Aborting purge becuase found NO keys!!!')
@@ -81,6 +81,6 @@ if __name__ == '__main__':
         if fn not in values and os.path.isfile (os.path.join
                                                 (dawgie.context.data_dbs, fn)):
             os.unlink (os.path.join (dawgie.context.data_dbs, fn))
-            logging.getLogger (__name__).warning ('deleted the file ' + fn + ' from the store.')
+            logging.getLogger (__name__).warning ('deleted the file %s from the store.', fn)
         pass
     pass

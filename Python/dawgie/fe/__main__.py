@@ -48,7 +48,8 @@ factory = twisted.web.server.Site(dawgie.fe.root())
 
 if dawgie.context.ssl_pem_file:
     if os.path.isfile (dawgie.context.ssl_pem_file):
-        with open (dawgie.context.ssl_pem_file, 'rt') as f: cert = f.read()
+        with open (dawgie.context.ssl_pem_file, 'rt', encoding="utf-8") as f: \
+             cert = f.read()
         cert = twisted.internet.ssl.PrivateCertificate.loadPEM(cert)
         twisted.internet.reactor.listenSSL (dawgie.context.fe_port,
                                             factory,

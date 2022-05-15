@@ -47,7 +47,7 @@ import os
 import pydot
 import xml.etree.ElementTree
 
-class Construct(object):
+class Construct:
     # pylint: disable=too-many-instance-attributes
     def __getitem__(self, key):
         result = []
@@ -55,8 +55,8 @@ class Construct(object):
         if key.count ('.') == 3: result.append (self._flat[key])
         else:
             key = key + '.'
-            for k in self._flat:
-                if k.startswith (key): result.append (self._flat[k])
+            for k,v in self._flat.items():
+                if k.startswith (key): result.append (v)
                 pass
             pass
         return result
@@ -101,8 +101,8 @@ class Construct(object):
         return
 
     def _ancestry (self):
-        for name in self._flat:
-            heritage = self._flat[name].get ('parents').copy()
+        for name,dct in self._flat.items():
+            heritage = dct.get ('parents').copy()
             parents = heritage.copy()
             while parents:
                 grands = set()
@@ -112,7 +112,7 @@ class Construct(object):
                     pass
                 parents = grands
                 pass
-            self._flat[name].get ('ancestry').update ([h.tag for h in heritage])
+            dct.get ('ancestry').update ([h.tag for h in heritage])
             pass
         return
 
@@ -163,11 +163,9 @@ class Construct(object):
                    children.append (child)
                 pass
             for child in children: child.get ('parents').add (node)
-            children = [c for c in
-                        filter (lambda n,k=known:n.tag not in k, children)]
-            self._parents ([c for c in
-                            filter (lambda n,k=known:n.tag not in k, children)],
-                           known)
+            children = list(filter (lambda n,k=known:n.tag not in k, children))
+            self._parents (list(filter (lambda n,k=known:n.tag not in k,
+                                        children)), known)
             pass
         return
 
@@ -221,11 +219,11 @@ class Construct(object):
 
     def _trim_trees (self, length):
         result = []
-        trimmed = set ([Construct.trim (leaf, length) for leaf in self._flat])
-        trimmed = dict([(name, Node(name, attrib={'feedback':set(),
-                                                  'shape':Shape.component,
-                                                  'visitors':set()}))
-                        for name in trimmed])
+        trimmed = {Construct.trim (leaf, length) for leaf in self._flat}
+        trimmed = {name:Node(name, attrib={'feedback':set(),
+                                           'shape':Shape.component,
+                                           'visitors':set()})
+                        for name in trimmed}
         for root in self._roots: result.append (root.trim (trimmed, length))
         return result
 
@@ -259,9 +257,7 @@ class Construct(object):
 
         fn = os.path.join (idir, name)
         dot.write_svg (fn)
-        f = open (fn, 'rb')
-        data = f.read()
-        f.close()
+        with open (fn, 'rb', encoding="utf-8") as f: data = f.read()
         return data
 
     @staticmethod
@@ -275,8 +271,8 @@ class Node(xml.etree.ElementTree.Element):
         return self.tag.__hash__()
 
     def __pydotify (self):
-        ready = all ([self.tag.find (c) < 0 for c in ['.', '(', ')']])
-        return self.tag if ready else ('"%s"' % self.tag)
+        ready = all ((self.tag.find (c) < 0 for c in ['.', '(', ')']))
+        return self.tag if ready else (f'"{self.tag}"')
 
     def __pydotnode (self, dot):
         name = self.__pydotify()

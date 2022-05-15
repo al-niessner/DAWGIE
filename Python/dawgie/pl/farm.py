@@ -63,8 +63,8 @@ class Hand(twisted.internet.protocol.Protocol):
             _busy.remove (done)
             if done in _time: del _time[done]
             pass
-        print ('msg:', msg)
-        print ('suc:', Hand._translate (msg.success))
+        log.debug ('msg: %s', msg)
+        log.debug ('suc: %s', Hand._translate (msg.success))
         try:
             job = dawgie.pl.schedule.find (msg.jobid)
             inc = msg.incarnation if msg.incarnation else '__all__'
@@ -76,7 +76,7 @@ class Hand(twisted.internet.protocol.Protocol):
                 dawgie.pl.schedule.update (msg.values, job, msg.runid)
             else: dawgie.pl.schedule.purge (job, inc)
 
-        except IndexError: log.error('Could not find job with ID: ' + msg.jobid)
+        except IndexError: log.error('Could not find job with ID: %s', msg.jobid)
         return
 
     @staticmethod
@@ -92,7 +92,9 @@ class Hand(twisted.internet.protocol.Protocol):
         self.__buf = b''
         self.__len = None
         log.info ('work application submission from %s', str(address))
+        # really is used so pylint: disable=unused-private-member
         self.__handshake = dawgie.security.TwistedWrapper(self, address)
+        # really is used so pylint: enable=unused-private-member
         self.__proceed = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, suc=True)
         self.__wait = dawgie.pl.message.make()
         return
@@ -104,6 +106,7 @@ class Hand(twisted.internet.protocol.Protocol):
             if msg.revision != dawgie.context.git_rev or \
                    not dawgie.context.fsm.is_pipeline_active():
                 dawgie.pl.message.send (self._abort, self)
+                # long msg more readable so pylint: disable=logging-not-lazy
                 log.warning ('Worker and pipeline revisions are not the same. '+
                              'Sever version %s and worker version %s.',
                              str(msg.revision), str(dawgie.context.git_rev))
@@ -213,10 +216,13 @@ def clear():
     _workers.clear()
     return
 
-def crew(): return {'busy':[b+" duration: %s" % delta_time_to_string(datetime.datetime.now() - _time[b]) for b in _busy], 'idle':str (len (_workers))}
+def crew():
+    # string is complicated so pylint: disable=consider-using-f-string
+    return {'busy':[b+" duration: %s" % delta_time_to_string(datetime.datetime.now() - _time[b]) for b in _busy], 'idle':str (len (_workers))}
 
 def delta_time_to_string(diff):
     mins = diff.seconds/60
+    # string is complicated so pylint: disable=consider-using-f-string    
     return "%02d:%02d:%02d" % (diff.days * 24 + math.floor (mins/60),
                                mins % 60,
                                diff.seconds % 60)
@@ -254,7 +260,7 @@ def dispatch():
                 _put (job=j, runid=0, target=t, where=where)
                 pass
             pass
-        else: log.error ('Unknown factory name: ' + str(fn))
+        else: log.error ('Unknown factory name: %s', str(fn))
 
         j.get ('do').clear()
         pass
@@ -279,14 +285,13 @@ def dispatch():
 def notifyAll():
     # pylint: disable=protected-access
     keep = dawgie.context.fsm.is_pipeline_active()
-    dawgie.pl.farm._workers = [w for w in filter (lambda w:w.notify(keep),
-                                                  _workers)]
+    dawgie.pl.farm._workers = list(filter (lambda w:w.notify(keep), _workers))
     return
 
 def plow():
     # necessary to do import here because items in dawgie.pl.aws depend on
     # classes defined in this module. Therefore, have to turn off some pylint.
-    # pylint: disable=redefined-outer-name
+    # pylint: disable=import-outside-toplevel,redefined-outer-name
     import dawgie.pl.worker.aws
 
     if dawgie.context.cloud_provider == dawgie.context.CloudProvider.aws:
@@ -305,9 +310,8 @@ def rerunid (job):
 
     if runid is None:
         runid = dawgie.db.next()
-        log.critical (('New run ID ({0:d}) for algorithm {1:s} ' +
-                       'trigger by the event: ').format (runid, job.tag) +
-                      job.get ('event', 'Not Specified'))
+        log.critical ('New run ID (%d) for algorithm %s trigger by the event: %s',
+                      runid, job.tag, job.get ('event', 'Not Specified'))
         pass
     return runid
 

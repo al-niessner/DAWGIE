@@ -80,13 +80,12 @@ class Engine:
         if dawgie.context.allow_promotion and self.more():
             algnode,runid,values = self._todo.pop(0)
             name = algnode.tag + '.'
-            targets = set([v.split ('.')[1] for v in values])
-            vals = set(['.'.join (v.split ('.')[2:]) for v in values])
+            targets = {v.split ('.')[1] for v in values}
+            vals = {'.'.join (v.split ('.')[2:]) for v in values}
 
             if len (targets) == 1: target_name = targets.copy().pop()
             else:
-                raise ValueError('Inconsistent targets for a single result %s' %
-                                 str(targets))
+                raise ValueError(f'Inconsistent targets for a single result {targets}')
 
             for child in algnode:
                 # 1: does decendent require subset of values
@@ -150,7 +149,7 @@ class Engine:
               original:dawgie.pl.dag.Node=None,
               rid:int=None,
               values:[(str,bool)]=None):
-        if not all ([v[1] for v in values]):\
+        if not all ((v[1] for v in values)):\
            self._todo.append ((original, rid,
                                [value for value,_isnew in
                                 filter (lambda t:not t[1], values)]))

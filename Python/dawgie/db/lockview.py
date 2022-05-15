@@ -49,7 +49,7 @@ class LockRequest(enum.Enum):
     lrle = "Lock_Release_End"
     pass
 
-class TaskLock(object):
+class TaskLock:
     def __init__(self, tn:str, action:str):
         self.tn = tn
         self.action = action
@@ -70,18 +70,17 @@ class TaskLock(object):
         return self.lasttime_delta
 
     def set_state(self, s:str):
-        if s == "done" or s == "busy":
+        if s in ["done","busy"]:
             self.state = s
             self.lasttime_delta = self.get_delta_time()
             pass
         pass
 
     def to_string(self):
-        return "%s %s %s" % (self.starttime.isoformat(),
-                             self.tn, self.action.value)
+        return f"{self.starttime.isoformat()} {self.tn} {self.action.value}"
     pass
 
-class TaskLockEngine(object):
+class TaskLockEngine:
     def __init__(self):
         self.queue = collections.OrderedDict()
         pass

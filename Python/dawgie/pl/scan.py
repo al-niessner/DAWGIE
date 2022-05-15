@@ -42,7 +42,7 @@ import importlib
 import os
 
 def for_factories (ae, pkg):
-    factories = dict([(e, []) for e in dawgie.Factories])
+    factories = {e:[] for e in dawgie.Factories}
     for pkg_name in filter (lambda fn:os.path.isdir (os.path.join (ae, fn)) and
                             fn != '__pycache__', os.listdir (ae)):
         fp = '.'.join ([pkg, pkg_name])
@@ -51,14 +51,16 @@ def for_factories (ae, pkg):
         ignore = getattr (mod, 'ignore') if 'ignore' in dm else False
 
         if ignore:
-            log.warning ('Ignoring package: ' + fp)
+            log.warning ('Ignoring package: %s', fp)
             continue
-        else: log.info ('Working on module ' + fp)
 
-        if not any([e.name in dm for e in dawgie.Factories]):
-            log.error ('The directory ' + os.path.join (ae, pkg_name) +
-                       ' does not conform to the architecture and design. ' +
-                       'It must have at least one analysis, events, ' +
+        log.info ('Working on module %s', fp)
+
+        if not any((e.name in dm for e in dawgie.Factories)):
+            log.error ('The directory %s %s %s %s',
+                       os.path.join (ae, pkg_name),
+                       'does not conform to the architecture and design.',
+                       'It must have at least one analysis, events,',
                        'regression, or task factory. Ignoring the package.')
             continue
 

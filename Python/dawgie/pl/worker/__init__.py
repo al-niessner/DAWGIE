@@ -47,7 +47,7 @@ import dawgie.pl.version
 import dawgie.security
 import dawgie.util
 
-class Context(object):
+class Context:
     def __init__(self, address:(str,int), revision:str):
         self.__address = address
         self.__revision = revision

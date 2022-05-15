@@ -51,7 +51,7 @@ import dawgie.pl.schedule
 import enum
 import json
 import logging; log = logging.getLogger(__name__)
-import pip
+import pkg_resources
 import os
 import sys
 
@@ -66,8 +66,8 @@ def db_lockview():
 
 def db_prime():
     # pylint: disable=protected-access
-    return json.dumps (list(set(['.'.join (k.split ('.')[:-1])
-                                 for k in dawgie.db._prime_keys()]))).encode()
+    return json.dumps (list({'.'.join (k.split ('.')[:-1])
+                                 for k in dawgie.db._prime_keys()})).encode()
 
 def db_targets():
     return json.dumps (dawgie.db.targets(True)).encode()
@@ -129,16 +129,16 @@ def _search (axis, key):
         pass
 
     result = {'items':[]}
-    keys = list(set(['.'.join (k.split ('.')[:-1])
-                     for k in filter (lambda k:-1 < prime(k).find (key),
-                                      dawgie.db._prime_keys())]))
+    keys = list({'.'.join (k.split ('.')[:-1])
+                 for k in filter (lambda k:-1 < prime(k).find (key),
+                                  dawgie.db._prime_keys())})
     keys.sort (key=prime)
-    for lkey in sorted (set ([prime (k) for k in keys])):
+    for lkey in sorted ({prime (k) for k in keys}):
         result['items'].append ({k1:lkey, k2:[]})
-        tnks = [k for k in filter (lambda k:prime (k) == lkey, keys)]
-        for nn in sorted (set ([second (k) for k in tnks])):
-            ids = sorted (set ([third (k) for k in
-                                filter (lambda k:second (k) == nn, tnks)]))
+        tnks = list(filter (lambda k:prime (k) == lkey, keys))
+        for nn in sorted ({second (k) for k in tnks}):
+            ids = sorted ({third (k) for k in
+                           filter (lambda k:second (k) == nn, tnks)})
             result['items'][-1]['targets'].append ({k3:nn, k4:ids})
             pass
         pass
@@ -147,16 +147,16 @@ def _search (axis, key):
 def _search_filter (fn:str, default:{})->bytes:
     if os.path.isfile (os.path.join (dawgie.context.fe_path, fn)):
         try:
-            with open (os.path.join (dawgie.context.fe_path, fn), 'rt') as f:\
-                 default = json.load(f)
+            with open (os.path.join (dawgie.context.fe_path, fn),
+                       'rt', encoding="utf-8") as f: default = json.load(f)
         except: log.exception ('Text file could not be parsed as JSON')  # pylint: disable=bare-except
     else: log.info ('using DAWGIE default for %s', fn)
     return json.dumps (default).encode()
 
 def search_cmplt_svn():
     # pylint: disable=protected-access
-    return json.dumps(sorted(set(['.'.join (k.split('.')[2:-1])
-                                  for k in dawgie.db._prime_keys()]))).encode()
+    return json.dumps(sorted({'.'.join (k.split('.')[2:-1])
+                              for k in dawgie.db._prime_keys()})).encode()
 def search_cmplt_tn(): return json.dumps(sorted(dawgie.db.targets())).encode()
 
 def search_filter_a(): return _search_filter ('admin.json',
@@ -179,12 +179,13 @@ def start_state():
                         'status':'active'}).encode()
 
 def versions():
-    dl = dict([(d.key, d.parsed_version.base_version)
-               for d in pip.commands.list.get_installed_distributions()])
+    # it is iterable so pylint: disable=not-an-iterable
+    dl = {p.key:p.parsed_version.base_version for p in pkg_resources.working_set}
+    # pylint: enable=not-an-iterable
     fn = os.path.join (os.path.dirname (__file__), 'requirements.txt')
     vers = {'dawgie':dawgie.__version__,
             'python':sys.version}
-    with open (fn, 'rt') as f:
+    with open (fn, 'rt', encoding="utf-8") as f:
         for name in f.readlines():
             if name in dl: vers[name] = dl[name]
             else: vers[name] = 'indeterminate'
