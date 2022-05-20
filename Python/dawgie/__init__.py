@@ -770,14 +770,14 @@ class Timeline:
     def __getitem__(self, key): raise NotImplementedError()
     def __iter__(self): raise NotImplementedError()
     def __len__(self): raise NotImplementedError()
-    def _recede (self, data:Regression)->None: raise NotImplementedError()
+    def _recede (self, refs:[(SV_REF,V_REF)])->None: raise NotImplementedError()
     def ds(self)->'Dataset': raise NotImplementedError()
     def items(self)->[(str,{str:{str:'dagie.Value'}})]:
         raise NotImplementedError()
     def keys(self)->[str]: raise NotImplementedError()
 
-    def recede (self, data:Regression)->None:
-        self.ds().measure (self._recede, (data,))
+    def recede (self, refs:[(SV_REF,V_REF)])->None:
+        self.ds().measure (self._recede, (refs,))
         return
 
     def values(self)->[{str:{str:'dawgie.Value'}}]: raise NotImplementedError()

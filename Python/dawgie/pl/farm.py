@@ -222,7 +222,7 @@ def crew():
 
 def delta_time_to_string(diff):
     mins = diff.seconds/60
-    # string is complicated so pylint: disable=consider-using-f-string    
+    # string is complicated so pylint: disable=consider-using-f-string
     return "%02d:%02d:%02d" % (diff.days * 24 + math.floor (mins/60),
                                mins % 60,
                                diff.seconds % 60)

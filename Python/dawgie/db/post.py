@@ -365,11 +365,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         conn.close()
         return
 
-    def _recede(self, data): return NotImplementedError()
-
-    def ds(self): return self
-
-    def recede (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
+    def _recede (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
         # pylint: disable=too-many-locals,too-many-statements
         conn = dawgie.db.post._conn()
         cur = dawgie.db.post._cur (conn)
@@ -444,12 +440,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                             self.__span['table'][rid][fsvn][vn] = entry
                             pass
                         pass
-                    else:
-                        # long msg readable so pylint: disable=logging-not-lazy
-                        log.critical ('Need to improve compliant because ' +
-                                      'received soemthing that was neither ' +
-                                      'SV_REF or V_REF: ' + str (type (ref)))
-                        pass
+                    else: log.critical ('Need to improve compliant because received soemthing that was neither SV_REF or V_REF: %s', str (type (ref)))
                     pass
                 pass
             pass
@@ -668,6 +659,8 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         cur.close()
         conn.close()
         return
+
+    def ds(self): return self
     pass
 
 class MyVersion(dawgie.Version):
@@ -699,7 +692,9 @@ def _cur (conn, real_dict=False):
 
 def _fetchone (cur, text):
     try: result = cur.fetchone()[0]
-    except: raise RuntimeError(text)
+    except:
+        # error msg should be text so pylint: disable=raise-missing-from
+        raise RuntimeError(text)
     return result
 
 def _find (da:[dict], **kwds)->dict:
@@ -710,8 +705,8 @@ def _find (da:[dict], **kwds)->dict:
     '''
     result = None
     for d in da:
-        if all ([k in d for k in kwds]):
-            if all ([d[k] == kwds[k] for k in kwds]):
+        if all ((k in d for k in kwds)):
+            if all ((d[k] == v for k,v in kwds.items())):
                 result = d
                 break
             pass
@@ -730,15 +725,15 @@ def _prime_keys():
     cur.close()
     cur = _cur (conn)
     cur.execute('SELECT PK,name from Target;')
-    tgtn = dict([t for t in cur.fetchall()])
+    tgtn = dict(cur.fetchall())
     cur.execute('SELECT PK,name from Task;')
-    tskn = dict([t for t in cur.fetchall()])
+    tskn = dict(cur.fetchall())
     cur.execute('SELECT PK,name from Algorithm;')
-    algn = dict([t for t in cur.fetchall()])
+    algn = dict(cur.fetchall())
     cur.execute('SELECT PK,name from StateVector;')
-    svn = dict([t for t in cur.fetchall()])
+    svn = dict(cur.fetchall())
     cur.execute('SELECT PK,name from Value;')
-    vn = dict([t for t in cur.fetchall()])
+    vn = dict(cur.fetchall())
     conn.commit()
     cur.close()
     conn.close()
@@ -749,7 +744,7 @@ def _prime_keys():
                                        algn[i['alg_id']],
                                        svn[i['sv_id']],
                                        vn[i['val_id']]]))
-    return sorted([k for k in keys])
+    return sorted(keys)
 
 def _prime_values():
     if not dawgie.db.post._db:
@@ -780,7 +775,7 @@ def archive (done):
         pass
     args = ['/usr/bin/pg_dump',
             '-h', dawgie.context.db_host,
-            '-p', '{0:d}'.format (dawgie.context.db_port),
+            '-p', f'{dawgie.context.db_port:d}',
             '-U', dawgie.context.db_path.split(':')[0],
             '-d', dawgie.context.db_name,
             '-f', os.path.join (path, bfn.format (0))]
@@ -806,45 +801,38 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     conn = dawgie.db.post._conn()
     cur = dawgie.db.post._cur (conn)
     cur.execute('SELECT pk FROM Target WHERE name = %s;', [target_name])
-    tn_ID = _fetchone(cur, 'Target "%s" is listed more than once' % target_name)
+    tn_ID = _fetchone(cur, f'Target "{target_name}" is listed more than once')
     # 1: Find all the times this version ran and collect the run IDs
     o_runids = []
     for output in outputs:
         cur.execute('SELECT pk FROM Task WHERE name = %s;', [output.tid.name])
-        task_ID = _fetchone (cur, ('Task "%s" is listed more than once' %
-                                   output.tid.name))
+        task_ID = _fetchone (cur, (f'Task "{output.tid.name}" is listed more than once'))
         cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
                     'task_ID = %s AND design = %s AND implementation = %s ' +
                     'AND bugfix = %s;',
                     (output.aid.name, task_ID, output.aid.version.design(),
                      output.aid.version.implementation(),
                      output.aid.version.bugfix()))
-        alg_ID = _fetchone (cur,
-                            ('consistent(): Algorithm "%s %s" is not singular' %
-                             (output.aid.name, output.aid.version.asstring())))
+        alg_ID = _fetchone (cur, f'consistent(): Algorithm "{output.aid.name} {output.aid.version.asstring()}" is not singular')
         cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
                     'alg_ID = %s AND design = %s AND implementation = %s ' +
                     'AND bugfix = %s;',
                     (output.sid.name, alg_ID, output.sid.version.design(),
                      output.sid.version.implementation(),
                      output.sid.version.bugfix()))
-        sv_ID = _fetchone (cur,
-                           ('consistent(): SV "%s %s" is not singular' %
-                            (output.sid.name, output.sid.version.asstring())))
+        sv_ID = _fetchone (cur, f'consistent(): SV "{output.sid.name} {output.sid.version.asstring()}" is not singular')
         cur.execute('SELECT pk FROM Value WHERE name = %s AND ' +
                     'sv_ID = %s AND design = %s AND implementation = %s ' +
                     'AND bugfix = %s;',
                     (output.vid.name, sv_ID, output.vid.version.design(),
                      output.vid.version.implementation(),
                      output.vid.version.bugfix()))
-        v_ID = _fetchone (cur,
-                          ('consistent(): Value "%s %s" is not singular' %
-                           (output.vid.name, output.vid.version.asstring())))
+        v_ID = _fetchone (cur, f'consistent(): Value "{output.vid.name} {output.vid.version.asstring()}" is not singular')
         cur.execute('SELECT run_ID FROM Prime WHERE tn_ID = %s AND ' +
                     'task_ID = %s AND alg_ID = %s AND sv_ID = %s AND ' +
                     'val_ID = %s;',
                     [tn_ID, task_ID, alg_ID, sv_ID, v_ID])
-        o_runids.append (set([runid[0] for runid in cur.fetchall()]))
+        o_runids.append ({runid[0] for runid in cur.fetchall()})
         pass
     o_runids = sorted (set.intersection (*o_runids), reverse=True)
 
@@ -864,35 +852,32 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
         if key not in ridbns: ridbns[key] = []
 
         cur.execute('SELECT pk FROM Task WHERE name = %s;', [inp.tid.name])
-        task_ID = _fetchone (cur, ('Task "%s" is listed more than once' %
-                                   inp.tid.name))
+        task_ID = _fetchone (cur, f'Task "{inp.tid.name}" is listed more than once')
         cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
                     'task_ID = %s;', (inp.aid.name, task_ID))
         alg_IDs = cur.fetchall()
         cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
                     'alg_ID = ANY(%s);', [inp.sid.name, alg_IDs])
-        sv_IDs = list(set([pk[0] for pk in cur.fetchall()]))
+        sv_IDs = list({pk[0] for pk in cur.fetchall()})
         cur.execute('SELECT pk FROM Value WHERE name = %s AND sv_ID = ANY(%s);',
                     [inp.vid.name, sv_IDs])
-        val_IDs = list(set([pk[0] for pk in cur.fetchall()]))
+        val_IDs = list({pk[0] for pk in cur.fetchall()})
         cur.execute('SELECT run_ID,blob_name FROM Prime WHERE tn_ID = %s AND '+
                     'task_ID = %s AND alg_ID = ANY(%s) AND ' +
                     'sv_ID = ANY(%s) AND val_ID = ANY(%s);',
                     [tn_ID, task_ID, alg_IDs, sv_IDs, val_IDs])
-        ridbns[key].append (sorted ([(runid,bn) for runid,bn in cur.fetchall()],
-                                    key=lambda t:t[0]))
+        ridbns[key].append (sorted (cur.fetchall(), key=lambda t:t[0]))
         kval = ridbns[key][-1][0][1]
-        i_runids[key].append (set([runid for runid,_bn in filter
-                                   (lambda t,k=kval:t[1] == k,
-                                    ridbns[key][-1])]))
+        i_runids[key].append ({runid for runid,_bn in filter
+                               (lambda t,k=kval:t[1] == k, ridbns[key][-1])})
         pass
-    for key in i_runids:
+    for key in i_runids.copy():
         i_runids[key] = sorted (set.intersection (*i_runids[key]),
                                 reverse=True)
         pass
 
     # 4: If there are no run input IDs with version, then return empty tuple
-    if any([not i_runids[k] for k in i_runids]):
+    if any((not v for v in i_runids.values())):
         cur.close()
         conn.close()
         log.info ('Step 3: no input runids - %s %s', str(key), str(i_runids))
@@ -908,10 +893,10 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     # --   for i_runids and m_runids.
     runid = None
     for rid in o_runids:
-        match = dict([(key,-3) for key in i_runids])
-        for key in i_runids:
+        match = {key:-3 for key in i_runids}
+        for key,value in i_runids.items():
             m = -2
-            for r in i_runids[key]:
+            for r in value:
                 if r <= rid:
                     m = r
                     break
@@ -919,7 +904,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
             match[key] = m
             pass
 
-        if all ([0 <= vrid for vrid in match.values()]):
+        if all ((0 <= vrid for vrid in match.values())):
             runid = rid
             break
         pass
@@ -936,35 +921,28 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     juncture = []
     for output in outputs:
         cur.execute('SELECT pk FROM Task WHERE name = %s;', [output.tid.name])
-        task_ID = _fetchone (cur, ('Task "%s" is listed more than once' %
-                                   output.tid.name))
+        task_ID = _fetchone (cur, f'Task "{output.tid.name}" is listed more than once')
         cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
                     'task_ID = %s AND design = %s AND implementation = %s ' +
                     'AND bugfix = %s;',
                     (output.aid.name, task_ID, output.aid.version.design(),
                      output.aid.version.implementation(),
                      output.aid.version.bugfix()))
-        alg_ID = _fetchone (cur,
-                            ('consistent(): Algorithm "%s %s" is not singular' %
-                             (output.aid.name, output.aid.version.asstring())))
+        alg_ID = _fetchone (cur, f'consistent(): Algorithm "{output.aid.name} {output.aid.version.asstring()}" is not singular')
         cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
                     'alg_ID = %s AND design = %s AND implementation = %s ' +
                     'AND bugfix = %s;',
                     (output.sid.name, alg_ID, output.sid.version.design(),
                      output.sid.version.implementation(),
                      output.sid.version.bugfix()))
-        sv_ID = _fetchone (cur,
-                           ('consistent(): SV "%s %s" is not singular' %
-                            (output.sid.name, output.sid.version.asstring())))
+        sv_ID = _fetchone (cur, f'consistent(): SV "{output.sid.name} {output.sid.version.asstring()}" is not singular')
         cur.execute('SELECT pk FROM Value WHERE name = %s AND ' +
                     'sv_ID = %s AND design = %s AND implementation = %s ' +
                     'AND bugfix = %s;',
                     (output.vid.name, sv_ID, output.vid.version.design(),
                      output.vid.version.implementation(),
                      output.vid.version.bugfix()))
-        v_ID = _fetchone (cur,
-                          ('consistent(): Value "%s %s" is not singular' %
-                           (output.vid.name, output.vid.version.asstring())))
+        v_ID = _fetchone (cur, f'consistent(): Value "{output.vid.name} {output.vid.version.asstring()}" is not singular')
         cur.execute('SELECT blob_name FROM Prime WHERE run_id = %s AND ' +
                     'tn_ID = %s AND task_ID = %s AND alg_ID = %s AND ' +
                     'sv_ID = %s AND val_ID = %s;',
@@ -1126,7 +1104,7 @@ def promote (juncture:(), runid:int):
     cur.close()
     conn.close()
 
-    if any([e is not None for e in entries]): return False
+    if any((e is not None for e in entries)): return False
 
     conn = dawgie.db.post._conn()
     cur = dawgie.db.post._cur (conn)
@@ -1161,13 +1139,13 @@ def remove (runid:int, tn:str, tskn:str, algn:str, svn:str, vn:str):
     task_ID = _fetchone (cur, 'Dataset load: Could not find task ID')
     cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND task_ID = %s;',
                 [algn, task_ID])
-    alg_ID = list(set([pk[0] for pk in cur.fetchall()]))
+    alg_ID = list({pk[0] for pk in cur.fetchall()})
     cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
                 'alg_ID = ANY(%s);', [svn, alg_ID])
-    sv_ID = list(set([pk[0] for pk in cur.fetchall()]))
+    sv_ID = list({pk[0] for pk in cur.fetchall()})
     cur.execute('SELECT pk FROM Value WHERE name = %s AND ' +
                 'sv_ID = ANY(%s);', [vn, sv_ID])
-    val_ID = list(set([pk[0] for pk in cur.fetchall()]))
+    val_ID = list({pk[0] for pk in cur.fetchall()})
 
     cur.execute('DELETE FROM Prime WHERE run_ID = %s AND tn_ID = %s AND ' +
                 'task_ID = %s AND alg_ID = ANY(%s) AND sv_ID = ANY(%s) AND ' +
@@ -1194,39 +1172,37 @@ def reset (runid:int, tn:str, tskn, alg)->None:
     task_ID = _fetchone (cur, 'Dataset load: Could not find task ID')
     cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND task_ID = %s;',
                 [alg.name(), task_ID])
-    alg_ID = list(set([pk[0] for pk in cur.fetchall()]))
+    alg_ID = list({pk[0] for pk in cur.fetchall()})
     algv = set()
     for sv in alg.state_vectors():
         cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
                     'alg_ID = ANY(%s);', [sv.name(), alg_ID])
-        sv_ID = list(set([pk[0] for pk in cur.fetchall()]))
+        sv_ID = list({pk[0] for pk in cur.fetchall()})
         cur.execute('SELECT alg_ID, sv_ID FROM Prime WHERE run_ID = %s AND ' +
                     ' tn_ID = %s AND task_ID = %s AND alg_ID = ANY(%s) AND ' +
                     'sv_ID = ANY(%s);',
                     [str(runid), tn_ID, task_ID, alg_ID, sv_ID])
         ids = cur.fetchall()
-        algv.update (set([fk[0] for fk in ids]))
-        svv = set([fk[1] for fk in ids])
+        algv.update ({fk[0] for fk in ids})
+        svv = {fk[1] for fk in ids}
 
         if len (svv) == 1:
             cur.execute ('SELECT design,implementation,bugfix '+
                          'FROM StateVector WHERE PK = %s;', [svv.pop()])
             v = cur.fetchone()
             sv._set_ver (dawgie.VERSION(v[0],v[1],v[2]))
-        else: log.critical ('Dataset load: The postgres db is corrupt ' +
-                            'because found %d IDs for the specific state ' +
-                            'vector %s', len (svv), '.'.join ([str (runid),
-                                                               tn, tskn,
-                                                               alg.name(),
-                                                               sv.name()]))
+        else: log.critical ('Dataset load: The postgres db is corrupt because found %d IDs for the specific state vector %s',
+                            len (svv), '.'.join ([str (runid),
+                                                  tn, tskn,
+                                                  alg.name(),
+                                                  sv.name()]))
         pass
     if len (algv) == 1:
         cur.execute ('SELECT design,implementation,bugfix '+
                      'FROM Algorithm WHERE PK = %s;', [algv.pop()])
         v = cur.fetchone()
         alg._set_ver (dawgie.VERSION(v[0],v[1],v[2]))
-    else: log.critical ('Dataset load: The postgres db is corrupt ' +
-                        'because found %d IDs for the specific algorithm %s',
+    else: log.critical ('Dataset load: The postgres db is corrupt because found %d IDs for the specific algorithm %s',
                         len (svv),
                         '.'.join ([str (runid), tn, tskn, alg.name()]))
     conn.commit()

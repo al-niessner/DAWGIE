@@ -75,7 +75,7 @@ _db = None
 task_engine = None
 pipeline_paused = False
 
-class Connector(object):
+class Connector:
     # pylint: disable=too-few-public-methods
     @staticmethod
     def _acquire (name):
@@ -214,7 +214,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
 
             if fsvn not in span: span[fsvn] = {}
 
-            span[fsvn].update (dict([(tn, pickle.loads (clone)) for tn in tnl]))
+            span[fsvn].update ({tn:pickle.loads (clone) for tn in tnl})
             for vn in ref.item.keys():
                 if isinstance (ref, dawgie.V_REF) and vn != ref.feat: continue
 
@@ -225,9 +225,9 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
                 pass
             pass
         for tn in tnl:
-            for fsvn in span:
-                if tn in span[fsvn]:
-                    for vn in span[fsvn][tn]:
+            for fsvn,fsv in span.items():
+                if tn in fsv:
+                    for vn in fsv[tn]:
                         if tn not in self.__span: self.__span[tn] = {}
                         if fsvn not in self.__span[tn]:\
                            self.__span[tn][fsvn] = {}
@@ -279,8 +279,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
                             self._bot()._runid(),
                             tn)
                 else:
-                    raise KeyError('Unknown factory type {}'.format
-                                   (algref.factory.__name__))
+                    raise KeyError(f'Unknown factory type {algref.factory.__name__}')
 
                 child = connect (algref.impl, algref.factory (*args), tn)
                 child._load (err=err, ver=ver, lok=lok)
@@ -293,8 +292,8 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
                                           self._task(), self._algn(), sv.name(),
                                           None) + '.'
 
-                    if not [k for k in filter (lambda n,base=base:n.startswith (base),
-                                               self._keys (Table.primary))]:
+                    if not list(filter (lambda n,base=base:n.startswith (base),
+                                        self._keys (Table.primary))):
                         base = self.__to_key (None, self._tn(), self._task(),
                                               self._algn(), sv.name(), None) + '.'
                         prev = -1
@@ -326,12 +325,11 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
 
     def ds (self): return self
 
-    def recede (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
+    def _recede (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
         span = {}
-        pk = sorted (set ([k for k in
-                           filter (lambda k:k.split('.')[1] == self._tn(),
-                                   self._keys (Table.primary))]))
-        rids = sorted (set ([int(k.split ('.')[0]) for k in pk]))
+        pk = sorted (set (filter (lambda k:k.split('.')[1] == self._tn(),
+                                  self._keys (Table.primary))))
+        rids = sorted ({int(k.split ('.')[0]) for k in pk})
         for ref in refs:
             clone = pickle.dumps (ref.item)
             fsvn = '.'.join ([dawgie.util.task_name (ref.factory),
@@ -340,8 +338,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
 
             if fsvn not in span: span[fsvn] = {}
 
-            span[fsvn].update (dict([(rid,  pickle.loads (clone))
-                                     for rid in rids]))
+            span[fsvn].update ({rid:pickle.loads (clone) for rid in rids})
             for vn in filter (lambda n,ref=ref:(not isinstance
                                                 (ref,dawgie.V_REF) or
                                                 n == ref.feat),
@@ -354,13 +351,13 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
             pass
         self.__span = {}
         for rid in rids:
-            for fsvn in span:
-                if rid in span[fsvn]:
-                    for vn in span[fsvn][rid]:
+            for fsvn,fsv in span.items():
+                if rid in fsv:
+                    for vn in fsv[rid]:
                         if rid not in self.__span: self.__span[rid] = {}
                         if fsvn not in self.__span[rid]:\
                            self.__span[rid][fsvn] = {}
-                        self.__span[rid][fsvn][vn] = span[fsvn][rid][vn]
+                        self.__span[rid][fsvn][vn] = fsv[rid][vn]
                         pass
                     pass
                 pass
@@ -379,7 +376,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
                 for k in sv.keys():
                     if not self.__verify (sv[k]):
                         logging.getLogger(__name__).critical \
-                                     ('offending item is ' +
+                                     ('offending item is %s',
                                       '.'.join ([self._task(), self._algn(),
                                                  sv.name(), k]))
                         valid = False
@@ -421,7 +418,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
             for k in msv.keys():
                 if not self.__verify (msv[k]):
                     logging.getLogger(__name__).critical\
-                        ('offending item is ' +
+                        ('offending item is %s',
                          '.'.join ([self._task(), self._algn(),
                                     msv.name(), k]))
                     valid = False
@@ -479,7 +476,9 @@ class Worker(twisted.internet.protocol.Protocol):
         self.__blen = len (struct.pack ('>I', 0))
         self.__buf = b''
         self.__len = None
+        # really is used so pylint: disable=unused-private-member
         self.__handshake = dawgie.security.TwistedWrapper(self, address)
+        # really is used so pylint: enable=unused-private-member
         self.__has_lock = False
         self.__id_name = 'unknown'
         self.__looping_call = twisted.internet.task.LoopingCall(self._do_acquire)
@@ -520,8 +519,7 @@ class Worker(twisted.internet.protocol.Protocol):
                 self.__buf = self.__buf[length:]
                 self.__len = None
 
-                if request.func != Func.acquire and \
-                   request.func != Func.dbcopy:
+                if request.func not in [Func.acquire,Func.dbcopy]:
                     try: self.do (request)
                     except ImportError: logging.getLogger (__name__).excpetion ('Had a problem unpickling an input so aborting connection and moving forward.')
                     finally: self.transport.loseConnection()
@@ -558,7 +556,7 @@ class Worker(twisted.internet.protocol.Protocol):
             log.info ('Worker.do() - received request for keys')
             log.info ('Worker.do() - table %s', request.table.name)
             log.info ('Worker.do() - table size %d', len (self.__db[request.table.value]))
-            self._send ([k for k in self.__db[request.table.value].keys()])
+            self._send (list(self.__db[request.table.value].keys()))
             pass
         elif request.func == Func.release:
             logging.getLogger (__name__).info("Inside worker: Release")
@@ -585,7 +583,7 @@ class Worker(twisted.internet.protocol.Protocol):
                                      request.value)
             self._send (True)
             pass
-        else: logging.getLogger (__name__).error ('Did not understand ' +
+        else: logging.getLogger (__name__).error ('Did not understand %s',
                                                   str (request))
         return
 
@@ -640,7 +638,7 @@ class Worker(twisted.internet.protocol.Protocol):
                         pass
                     pass
                 else:
-                    r = os.system("rsync --delete -ax %s/ %s/" % (src, tmpdst))
+                    r = os.system(f"rsync --delete -ax {src}/ {tmpdst}/")
                     retValue = tmpdst if r == 0 else None
                     dawgie.db.shelf.open_db()
                     pass
@@ -705,8 +703,7 @@ class Worker(twisted.internet.protocol.Protocol):
 def _connect():
     return Connector()
 
-def _copy (table):
-    return dict([(k,table[k]) for k in table.keys()])
+def _copy (table): return {k:table[k] for k in table.keys()}
 
 def _prime_keys():
     log.info ('_prime_keys() - size is %d', len (dawgie.db.shelf._db.primary))
@@ -802,13 +799,13 @@ def copy(dst, method=Method.connector, gateway=dawgie.context.db_host):
         status = 0
     elif method == Method.rsync:
         tmpdir = retValue
-        status = os.system("rsync --delete -ax %s:%s/ %s/" % (gateway, tmpdir, dst))
+        status = os.system(f"rsync --delete -ax {gateway}:{tmpdir}/ {dst}/")
     elif method == Method.scp:
         tmpdir = retValue
-        status = os.system("scp -rp %s:%s/* %s/" % (gateway, tmpdir, dst))
+        status = os.system(f"scp -rp {gateway}:{tmpdir}/* {dst}/")
     elif method == Method.cp:
         tmpdir = retValue
-        status = os.system("cp -rp %s/* %s/" % (tmpdir, dst))
+        status = os.system(f"cp -rp {tmpdir}/* {dst}/")
 
     return status
 
@@ -823,9 +820,9 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
 
     result = []
     log.info ('metrics() - starting')
-    keys = [k for k in _prime_keys()]
+    keys = list(_prime_keys())
     log.info ('metrics() - total prime keys %d', len (keys))
-    keys = [k for k in sorted (filter (lambda s:s.split('.')[4] == '__metric__', keys))]
+    keys = list(sorted(filter(lambda s:s.split('.')[4] == '__metric__', keys)))
     log.info ('metrics() - total __metric__ in prime keys %d', len (keys))
     for m in keys:
         log.info ('metrics() - working on %s', m)
@@ -854,7 +851,11 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
 
 def mkStgDir():
     t = datetime.datetime.now()
-    tString = "%s/%d%d%d%d%d%d%d" % (dawgie.context.data_stg, t.year, t.month, t.day, t.hour, t.minute, t.second, t.microsecond)
+    # too error prone to fix and probably not much more readable anyway so
+    # pylint: disable=consider-using-f-string
+    tString = "%s/%d%d%d%d%d%d%d" % (dawgie.context. data_stg, t.year, t.month,
+                                     t.day, t.hour, t.minute, t.second,
+                                     t.microsecond)
     os.system("mkdir %s" % tString)
     return tString
 
@@ -912,9 +913,9 @@ def remove (runid, tn, taskn, algn, svn, vn):
     if k in dawgie.db.shelf._db.primary:
         v = dawgie.db.shelf._db.primary[k]
         del dawgie.db.shelf._db.primary[k]
-        logging.getLogger (__name__).warning ('removed (' + k + ', ' + v + ')')
+        logging.getLogger (__name__).warning ('removed (%s, %s)', str(k),str(v))
         pass
-    else: logging.getLogger (__name__).error ('remove() could not find the key "' + k + '" in the primary table. Ignoring request.')
+    else: logging.getLogger (__name__).error ('remove() could not find the key "%s" in the primary table. Ignoring request.', k)
     return
 
 def reopen():
@@ -928,19 +929,19 @@ def reset (runid:int, tn:str, tskn, alg)->None:
 def rotated_files(index=None):
     path = dawgie.context.db_rotate_path
     if index is None:
-        orig = glob.glob("%s/%s.alg" % (path, dawgie.context.db_name))
-        orig += glob.glob("%s/%s.prime" % (path, dawgie.context.db_name))
-        orig += glob.glob("%s/%s.state" % (path, dawgie.context.db_name))
-        orig += glob.glob("%s/%s.target" % (path, dawgie.context.db_name))
-        orig += glob.glob("%s/%s.task" % (path, dawgie.context.db_name))
-        orig += glob.glob("%s/%s.value" % (path, dawgie.context.db_name))
+        orig = glob.glob(f"{path}/{dawgie.context.db_name}.alg")
+        orig += glob.glob(f"{path}/{dawgie.context.db_name}.prime")
+        orig += glob.glob(f"{path}/{dawgie.context.db_name}.state")
+        orig += glob.glob(f"{path}/{dawgie.context.db_name}.target")
+        orig += glob.glob(f"{path}/{dawgie.context.db_name}.task")
+        orig += glob.glob(f"{path}/{dawgie.context.db_name}.value")
         return orig
-    orig = glob.glob("%s/%d.%s.alg" % (path, index, dawgie.context.db_name))
-    orig += glob.glob("%s/%d.%s.prime" % (path, index, dawgie.context.db_name))
-    orig += glob.glob("%s/%d.%s.state" % (path, index, dawgie.context.db_name))
-    orig += glob.glob("%s/%d.%s.target" % (path, index, dawgie.context.db_name))
-    orig += glob.glob("%s/%d.%s.task" % (path, index, dawgie.context.db_name))
-    orig += glob.glob("%s/%d.%s.value" % (path, index, dawgie.context.db_name))
+    orig = glob.glob(f"{path}/{index:d}.{dawgie.context.db_name}.alg")
+    orig += glob.glob(f"{path}/{index:d}.{dawgie.context.db_name}.prime")
+    orig += glob.glob(f"{path}/{index:d}.{dawgie.context.db_name}.state")
+    orig += glob.glob(f"{path}/{index:d}.{dawgie.context.db_name}.target")
+    orig += glob.glob(f"{path}/{index:d}.{dawgie.context.db_name}.task")
+    orig += glob.glob(f"{path}/{index:d}.{dawgie.context.db_name}.value")
     return orig
 
 def retreat (reg, ret):
@@ -950,7 +951,7 @@ def retreat (reg, ret):
 
 def targets():
     if isinstance (dawgie.db.shelf._db, bool): result = Connector()._keys (Table.target)
-    else: result = [k for k in dawgie.db.shelf._db.target.keys()]
+    else: result = list(dawgie.db.shelf._db.target.keys())
     return result
 
 def trace (task_alg_names):

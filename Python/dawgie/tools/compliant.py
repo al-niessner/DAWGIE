@@ -69,7 +69,7 @@ def _scan():
                                               dawgie.context.ae_base_package)
     all_factories = []
     for v in factories.values(): all_factories.extend (v)
-    tasks = list (set ([f.__module__ for f in all_factories]))
+    tasks = list ({f.__module__ for f in all_factories})
     tasks.sort()
     return tasks
 
@@ -79,22 +79,22 @@ def _verify (tasks, silent, verbose):
     passed = True
     for t in tasks:
         result = []
-        logging.info ('Verifying ' + t)
+        logging.info ('Verifying %s', t)
 
-        if not silent and verbose: print ('Verifying ' + t)
+        if not silent and verbose: print (f'Verifying {t}')
 
         for r in _get_rules():
             # pylint: disable=bare-except
             status = False
             try: status = getattr (dawgie.tools.compliant, r) (t)
-            except: logging.exception ('Could not process ' + r)
+            except: logging.exception ('Could not process %s', r)
             result.append (status)
-            logging.info (r + ': ' + str (result[-1]))
+            logging.info ('%s:%s', r, str(result[-1]))
 
             if not silent and verbose: print ('   ' + r + ': ' +
                                               str (result[-1]))
             pass
-        logging.info ('Verified ' + t + ': ' + str (all (result)))
+        logging.info ('Verified %s:%s', t, str (all (result)))
 
         if not silent: print ('Verified ' + t + ': ' + str (all (result)))
         if not all(result): passed = False
@@ -228,7 +228,7 @@ def rule_01 (task):
     findings = []
     mod = importlib.import_module (task)
     names = dir (mod)
-    findings.append (any([e.name in names for e in dawgie.Factories]))
+    findings.append (any((e.name in names for e in dawgie.Factories)))
 
     if not findings[-1]: logging.error ('No factory method in package %s', task)
 

@@ -97,9 +97,9 @@ class Contractor(dawgie.pl.farm.Hand):
         if msg.type == dawgie.pl.message.Type.cloud:
             if msg.jobid:
                 if msg.jobid in _contractors: _contractors.remove (msg.jobid)
-                else: self.log.warning ('Job ID %s not found in my list of ' +
-                                        'contractors %s', str(msg.jobid),
-                                        str([k for k in sorted(_contractors)]))
+                else: self.log.warning ('Job ID %s not found in my list of contractors %s',
+                                        str(msg.jobid),
+                                        str(list(sorted(_contractors))))
                 self.transport.loseConnection()
             elif msg.revision and msg.target and not msg.values:
                 result = dawgie.db.util.move (msg.revision, msg.target)
@@ -139,7 +139,7 @@ class Company(twisted.internet.protocol.Factory):
     def buildProtocol (self, addr): return Contractor(addr)
     pass
 
-class Connect(object):
+class Connect:
     def __init__(self, job, respond, callLater=twisted.internet.reactor.callLater):
         self._callLater = callLater
         self._did = tempfile.mkdtemp()
@@ -166,7 +166,7 @@ class Connect(object):
         signed = self._pgp.sign (base64.b64encode (pickle.dumps (message)),
                                  keyid=self._kid, passphrase='1234567890')
         response = _https_push (signed.data)
-        self._log.info ('advertise: ' + response)
+        self._log.info ('advertise: %s', response)
 
         if response != 'position posted': self._respond (self._job, False)
         else: self._callLater (0, dawgie.pl.DeferWithLogOnError (self.interview, 'while interviewing requester', __name__).callback, None)
@@ -180,7 +180,7 @@ class Connect(object):
         signed = self._pgp.sign (base64.b64encode (pickle.dumps (message)),
                                  keyid=self._kid, passphrase='1234567890')
         response = _https_push (signed.data)
-        self._log.info ('interview: ' + response)
+        self._log.info ('interview: %s', response)
 
         if response == 'False': self._respond (self._job, True)
         else:
@@ -268,9 +268,7 @@ def _https_push (msg):
                               headers={'x-api-key':api_key})
 
     if response.status_code != 200:\
-       log.error ('failed to communicate with AWS successfully ' +
-                  '(status code, message): (%d, %s)',
-                  response.status_code, response.text)
+       log.error ('failed to communicate with AWS successfully (status code, message): (%d, %s)', response.status_code, response.text)
     return response.text if response.status_code == 200 else 'False'
 
 def _sqs_pop():
