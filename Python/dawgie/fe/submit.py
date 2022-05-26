@@ -56,8 +56,9 @@ class Defer(absDefer):
                                   submission[0])
                 process.step_0()
                 return twisted.web.server.NOT_DONE_YET
-            else: result = {'alert_status':'danger',
-                            'alert_message':'Submission already in progress'}
+
+            result = {'alert_status':'danger',
+                      'alert_message':'Submission already in progress'}
         else: result = {'alert_status':'danger',
                         'alert_message':'Cannot submit a blank changeset'}
         return json.dumps (result).encode()
@@ -70,7 +71,7 @@ class Defer(absDefer):
     def clear(self): self.__busy = False
     pass
 
-class Process(object):
+class Process:
     def __init__ (self, changeset, clear, request, submission):
         object.__init__(self)
         log.info ('Process.__changeset %s', str(changeset))
@@ -94,7 +95,7 @@ class Process(object):
             self.__request.write (json.dumps (self.__msg).encode())
             try: self.__request.finish()
             except:  # pylint: disable=bare-except
-                log.exception ('Failed to complete an error message: ' +
+                log.exception ('Failed to complete an error message: %s',
                                str (self.__msg['alert_message']))
                 pass
             self.__clear()
@@ -129,7 +130,7 @@ class Process(object):
 
         # Go To: gitting state
         dawgie.context.fsm.gitting_trigger()
-        return
+        return None
 
     def step_2(self, _result):
         '''prepare_pre_ops'''
@@ -176,7 +177,7 @@ class Process(object):
         self.__request.write (json.dumps (result).encode())
         try: self.__request.finish()
         except:  # pylint: disable=bare-except
-            log.exception ('Failed to complete a successful message: ' +
+            log.exception ('Failed to complete a successful message: %s',
                            str (result))
             pass
         self.__clear()
@@ -197,8 +198,7 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
 
     def processEnded(self, reason):
         if isinstance (reason.value, twisted.internet.error.ProcessTerminated):
-            log.critical ('Error while running compliant.py.    EXIT CODE: %s' +
-                          '   SIGNAL: %s    STATUS: %s   COMMAND: "%s"',
+            log.critical ('Error while running compliant.py.    EXIT CODE: %s   SIGNAL: %s    STATUS: %s   COMMAND: "%s"',
                           str (reason.value.exitCode),
                           str (reason.value.signal),
                           str (reason.value.status),

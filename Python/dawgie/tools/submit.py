@@ -47,6 +47,7 @@ import enum
 import git
 import logging
 import smtplib
+import subprocess
 
 ops = "master"
 pre_ops = "pre_ops"
@@ -101,7 +102,6 @@ def _main(an_args):
     return
 
 def _spawn (cmd:[str]):
-    import subprocess
     return subprocess.call (cmd) == 0
 
 def already_applied (changeset, a_repo_dir):
@@ -127,26 +127,26 @@ def auto_merge_prepare(changeset,
         return State.FAILED
 
     # Check if commit exists
-    status = git_execute(g, "git cat-file -t %s" % changeset)
+    status = git_execute(g, f'git cat-file -t {changeset}')
     if status == State.FAILED:
-        mail_out("You forgot to push your changes (%s). Please, push them." % changeset)
+        mail_out(f"You forgot to push your changes ({changeset}). Please, push them.")
         return State.FAILED
 
     # Check-out pre_ops
-    status = git_execute(g, "git checkout %s" % a_pre_ops)
+    status = git_execute(g, f"git checkout {a_pre_ops}")
     if status == State.FAILED:
-        mail_out("Failed to checkout %s" % a_pre_ops)
+        mail_out(f"Failed to checkout {a_pre_ops}")
         return State.FAILED
 
     # Make sure checkout is clean.
-    status = git_execute(g, "git pull origin %s" % a_pre_ops)
+    status = git_execute(g, f"git pull origin {a_pre_ops}")
     if status == State.FAILED:
-        mail_out("Failed to pull in %s." % a_pre_ops)
+        mail_out(f"Failed to pull in {a_pre_ops}")
         return State.FAILED
 
     # Merge with changeset
-    commit_msg = "merging_%s_into_%s" % (changeset, a_pre_ops)
-    status = git_execute(g, "git merge -m %s %s" % (commit_msg, changeset))
+    commit_msg = f"merging_{changeset}_into_{a_pre_ops}"
+    status = git_execute(g, f"git merge -m {commit_msg} {changeset}")
     if status == State.FAILED:
         msg = "Failed to merge " + changeset + " into " + a_pre_ops + "."
         msg += " You probably have merge conflicts. Please update and merge"
@@ -169,7 +169,7 @@ def auto_merge_compliant(changeset,
     # if failed then revert git reset --hard ORIG_HEAD
     # otherwise continue
     if not dawgie.tools.compliant.verify (a_repo_dir, True, False, spawn):
-        msg = "Compliancy check failed. Please run compliant.py for (%s)." % changeset
+        msg = f"Compliancy check failed. Please run compliant.py for ({changeset})"
         status = git_execute(g, "git reset --hard ORIG_HEAD")
         if status == State.FAILED:
             msg += " And also failed to do a git reset. Please check this out Keepers of the Pipelie."
@@ -182,28 +182,25 @@ def auto_merge_push(changeset,
                     a_repo_dir=None,
                     priority=Priority.TODO.value):
     g = git.cmd.Git(a_repo_dir)
-    status = git_execute(g, "git checkout %s" % a_pre_ops)
+    status = git_execute(g, f"git checkout {a_pre_ops}")
     if status == State.FAILED:
-        mail_out("Failed to checkout %s" % a_pre_ops)
+        mail_out(f"Failed to checkout {a_pre_ops}")
         return State.FAILED
 
     # Push changes
-    status = git_execute(g, "git push origin %s" % a_pre_ops)
+    status = git_execute(g, f"git push origin {a_pre_ops}")
     if status == State.FAILED:
-        mail_out("Failed to push changes to " + a_pre_ops)
+        mail_out(f"Failed to push changes to {a_pre_ops}")
         return State.FAILED
 
     # Mail out the good news
-    cmd = 'git show --no-patch ' + changeset
+    cmd = f'git show --no-patch {changeset}'
     status = git_execute(g, cmd)
     if status == State.FAILED:
-        mail_out("Failed to run: " + cmd)
+        mail_out(f"Failed to run: {cmd}")
         return State.FAILED
 
-    mail_out("Successfully merged " + changeset +" into " + a_pre_ops +
-             ". The pipeline is reloading with your changes based on the scheduled priority.\n" +
-             "Submission asks for the pipeline to reload: " + priority +".\n" +
-             g.execute(cmd.split(' ')))
+    mail_out(f"Successfully merged {changeset} into {a_pre_ops}. The pipeline is reloading with your changes based on the scheduled priority.\nSubmission asks for the pipeline to reload: {priority}.\n" + g.execute(cmd.split(' ')))
     return State.SUCCESS
 
 def git_execute_d(func):
@@ -238,15 +235,15 @@ def mail_out(msg):
     return
 
 def merge_into(g, src, dst):
-    status = git_execute(g, "git merge origin/%s" % src)
+    status = git_execute(g, f"git merge origin/{src}")
     if status == State.FAILED:
-        msg = "Failed to merge %s into %s." % (src, dst)
-        status = git_execute(g, "git merge --abort")
-        if status == State.FAILED: \
+        msg = f"Failed to merge {src} into {dst}."
+
+        if git_execute(g, "git merge --abort") == State.FAILED: \
             msg += "\nFailed to abort merge. Take Action! Take Action!"
         mail_out(msg)
-        return State.FAILED
-    return
+        pass
+    return status
 
 def update_ops():
     g = git.cmd.Git(repo_dir)
@@ -262,7 +259,7 @@ def update_ops():
         return State.FAILED
 
     # push pre_ops
-    status = git_execute(g, "git push origin %s" % pre_ops)
+    status = git_execute(g, f"git push origin {pre_ops}")
 
     # Now update the real thing
     g = git.cmd.Git(ops_dir)
@@ -278,8 +275,8 @@ def update_ops():
         return State.FAILED
 
     # push ops
-    if git_execute(g, "git push origin %s" % ops) == State.FAILED:
-        mail_out("update_ops: Failed to push to %s" % ops)
+    if git_execute(g, f"git push origin {ops}") == State.FAILED:
+        mail_out(f"update_ops: Failed to push to {ops}")
         return State.FAILED
 
     return State.SUCCESS

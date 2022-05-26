@@ -43,7 +43,7 @@ import html
 import io
 import re
 
-class AsIsText(object):
+class AsIsText:
     # pylint: disable=too-few-public-methods
     def __init__ (self, text):
         object.__init__ (self)
@@ -274,31 +274,28 @@ class Visitor(Cell):
 
     def render(self) -> str:
         buf = io.StringIO()
-        buf.write(f"<!DOCTYPE HTML>")
-        buf.write(f"<html lang=\"en-US\">")
-        buf.write(f"    <head>")
-        buf.write(f"        <meta charset=\"UTF-8\">")
+        buf.write("<!DOCTYPE HTML>")
+        buf.write("<html lang=\"en-US\">")
+        buf.write("    <head>")
+        buf.write("        <meta charset=\"UTF-8\">")
         buf.write(f"        <title>{self.__title}</title>")
-        buf.write(f"        <script type=\"text/javascript\" " +
-                  f"src=\"https://cdn.pydata.org/bokeh/release/bokeh-{bokeh.__version__}.min.js\"></script>")
-        buf.write(f"        <script type=\"text/javascript\" " +
-                  f"src=\"https://cdn.pydata.org/bokeh/release/bokeh-widgets-{bokeh.__version__}.min.js\"></script>")
-        buf.write(f"        <script type=\"text/javascript\" " +
-                  f"src=\"https://cdn.pydata.org/bokeh/release/bokeh-tables-{bokeh.__version__}.min.js\"></script>")
+        buf.write(f"        <script type=\"text/javascript\" src=\"https://cdn.pydata.org/bokeh/release/bokeh-{bokeh.__version__}.min.js\"></script>")
+        buf.write(f"        <script type=\"text/javascript\" src=\"https://cdn.pydata.org/bokeh/release/bokeh-widgets-{bokeh.__version__}.min.js\"></script>")
+        buf.write(f"        <script type=\"text/javascript\" src=\"https://cdn.pydata.org/bokeh/release/bokeh-tables-{bokeh.__version__}.min.js\"></script>")
         for js in self.__js:
             buf.write(js)
         for css in self.__css:
             buf.write(css)
-        buf.write(f"    </head>")
-        buf.write(f"    <body>")
+        buf.write("    </head>")
+        buf.write("    <body>")
         # 20200102: write self.__decl for backwards compatibility
         for d in self.__decl:
             buf.write(d)
         # iff using add_declaration_inline(...) then declarations are
         #     rendered in order with add_primitive(...), tables, etc.
         self._render(buf)
-        buf.write(f"    </body>")
-        buf.write(f"</html>")
+        buf.write("    </body>")
+        buf.write("</html>")
         return buf.getvalue()
 
     pass

@@ -325,8 +325,10 @@ def exchange (message):  # AWS lambda function
                     pk = _pgp.export_keys ([keys['fingerprint']])
                     sk = _pgp.export_keys ([keys['fingerprint']], secret=True,
                                            passphrase='1234567890')
+                    # Sign.data dynamic so pylint: disable=no-member
                     signed = _pgp.sign (pk, keyid=keys['fingerprint'],
                                         passphrase='1234567890').data
+                    # pylint: enable=no-member
                     print ('exchange() - get IID')
                     iid = _interview()[3]
                     print ('exchange() - push to SQS')

@@ -102,6 +102,7 @@ def main (fn:str=None, at=None):
     fn : filename to store the diagram and when None, display it.
     '''
     # pylint: disable=too-many-branches,too-many-locals,too-many-statements
+    # control matplotlib loading so pylint: disable=import-outside-toplevel
     import matplotlib
     import matplotlib.pyplot
 
@@ -122,18 +123,17 @@ def main (fn:str=None, at=None):
         for path in routes[key]: algs.update (path)
         traces[key] = dawgie.db.trace (algs)
         pass
-    for key in routes:
+    for key,route in routes.items():
         last = []
         rank = {}
         for tn in sorted (traces[key]):
             if not rank:
                 for tan in traces[key][tn].keys():
                     rank[tan] = max([path.index (tan) if tan in path else 0
-                                     for path in routes[key]])
+                                     for path in route])
                     pass
-                rank = dict([(tan,i) for i,(tan,r) in
-                             enumerate (sorted (rank.items(),
-                                                key=lambda x:x[1]))])
+                rank = {tan:i for i,(tan,r) in enumerate
+                        (sorted (rank.items(), key=lambda x:x[1]))}
                 algs = [i[0] for i in sorted (rank.items(), key=lambda x:x[1])]
                 pass
 
@@ -157,7 +157,7 @@ def main (fn:str=None, at=None):
     av = pydot.Dot(graph_type='digraph', rank='same')
     for r in at: r._reset()
     for r in at: r.graph (av)
-    with open (tfn, 'tw') as ff:
+    with open (tfn, 'tw', encoding='UTF-8') as ff:
         for key in sorted (routes, key='.'.join):
             br = io.BytesIO()
             charts[key].savefig (br)
