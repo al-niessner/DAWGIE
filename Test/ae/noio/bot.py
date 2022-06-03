@@ -37,6 +37,8 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+# test code so who cares; pylint: disable=duplicate-code
+
 import ae
 import ae.disk
 import ae.disk.bot

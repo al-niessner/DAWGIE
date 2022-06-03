@@ -73,6 +73,7 @@ class ArchiveHandler(twisted.internet.protocol.ProcessProtocol):
     def processEnded(self, reason):
         if isinstance (reason.value, twisted.internet.error.ProcessTerminated):
             # more readable this way so pylint: disable=logging-not-lazy
+            # exceptions always look the same; pylint: disable=duplicate-code
             log.critical ('Error in archiving of data.    EXIT CODE: %s' +
                           '   SIGNAL: %s    STATUS: %s   COMMAND: "%s"',
                           str (reason.value.exitCode),
@@ -143,18 +144,6 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                     [self._tn()])
         tn_ID = _fetchone(cur,'Dataset: Could not find target ID')
         return tn_ID
-
-    @staticmethod
-    def __verify (value):
-        # pylint: disable=bare-except
-        result = [False, False, False, False]
-        result[0] = isinstance (value, dawgie.Value)
-        try:
-            result[1] = isinstance (value.bugfix(), int)
-            result[2] = isinstance (value.design(), int)
-            result[3] = isinstance (value.implementation(), int)
-        except: pass
-        return all (result)
 
     def _ckeys (self, l1k, l2k):
         if l2k: keys = self.__span['table'][l1k][l2k].keys()
@@ -505,7 +494,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                                   'state vector ID')
 
                 # Get the value id that matches the value
-                if not self.__verify (val):
+                if not dawgie.db.util.verify (val):
                     log.critical ('offending item is %s',
                                   '.'.join ([self._task(), self._alg().name(),
                                              sv.name(), vn]))
@@ -540,6 +529,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
             pass
 
         if not valid:
+            # exceptions always look the same; pylint: disable=duplicate-code
             raise dawgie.NotValidImplementationError\
                   ('StateVector contains data that does not extend ' +
                    'dawgie.Value correctly. See log for details.')
@@ -609,7 +599,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                 pass
 
             # Get the value id that matches the value
-            if not self.__verify (val):
+            if not dawgie.db.util.verify (val):
                 log.critical ('offending item is %s',
                               '.'.join ([self._task(), self._alg().name(),
                                          msv.name(), vn]))
@@ -644,6 +634,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
             pass
 
         if not valid:
+            # exceptions always look the same; pylint: disable=duplicate-code
             raise dawgie.NotValidImplementationError\
                   ('MetricStateVector contains data that does not extend ' +
                    'dawgie.Value correctly. See log for details.')

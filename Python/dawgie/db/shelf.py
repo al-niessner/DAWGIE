@@ -183,18 +183,6 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
         self._update_cmd (taskn, Table.task, None)
         return dawgie.db.util.to_key (runid, tn, taskn, algn, svn, vn)
 
-    @staticmethod
-    def __verify (value):
-        result = [False, False, False, False]
-        result[0] = isinstance (value, dawgie.Value)
-        # pylint: disable=bare-except
-        try:
-            result[1] = isinstance (value.bugfix(), int)
-            result[2] = isinstance (value.design(), int)
-            result[3] = isinstance (value.implementation(), int)
-        except: pass
-        return all (result)
-
     def _collect (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
         self.__span = {}
         pk = {}
@@ -374,7 +362,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
         try:
             for sv in self._alg().state_vectors():
                 for k in sv.keys():
-                    if not self.__verify (sv[k]):
+                    if not dawgie.db.util.verify (sv[k]):
                         logging.getLogger(__name__).critical \
                                      ('offending item is %s',
                                       '.'.join ([self._task(), self._algn(),
@@ -385,6 +373,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
                 pass
 
             if not valid:
+                # exceptions always look the same; pylint: disable=duplicate-code
                 raise dawgie.NotValidImplementationError\
                       ('StateVector contains data that does not extend ' +
                        'dawgie.Value correctly. See log for details.')
@@ -416,7 +405,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
         valid = True
         try:
             for k in msv.keys():
-                if not self.__verify (msv[k]):
+                if not dawgie.db.util.verify (msv[k]):
                     logging.getLogger(__name__).critical\
                         ('offending item is %s',
                          '.'.join ([self._task(), self._algn(),
@@ -426,6 +415,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
                 pass
 
             if not valid:
+                # exceptions always look the same; pylint: disable=duplicate-code
                 raise dawgie.NotValidImplementationError\
                       ('MetricStateVector contains data that does not extend ' +
                        'dawgie.Value correctly. See log for details.')

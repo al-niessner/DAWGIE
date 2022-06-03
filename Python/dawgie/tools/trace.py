@@ -197,6 +197,7 @@ def main (fn:str=None, at=None):
     return
 
 if __name__ == '__main__':
+    # main blocks always look the same; pylint: disable=duplicate-code
     root_dir = os.path.dirname (__file__)
     for i in range(3): root_dir = os.path.join (root_dir, '..')
     root_dir = os.path.abspath (root_dir)

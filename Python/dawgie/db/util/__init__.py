@@ -114,3 +114,14 @@ def to_key (runid, tn, taskn, algn, svn, vn):
     return '.'.join ([str (i) for i in filter
                       (lambda n:n is not None,
                        [runid, tn, taskn, algn, svn, vn])])
+
+def verify (value):
+    # pylint: disable=bare-except
+    result = [False, False, False, False]
+    result[0] = isinstance (value, dawgie.Value)
+    try:
+        result[1] = isinstance (value.bugfix(), int)
+        result[2] = isinstance (value.design(), int)
+        result[3] = isinstance (value.implementation(), int)
+    except: pass
+    return all (result)
