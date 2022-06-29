@@ -37,6 +37,9 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+# it works and needs to be redone when shelf is update to support all the
+# functionality in postgres. Therefore pylint: disable=consider-using-f-string
+
 import argparse
 import logging
 import os
@@ -241,6 +244,7 @@ def main(dpath):
     pass
 
 if __name__ == "__main__":
+    # main blocks always look the same; pylint: disable=duplicate-code
     root = os.path.dirname (__file__)
     for i in range(4): root = os.path.join (root, '..')
     root = os.path.abspath (root)

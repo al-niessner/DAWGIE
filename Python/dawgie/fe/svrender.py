@@ -59,7 +59,7 @@ class Defer(absDefer):
         return twisted.web.server.NOT_DONE_YET
     pass
 
-class Renderer(object):
+class Renderer:
     def __init__ (self, display, request):
         object.__init__(self)
         self.__display = display
@@ -72,7 +72,7 @@ class Renderer(object):
                               str (result).replace ('\n','<br/>').encode() +
                               b'</p>')
         try: self.__request.finish()
-        except: log.exception ('Failed to complete an error page: ' +
+        except: log.exception ('Failed to complete an error page: %s',
                                str (result))
         return
 
@@ -80,7 +80,7 @@ class Renderer(object):
         # pylint: disable=bare-except
         self.__request.write (self.__display.render().encode())
         try: self.__request.finish()
-        except: log.exception ('Failed to complete a successful page: ' +
+        except: log.exception ('Failed to complete a successful page: %s',
                                str (result))
         return
     pass

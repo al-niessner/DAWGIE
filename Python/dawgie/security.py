@@ -56,11 +56,12 @@ import shutil
 import socket
 import struct
 import tempfile
+import traceback
 
 _pgp = None
 gpgargname = 'gnupghome' if 'gnupghome' in inspect.signature (gnupg.GPG).parameters else 'homedir'
 
-class TwistedWrapper(object):
+class TwistedWrapper:
     # pylint: disable=too-few-public-methods
     def __init__ (self, protocol, address):
         self.__address = address
@@ -98,7 +99,7 @@ class TwistedWrapper(object):
 
         if response.valid:
             hid = _pgp.decrypt (hid).data.decode()
-            log.debug ('Received handshake identification:\n' + hid)
+            log.debug ('Received handshake identification:\n%s', hid)
             self.__msg = 'timestamp: ' + str (datetime.datetime.utcnow())
             self.__msg += '\nunique id: ' + str (random.random())
             msg = struct.pack ('>I', len (self.__msg)) + self.__msg.encode()
@@ -127,9 +128,9 @@ class TwistedWrapper(object):
             response.valid = reply.strip() == self.__msg.strip()
 
             if not response.valid:
-                log.warning ('Did not echo my message. Expectation: "' +
-                             self.__msg.strip() + '" but received this "' +
-                             reply.strip() + '".')
+                log.warning ('Did not echo my message. Expectation: "%s" but received this "%s".',
+                             self.__msg.strip(),
+                             reply.strip())
                 pass
             pass
         if response.valid and self.__dr is not None:
@@ -153,11 +154,10 @@ class TwistedWrapper(object):
             self.__buf = self.__buf[self.__len:]
 
             if not self.__phase(data):
-                log.error ('failed to pass handshake at ' +
-                           self.__phase.__name__ + ' of ' +
-                           str (type (self.__p)) +
-                           '. Killing the connection to ' +
-                           str (self.__address) + '.')
+                log.error ('failed to pass handshake at %s of %s. Killing the connection to %s.',
+                           self.__phase.__name__,
+                           str (type (self.__p)),
+                           str (self.__address))
                 self.__p.transport.loseConnection()
                 self.__len = len (self.__buf) + 1  # break out of the while loop
                 pass
@@ -172,7 +172,6 @@ def _my_ip()->str:
         s.connect(('8.8.8.8', 0))  # connecting to a UDP address doesn't send packets
         response = s.getsockname()[0]
     except:
-        import traceback
         print ('failed to get host name falling back to localhost')
         traceback.print_exc()
         response = 'localhost'
@@ -231,7 +230,7 @@ def initialize (path:str=None)->None:
     path  : path to find the PGP keys dawgie.*.{pub,sec}
 
     '''
-    # pylint: disable=import-self,protected-access
+    # pylint: disable=import-outside-toplevel,import-self,protected-access
     import dawgie.security
     dawgie.security._pgp = gnupg.GPG(**{gpgargname:tempfile.mkdtemp()})
 
@@ -240,7 +239,8 @@ def initialize (path:str=None)->None:
         for fn in filter (lambda fn:fn.startswith ('dawgie.') and
                           (fn.endswith ('.pub') or fn.endswith ('.sec')),
                           os.listdir (path)):
-            with open (os.path.join (path,fn), 'rt') as f: keys.append(f.read())
+            with open (os.path.join (path,fn), 'rt', encoding="utf-8") as f: \
+                 keys.append(f.read())
             pass
 
         if keys: keys = _pgp.import_keys ('\n'.join (keys))
@@ -266,9 +266,9 @@ if __name__ == '__main__':
                                         name_email=args.user_email,
                                         name_real=args.user_name))
     bn = os.path.join (args.output_dir, 'dawgie.%s.%s')
-    with open (bn % (args.user_name, 'pub'), 'wt') as gf: \
+    with open (bn % (args.user_name, 'pub'), 'wt', encoding="utf-8") as gf: \
          gf.write (pgp.export_keys (k))
-    with open (bn % (args.user_name, 'sec'), 'wt') as gf: \
+    with open (bn % (args.user_name, 'sec'), 'wt', encoding="utf-8") as gf: \
          gf.write (pgp.export_keys (k, True))
     os.chmod (bn % (args.user_name, 'pub'), 0o600)
     os.chmod (bn % (args.user_name, 'sec'), 0o600)

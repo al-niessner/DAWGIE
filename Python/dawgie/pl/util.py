@@ -46,8 +46,10 @@ class SVGOHandler(twisted.internet.protocol.ProcessProtocol):
     def __init__ (self, command): self.__command = command
     def processEnded(self, reason):
         if isinstance (reason.value, twisted.internet.error.ProcessTerminated):
+            # long statement to log so pylint: disable=logging-not-lazy
+            # exceptions always look the same; pylint: disable=duplicate-code
             log.critical ('Error in archiving of data.    EXIT CODE: %s'+
-                          '   SIGNAL: %s    STATUS: %s' + '   COMMAND: "%s"',
+                          '   SIGNAL: %s    STATUS: %s   COMMAND: "%s"',
                           str (reason.value.exitCode),
                           str (reason.value.signal),
                           str (reason.value.status),

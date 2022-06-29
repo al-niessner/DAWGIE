@@ -149,7 +149,7 @@ def build (factories, latest, previous):
     dalg = _diff (latest[0], previous[1])
     dsv = _diff (latest[1], previous[2])
     dv = _diff (latest[2], previous[3])
-    ans = set(['.'.join (item.split ('.')[:2]) for item in dalg + dsv + dv])
+    ans = {'.'.join (item.split ('.')[:2]) for item in dalg + dsv + dv}
     rev = dawgie.context.git_rev
     trglist = dawgie.db.targets()
     log.info ('build() - building schedule for new versions')
@@ -161,14 +161,14 @@ def build (factories, latest, previous):
             pass
         pass
     log.info ('build() - calling organize with new versions')
-    organize (ans, event='New software changeset {0:s}'.format (rev))
+    organize (ans, event=f'New software changeset {rev}')
     log.info ('build() - done building the schedule')
     return
 
 def complete (job, runid, target, timing, status):
     history = err if status == State.failure else suc
     timing['completed'] = datetime.datetime.utcnow()
-    timing = dict([(k,str(v)) for k,v in timing.items()])
+    timing = {k:str(v) for k,v in timing.items()}
 
     if target == '__all__': job.get ('doing').clear()
     elif target in job.get ('doing'): job.get ('doing').remove (target)
@@ -206,8 +206,8 @@ def defer():
                     if _is_asp (t): t.get ('todo').add ('__all__')
                     else: t.get ('todo').update (dawgie.db.targets())
 
-                    log.info ('defer() - moving deferred task ' + str (t.tag) +
-                              ' to the job queue')
+                    log.info ('defer() - moving task %s to the job queue',
+                              t.tag)
                 else: delay.append (ts)
             except _DelayNotKnowableError:
                 pass
@@ -216,15 +216,15 @@ def defer():
 
     if delay:
         wait = min (delay)
-        log.info ('defer() - next wake up time in ' + str (round (wait)) +
-                  ' seconds.')
+        log.info ('defer() - next wake up time in %s seconds',
+                  str (round (wait)))
         twisted.internet.reactor.callLater (round (wait), dawgie.pl.DeferWithLogOnError (defer, 'handling error while scheduling periodic events', __name__).callback, None)
         pass
     return
 
 def find (job)->dawgie.pl.dag.Node:
     jobid = job if isinstance (job, str) else job.tab
-    avail = [j for j in filter (lambda j:j.tag == jobid, que)]
+    avail = list(filter (lambda j:j.tag == jobid, que))
     return avail[0]
 
 def is_paused(): return dawgie.pl.schedule.pipeline_paused
@@ -232,7 +232,7 @@ def is_paused(): return dawgie.pl.schedule.pipeline_paused
 def next_job_batch():
     todo = []
     if not (promote() or dawgie.pl.schedule.is_paused()):
-        jobs = dict([(job.tag, job) for job in que])
+        jobs = {job.tag:job for job in que}
         for job in filter (lambda j:j.get ('todo'), que):
             available = job.get ('todo').copy()
             for dep in jobs.keys() & job.get ('ancestry'):
@@ -258,7 +258,7 @@ def next_job_batch():
     return todo
 
 def organize (task_names, runid=None, targets=None, event=None):
-    jobs = dict([(j.tag,j) for j in que])
+    jobs = {j.tag:j for j in que}
     targets = targets if targets else set()
     log.info ('organize() - looping over targets')
     for tn in task_names:
@@ -360,9 +360,8 @@ def update (values:[(str,bool)], original:dawgie.pl.dag.Node, rid:int):
     return
 
 def view_doing() -> dict:
-    active = [t for t in
-              filter (lambda t:t.get ('status') == State.running, que)]
-    return dict([(a.tag, sorted (list(a.get ('doing')))) for a in active])
+    active = list(filter (lambda t:t.get ('status') == State.running, que))
+    return {a.tag:sorted (list(a.get ('doing'))) for a in active}
 
 def view_events()->[{}]:
     result = {}
@@ -380,8 +379,8 @@ def view_failure() -> [dict]: return err
 def view_success() -> [dict]: return suc
 
 def view_todo() -> [dict]:
-    wait = [t for t in filter(lambda t:t.get ('status')in [State.waiting,
-                                                           State.running], que)]
+    wait = list(filter(lambda t:t.get ('status')in [State.waiting,
+                                                    State.running], que))
     wait.sort (key=lambda t:t.get ('level'))
     return [{'name':w.tag,
              'targets':sorted (list(w.get ('todo')))} for w in wait]

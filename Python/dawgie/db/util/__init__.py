@@ -88,7 +88,7 @@ def rotate(path, orig, backup):
                 logging.getLogger(__name__).warning("orig db missing, copying from db %d", i)
                 for v in backup[i]:
                     t = v.split(".")[-1]
-                    shutil.copy(v, "%s/%s.%s" % (path,dawgie.context.db_name,t))
+                    shutil.copy(v, f'{path}/{dawgie.context.db_name}.{t}')
                     pass
                 break
         pass
@@ -102,10 +102,10 @@ def rotate(path, orig, backup):
             t = stack.pop()
             for v in backup[t]:
                 ext = v.split(".")[-1]
-                shutil.move(v, "%s/%d.%s.%s" % (path, t+1, dawgie.context.db_name, ext))
+                shutil.move(v, f'{path}/{t+1:d}.{dawgie.context.db_name}.{ext}')
         for v in orig:
             ext = v.split(".")[-1]
-            shutil.copy(v, "%s/0.%s.%s" % (path, dawgie.context.db_name, ext))
+            shutil.copy(v, f'{path}/0.{dawgie.context.db_name}.{ext}')
 
     return
 
@@ -114,3 +114,14 @@ def to_key (runid, tn, taskn, algn, svn, vn):
     return '.'.join ([str (i) for i in filter
                       (lambda n:n is not None,
                        [runid, tn, taskn, algn, svn, vn])])
+
+def verify (value):
+    # pylint: disable=bare-except
+    result = [False, False, False, False]
+    result[0] = isinstance (value, dawgie.Value)
+    try:
+        result[1] = isinstance (value.bugfix(), int)
+        result[2] = isinstance (value.design(), int)
+        result[3] = isinstance (value.implementation(), int)
+    except: pass
+    return all (result)

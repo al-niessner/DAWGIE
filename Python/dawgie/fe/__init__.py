@@ -53,7 +53,7 @@ class HttpMethod(enum.Enum):
     DEL = 3
     pass
 
-class Defer(object):
+class Defer:
     def __init__(self): self.__request = None
     def get_request(self): return self.__request
     def set_request(self, req): self.__request = req
@@ -168,7 +168,7 @@ def _static (fn:str,
 
         if os.path.isdir (ffn): ffn = os.path.join (ffn, 'index.html')
         if os.path.isfile (ffn): break
-        else: result += ffn.encode() + b'     '
+        result += ffn.encode() + b'     '
         pass
 
     if os.path.isfile (ffn):

@@ -56,8 +56,8 @@ def aspects (metric:[dawgie.db.METRIC_DATA])->{str:[dawgie.db.METRIC_DATA]}:
     log.info ('aspects() - metrics of aspects over %d', len (metric))
     reg = regress (metric)
     log.info ('aspects() - number of regressions %d', len (reg))
-    names = set(['.'.join ([m.task, m.alg_name]) for m in metric])
-    asp = dict([(name,[]) for name in names])
+    names = {'.'.join ([m.task, m.alg_name]) for m in metric}
+    asp = {name:[] for name in names}
     for r in reg:
         name = '.'.join (r.split ('.')[1:])
         asp[name].append (_latest (reg[r]))
@@ -90,8 +90,8 @@ def distribution (metric:[dawgie.db.METRIC_DATA])->{str:HINT}:
 
 def regress (metric:[dawgie.db.METRIC_DATA])->{str:[dawgie.db.METRIC_DATA]}:
     log.info ('regress() - regress back across metric data %d', len (metric))
-    names = set(['.'.join ([m.target, m.task, m.alg_name]) for m in metric])
-    reg = dict([(name,[]) for name in names])
+    names = {'.'.join ([m.target, m.task, m.alg_name]) for m in metric}
+    reg = {name:[] for name in names}
     for m in metric:
         name = '.'.join ([m.target, m.task, m.alg_name])
         reg[name].append (m)

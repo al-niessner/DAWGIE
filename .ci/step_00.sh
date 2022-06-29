@@ -80,12 +80,12 @@ then
            then
                echo "   Building CI Tools layer $citVersion"
                docker build --network=host -t niessner/cit:${citVersion} - < .ci/Dockerfile.3
+               docker login -p ${DOCKER_LOGIN_PASSWORD} -u ${DOCKER_LOGIN_ID}
+               docker push niessner/cit:${citVersion}
+               docker logout
            fi
 
            rm .ci/Dockerfile.1 .ci/Dockerfile.2 .ci/Dockerfile.3
-           docker login -p ${DOCKER_LOGIN_PASSWORD} -u ${DOCKER_LOGIN_ID}
-           docker push niessner/cit:${citVersion}
-           docker logout
        fi
     fi
     state=`get_state`

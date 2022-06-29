@@ -46,7 +46,7 @@ import os
 
 def _dir (dn:str):
     if not os.path.isdir (dn):
-        raise ValueError('The specified value {} is not a directory'.format(dn))
+        raise ValueError(f'The specified value {dn} is not a directory')
     return dn
 
 known = set()

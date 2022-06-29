@@ -37,6 +37,8 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+# test code so who cares; pylint: disable=duplicate-code
+
 import ae
 import ae.disk
 import ae.disk.bot
@@ -76,7 +78,7 @@ class Engine(dawgie.Algorithm):
         res = scipy.optimize.minimize (Engine._opt, p, (image,),
                                        bounds=[(100, 1000), (-3.2, 3.2),
                                                (100, 1000), (-3.2, 3.2)])
-        log.critical ('Coefficients: ' + str (res.x))
+        log.critical ('Coefficients: %s', str (res.x))
         self.__clean['image'] = ae.Value(Engine._model (res.x, image.shape))
         ds.update()
         return

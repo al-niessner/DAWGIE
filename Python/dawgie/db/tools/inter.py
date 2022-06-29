@@ -58,7 +58,7 @@ def _compare (base:str, wild:str):
 
         if not front: match = base.endswith (back)
         elif not back: match = base.startswith (front)
-        else: match = base.startswith (front) and match.endswith (back)
+        else: match = base.startswith (front) and base.endswith (back)
     else: match = base == wild
 
     return match
@@ -111,10 +111,10 @@ def postgres (args:argparse.Namespace, items:[str], outdir:str)->[str]:
     blobs = []
     ifn = 'interred.' + os.path.basename (args.backup_file)
     seconds = postgres_extract_secondary_tables (args.backup_file)
-    with open (os.path.join
-               (os.path.join (outdir, 'db'), ifn), 'tw') as output_file:
+    with open (os.path.join (os.path.join (outdir, 'db'), ifn), 'tw',
+               encoding="utf-8") as output_file:
         key = ''
-        with open (args.backup_file, 'rt') as input_file:
+        with open (args.backup_file, 'rt', encoding="utf-8") as input_file:
             for line in input_file.readlines():
                 if line.startswith ('\\.'): key = ''
                 elif line.startswith ('COPY public.prime'): key = 'prime'
@@ -140,7 +140,7 @@ def postgres_extract_secondary_tables (filename:str)->{}:
               'algorithm':{},
               'statevector':{},
               'value':{}}
-    with open (filename, 'rt') as file:
+    with open (filename, 'rt', encoding="utf-8") as file:
         for line in file.readlines():
             if line.startswith ('\\.'): key = ''
             elif line.startswith ('COPY public.'):
@@ -159,8 +159,8 @@ def postgres_is_match (ref:str, items:[str])->bool:
     matches = []
     sref = ref.split('.')
     for item in items:
-        matches.append (all([_compare (r,i) for r,i in zip(sref,
-                                                           item.split('.'))]))
+        matches.append (all((_compare (r,i) for r,i in zip(sref,
+                                                           item.split('.')))))
         pass
     return any(matches)
 

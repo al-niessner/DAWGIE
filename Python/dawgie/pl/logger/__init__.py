@@ -47,6 +47,8 @@ import twisted.internet.threads
 
 _root = None
 
+# Importing libraries gets complicated so pylint: disable=import-outside-toplevel
+
 class LogFilter(logging.Filter):
     # pylint: disable=too-few-public-methods
     def filter (self, record):
@@ -63,6 +65,7 @@ class LogSink(twisted.internet.protocol.Protocol):
         self.__buf = b''
         self.__blen = len (struct.pack ('>L', 0))
         self.__len = None
+        # this is really used so pylint: disable=unused-private-member
         self.__handshake = dawgie.security.TwistedWrapper(self, address)
         return
 

@@ -40,9 +40,11 @@ ignore = False  # forces the pipeline to ignore this package (aka task)
 
 # pylint: disable=redefined-builtin
 def analysis (prefix:str, ps_hint:int=0, runid:int=-1):
+    # avoid circular dependencies so pylint: disable=import-outside-toplevel
     import ae.review.bot
     return ae.review.bot.Actor(prefix, ps_hint, runid)
 
 def regress (prefix:str, ps_hint:int=0, target:str='__none__'):
+    # avoid circular dependencies so pylint: disable=import-outside-toplevel
     import ae.review.bot
     return ae.review.bot.Regress(prefix, ps_hint, target)

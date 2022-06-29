@@ -160,7 +160,7 @@ class Factories(enum.Enum):
 # Below are the interfaces that developers must use
 ###
 
-class _Metric(object):
+class _Metric:
     '''Interface used internally to measure process resource usage'''
     def __init__(self):
         self.__history = []
@@ -188,6 +188,8 @@ class _Metric(object):
         self.__history.append ({'child':child, 'task':task})
 
         if ds:
+            # need to break circular dependancy so
+            # pylint: disable=import-outside-toplevel
             import dawgie.db
             import dawgie.util
 
@@ -210,7 +212,7 @@ class _Metric(object):
         return s
     pass
 
-class Version(object):
+class Version:
     '''Define what a version number is the context of DAWGIE
 
     Unfortunately, this is where Python gets a little weird. It would be nicer
@@ -311,7 +313,7 @@ class Algorithm(Version):
     def run(self, ds, ps): raise NotImplementedError()
     def state_vectors(self)->'[StateVector]': raise NotImplementedError()
     def sv_as_dict(self)->'{str:StateVector}':
-        return dict([(sv.name(), sv) for sv in self.state_vectors()])
+        return {sv.name():sv for sv in self.state_vectors()}
     def where(self)->Distribution: return Distribution.auto
     pass
 
@@ -347,21 +349,23 @@ class Analysis(_Metric):
         return False
 
     def do(self, goto:str=None)->None:
+        # need to break circular dependancy so
+        # pylint: disable=import-outside-toplevel
         import dawgie.db
 
         log = logging.getLogger (__name__ + '.Analysis')
         for step in filter (lambda s:goto is None or s.name() == goto,
                             self.list()):
             if self.abort(): raise AbortAEError()
-            else: setattr (step, 'abort', self.abort)
 
+            setattr (step, 'abort', self.abort)
             self.__timing['gather_' + step.name()] = datetime.datetime.utcnow()
             aspect = dawgie.db.gather (step, self)
             self.__timing['collect_' + step.name()] = datetime.datetime.utcnow()
             aspect.collect (step.feedback())
             aspect.collect (step.traits())
             self.__timing['start_' + self._name()] = datetime.datetime.utcnow()
-            log.info ('Stepping into ' + step.name())
+            log.info ('Stepping into %s', step.name())
             self.measure (step.run, args=(aspect,), ds=aspect.ds())
         return
 
@@ -409,12 +413,12 @@ class Analyzer(Version):
     def run (self, aspects:'Aspect')->None: raise NotImplementedError()
     def state_vectors(self)->'[StateVector]': raise NotImplementedError()
     def sv_as_dict(self)->'{str:StateVector}':
-        return dict([(sv.name(), sv) for sv in self.state_vectors()])
+        return {sv.name():sv for sv in self.state_vectors()}
     def traits(self)->[ALG_REF, SV_REF, V_REF]: raise NotImplementedError()
     def where(self)->Distribution: return Distribution.auto
     pass
 
-class Aspect(object):
+class Aspect:
     '''The Aspect is the data pertaining to all targets
 
     Implementations are done in dawgie.db.
@@ -522,7 +526,7 @@ class Dataset(_Metric):
         return
     pass
 
-class Feature(object):
+class Feature:
     # pylint: disable=too-few-public-methods
     pass
 
@@ -558,21 +562,23 @@ class Regress(_Metric):
         return False
 
     def do(self, goto:str=None)->None:
+        # need to break circular dependancy so
+        # pylint: disable=import-outside-toplevel
         import dawgie.db
 
         log = logging.getLogger (__name__ + '.Regress')
         for step in filter (lambda s:goto is None or s.name() == goto,
                             self.list()):
             if self.abort(): raise AbortAEError()
-            else: setattr (step, 'abort', self.abort)
 
+            setattr (step, 'abort', self.abort)
             self.__timing['retreat_' + step.name()] = datetime.datetime.utcnow()
             timeline = dawgie.db.retreat (step, self)
             self.__timing['recede_' + step.name()] = datetime.datetime.utcnow()
             timeline.recede (step.feedback())
             timeline.recede (step.variables())
             self.__timing['start_' + self._name()] = datetime.datetime.utcnow()
-            log.info ('Stepping into ' + step.name())
+            log.info ('Stepping into %s', step.name())
             self.measure (step.run,
                           args=(self._ps_hint(), timeline), ds=timeline.ds())
         return
@@ -622,7 +628,7 @@ class Regression(Version):
         raise NotImplementedError()
     def state_vectors(self)->'[StateVector]': raise NotImplementedError()
     def sv_as_dict(self)->'{str:StateVector}':
-        return dict([(sv.name(), sv) for sv in self.state_vectors()])
+        return {sv.name():sv for sv in self.state_vectors()}
     def variables(self)->[ALG_REF, SV_REF, V_REF]: raise NotImplementedError()
     def where(self)->Distribution: return Distribution.auto
     pass
@@ -694,6 +700,8 @@ class Task(_Metric):
 
     def _make_ds (self, alg) -> Dataset:
         '''Make a Dataset with the minimal help from self.do()'''
+        # need to break circular dependancy so
+        # pylint: disable=import-outside-toplevel
         import dawgie.db
         return dawgie.db.connect (alg, self, self.__target)
 
@@ -718,16 +726,16 @@ class Task(_Metric):
         for step in filter (lambda s:goto is None or s.name() == goto,
                             self.list()):
             if self.abort(): raise AbortAEError()
-            else: setattr (step, 'abort', self.abort)
 
-            sname = "%s.%s.%s" % (self._target(), self._name(), step.name())
+            setattr (step, 'abort', self.abort)
+            sname = f'{self._target()}.{self._name()}.{step.name()}'
             log.info ('Loading into %s', sname)
             self.__timing['load_' + step.name()] = datetime.datetime.utcnow()
             ds = self._make_ds (step)
             for f in step.feedback(): ds.load (f)
             for p in step.previous(): ds.load (p)
             log.info ('Loaded into %s', sname)
-            self.__timing['start_' + step.name()] = datetime.datetime.utcnow()
+            self.__timing[f'start_{step.name()}'] = datetime.datetime.utcnow()
             log.info ('Stepping into %s', sname)
             self.measure (step.run, args=(ds, self._ps_hint()), ds=ds)
             log.info ('Returned from %s', sname)
@@ -744,7 +752,7 @@ class Task(_Metric):
     def timing (self): return self.__timing
     pass
 
-class Timeline(object):
+class Timeline:
     '''The Aspect is the data pertaining to all targets
 
     Implementations are done in dawgie.db.
@@ -762,14 +770,14 @@ class Timeline(object):
     def __getitem__(self, key): raise NotImplementedError()
     def __iter__(self): raise NotImplementedError()
     def __len__(self): raise NotImplementedError()
-    def _recede (self, data:Regression)->None: raise NotImplementedError()
+    def _recede (self, refs:[(SV_REF,V_REF)])->None: raise NotImplementedError()
     def ds(self)->'Dataset': raise NotImplementedError()
     def items(self)->[(str,{str:{str:'dagie.Value'}})]:
         raise NotImplementedError()
     def keys(self)->[str]: raise NotImplementedError()
 
-    def recede (self, data:Regression)->None:
-        self.ds().measure (self._recede, (data,))
+    def recede (self, refs:[(SV_REF,V_REF)])->None:
+        self.ds().measure (self._recede, (refs,))
         return
 
     def values(self)->[{str:{str:'dawgie.Value'}}]: raise NotImplementedError()
@@ -805,7 +813,7 @@ class Value(Version):
     pass
 
 
-class Visitor(object):
+class Visitor:
     def add_declaration (self, text:str, **kwds)->None:
         raise NotImplementedError()
     def add_image (self, alternate:str, label:str, img:bytes)->None:
@@ -816,7 +824,7 @@ class Visitor(object):
         raise NotImplementedError()
     pass
 
-class TableVisitor(object):
+class TableVisitor:
     # pylint: disable=too-few-public-methods
     def get_cell (self, r:int, c:int)->Visitor:
         raise NotImplementedError()
@@ -835,6 +843,7 @@ def _version():
 __version__ = _version()
 
 def resolve_username()->str:
+    # Change error message to this context so pylint: disable=raise-missing-from
     try: name = getpass.getuser()
     except KeyError:
         if 'USER' in os.environ: name = os.environ['USER']

@@ -47,7 +47,7 @@ def consumption():
     # pylint: disable=protected-access
     db = []
     dbs = []
-    known = [v for v in dawgie.db._prime_values()]
+    known = list(dawgie.db._prime_values())
     scrapes = {}
     for dp, dns, fns in os.walk (dawgie.context.data_dbs):
         for dn in dns: scrapes[dn] = scrapes.get (dn, [])
@@ -64,6 +64,8 @@ def consumption():
     known = sum (db)
     lens = len (db)
     total = sum (dbs)
+    # this is a tool and printing efficiency is less import then being explicit
+    # in what is being output so pylint: disable=consider-using-f-string
     print ('\n\n\t\tFiles\tSize (GB)')
     print ('generated:\t{0:d}\t{1:5.1f}\t{2:3.1f}%'.format (len (db),
                                                             sum (db)/2**30,
@@ -84,6 +86,7 @@ def consumption():
     return
 
 if __name__ == '__main__':
+    # main blocks always look the same; pylint: disable=duplicate-code
     root = os.path.dirname (__file__)
     for i in range(4): root = os.path.join (root, '..')
     root = os.path.abspath (root)

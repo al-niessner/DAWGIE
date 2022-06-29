@@ -69,7 +69,7 @@ def _scan():
                                               dawgie.context.ae_base_package)
     all_factories = []
     for v in factories.values(): all_factories.extend (v)
-    tasks = list (set ([f.__module__ for f in all_factories]))
+    tasks = list ({f.__module__ for f in all_factories})
     tasks.sort()
     return tasks
 
@@ -79,22 +79,22 @@ def _verify (tasks, silent, verbose):
     passed = True
     for t in tasks:
         result = []
-        logging.info ('Verifying ' + t)
+        logging.info ('Verifying %s', t)
 
-        if not silent and verbose: print ('Verifying ' + t)
+        if not silent and verbose: print (f'Verifying {t}')
 
         for r in _get_rules():
             # pylint: disable=bare-except
             status = False
             try: status = getattr (dawgie.tools.compliant, r) (t)
-            except: logging.exception ('Could not process ' + r)
+            except: logging.exception ('Could not process %s', r)
             result.append (status)
-            logging.info (r + ': ' + str (result[-1]))
+            logging.info ('%s:%s', r, str(result[-1]))
 
             if not silent and verbose: print ('   ' + r + ': ' +
                                               str (result[-1]))
             pass
-        logging.info ('Verified ' + t + ': ' + str (all (result)))
+        logging.info ('Verified %s:%s', t, str (all (result)))
 
         if not silent: print ('Verified ' + t + ': ' + str (all (result)))
         if not all(result): passed = False
@@ -228,7 +228,7 @@ def rule_01 (task):
     findings = []
     mod = importlib.import_module (task)
     names = dir (mod)
-    findings.append (any([e.name in names for e in dawgie.Factories]))
+    findings.append (any((e.name in names for e in dawgie.Factories)))
 
     if not findings[-1]: logging.error ('No factory method in package %s', task)
 
@@ -314,21 +314,21 @@ def rule_03 (task):
         try: findings.append (func (i))
         except NotImplementedError: findings.append (False)
 
-        if not findings[-1]: logging.error ('Item ' + name + ' does not override all of the elements it needs to or does not return the correct types.')
+        if not findings[-1]: logging.error ('Item %s does not override all of the elements it needs to or does not return the correct types.', name)
         return
 
-    def _verify_analysis (a): return (all ([isinstance (az, dawgie.Analyzer)
-                                            for az in a.list()])
+    def _verify_analysis (a): return (all ((isinstance (az, dawgie.Analyzer)
+                                            for az in a.list()))
                                       if a.list() else False)
 
     def _verify_analyzer (a):
-        if a.traits(): tl = all([isinstance (p, (dawgie.SV_REF, dawgie.V_REF))
-                                 for p in a.traits()])
+        if a.traits(): tl = all((isinstance (p, (dawgie.SV_REF, dawgie.V_REF))
+                                 for p in a.traits()))
         else: tl = True
 
         if a.state_vectors():
-            svl = all([isinstance (sv, dawgie.StateVector)
-                       for sv in a.state_vectors()])
+            svl = all((isinstance (sv, dawgie.StateVector)
+                       for sv in a.state_vectors()))
             pass
         else: svl = True
         return all ([svl, tl, _verify_version (a),
@@ -337,15 +337,15 @@ def rule_03 (task):
                      isinstance (a.state_vectors(), list)])
 
     def _verify_alg (a):
-        if a.previous(): pl = all([isinstance (p, (dawgie.ALG_REF,
+        if a.previous(): pl = all((isinstance (p, (dawgie.ALG_REF,
                                                    dawgie.SV_REF,
                                                    dawgie.V_REF))
-                                   for p in a.previous()])
+                                   for p in a.previous()))
         else: pl = True
 
         if a.state_vectors():
-            svl = all([isinstance (sv, dawgie.StateVector)
-                       for sv in a.state_vectors()])
+            svl = all((isinstance (sv, dawgie.StateVector)
+                       for sv in a.state_vectors()))
             pass
         else: svl = True
         return all ([pl, svl, _verify_version (a),
@@ -353,18 +353,18 @@ def rule_03 (task):
                      isinstance (a.previous(), list),
                      isinstance (a.state_vectors(), list)])
 
-    def _verify_regress (r): return (all ([isinstance (reg, dawgie.Regression)
-                                           for reg in r.list()])
+    def _verify_regress (r): return (all ((isinstance (reg, dawgie.Regression)
+                                           for reg in r.list()))
                                      if r.list() else False)
 
     def _verify_regression (r):
-        if r.variables(): tl = all([isinstance (v, (dawgie.SV_REF,dawgie.V_REF))
-                                    for v in r.variables()])
+        if r.variables(): tl = all((isinstance (v, (dawgie.SV_REF,dawgie.V_REF))
+                                    for v in r.variables()))
         else: tl = True
 
         if r.state_vectors():
-            svl = all([isinstance (sv, dawgie.StateVector)
-                       for sv in r.state_vectors()])
+            svl = all((isinstance (sv, dawgie.StateVector)
+                       for sv in r.state_vectors()))
             pass
         else: svl = True
         return all ([svl, tl, _verify_version (r),
@@ -374,8 +374,8 @@ def rule_03 (task):
 
     def _verify_state_vector (sv): return _verify_version (sv)
 
-    def _verify_task (t): return (all ([isinstance (a, dawgie.Algorithm)
-                                        for a in t.list()])
+    def _verify_task (t): return (all ((isinstance (a, dawgie.Algorithm)
+                                        for a in t.list()))
                                   if t.list() else False)
 
     def _verify_value (v): return all ([_verify_version (v)])
@@ -589,6 +589,7 @@ def verify (repo:str, silent:bool, verbose:bool, spawn):
 
     Function returns what spawn returns.
     '''
+    # format() is more readable so pylint: disable=consider-using-f-string
     cmd = ['python3', '-m', 'dawgie.tools.compliant',
            '--ae-dir={0}/{1}'.format (repo, dawgie.context.ae_base_package.replace ('.', '/')),
            '--ae-pkg={0}'.format (dawgie.context.ae_base_package),
@@ -596,7 +597,7 @@ def verify (repo:str, silent:bool, verbose:bool, spawn):
                                                   dawgie.context.log_port,
                                                   dawgie.context.gpg_home),
            '--log-level={}'.format (dawgie.context.log_level)]
-
+    # pylint: enable=consider-using-f-string
     silent = False
     verbose = True
     if silent: cmd.append ('--silent')
@@ -606,6 +607,7 @@ def verify (repo:str, silent:bool, verbose:bool, spawn):
     return spawn (cmd)
 
 if __name__ == '__main__':
+    # main blocks always look the same; pylint: disable=duplicate-code
     root = os.path.dirname (__file__)
     for gi in range(2): root = os.path.join (root, '..')
     root = os.path.abspath (root)

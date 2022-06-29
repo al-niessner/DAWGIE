@@ -159,9 +159,9 @@ def retreat (reg, ret):
     return _db_in_use().retreat (reg, ret)
 
 def targets (fulllist:bool=False):
-    return [tn for tn in filter (lambda s:fulllist or not
-                                 (s.startswith ('__') and s.endswith ('__')),
-                                 _db_in_use().targets())]
+    return list(filter (lambda s:fulllist or not
+                        (s.startswith ('__') and s.endswith ('__')),
+                        _db_in_use().targets()))
 
 def trace (task_alg_names:[str])->{str:{str:int}}:
     '''trace the task_alg_names to find the lastest runid for each target
@@ -200,6 +200,9 @@ def view (visitor, runid, tn, tskn, algn, svn):
     algn    : algorithm nme
     svn     : state vector name
     '''
+    # matplolib needs to be setup before being imported generally so only
+    # one package should import it at the root and the rest should do it
+    # within the functions so pylint: disable=import-outside-toplevel
     import matplotlib
     import matplotlib.pyplot
 
@@ -223,7 +226,7 @@ def view (visitor, runid, tn, tskn, algn, svn):
         visitor.add_declaration (msg)
         return
 
-    alg = [a for a in filter (lambda x:x.name() == algn, bot.list())]
+    alg = list(filter (lambda x:x.name() == algn, bot.list()))
 
     if len (alg) == 1: alg = alg[0]
     else:
@@ -233,7 +236,7 @@ def view (visitor, runid, tn, tskn, algn, svn):
         visitor.add_declaration (msg)
         return
 
-    sv = [sv for sv in filter (lambda x:x.name() == svn, alg.state_vectors())]
+    sv = list(filter (lambda x:x.name() == svn, alg.state_vectors()))
 
     if len (sv) == 1: sv = sv[0]
     elif svn == '__metric__':

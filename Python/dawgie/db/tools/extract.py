@@ -44,11 +44,10 @@ import os
 import pickle
 import sys
 
-class FakeItem(dict,object):
+class FakeItem(dict):
     # pylint: disable=no-self-use
     def __init__ (self, name, runid, svl):
         dict.__init__(self)
-        object.__init__(self)
         self.__name = name
         self.__runid = runid
         self.__svl = svl
@@ -75,16 +74,16 @@ def info (ofn, runid, tn, taskn, algn, svn):
                                 FakeItem(taskn, runid, []),
                                 tn)
         ds.load()
-        f = open (ofn, 'wb')
-        pickle.dump (dict(ds._alg().state_vectors()[0]), f,
-                     pickle.HIGHEST_PROTOCOL)
-        f.close()
+        with open (ofn, 'wb') as file: \
+             pickle.dump (dict(ds._alg().state_vectors()[0]), file,
+                          pickle.HIGHEST_PROTOCOL)
         dawgie.db.close()
         dawgie.security.finalize()
         pass
     return
 
 if __name__ == '__main__':
+    # main blocks always look the same; pylint: disable=duplicate-code
     root = os.path.dirname (__file__)
     for i in range(4): root = os.path.join (root, '..')
     root = os.path.abspath (root)

@@ -44,6 +44,7 @@ def do():
     return h
 
 if __name__ == '__main__':
+    # main blocks always look the same; pylint: disable=duplicate-code
     root = os.path.dirname (__file__)
     for gi in range(2): root = os.path.join (root, '..')
     root = os.path.abspath (root)

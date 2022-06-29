@@ -98,7 +98,7 @@ class Engine(dawgie.Algorithm):
                 pass
             pass
         url = "https://github.com/OpenExoplanetCatalogue/oec_gzip/raw/master/systems.xml.gz"
-        urllib.request.urlopen (url).read()
+        with urllib.request.urlopen (url) as link: link.read()
         self.__image['image'] = ae.Value(image)
         ds.update()
         return

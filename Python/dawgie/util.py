@@ -150,13 +150,14 @@ def verify_name (o, err=False):
     log = logging.getLogger (__file__)
     result = o.name().find (".") < 0
 
-    if not result: log.critical ('The name "' + o.name() +
-                                 '" contains the special character "."')
+    if not result: \
+       log.critical ('The name "%s" contains the special character "."', o.name)
     if isinstance (o, dawgie.StateVector):
         for name,state in [(k,k.find ('.') < 0) for k in o.keys()]:
             result &= state
-            if not state: log.critical ('The name "' + name +
-                                        '" contains the special character "."')
+            if not state: \
+               log.critical ('The name "%s" contains the special character "."',
+                             name)
             pass
         pass
     if err and not result: raise ValueError('The name(s) contains the special character "."')
