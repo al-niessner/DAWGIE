@@ -75,7 +75,7 @@ ap.add_argument ('-l', '--log-file', default='dawgie.log', required=False,
                  help='a filename to put all of the log messages into [%(default)s]')
 ap.add_argument ('-L', '--log-level', default=logging.ERROR, required=False,
                  type=dawgie.util.log_level,
-                 help='set the verbosity that you want where a smaller number means more verbose [logging.ERROR]')
+                 help='set the verbosity that you want where a smaller number means more verbose [logging.WARN]')
 ap.add_argument ('-p', '--port', default=dawgie.context.fe_port,
                  required=False, type=int,
                  help='server port number for the display [%(default)s]')
