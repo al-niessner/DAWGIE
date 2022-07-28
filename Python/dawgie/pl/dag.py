@@ -257,7 +257,7 @@ class Construct:
 
         fn = os.path.join (idir, name)
         dot.write_svg (fn)
-        with open (fn, 'rb', encoding="utf-8") as f: data = f.read()
+        with open (fn, 'rb') as f: data = f.read()
         return data
 
     @staticmethod
