@@ -266,9 +266,9 @@ if __name__ == '__main__':
                                         name_email=args.user_email,
                                         name_real=args.user_name))
     bn = os.path.join (args.output_dir, 'dawgie.%s.%s')
-    with open (bn % (args.user_name, 'pub'), 'wt', encoding="utf-8") as gf: \
+    with open (bn % (args.user_name, 'pub'), 'tw', encoding="utf-8") as gf: \
          gf.write (pgp.export_keys (k))
-    with open (bn % (args.user_name, 'sec'), 'wt', encoding="utf-8") as gf: \
+    with open (bn % (args.user_name, 'sec'), 'tw', encoding="utf-8") as gf: \
          gf.write (pgp.export_keys (k, True))
     os.chmod (bn % (args.user_name, 'pub'), 0o600)
     os.chmod (bn % (args.user_name, 'sec'), 0o600)
