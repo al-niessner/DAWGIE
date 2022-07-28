@@ -187,7 +187,7 @@ class _Metric:
         task = _Metric.diff (s1, s0)
         self.__history.append ({'child':child, 'task':task})
 
-        if ds:
+        if ds is not None:
             # need to break circular dependancy so
             # pylint: disable=import-outside-toplevel
             import dawgie.db
