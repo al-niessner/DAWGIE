@@ -148,7 +148,8 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
     def _ckeys (self, l1k, l2k):
         if l2k: keys = self.__span['table'][l1k][l2k].keys()
         elif l1k: keys = self.__span['table'][l1k].keys()
-        else: keys = self.__span['table'].keys()
+        elif 'table' in self.__span: keys = self.__span['table'].keys()
+        else: keys = []
         return keys
 
     def _collect (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
