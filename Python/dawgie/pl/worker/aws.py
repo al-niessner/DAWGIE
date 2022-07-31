@@ -129,8 +129,8 @@ class Contractor(dawgie.pl.farm.Hand):
                                          (msg.target if msg.target else
                                           '__all__') + ']')
             dawgie.pl.farm._time[dawgie.pl.farm._busy[-1]] = datetime.datetime.now()
-            self.log.info ('Registered a worker for its %d incarnation.',
-                           msg.incarnation)
+            self.log.debug ('Registered a worker for its %d incarnation.',
+                            msg.incarnation)
             pass
         return
     pass
@@ -166,7 +166,7 @@ class Connect:
         signed = self._pgp.sign (base64.b64encode (pickle.dumps (message)),
                                  keyid=self._kid, passphrase='1234567890')
         response = _https_push (signed.data)
-        self._log.info ('advertise: %s', response)
+        self._log.debug ('advertise: %s', response)
 
         if response != 'position posted': self._respond (self._job, False)
         else: self._callLater (0, dawgie.pl.DeferWithLogOnError (self.interview, 'while interviewing requester', __name__).callback, None)
@@ -180,7 +180,7 @@ class Connect:
         signed = self._pgp.sign (base64.b64encode (pickle.dumps (message)),
                                  keyid=self._kid, passphrase='1234567890')
         response = _https_push (signed.data)
-        self._log.info ('interview: %s', response)
+        self._log.debug ('interview: %s', response)
 
         if response == 'False': self._respond (self._job, True)
         else:
@@ -200,7 +200,7 @@ class Connect:
         signed = self._pgp.sign (base64.b64encode (pickle.dumps (message)),
                                  keyid=self._kid, passphrase='1234567890')
         response = _https_push (signed.data)
-        self._log.info ('hired')
+        self._log.debug ('hired')
 
         if response and response not in [b'False', 'False']:\
            started = self._pgp.verify (response).valid

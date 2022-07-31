@@ -206,8 +206,8 @@ def defer():
                     if _is_asp (t): t.get ('todo').add ('__all__')
                     else: t.get ('todo').update (dawgie.db.targets())
 
-                    log.info ('defer() - moving task %s to the job queue',
-                              t.tag)
+                    log.debug ('defer() - moving task %s to the job queue',
+                               t.tag)
                 else: delay.append (ts)
             except _DelayNotKnowableError:
                 pass
@@ -216,8 +216,8 @@ def defer():
 
     if delay:
         wait = min (delay)
-        log.info ('defer() - next wake up time in %s seconds',
-                  str (round (wait)))
+        log.debug ('defer() - next wake up time in %s seconds',
+                   str (round (wait)))
         twisted.internet.reactor.callLater (round (wait), dawgie.pl.DeferWithLogOnError (defer, 'handling error while scheduling periodic events', __name__).callback, None)
         pass
     return
@@ -260,7 +260,7 @@ def next_job_batch():
 def organize (task_names, runid=None, targets=None, event=None):
     jobs = {j.tag:j for j in que}
     targets = targets if targets else set()
-    log.info ('organize() - looping over targets')
+    log.debug ('organize() - looping over targets')
     for tn in task_names:
         for t in dawgie.pl.schedule.ae.at:
             for n in t.locate (tn):
@@ -276,7 +276,7 @@ def organize (task_names, runid=None, targets=None, event=None):
                 pass
             pass
         pass
-    log.info ('organize() - setting queue')
+    log.debug ('organize() - setting queue')
     dawgie.pl.schedule.que = sorted (jobs.values(),
                                      key=lambda i:i.get ('level'))
     return
@@ -325,9 +325,9 @@ def tasks():
 def unpause(): dawgie.pl.schedule.pipeline_paused = False
 
 def update (values:[(str,bool)], original:dawgie.pl.dag.Node, rid:int):
-    log.info ('update() - New values: %s', str(values))
-    log.info ('update() - Node name: %s', original.tag)
-    log.info ('update() - Run ID: %s', str(rid))
+    log.debug ('update() - New values: %s', str(values))
+    log.debug ('update() - Node name: %s', original.tag)
+    log.debug ('update() - Run ID: %s', str(rid))
 
     if values:
         event = None

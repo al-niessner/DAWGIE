@@ -74,10 +74,10 @@ class Defer(absDefer):
 class Process:
     def __init__ (self, changeset, clear, request, submission):
         object.__init__(self)
-        log.info ('Process.__changeset %s', str(changeset))
-        log.info ('Process.__clear %s', str(clear))
-        log.info ('Process.__request %s', str(request))
-        log.info ('Process.__submission %s', str(submission))
+        log.debug ('Process.__changeset %s', str(changeset))
+        log.debug ('Process.__clear %s', str(clear))
+        log.debug ('Process.__request %s', str(request))
+        log.debug ('Process.__submission %s', str(submission))
         self.__changeset = changeset
         self.__clear = clear
         self.__msg = 'unspecified'
@@ -89,8 +89,8 @@ class Process:
         if self.__request is not None:
             if dawgie.context.fsm.state == 'gitting':\
                dawgie.context.fsm.running_trigger()
-            else: log.info ('Process.failure() state is not gitting: %s',
-                            str(dawgie.context.fsm.state))
+            else: log.debug ('Process.failure() state is not gitting: %s',
+                             str(dawgie.context.fsm.state))
 
             self.__request.write (json.dumps (self.__msg).encode())
             try: self.__request.finish()
@@ -101,7 +101,7 @@ class Process:
             self.__clear()
             self.__request = None
             dawgie.tools.submit.mail_out (self.__msg['alert_message'])
-        else: log.info ('Process.failure() self.__request is None')
+        else: log.debug ('Process.failure() self.__request is None')
         return fail
 
     def step_0 (self):
@@ -173,7 +173,7 @@ class Process:
         dawgie.context.fsm.running_trigger()
         result = {'alert_status':'success',
                   'alert_message':'Submission successful scheduling update.'}
-        log.info("Going to the crossroads.")
+        log.debug("Going to the crossroads.")
         self.__request.write (json.dumps (result).encode())
         try: self.__request.finish()
         except:  # pylint: disable=bare-except
@@ -214,7 +214,7 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
 
     def spawn_off (self, cmd:[str]):
         self.__command = ' '.join (cmd)
-        log.info ('VerifyHandler.spawn_off (%s)', self.__command)
+        log.debug ('VerifyHandler.spawn_off (%s)', self.__command)
         twisted.internet.reactor.spawnProcess (self, cmd[0], args=cmd,
                                                env=os.environ, usePTY=True)
         return True

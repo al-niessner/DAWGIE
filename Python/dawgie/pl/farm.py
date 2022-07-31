@@ -91,7 +91,7 @@ class Hand(twisted.internet.protocol.Protocol):
         self.__blen = len (struct.pack ('>I', 0))
         self.__buf = b''
         self.__len = None
-        log.info ('work application submission from %s', str(address))
+        log.debug ('work application submission from %s', str(address))
         # really is used so pylint: disable=unused-private-member
         self.__handshake = dawgie.security.TwistedWrapper(self, address)
         # really is used so pylint: enable=unused-private-member
@@ -125,8 +125,8 @@ class Hand(twisted.internet.protocol.Protocol):
             self.transport.loseConnection()
         else:
             _workers.append (self)
-            log.info ('Registered a worker for its %d incarnation.',
-                      msg.incarnation)
+            log.debug ('Registered a worker for its %d incarnation.',
+                       msg.incarnation)
             pass
         return
 
@@ -318,9 +318,9 @@ def rerunid (job):
 def something_to_do():
     # pylint: disable=too-many-branches,too-many-statements
     if dawgie.context.fsm.waiting_on_crew() and not _agency:
-        log.info("farm.dispatch: Waiting for crew to finish...")
+        log.debug("farm.dispatch: Waiting for crew to finish...")
         return False
     if not dawgie.context.fsm.is_pipeline_active():
-        log.info("Pipeline is not active. Returning from farm.dispatch().")
+        log.debug("Pipeline is not active. Returning from farm.dispatch().")
         return False
     return True

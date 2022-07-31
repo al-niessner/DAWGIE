@@ -82,19 +82,19 @@ class TwistedWrapper:
     def _phase (self): return self.__phase
 
     def _p1 (self, data:bytes)->bool:
-        log.info ('pi: %s', str(self.__address))
+        log.debug ('pi: %s', str(self.__address))
         result = struct.unpack ('>I', data)[0] == 4
         self.__phase = self._p2
         return result
 
     def _p2 (self, data:bytes)->bool:
-        log.info ('p2: %s', str(self.__address))
+        log.debug ('p2: %s', str(self.__address))
         self.__len = struct.unpack ('>I', data)[0]
         self.__phase = self._p3
         return True
 
     def _p3 (self, hid:bytes)->bool:
-        log.info ('p3: %s', str(self.__address))
+        log.debug ('p3: %s', str(self.__address))
         response = _pgp.verify (hid)
 
         if response.valid:
@@ -113,14 +113,14 @@ class TwistedWrapper:
         return response.valid
 
     def _p4 (self, data:bytes)->bool:
-        log.info ('p4: %s', str(self.__address))
+        log.debug ('p4: %s', str(self.__address))
         l = struct.unpack ('>II', data)
         self.__len = l[1]
         self.__phase = self._p5
         return l[0] == 4
 
     def _p5 (self, reply:bytes)->bool:
-        log.info ('p5: %s', str(self.__address))
+        log.debug ('p5: %s', str(self.__address))
         response = _pgp.verify (reply)
 
         if response.valid:

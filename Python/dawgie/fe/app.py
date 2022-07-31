@@ -150,7 +150,7 @@ def _search_filter (fn:str, default:{})->bytes:
             with open (os.path.join (dawgie.context.fe_path, fn),
                        'rt', encoding="utf-8") as f: default = json.load(f)
         except: log.exception ('Text file could not be parsed as JSON')  # pylint: disable=bare-except
-    else: log.info ('using DAWGIE default for %s', fn)
+    else: log.debug ('using DAWGIE default for %s', fn)
     return json.dumps (default).encode()
 
 def search_cmplt_svn():

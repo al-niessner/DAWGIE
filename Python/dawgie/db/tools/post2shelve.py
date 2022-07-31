@@ -237,6 +237,7 @@ def main(dpath):
          'alg':alg_k,
          'state':state_k,
          'value':value_k}
+    logging.getLogger(__name__).info('-------------convert-----------')
     convert_prime_db (conn,
                       dpath+'/%s.prime' % dawgie.context.db_post2shelve_prefix,
                       d)

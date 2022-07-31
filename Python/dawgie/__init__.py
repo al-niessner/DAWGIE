@@ -365,7 +365,7 @@ class Analysis(_Metric):
             aspect.collect (step.feedback())
             aspect.collect (step.traits())
             self.__timing['start_' + self._name()] = datetime.datetime.utcnow()
-            log.info ('Stepping into %s', step.name())
+            log.debug ('Stepping into %s', step.name())
             self.measure (step.run, args=(aspect,), ds=aspect.ds())
         return
 
@@ -578,7 +578,7 @@ class Regress(_Metric):
             timeline.recede (step.feedback())
             timeline.recede (step.variables())
             self.__timing['start_' + self._name()] = datetime.datetime.utcnow()
-            log.info ('Stepping into %s', step.name())
+            log.debug ('Stepping into %s', step.name())
             self.measure (step.run,
                           args=(self._ps_hint(), timeline), ds=timeline.ds())
         return
@@ -722,25 +722,25 @@ class Task(_Metric):
 
     def do(self, goto:str=None)->None:
         log = logging.getLogger (__name__ + '.Task')
-        log.info ('Starting %s for %s', self.__name, self._target())
+        log.debug ('Starting %s for %s', self.__name, self._target())
         for step in filter (lambda s:goto is None or s.name() == goto,
                             self.list()):
             if self.abort(): raise AbortAEError()
 
             setattr (step, 'abort', self.abort)
             sname = f'{self._target()}.{self._name()}.{step.name()}'
-            log.info ('Loading into %s', sname)
+            log.debug ('Loading into %s', sname)
             self.__timing['load_' + step.name()] = datetime.datetime.utcnow()
             ds = self._make_ds (step)
             for f in step.feedback(): ds.load (f)
             for p in step.previous(): ds.load (p)
-            log.info ('Loaded into %s', sname)
+            log.debug ('Loaded into %s', sname)
             self.__timing[f'start_{step.name()}'] = datetime.datetime.utcnow()
-            log.info ('Stepping into %s', sname)
+            log.debug ('Stepping into %s', sname)
             self.measure (step.run, args=(ds, self._ps_hint()), ds=ds)
-            log.info ('Returned from %s', sname)
+            log.debug ('Returned from %s', sname)
             pass
-        log.info ('Completed %s for %s', self.__name, self._target())
+        log.debug ('Completed %s for %s', self.__name, self._target())
         return
 
     def list(self)->[Algorithm]: raise NotImplementedError()

@@ -106,11 +106,11 @@ class Connector:
         msg = pickle.dumps (request, pickle.HIGHEST_PROTOCOL)
         s.sendall (struct.pack ('>I', len(msg)) + msg)
         buf = b''
-        log.info ('Connector.__do() - sending command')
+        log.debug ('Connector.__do() - sending command')
         while len (buf) < 4: buf += s.recv(4 - len (buf))
         l = struct.unpack ('>I', buf)[0]
         buf = b''
-        log.info ('Connector.__do() - receiving command')
+        log.debug ('Connector.__do() - receiving command')
         while len (buf) < l: buf += s.recv(l - len (buf))
         s.close()
         return pickle.loads (buf)
@@ -124,7 +124,7 @@ class Connector:
         return self.__do (COMMAND(Func.keys, None, table, None))
 
     def _prime_keys (self):
-        log.info ('Connector._prime_keys() - get prime keys')
+        log.debug ('Connector._prime_keys() - get prime keys')
         return self._keys (Table.primary)
 
     @staticmethod
@@ -243,7 +243,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
         if lok is None:
             name = '.'.join ([self._tn(), self._task(), self._algn()])
             parent= True
-            logging.getLogger (__name__ + '.Interface').info("load: Acquiring for %s", name)
+            logging.getLogger (__name__ + '.Interface').debug("load: Acquiring for %s", name)
             lok = self._acquire ('load: ' + name)
             pass
 
@@ -305,7 +305,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
                 pass
         finally:
             if parent:
-                logging.getLogger (__name__ + '.Interface').info("load: Releaseing for %s", name)
+                logging.getLogger (__name__ + '.Interface').debug("load: Releaseing for %s", name)
                 self._release (lok)
                 pass
             pass
@@ -356,7 +356,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
         if self._alg().abort(): raise dawgie.AbortAEError()
 
         name = '.'.join ([self._tn(), self._task(), self._algn()])
-        logging.getLogger (__name__ + '.Interface').info("update: Acquiring for %s", name)
+        logging.getLogger (__name__ + '.Interface').debug("update: Acquiring for %s", name)
         lok = self._acquire ('update: ' + name)
         valid = True
         try:
@@ -391,7 +391,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
                     pass
                 pass
         finally:
-            logging.getLogger (__name__ + '.Interface').info("update: Releaseing for %s", name)
+            logging.getLogger (__name__ + '.Interface').debug("update: Releaseing for %s", name)
             self._release (lok)
             pass
         return
@@ -400,7 +400,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
         if self._alg().abort(): raise dawgie.AbortAEError()
 
         name = '.'.join ([self._tn(), self._task(), self._algn()])
-        logging.getLogger (__name__ + '.Interface').info("update: Acquiring for %s", name)
+        logging.getLogger (__name__ + '.Interface').debug("update: Acquiring for %s", name)
         lok = self._acquire ('update: ' + name)
         valid = True
         try:
@@ -431,7 +431,7 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
                 self._bot().new_values ((vname, isnew))
                 pass
         finally:
-            logging.getLogger (__name__ + '.Interface').info("update: Releaseing for %s", name)
+            logging.getLogger (__name__ + '.Interface').debug("update: Releaseing for %s", name)
             self._release (lok)
             pass
         return
@@ -486,13 +486,13 @@ class Worker(twisted.internet.protocol.Protocol):
         self.__connection_lost = True
 
         if self.__looping_call.running and not self.__looping_call_stopped:
-            logging.getLogger (__name__).info("ConnectionLost: Stopping looping call.")
+            logging.getLogger (__name__).debug("ConnectionLost: Stopping looping call.")
             twisted.internet.reactor.callLater(1, self.__looping_call.stop)
             self.__looping_call_stopped = True
             pass
 
         if self.__has_lock:
-            logging.getLogger (__name__).info("ConnectionLost: Release lock after losing connection =(")
+            logging.getLogger (__name__).debug("ConnectionLost: Release lock after losing connection =(")
             self._unlock_db()
             pass
         return
@@ -530,8 +530,8 @@ class Worker(twisted.internet.protocol.Protocol):
         # pylint: disable=too-many-branches
         if request.func == Func.acquire:
             self.__id_name = request.value
-            logging.getLogger (__name__).info("Inside worker(%s): Acquire",
-                                              self.__id_name)
+            logging.getLogger (__name__).debug("Inside worker(%s): Acquire",
+                                               self.__id_name)
             # Lock Request Begin
             dawgie.db.shelf.task_engine.add_task(self.__id_name, dawgie.db.lockview.LockRequest.lrqb)
             self.__looping_call.start(3)
@@ -543,13 +543,13 @@ class Worker(twisted.internet.protocol.Protocol):
             self._send (self.__db[request.table.value][request.key])
             pass
         elif request.func == Func.keys:
-            log.info ('Worker.do() - received request for keys')
-            log.info ('Worker.do() - table %s', request.table.name)
-            log.info ('Worker.do() - table size %d', len (self.__db[request.table.value]))
+            log.debug ('Worker.do() - received request for keys')
+            log.debug ('Worker.do() - table %s', request.table.name)
+            log.debug ('Worker.do() - table size %d', len (self.__db[request.table.value]))
             self._send (list(self.__db[request.table.value].keys()))
             pass
         elif request.func == Func.release:
-            logging.getLogger (__name__).info("Inside worker: Release")
+            logging.getLogger (__name__).debug("Inside worker: Release")
             self._do_release()
             pass
         elif request.func == Func.set:
@@ -580,18 +580,18 @@ class Worker(twisted.internet.protocol.Protocol):
     def _do_acquire(self):
         if self.__looping_call_stopped: return
         if self.__connection_lost:
-            logging.getLogger (__name__).info("_do_acquire(%s): connection has already been lost", self.__id_name)
+            logging.getLogger (__name__).debug("_do_acquire(%s): connection has already been lost", self.__id_name)
             return
 
-        logging.getLogger(__name__).info("_do_acquire(%s): checking lock status...", self.__id_name)
+        logging.getLogger(__name__).debug("_do_acquire(%s): checking lock status...", self.__id_name)
 
         s = self._get_db_lock_status()
         if s == Mutex.unlock:
-            logging.getLogger(__name__).info("_do_acquire(%s): lock is unlocked!", self.__id_name)
+            logging.getLogger(__name__).debug("_do_acquire(%s): lock is unlocked!", self.__id_name)
             self._lock_db()
-            logging.getLogger(__name__).info("_do_acquire(%s): lock is now locked!", self.__id_name)
-            logging.getLogger(__name__).info("_do_acquire(%s): calling stop",
-                                             self.__id_name)
+            logging.getLogger(__name__).debug("_do_acquire(%s): lock is now locked!", self.__id_name)
+            logging.getLogger(__name__).debug("_do_acquire(%s): calling stop",
+                                              self.__id_name)
             twisted.internet.reactor.callLater(1, self.__looping_call.stop)
             self.__looping_call_stopped = True
             # Lock Request End
@@ -610,12 +610,12 @@ class Worker(twisted.internet.protocol.Protocol):
         tmpdst = dawgie.db.shelf.mkStgDir()
         retValue = None
 
-        logging.getLogger (__name__).info("_do_copy: Acquiring. dst -> %s", dst)
+        logging.getLogger (__name__).debug("_do_copy: Acquiring. dst -> %s", dst)
         connection = Interface(None, None, None)
         lok = connection._acquire('copy')
 
         try:
-            logging.getLogger (__name__).info("_do_copy: Got lok")
+            logging.getLogger (__name__).debug("_do_copy: Got lok")
             src = dawgie.context.db_path
 
             if os.path.exists(src):
@@ -639,7 +639,7 @@ class Worker(twisted.internet.protocol.Protocol):
             if dawgie.db.shelf._db is None:
                 dawgie.db.shelf.open_db()
 
-            logging.getLogger (__name__).info("_do_copy: Releasing")
+            logging.getLogger (__name__).debug("_do_copy: Releasing")
             connection. _release(lok)
             pass
 
@@ -648,8 +648,8 @@ class Worker(twisted.internet.protocol.Protocol):
         return
 
     def _do_release(self):
-        logging.getLogger (__name__).info("_do_release: has_lock => %d",
-                                          self.__has_lock)
+        logging.getLogger (__name__).debug("_do_release: has_lock => %d",
+                                           self.__has_lock)
         if self.__has_lock:
             # Lock Acquire End
             dawgie.db.shelf.task_engine.add_task(self.__id_name, dawgie.db.lockview.LockRequest.laqe)
@@ -674,17 +674,17 @@ class Worker(twisted.internet.protocol.Protocol):
     def _lock_db(self):
         """Shouldn't be called directory by user"""
         dawgie.context.lock_db()
-        logging.getLogger (__name__).info("_lock_db: assigning lock to me.")
+        logging.getLogger (__name__).debug("_lock_db: assigning lock to me.")
         self.__has_lock = True
-        logging.getLogger (__name__).info("_lock_db: assigning lock to me. Done.")
+        logging.getLogger (__name__).debug("_lock_db: assigning lock to me. Done.")
         return
 
     def _unlock_db(self):
         """Shouldn't be called directory by user"""
-        logging.getLogger (__name__).info("_unlock_db: unlocking...")
+        logging.getLogger (__name__).debug("_unlock_db: unlocking...")
         dawgie.context.unlock_db()
         self.__has_lock = False
-        logging.getLogger (__name__).info("_unlock_db: unlocking done.")
+        logging.getLogger (__name__).debug("_unlock_db: unlocking done.")
         return
 
     pass
@@ -696,7 +696,7 @@ def _connect():
 def _copy (table): return {k:table[k] for k in table.keys()}
 
 def _prime_keys():
-    log.info ('_prime_keys() - size is %d', len (dawgie.db.shelf._db.primary))
+    log.debug ('_prime_keys() - size is %d', len (dawgie.db.shelf._db.primary))
     return dawgie.db.shelf._db.primary.keys()
 def _prime_values():
     return dawgie.db.shelf._db.primary.values()
@@ -809,31 +809,31 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
         raise RuntimeError('called metrics before open')
 
     result = []
-    log.info ('metrics() - starting')
+    log.debug ('metrics() - starting')
     keys = list(_prime_keys())
-    log.info ('metrics() - total prime keys %d', len (keys))
+    log.debug ('metrics() - total prime keys %d', len (keys))
     keys = list(sorted(filter(lambda s:s.split('.')[4] == '__metric__', keys)))
-    log.info ('metrics() - total __metric__ in prime keys %d', len (keys))
+    log.debug ('metrics() - total __metric__ in prime keys %d', len (keys))
     for m in keys:
-        log.info ('metrics() - working on %s', m)
+        log.debug ('metrics() - working on %s', m)
         runid,target,task,algn,_svn,vn = m.split('.')
 
         if not result or any ([result[-1].run_id != runid,
                                result[-1].target != target,
                                result[-1].task != task,
                                result[-1].alg_name != algn]):
-            log.info ('metrics() - make new reuslt')
+            log.debug ('metrics() - make new reuslt')
             msv = dawgie.util.MetricStateVector(dawgie.METRIC(-2,-2,-2,-2,-2,-2),
                                                 dawgie.METRIC(-2,-2,-2,-2,-2,-2))
             result.append (dawgie.db.METRIC_DATA(alg_name=algn,
                                                  alg_ver=dawgie.VERSION(-1,-1,-1),
                                                  run_id=runid, sv=msv,
                                                  target=target, task=task))
-            log.info ('metrics() - result length %d', len (result))
+            log.debug ('metrics() - result length %d', len (result))
             pass
 
         try:
-            log.info ('metrics() - reading data and decoding')
+            log.debug ('metrics() - reading data and decoding')
             msv[vn] = dawgie.db.util.decode (dawgie.db.shelf._db.primary[m])
         except FileNotFoundError: log.exception('missing metric data for %s',m)
         pass

@@ -267,7 +267,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         # pylint: disable=too-many-locals,too-many-statements
         if self._alg().abort(): raise dawgie.AbortAEError()
 
-        log.info ("In Interface load")
+        log.debug ("In Interface load")
         conn = dawgie.db.post._conn()
         cur = dawgie.db.post._cur (conn)
 
@@ -318,8 +318,8 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
 
                 if not run_ID:
                     # long msg more readable so pylint: disable=logging-not-lazy
-                    log.info ('Dataset load: Could not find any runs that ' +
-                              'match given the algorithm and state vector')
+                    log.debug ('Dataset load: Could not find any runs that ' +
+                               'match given the algorithm and state vector')
                     continue
 
                 run_ID = self._runid() if self._runid() in run_ID \
@@ -444,7 +444,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         # pylint: disable=too-many-locals,too-many-statements
         if self._alg().abort(): raise dawgie.AbortAEError()
 
-        log.info ("in Interface update")
+        log.debug ("in Interface update")
         conn = dawgie.db.post._conn()
         cur = dawgie.db.post._cur (conn)
         primes = []
@@ -551,7 +551,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         # pylint: disable=too-many-locals,too-many-statements
         if self._alg().abort(): raise dawgie.AbortAEError()
 
-        log.info ("in Interface update process metrics")
+        log.debug ("in Interface update process metrics")
         conn = dawgie.db.post._conn()
         cur = dawgie.db.post._cur (conn)
         primes = []
@@ -671,7 +671,7 @@ def _append_ver (d:dict, k:str, v:str):
     return
 
 def _conn():
-    log.info ('using db_path %s', dawgie.context.db_path)
+    log.debug ('using db_path %s', dawgie.context.db_path)
     return psycopg2.connect(database=dawgie.context.db_name,
                             host=dawgie.context.db_host,
                             password=dawgie.context.db_path.split(':')[1],
@@ -782,7 +782,7 @@ def close():
 def connect(alg, bot, tn):
     # attempt the connection, assume everything exists
     if not dawgie.db.post._db: raise RuntimeError('called connect before open')
-    log.info ("connected")
+    log.debug ("connected")
     return Interface(alg, bot, tn)
 
 def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
@@ -832,7 +832,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     if not o_runids:
         cur.close()
         conn.close()
-        log.info ('step 1: no run ids with this output')
+        log.debug ('step 1: no run ids with this output')
         return tuple()
 
     # 3: Find all of the inputs keyed by name and save runid,blobname
@@ -872,7 +872,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     if any((not v for v in i_runids.values())):
         cur.close()
         conn.close()
-        log.info ('Step 3: no input runids - %s %s', str(key), str(i_runids))
+        log.debug ('Step 3: no input runids - %s %s', str(key), str(i_runids))
         return tuple()
 
     # 5: Use runids from (1) and (3) to find when in time to promote
@@ -905,8 +905,8 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
     if not runid:
         cur.close()
         conn.close()
-        log.info ('step 5: no run ids found -- %s %s',
-                  str(o_runids), str(i_runids))
+        log.debug ('step 5: no run ids found -- %s %s',
+                   str(o_runids), str(i_runids))
         return tuple()
 
     # 7: Build the juncture from the runid and output
@@ -994,7 +994,7 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
 
 # pylint: disable=redefined-builtin
 def next():
-    log.info ("in Next")
+    log.debug ("in Next")
     # Get next run id
     if not dawgie.db.post._db: raise RuntimeError('called next before connect')
 
@@ -1065,7 +1065,6 @@ def open():
         cur.execute("SELECT pg_catalog.setval(pg_get_serial_sequence(" +
                     "'Task', 'pk'), (SELECT MAX(PK) FROM Task));")
     except psycopg2.ProgrammingError: pass
-    log.info ("finished making or updating table sequences")
     conn.commit()
     cur.close()
     conn.close()
@@ -1209,7 +1208,7 @@ def retreat (reg, ret):
 def targets():
     if not dawgie.db.post._db: raise RuntimeError('called targets before open')
 
-    log.info ("in targets()")
+    log.debug ("in targets()")
     conn = _conn()
     cur = _cur (conn)
     cur.execute('SELECT name from Target;')
@@ -1257,7 +1256,7 @@ def trace (task_alg_names):
 def update (tsk, alg, sv, vn, v):
     if not dawgie.db.post._db: raise RuntimeError('called update before open')
 
-    log.info ("In databse update")
+    log.debug ("In databse update")
     # Just adds these things to their respective tables
     # Check if connection to DB is already open
     if not dawgie.db.post._db: raise RuntimeError('Called before open')
@@ -1319,7 +1318,7 @@ def versions():
     # where each dictionary represents a row in the table
     if not dawgie.db.post._db: raise RuntimeError('called versions before open')
 
-    log.info ('versions() - starting')
+    log.debug ('versions() - starting')
     conn = _conn()
     cur = _cur (conn, True)
     alg_ver = {}
@@ -1359,7 +1358,7 @@ def versions():
     conn.commit()
     cur.close()
     conn.close()
-    log.info ('versions() - starting')
+    log.debug ('versions() - starting')
     return task_ver, alg_ver, sv_ver, v_ver
 
 def view_locks(): return {'msg':'<h1>Not Applicable with postgresql database',
