@@ -120,7 +120,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         # modifying table in loop so pylint: disable=unnecessary-comprehension
         for k1 in [k for k in table]:
             for k2 in [k for k in table[k1]]:
-                if not table[k1][2]:
+                if not table[k1][k2]:
                     log.warning ('No data found for keys [%s][%s]',
                                  str(k1), str(k2))
                     del table[k1][k2]
