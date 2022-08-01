@@ -175,7 +175,7 @@ def convert_prime_db(conn, fn, data):
     ''' run_id.Target.Task.Alg.State.Value blob_name '''
     # pylint: disable=protected-access,too-many-locals
     cur = dawgie.db.post._cur(conn)
-    d = shelve.open(fn)
+    table = {}
     task_IDs = [str(v['task_pk']) for k,v in data['task'].items()]
     tn_IDs = [str(v['target_pk']) for k,v in data['target'].items()]
     alg_IDs = [str(v['alg_pk']) for k,v in data['alg'].items()]
@@ -203,10 +203,11 @@ def convert_prime_db(conn, fn, data):
                       data['target'][r[1]]['name'],
                       data['value'][r[5]]['name']])
         tdb[k] = {'prime_pk':r[0], 'yo':y, 'name':k}
-        d[k] = '%s'% (r[-1])
+        table[k] = '%s'% (r[-1])
 
     conn.commit()
     cur.close()
+    with shelve.open(fn) as db: db.update (table)
     d.close()
     return tdb
 
