@@ -116,7 +116,7 @@ def main (fn:str=None, at=None):
     images = ''
     routes = {}
     traces = {}
-    dawgie.db.open()
+    dawgie.db.reopen()  # not a good fix but an intermediate to determine when and where db closes
     for root in at: routes.update (_trace (root))
     for key in sorted (routes, key='.'.join):
         algs = set()
@@ -196,7 +196,6 @@ def main (fn:str=None, at=None):
         shutil.move (tfn, fn)
     else: webbrowser.open_new_tab ('file://' + tfn)
 
-    dawgie.db.close()
     return
 
 if __name__ == '__main__':
@@ -226,7 +225,9 @@ if __name__ == '__main__':
     args = ap.parse_args()
     dawgie.context.log_level = args.log_level
     dawgie.context.override (args)
+    dawgie.db.open()
     dawgie.tools.trace.main(fn=args.file_name)
+    dawgie.db.close()
 else:
     import dawgie.context
     import dawgie.db
