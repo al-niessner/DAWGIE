@@ -208,7 +208,6 @@ def convert_prime_db(conn, fn, data):
     conn.commit()
     cur.close()
     with shelve.open(fn) as db: db.update (table)
-    d.close()
     return tdb
 
 def main(dpath):
