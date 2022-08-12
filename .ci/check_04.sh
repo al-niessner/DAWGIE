@@ -36,7 +36,9 @@
 #
 # NTR:
 
-. .ci/util.sh
+cidir=$(realpath $(dirname $0))
+rootdir=$(realpath ${cidir}/..)
+. ${rootdir}/.ci/util.sh
 
 state="pending" # "success" "pending" "failure" "error"
 description="Verify legal content: copyright and license in all files"
@@ -46,7 +48,7 @@ post_state "$context" "$description" "$state"
 
 if current_state
 then
-    docker run --rm -e PYTHONPATH=${PWD}/Python -e USERNAME="$(whoami)" -v $PWD:$PWD -u $UID -w $PWD -i niessner/cit:$(cit_version) python3 <<EOF
+    docker run --rm -e PYTHONPATH=${rootdir}/Python -e USERNAME="$(whoami)" -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} -i niessner/cit:$(cit_version) python3 <<EOF
 import datetime
 import os
 
@@ -118,7 +120,7 @@ for p,dns,fns in os.walk ('.'):
     pass
 
 if not legal:
-    with open ('.ci/status.txt', 'tw') as f: f.write ('failure')
+    with open ('${rootdir}/.ci/status.txt', 'tw') as f: f.write ('failure')
     pass
 EOF
     [[ $# -eq 0 ]] && git checkout 

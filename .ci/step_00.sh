@@ -36,7 +36,9 @@
 #
 # NTR:
 
-. .ci/util.sh
+cidir=$(realpath $(dirname $0))
+rootdir=$(realpath ${cidir}/..)
+. ${rootdir}/.ci/util.sh
 
 # https://developer.github.com/v3/repos/statuses/
 
@@ -67,25 +69,25 @@ then
            if [ -z "$(docker images | awk '{print $1":"$2}' | grep os:$osVersion)" ]
            then
                echo "   Building OS layer $osVersion"
-               docker build --network=host -t os:${osVersion} - < .ci/Dockerfile.1
+               docker build --network=host -t os:${osVersion} - < ${rootdir}/.ci/Dockerfile.1
            fi
 
            if [ -z "$(docker images | awk '{print $1":"$2}' | grep py:$pyVersion)" ]
            then
                echo "   Building Python layer $pyVersion"
-               docker build --network=host -t py:${pyVersion} - < .ci/Dockerfile.2
+               docker build --network=host -t py:${pyVersion} - < ${rootdir}/.ci/Dockerfile.2
            fi
 
            if [ -z "$(docker images | awk '{print $1":"$2}' | grep cit:$citVersion)" ]
            then
                echo "   Building CI Tools layer $citVersion"
-               docker build --network=host -t niessner/cit:${citVersion} - < .ci/Dockerfile.3
+               docker build --network=host -t niessner/cit:${citVersion} - < ${rootdir}/.ci/Dockerfile.3
                docker login -p ${DOCKER_LOGIN_PASSWORD} -u ${DOCKER_LOGIN_ID}
                docker push niessner/cit:${citVersion}
                docker logout
            fi
 
-           rm .ci/Dockerfile.1 .ci/Dockerfile.2 .ci/Dockerfile.3
+           rm ${rootdir}/.ci/Dockerfile.1 ${rootdir}/.ci/Dockerfile.2 ${rootdir}/.ci/Dockerfile.3
        fi
     fi
     state=`get_state`

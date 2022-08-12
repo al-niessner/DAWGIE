@@ -36,7 +36,9 @@
 #
 # NTR:
 
-. .ci/util.sh
+cidir=$(realpath $(dirname $0))
+rootdir=$(realpath ${cidir}/..)
+. ${rootdir}/.ci/util.sh
 
 # https://developer.github.com/v3/repos/statuses/
 
@@ -48,7 +50,7 @@ post_state "$context" "$description" "$state"
 
 if current_state
 then
-    docker run --rm -v $PWD:$PWD -u $UID -w $PWD niessner/cit:$(cit_version) pylint --rcfile=.ci/pylint.rc Python/dawgie Test/ae | tee pylint.rpt.txt
+    docker run --rm -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} niessner/cit:$(cit_version) pylint --rcfile=${rootdir}/.ci/pylint.rc Python/dawgie Test/ae | tee pylint.rpt.txt
     python3 <<EOF
 mn = '<unknown>'
 count = 0
@@ -59,9 +61,11 @@ with open ('pylint.rpt.txt', 'rt') as f:
 
         if l.startswith ('***'): mn = l.split()[2]
         if len (l) < 2: continue
-        if not l.startswith ('dawgie/'): continue
         if 0 < l.find ('(missing-docstring)'): continue
+        if 0 < l.find ('(missing-class-docstring)'): continue
+        if 0 < l.find ('(missing-function-docstring)'): continue
         if 0 < l.find ('(locally-disabled)'): continue
+        if l.count(':') <  4: continue
 
         count += 1
         print (count, mn, l.strip())
@@ -70,7 +74,7 @@ with open ('pylint.rpt.txt', 'rt') as f:
 
 if 0 < count or not rated:
     print ('pylint check failed', count)
-    with open ('.ci/status.txt', 'tw') as f: f.write ('failure')
+    with open ('${rootdir}/.ci/status.txt', 'tw') as f: f.write ('failure')
 EOF
     state=`get_state`
 fi
