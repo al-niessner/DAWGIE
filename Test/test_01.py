@@ -69,8 +69,8 @@ class Metric(unittest.TestCase):
         m = dawgie._Metric()
         m.measure (Metric._cpu, (100,))
         s = m.sum()
-        self.assertTrue (30000 < s.mem)
-        self.assertTrue (1.0 < s.user)
+        self.assertLess (30000, s.mem)
+        self.assertLess (0.5, s.user)
         return
 
     def test_io(self):

@@ -48,11 +48,11 @@ post_state "$context" "$description" "$state"
 
 if current_state
 then
-    docker run --rm -e PYTHONPATH=${rootdir}/Python -e USERNAME="$(whoami)" -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} -it niessner/cit:$(cit_version) python3 -m dawgie.tools.compliant --ae-dir=${rootdir}/Test/ae --ae-pkg=ae --verbose
+    docker run --rm -e PYTHONPATH=${rootdir}/Python -e USERNAME="$(whoami)" -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} -it niessner/cit:$(cit_version) python3 -m dawgie.tools.compliant --ae-dir=${rootdir}/Test/ae --ae-pkg=ae --verbose | tee compliant.rpt.txt
     [[ $? -eq 0 ]] && ret_ae=passed || ret_ae=failed
-    docker run --rm -e PYTHONPATH=${rootdir}/Python -e USERNAME="$(whoami)" -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} -it niessner/cit:$(cit_version) python3 -m dawgie.tools.compliant --ae-dir=${rootdir}/Test/bae --ae-pkg=bae --verbose
+    docker run --rm -e PYTHONPATH=${rootdir}/Python -e USERNAME="$(whoami)" -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} -it niessner/cit:$(cit_version) python3 -m dawgie.tools.compliant --ae-dir=${rootdir}/Test/bae --ae-pkg=bae --verbose | tee -a compliant.rpt.txt
     [[ $? -ne 0 ]] && ret_bae=passed || ret_bae=failed
-    docker run --rm -e PYTHONPATH=${rootdir}/Python -e USERNAME="$(whoami)" -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} -it niessner/cit:$(cit_version) python3 -m dawgie.tools.compliant --ae-dir=${rootdir}/Test/Integration/ae --ae-pkg=ae --verbose
+    docker run --rm -e PYTHONPATH=${rootdir}/Python -e USERNAME="$(whoami)" -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} -it niessner/cit:$(cit_version) python3 -m dawgie.tools.compliant --ae-dir=${rootdir}/Test/Integration/ae --ae-pkg=ae --verbose | tee -a compliant.rpt.txt
     [[ $? -eq 0 ]] && ret_iae=passed || ret_iae=failed
 
     if [[ $ret_ae == "passed" ]] && [[ $ret_bae == "passed" ]] && [[ $ret_iae == "passed" ]]
