@@ -117,8 +117,8 @@ for tsk_idx in range(TSK_CNT):
     tidx = tsk_idx // 3
 
     if rem == 0: tsk = Analysis(f'Analysis_{tidx:02d}', 0, RUNID)
-    if rem == 1: tsk = Regress('Regress_{tidx:02d}', 0, TARGET)
-    if rem == 2: tsk = Task('Task_{tidx:02d}', 0, RUNID, TARGET)
+    if rem == 1: tsk = Regress(f'Regress_{tidx:02d}', 0, TARGET)
+    if rem == 2: tsk = Task(f'Task_{tidx:02d}', 0, RUNID, TARGET)
 
     for ver_idx in range(VER_CNT):
         for alg_idx in range(ALG_CNT):
@@ -131,7 +131,7 @@ for tsk_idx in range(TSK_CNT):
             tsk.mylist.append (alg)
             for svn_idx in range(SVN_CNT):
                 if svn_idx < SVN_CNT-1:
-                    sv = StateVector('StateVector_{svn_idx:02d}')
+                    sv = StateVector(f'StateVector_{svn_idx:02d}')
                 else: sv = StateVector('__metric__')
 
                 alg.sv.append (sv)

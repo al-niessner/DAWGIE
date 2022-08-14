@@ -673,7 +673,6 @@ def _append_ver (d:dict, k:str, v:str):
 def _conn():
     uri = f'postgresql://{dawgie.context.db_path}@{dawgie.context.db_host}:{dawgie.context.db_port}/{dawgie.context.db_name}'
     log.debug ('using URI: %s', uri)
-    print ('using URI: %s', uri)
     return psycopg.connect(uri)
 
 def _cur (conn, real_dict=False):
@@ -727,13 +726,12 @@ def _prime_keys():
     conn.commit()
     cur.close()
     conn.close()
-    keys = set()
-    for i in ids: keys.add ('.'.join ([str(i['run_id']),
-                                       tgtn[i['tn_id']],
-                                       tskn[i['task_id']],
-                                       algn[i['alg_id']],
-                                       svn[i['sv_id']],
-                                       vn[i['val_id']]]))
+    keys = {('.'.join ([str(i['run_id']),
+                        tgtn[i['tn_id']],
+                        tskn[i['task_id']],
+                        algn[i['alg_id']],
+                        svn[i['sv_id']],
+                        vn[i['val_id']]])) for i in ids}
     return sorted(keys)
 
 def _prime_values():
@@ -845,7 +843,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
         task_ID = _fetchone (cur, f'Task "{inp.tid.name}" is listed more than once')
         cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
                     'task_ID = %s;', (inp.aid.name, task_ID))
-        alg_IDs = cur.fetchall()
+        alg_IDs = list({pk[0] for pk in cur.fetchall()})
         cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
                     'alg_ID = ANY(%s);', [inp.sid.name, alg_IDs])
         sv_IDs = list({pk[0] for pk in cur.fetchall()})
@@ -1228,9 +1226,9 @@ def trace (task_alg_names):
             tskn,algn = tan.split('.')
             cur.execute ('SELECT PK FROM Target WHERE name = ANY(%s);',
                          [['__all__', tn]])
-            tnids = cur.fetchall()
+            tnids = list({pk[0] for pk in cur.fetchall()})
             cur.execute ('SELECT PK FROM Task WHERE name = %s;', [tskn])
-            tid = cur.fetchone()
+            tid = cur.fetchone()[0]
             cur.execute ('SELECT MAX(design),MAX(implementation),MAX(bugfix) '+
                          'FROM Algorithm WHERE task_ID = %s AND name = %s;',
                          [tid, algn])
@@ -1239,7 +1237,7 @@ def trace (task_alg_names):
                          'name = %s AND design = %s AND implementation = %s ' +
                          'AND bugfix = %s;',
                          [tid, algn, version[0], version[1], version[2]])
-            aid = cur.fetchone()
+            aid = cur.fetchone()[0]
             cur.execute ('SELECT run_ID FROM Prime WHERE ' +
                          'tn_ID = ANY(%s) AND task_ID = %s AND alg_ID = %s;',
                          [tnids, tid, aid])
