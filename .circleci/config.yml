@@ -21,5 +21,8 @@ jobs:
           name: Legal (licensing) compliance
           command: .ci/check_04.sh
       - run:
+          name: Test AE compliance
+          command: .ci/check_05.sh
+      - run:
           name: Conclude the checks
           command: .ci/step_99.sh
