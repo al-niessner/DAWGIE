@@ -47,7 +47,6 @@ RUN set -ex && \
             python3-gdbm \
             python3-numpy \
             python3-pip \
-            python3-psycopg2 \
             python3-setuptools \
             tzdata && \
     apt-get clean && apt-get autoremove && \
