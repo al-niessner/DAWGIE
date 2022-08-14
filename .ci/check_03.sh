@@ -84,7 +84,7 @@ then
     [ 0 -lt `grep "ERROR " unittest.rpt.txt | wc -l` ]  && echo 'failure' > ${rootdir}/.ci/status.txt
 
     # cleanup postgresql
-    docker stop cit_postgres
+    #docker stop cit_postgres
     state=`get_state`
 fi
 
