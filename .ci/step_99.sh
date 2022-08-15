@@ -37,7 +37,9 @@
 #
 # NTR:
 
-. .ci/util.sh
+cidir=$(realpath $(dirname $0))
+rootdir=$(realpath ${cidir}/..)
+. ${rootdir}/.ci/util.sh
 
 if current_state
 then
