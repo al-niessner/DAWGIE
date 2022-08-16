@@ -40,6 +40,8 @@ NTR:
 import ae
 import dawgie
 import numpy.random
+import os
+import tempfile
 
 class Actor(dawgie.Analysis):
     def list(self)->[dawgie.Analyzer]: return [Analyzer()]
@@ -53,6 +55,8 @@ class Analyzer(dawgie.Analyzer):
     def __init__(self):
         dawgie.Analyzer.__init__(self)
         self._version_ = dawgie.VERSION(1,0,0)
+        self.__sv = ae.StateVector()
+        self.__sv['z'] = ae.Value (0xffff, 0xffff)
         return
 
     def name(self): return 'initializer'
@@ -66,13 +70,14 @@ class Analyzer(dawgie.Analyzer):
         aspects.ds().update()
         return
 
-    def state_vectors(self): return []
+    def state_vectors(self): return [self.__sv]
     def traits(self): return []
     pass
 
 class Engine(dawgie.Algorithm):
     def __init__(self):
         dawgie.Algorithm.__init__(self)
+        self.__initializer = Analyzer()
         self.__sv = ae.StateVector()
         self.__sv['a'] = ae.Value (1.0, 0)
         self.__sv['b'] = ae.Value (1.0, 0)
@@ -82,7 +87,11 @@ class Engine(dawgie.Algorithm):
         return
 
     def name(self): return 'engine'
-    def previous(self): return []
+    def previous(self):
+        return [dawgie.V_REF(factory=ae.prime.analysis,
+                             impl=self.__initializer,
+                             item=self.__initializer.state_vectors()[0],
+                             feat='z')]
 
     def run (self, ds, ps):
         self.__sv['a'] = ae.Value (numpy.random.rand(), 0x0001)
