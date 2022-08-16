@@ -41,8 +41,33 @@ import ae
 import dawgie
 import numpy.random
 
-class Actor(dawgie.Task):
-    def list(self): return [Engine()]
+class Actor(dawgie.Analysis):
+    def list(self)->[dawgie.Analyzer]: return [Analyzer()]
+    pass
+
+class Agent(dawgie.Task):
+    def list(self)->[dawgie.Task]: return [Engine()]
+    pass
+
+class Analyzer(dawgie.Analyzer):
+    def __init__(self):
+        dawgie.Analyzer.__init__(self)
+        self._version_ = dawgie.VERSION(1,0,0)
+        return
+
+    def name(self): return 'initializer'
+
+    def run(self, aspects):
+        # pylint: disable=protected-access
+        fid,tn = tempfile.mkstemp()
+        os.close (fid)
+        os.unlink (tn)
+        dawgie.db.connect (Engine(), aspects.ds()._bot(), tn).load()
+        aspects.ds().update()
+        return
+
+    def state_vectors(self): return []
+    def traits(self): return []
     pass
 
 class Engine(dawgie.Algorithm):
