@@ -908,9 +908,9 @@ def remove (runid, tn, taskn, algn, svn, vn):
     else: logging.getLogger (__name__).error ('remove() could not find the key "%s" in the primary table. Ignoring request.', k)
     return
 
-def reopen():
+def reopen()->bool:
     if dawgie.db.shelf._db is None: dawgie.db.shelf._db = True
-    return
+    return not isinstance(dawgie.db.shelf._db, bool)
 
 def reset (runid:int, tn:str, tskn, alg)->None:
     # pylint: disable=unused-argument

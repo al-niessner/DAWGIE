@@ -141,14 +141,16 @@ def remove(runid:int, tn:str, taskn:str, algn:str, svn:str, vn:str):
     '''Remove the specified key from the primary table'''
     return _db_in_use().remove (runid, tn, taskn, algn, svn, vn)
 
-def reopen():
+def reopen()->bool:
     '''open an already open database
 
     Used by modules outside of the pipeline but still wish to access the
     data contained within the database. When a reopen is closed, the pipeline
     will keep the database open for its own use.
+
+    returns True if the data was open from open() already or False otherwise
     '''
-    return _db_in_use().reopen()  # may only be needed in db/shelf.py
+    return _db_in_use().reopen()
 
 def retreat (reg, ret):
     '''Get a dawgie.Timeline from the database backend

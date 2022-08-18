@@ -1144,9 +1144,13 @@ def remove (runid:int, tn:str, tskn:str, algn:str, svn:str, vn:str):
     conn.close()
     return removed
 
-def reopen():
+def reopen()->bool:
+    already_open = False
+
     if not dawgie.db.post._db: open()
-    return
+    else: already_open = True
+
+    return already_open
 
 def reset (runid:int, tn:str, tskn, alg)->None:
     if not dawgie.db.post._db: raise RuntimeError('called reset before open')
