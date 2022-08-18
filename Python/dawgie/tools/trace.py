@@ -116,7 +116,6 @@ def main (fn:str=None, at=None):
     images = ''
     routes = {}
     traces = {}
-    dawgie.db.reopen()  # not a good fix but an intermediate to determine when and where db closes
     for root in at: routes.update (_trace (root))
     for key in sorted (routes, key='.'.join):
         algs = set()

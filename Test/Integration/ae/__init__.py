@@ -57,13 +57,13 @@ class StateVector(dawgie.StateVector):
     pass
 
 class Value(dawgie.Value):
-    def __init__(self, value:float=None, uid:int=0):
+    def __init__(self, value:float=0.0, uid:int=0):
         dawgie.Value.__init__(self)
-        self.__uid = uid
-        self.__value = value
+        self.__uid = int(uid) if uid else 0
+        self.__value = float(value) if value else 0.0
         self._version_ = dawgie.VERSION(1,0,0)
         return
     def features(self): return []
     def uid(self)->int: return self.__uid
-    def value(self)->float: return self.__float
+    def value(self)->float: return self.__value
     pass

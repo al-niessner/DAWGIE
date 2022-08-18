@@ -75,8 +75,8 @@ class Engine(dawgie.Algorithm):
 
     def run (self, ds, ps):
         self.__sv['g'] = ae.Value (numpy.random.rand() *
-                                   sum(self.__prime.state_vectors()[0]['b'].value(),
-                                       self.__prime.state_vectors()[0]['d'].value()) /
+                                   sum([self.__prime.state_vectors()[0]['b'].value(),
+                                        self.__prime.state_vectors()[0]['d'].value()]) /
                                    self.__second.state_vectors()[0]['e'].value(), 0x0021)
         ds.update()
         return

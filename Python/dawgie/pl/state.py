@@ -254,9 +254,10 @@ class FSM:
         import dawgie.pl.farm
         import dawgie.pl.resources
 
-        log.info ('Enter state navel gaze')
+        log.info ('entering state navel gaze')
         dawgie.pl.farm.insights = dawgie.pl.resources.distribution\
                                   (dawgie.db.metrics())
+        log.info ('exiting state navel gaze')
         return
 
     def _pipeline(self, *_args, **_kwds):
@@ -289,6 +290,8 @@ class FSM:
         import dawgie.db
         import dawgie.tools.submit
 
+        log.info ('entering state updating (reload)')
+
         if self.__doctest: print ('self._reload()')
         else:
             log.info("Jump into the time machine. Do the reload Rollback.")
@@ -297,6 +300,8 @@ class FSM:
             dawgie.context.git_rev = dawgie.context._rev()
             self.time_machine.reload()
             pass
+        
+        log.info ('exiting state updating (reload)')
         pass
 
     def _security(self):
@@ -366,6 +371,8 @@ class FSM:
 
         def done(*_args, **_kwds): self.running_trigger()
 
+        log.info ('entering state loading')
+
         if self.__doctest:
             print ('self.load()')
             self._pipeline()
@@ -377,6 +384,8 @@ class FSM:
             d = twisted.internet.threads.deferToThread(self._pipeline, 2)
             d.addCallbacks (done, dawgie.pl.LogFailure('while loading the pipeline', __name__).log)
             pass
+
+        log.info ('exiting state loading')
         return
 
     def navel_gaze(self):
@@ -437,12 +446,14 @@ class FSM:
 
         if self.__doctest: print ('self.start()')
 
+        log.info ('entering state starting')
         self._gui()
         self._security()
         self._logging()
         log.info ('Starting the pipeline')
         dawgie.pl.farm.plow()
         self.time_machine = RollbackImporter()
+        log.info ('exiting state starting')
         return
 
     def state_view(self):
