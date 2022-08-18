@@ -36,7 +36,9 @@
 #
 # NTR:
 
-. .ci/util.sh
+cidir=$(realpath $(dirname $0))
+rootdir=$(realpath ${cidir}/..)
+. ${rootdir}/.ci/util.sh
 
 # https://developer.github.com/v3/repos/statuses/
 
@@ -77,9 +79,9 @@ then
     fi
 
     # run pytest
-    docker run --rm -e PYTHONPATH=${PWD}/Python -e USERNAME="$(whoami)" --network ${CIT_NETWORK:-citnet} -v $PWD:$PWD -u $UID -w $PWD niessner/cit:$(cit_version) python3 -m pytest --cov=dawgie --cov-branch --cov-report term-missing -v ${units} | tee unittest.rpt.txt
-    [ 0 -lt `grep FAILED unittest.rpt.txt | wc -l` ]  && echo 'failure' > .ci/status.txt
-    [ 0 -lt `grep "ERROR at" unittest.rpt.txt | wc -l` ]  && echo 'failure' > .ci/status.txt
+    docker run --rm -e PYTHONPATH=${rootdir}/Python -e USERNAME="$(whoami)" --network ${CIT_NETWORK:-citnet} -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} niessner/cit:$(cit_version) python3 -m pytest --cov=dawgie --cov-branch --cov-report term-missing -v ${units} | tee unittest.rpt.txt
+    [ 0 -lt `grep FAILED unittest.rpt.txt | wc -l` ]  && echo 'failure' > ${rootdir}/.ci/status.txt
+    [ 0 -lt `grep "ERROR " unittest.rpt.txt | wc -l` ]  && echo 'failure' > ${rootdir}/.ci/status.txt
 
     # cleanup postgresql
     docker stop cit_postgres

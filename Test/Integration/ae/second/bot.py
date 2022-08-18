@@ -1,4 +1,4 @@
-'''
+'''The algorithm engine for touching the local disk
 
 COPYRIGHT:
 Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
@@ -36,52 +36,38 @@ POSSIBILITY OF SUCH DAMAGE.
 
 NTR:
 '''
+
+import ae
+import ae.prime
+import ae.prime.bot
 import dawgie
-import numpy
-import os
-import pickle
-import tempfile
-import unittest
+import numpy.random
 
-class Metric(unittest.TestCase):
-    @staticmethod
-    def _cpu (N):
-        for n in range(N):
-            x = numpy.random.rand (1000,1000)
-            y = numpy.random.rand (1000,1000)
-            z = x * y
-            pass
+class Actor(dawgie.Task):
+    def list(self): return [Engine()]
+    pass
+
+class Engine(dawgie.Algorithm):
+    def __init__(self):
+        dawgie.Algorithm.__init__(self)
+        self.__prime = ae.prime.bot.Engine()
+        self.__sv = ae.StateVector()
+        self.__sv['e'] = ae.Value (1.0, 0)
+        self.__sv['f'] = ae.Value (1.0, 0)
+        self._version_ = dawgie.VERSION(1,0,0)
         return
 
-    @staticmethod
-    def _io (N):
-        fid,fn = tempfile.mkstemp()
-        os.close (fid)
-        for n in range(N):
-            x = numpy.random.rand (1200,1200)
-            with open (fn, 'bw') as f: pickle.dump (x, f)
-            with open (fn, 'br') as f: y = pickle.load (f)
-            pass
-        os.unlink (fn)
+    def name(self): return 'engine'
+    def previous(self): return [dawgie.V_REF(factory=ae.prime.task,
+                                             impl=self.__prime,
+                                             item=self.__prime.state_vectors()[0],
+                                             feat='c')]
+
+    def run (self, ds, ps):
+        self.__sv['e'] = ae.Value (numpy.random.rand() + self.__prime.state_vectors()[0]['c'].value(), 0x0011)
+        self.__sv['f'] = ae.Value (numpy.random.rand() * self.__prime.state_vectors()[0]['c'].value(), 0x0012)
+        ds.update()
         return
 
-    def test_cpu(self):
-        m = dawgie._Metric()
-        m.measure (Metric._cpu, (100,))
-        s = m.sum()
-        self.assertLess (30000, s.mem)
-        self.assertLess (0.5, s.user)
-        return
-
-    def test_io(self):
-        m = dawgie._Metric()
-        m.measure (Metric._io, (100,))
-        s = m.sum()
-        print ('metric:', s)
-        # self.assertTrue (1400000 < s.input)
-        self.assertLess (1400000, s.output)
-        self.assertLess (3000, s.mem)
-        self.assertLess (0.0, s.sys)
-        self.assertLess (0.0, s.user)
-        return
+    def state_vectors (self): return [self.__sv]
     pass

@@ -37,7 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import dawgie.context
+import dawgie.context; dawgie.context.fsm = dawgie.pl.state.FSM()
 import dawgie.pl.dag
 import dawgie.pl.farm
 import dawgie.pl.message

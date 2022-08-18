@@ -52,8 +52,8 @@ import dawgie.util
 import logging; log = logging.getLogger(__name__)
 import os
 import pickle
-import psycopg2
-import psycopg2.extras
+import psycopg
+import psycopg.rows
 import shutil
 import twisted.internet.error
 import twisted.internet.protocol
@@ -138,8 +138,8 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         try:
             cur.execute('INSERT into Target (name) values (%s)', [self._tn()])
             conn.commit()
-        except psycopg2.IntegrityError: conn.rollback()
-        except psycopg2.ProgrammingError: conn.rollback()  # permission issue
+        except psycopg.IntegrityError: conn.rollback()
+        except psycopg.ProgrammingError: conn.rollback()  # permission issue
         cur.execute('SELECT * from Target WHERE name = %s;',
                     [self._tn()])
         tn_ID = _fetchone(cur,'Dataset: Could not find target ID')
@@ -517,7 +517,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                                     (vn, sv_ID, val.design(), val.bugfix(),
                                      val.implementation()))
                         conn.commit()
-                    except psycopg2.IntegrityError: conn.rollback()
+                    except psycopg.IntegrityError: conn.rollback()
                     cur.execute (*args)
                     val_ID = cur.fetchone()
                     pass
@@ -541,7 +541,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                 for args in primes: cur.execute (*args)
                 conn.commit()
                 primes.clear()
-            except psycopg2.IntegrityError: conn.rollback()
+            except psycopg.IntegrityError: conn.rollback()
             pass
         cur.close()
         conn.close()
@@ -594,7 +594,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                                  (msv.name(),alg_ID,msv.design(),msv.bugfix(),
                                   msv.implementation()))
                     conn.commit()
-                except psycopg2.IntegrityError: conn.rollback()
+                except psycopg.IntegrityError: conn.rollback()
                 cur.execute (*args)
                 sv_ID = cur.fetchone()
                 pass
@@ -623,7 +623,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                                 (vn, sv_ID[0], val.design(), val.bugfix(),
                                  val.implementation()))
                     conn.commit()
-                except psycopg2.IntegrityError: conn.rollback()
+                except psycopg.IntegrityError: conn.rollback()
                 cur.execute (*args)
                 val_ID = cur.fetchone()
                 pass
@@ -646,7 +646,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                 for args in primes: cur.execute (*args)
                 conn.commit()
                 primes.clear()
-            except psycopg2.IntegrityError: conn.rollback()
+            except psycopg.IntegrityError: conn.rollback()
             pass
         cur.close()
         conn.close()
@@ -671,15 +671,12 @@ def _append_ver (d:dict, k:str, v:str):
     return
 
 def _conn():
-    log.debug ('using db_path %s', dawgie.context.db_path)
-    return psycopg2.connect(database=dawgie.context.db_name,
-                            host=dawgie.context.db_host,
-                            password=dawgie.context.db_path.split(':')[1],
-                            port=dawgie.context.db_port,
-                            user=dawgie.context.db_path.split(':')[0])
+    uri = f'postgresql://{dawgie.context.db_path}@{dawgie.context.db_host}:{dawgie.context.db_port}/{dawgie.context.db_name}'
+    log.debug ('using URI: %s', uri)
+    return psycopg.connect(uri)
 
 def _cur (conn, real_dict=False):
-    return conn.cursor (cursor_factory=psycopg2.extras.RealDictCursor) \
+    return conn.cursor (row_factory=psycopg.rows.dict_row) \
            if real_dict else conn.cursor()
 
 def _fetchone (cur, text):
@@ -729,13 +726,12 @@ def _prime_keys():
     conn.commit()
     cur.close()
     conn.close()
-    keys = set()
-    for i in ids: keys.add ('.'.join ([str(i['run_id']),
-                                       tgtn[i['tn_id']],
-                                       tskn[i['task_id']],
-                                       algn[i['alg_id']],
-                                       svn[i['sv_id']],
-                                       vn[i['val_id']]]))
+    keys = {('.'.join ([str(i['run_id']),
+                        tgtn[i['tn_id']],
+                        tskn[i['task_id']],
+                        algn[i['alg_id']],
+                        svn[i['sv_id']],
+                        vn[i['val_id']]])) for i in ids}
     return sorted(keys)
 
 def _prime_values():
@@ -847,7 +843,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
         task_ID = _fetchone (cur, f'Task "{inp.tid.name}" is listed more than once')
         cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
                     'task_ID = %s;', (inp.aid.name, task_ID))
-        alg_IDs = cur.fetchall()
+        alg_IDs = list({pk[0] for pk in cur.fetchall()})
         cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
                     'alg_ID = ANY(%s);', [inp.sid.name, alg_IDs])
         sv_IDs = list({pk[0] for pk in cur.fetchall()})
@@ -1064,7 +1060,7 @@ def open():
                     "'Value', 'pk'), (SELECT MAX(PK) FROM Value));")
         cur.execute("SELECT pg_catalog.setval(pg_get_serial_sequence(" +
                     "'Task', 'pk'), (SELECT MAX(PK) FROM Task));")
-    except psycopg2.ProgrammingError: pass
+    except psycopg.ProgrammingError: pass
     conn.commit()
     cur.close()
     conn.close()
@@ -1107,7 +1103,7 @@ def promote (juncture:(), runid:int):
                         [runid, tn_ID, task_ID, alg_ID, sv_ID, v_ID, bn])
             pass
         conn.commit()
-    except psycopg2.IntegrityError:
+    except psycopg.IntegrityError:
         conn.rollback()
         cur.close()
         conn.close()
@@ -1148,9 +1144,13 @@ def remove (runid:int, tn:str, tskn:str, algn:str, svn:str, vn:str):
     conn.close()
     return removed
 
-def reopen():
+def reopen()->bool:
+    already_open = False
+
     if not dawgie.db.post._db: open()
-    return
+    else: already_open = True
+
+    return already_open
 
 def reset (runid:int, tn:str, tskn, alg)->None:
     if not dawgie.db.post._db: raise RuntimeError('called reset before open')
@@ -1230,9 +1230,9 @@ def trace (task_alg_names):
             tskn,algn = tan.split('.')
             cur.execute ('SELECT PK FROM Target WHERE name = ANY(%s);',
                          [['__all__', tn]])
-            tnids = cur.fetchall()
+            tnids = list({pk[0] for pk in cur.fetchall()})
             cur.execute ('SELECT PK FROM Task WHERE name = %s;', [tskn])
-            tid = cur.fetchone()
+            tid = cur.fetchone()[0]
             cur.execute ('SELECT MAX(design),MAX(implementation),MAX(bugfix) '+
                          'FROM Algorithm WHERE task_ID = %s AND name = %s;',
                          [tid, algn])
@@ -1241,7 +1241,7 @@ def trace (task_alg_names):
                          'name = %s AND design = %s AND implementation = %s ' +
                          'AND bugfix = %s;',
                          [tid, algn, version[0], version[1], version[2]])
-            aid = cur.fetchone()
+            aid = cur.fetchone()[0]
             cur.execute ('SELECT run_ID FROM Prime WHERE ' +
                          'tn_ID = ANY(%s) AND task_ID = %s AND alg_ID = %s;',
                          [tnids, tid, aid])
@@ -1267,7 +1267,7 @@ def update (tsk, alg, sv, vn, v):
     try:
         cur.execute ('INSERT into Task(name) values (%s);', [tsk._name()])
         conn.commit()
-    except psycopg2.IntegrityError: conn.rollback()
+    except psycopg.IntegrityError: conn.rollback()
     cur.execute('SELECT pk from TASK WHERE name = %s;', [tsk._name()])
     task_ID = cur.fetchone()
     task_ID = task_ID[0]
@@ -1278,7 +1278,7 @@ def update (tsk, alg, sv, vn, v):
                     (alg.name(), task_ID, alg.design(),
                      alg.implementation(), alg.bugfix()))
         conn.commit()
-    except psycopg2.IntegrityError: conn.rollback()
+    except psycopg.IntegrityError: conn.rollback()
 
     if sv:
         cur.execute('SELECT pk from Algorithm WHERE name = %s and task_ID = %s'+
@@ -1293,7 +1293,7 @@ def update (tsk, alg, sv, vn, v):
                         (sv.name(), alg_ID, sv.design(),
                          sv.implementation(), sv.bugfix()))
             conn.commit()
-        except psycopg2.IntegrityError: conn.rollback()
+        except psycopg.IntegrityError: conn.rollback()
         cur.execute('SELECT pk from StateVector WHERE name = %s and alg_ID = %s ' +
                     'and design = %s and implementation = %s and bugfix = %s;',
                     (sv.name(), alg_ID,
@@ -1306,7 +1306,7 @@ def update (tsk, alg, sv, vn, v):
                         (vn, sv_ID,
                          v.design(), v.implementation(), v.bugfix()))
             conn.commit()
-        except psycopg2.IntegrityError: conn.rollback()
+        except psycopg.IntegrityError: conn.rollback()
         pass
 
     cur.close()

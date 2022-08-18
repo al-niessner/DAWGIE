@@ -95,6 +95,8 @@ def schedule_failure():
     return json.dumps (dawgie.pl.schedule.view_failure()).encode()
 
 def schedule_run (tasks:[str], targets:[str]):
+    log.debug ('schedule_run: targets %s', str(targets))
+    log.debug ('schedule_run: tasks %s', str(tasks))
     dawgie.pl.schedule.organize (task_names=tasks,
                                  targets=set(targets),
                                  event='command-run requested by user')

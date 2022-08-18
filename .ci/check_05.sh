@@ -40,43 +40,26 @@ cidir=$(realpath $(dirname $0))
 rootdir=$(realpath ${cidir}/..)
 . ${rootdir}/.ci/util.sh
 
-# https://developer.github.com/v3/repos/statuses/
-
 state="pending" # "success" "pending" "failure" "error"
-description="Use pylint to verify code quality [static analysis]"
-context="continuous-integration/02/pylint"
+description="Verify Test AE content: check the test AEs that they meet expectations"
+context="continuous-integration/05/compliant"
 
 post_state "$context" "$description" "$state"
 
 if current_state
 then
-    docker run --rm -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} niessner/cit:$(cit_version) pylint --rcfile=${rootdir}/.ci/pylint.rc Python/dawgie Test/ae | tee pylint.rpt.txt
-    python3 <<EOF
-mn = '<unknown>'
-count = 0
-rated = False
-with open ('pylint.rpt.txt', 'rt') as f:
-    for l in f.readlines():
-        rated |= 0 < l.find ('code has been rated at')
+    docker run --rm -e PYTHONPATH=${rootdir}/Python -e USERNAME="$(whoami)" -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} -it niessner/cit:$(cit_version) python3 -m dawgie.tools.compliant --ae-dir=${rootdir}/Test/ae --ae-pkg=ae --verbose | tee compliant.rpt.txt
+    [[ $? -eq 0 ]] && ret_ae=passed || ret_ae=failed
+    docker run --rm -e PYTHONPATH=${rootdir}/Python -e USERNAME="$(whoami)" -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} -it niessner/cit:$(cit_version) python3 -m dawgie.tools.compliant --ae-dir=${rootdir}/Test/bae --ae-pkg=bae --verbose | tee -a compliant.rpt.txt
+    [[ $? -ne 0 ]] && ret_bae=passed || ret_bae=failed
+    docker run --rm -e PYTHONPATH=${rootdir}/Python -e USERNAME="$(whoami)" -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} -it niessner/cit:$(cit_version) python3 -m dawgie.tools.compliant --ae-dir=${rootdir}/Test/Integration/ae --ae-pkg=ae --verbose | tee -a compliant.rpt.txt
+    [[ $? -eq 0 ]] && ret_iae=passed || ret_iae=failed
 
-        if l.startswith ('***'): mn = l.split()[2]
-        if len (l) < 2: continue
-        if 0 < l.find ('(missing-docstring)'): continue
-        if 0 < l.find ('(missing-class-docstring)'): continue
-        if 0 < l.find ('(missing-function-docstring)'): continue
-        if 0 < l.find ('(locally-disabled)'): continue
-        if 0 < l.find ('Similar lines in'): continue  # FIXME: remove when ready to fix duplicates
-        if l.count(':') <  4: continue
+    if [[ $ret_ae == "passed" ]] && [[ $ret_bae == "passed" ]] && [[ $ret_iae == "passed" ]]
+    then
+        echo "all passed"
+    fi
 
-        count += 1
-        print (count, mn, l.strip())
-        pass
-    pass
-
-if 0 < count or not rated:
-    print ('pylint check failed', count)
-    with open ('${rootdir}/.ci/status.txt', 'tw') as f: f.write ('failure')
-EOF
     state=`get_state`
 fi
 

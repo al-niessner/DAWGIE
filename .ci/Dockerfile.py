@@ -39,10 +39,11 @@ RUN set -ex && \
     pip3 install bokeh>=1.2 \
                  boto3>=1.7.80 \
                  cryptography>=2.1.4 \
-                 dawgie-pydot3==1.0.10 \
+                 dawgie-pydot3==1.0.11 \
                  GitPython>=2.1.11 \
                  matplotlib>=2.1.1 \
-                 psycopg2-binary>=2.7.4 \
+                 psycopg>3.0.0 \
+                 psycopg-binary>3.0.0 \
                  pyparsing>=2.4.7 \
                  pyOpenSSL>=19.1.0 \
                  python-gnupg>=0.4.9 \

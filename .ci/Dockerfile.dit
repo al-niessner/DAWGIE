@@ -1,5 +1,3 @@
-#! /usr/bin/env bash
-
 # COPYRIGHT:
 # Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
 # U.S. Government sponsorship acknowledged.
@@ -36,48 +34,15 @@
 #
 # NTR:
 
-cidir=$(realpath $(dirname $0))
-rootdir=$(realpath ${cidir}/..)
-. ${rootdir}/.ci/util.sh
-
-# https://developer.github.com/v3/repos/statuses/
-
-state="pending" # "success" "pending" "failure" "error"
-description="Use pylint to verify code quality [static analysis]"
-context="continuous-integration/02/pylint"
-
-post_state "$context" "$description" "$state"
-
-if current_state
-then
-    docker run --rm -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} niessner/cit:$(cit_version) pylint --rcfile=${rootdir}/.ci/pylint.rc Python/dawgie Test/ae | tee pylint.rpt.txt
-    python3 <<EOF
-mn = '<unknown>'
-count = 0
-rated = False
-with open ('pylint.rpt.txt', 'rt') as f:
-    for l in f.readlines():
-        rated |= 0 < l.find ('code has been rated at')
-
-        if l.startswith ('***'): mn = l.split()[2]
-        if len (l) < 2: continue
-        if 0 < l.find ('(missing-docstring)'): continue
-        if 0 < l.find ('(missing-class-docstring)'): continue
-        if 0 < l.find ('(missing-function-docstring)'): continue
-        if 0 < l.find ('(locally-disabled)'): continue
-        if 0 < l.find ('Similar lines in'): continue  # FIXME: remove when ready to fix duplicates
-        if l.count(':') <  4: continue
-
-        count += 1
-        print (count, mn, l.strip())
-        pass
-    pass
-
-if 0 < count or not rated:
-    print ('pylint check failed', count)
-    with open ('${rootdir}/.ci/status.txt', 'tw') as f: f.write ('failure')
-EOF
-    state=`get_state`
-fi
-
-post_state "$context" "$description" "$state"
+FROM py:ghrVersion
+COPY LICENSE.txt /tmp
+COPY Python /tmp/Python
+COPY README.md /tmp/Python
+ENV DAWGIE_AE_BASE_PATH /proj/src/Test/Integration/ae
+ENV DAWGIE_FE_DEBUG yes
+ENV MPLCONFIGDIR /proj/data
+ENV PYTHONPATH /proj/src/Test/Integration
+RUN set -ex && \
+    cd /tmp/Python && \
+    python3 setup.py install    
+ENTRYPOINT [ "python3", "-m" ]

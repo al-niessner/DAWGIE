@@ -36,7 +36,9 @@
 #
 # NTR:
 
-. .ci/util.sh
+cidir=$(realpath $(dirname $0))
+rootdir=$(realpath ${cidir}/..)
+. ${rootdir}/.ci/util.sh
 
 # https://developer.github.com/v3/repos/statuses/
 
@@ -48,12 +50,12 @@ post_state "$context" "$description" "$state"
 
 if current_state
 then
-    docker run --rm -v $PWD:$PWD -u $UID -w $PWD niessner/cit:$(cit_version) pycodestyle \
+    docker run --rm -v ${rootdir}:${rootdir} -u $UID -w ${rootdir} niessner/cit:$(cit_version) pycodestyle \
            --ignore=E24,E121,E123,E124,E126,E127,E211,E225,E226,E231,E252,E301,E302,E305,E402,E501,W504,E701,E702,E704,E722,E741 \
            --exclude=binding.py \
            --statistics Python Test | tee pep8.rpt.txt
     errs=`wc -l pep8.rpt.txt | awk '{print $1}'`
-    [ $errs -ne 0 ] && echo -n "failure" > .ci/status.txt
+    [ $errs -ne 0 ] && echo -n "failure" > ${rootdir}/.ci/status.txt
     state=`get_state`
 fi
 

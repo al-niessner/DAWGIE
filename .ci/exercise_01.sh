@@ -70,7 +70,7 @@ then
 EOF
     GNUPGHOME=${tempdir}/gnupg ${gpg_cmd} -armor --export no-reply@dawgie.jpl.nasa,gov > ${tempdir}/gnupg/dawgie.test.pub
     GNUPGHOME=${tempdir}/gnupg ${gpg_cmd} -armor --export-secret-key no-reply@dawgie.jpl.nasa,gov > ${tempdir}/gnupg/dawgie.test.sec
-    docker run --rm -e GNUPGHOME=/proj/data/gnupg -e USER=$USER -p 8080-8089:8080-8089 -u $UID -v ${PWD}/Test:/proj/src -v ${tempdir}:/proj/data ex:${ghrVersion} dawgie.pl.start --context-fe-path=/proj/data/fe &
+    docker run --rm -e GNUPGHOME=/proj/data/gnupg -e USER=$USER -p 8080-8089:8080-8089 -u $UID -v ${PWD}/Test:/proj/src -v ${tempdir}:/proj/data ex:${ghrVersion} dawgie.pl --context-fe-path=/proj/data/fe &
     python3 <<EOF
 import json
 import time

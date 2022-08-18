@@ -45,13 +45,13 @@ export GHE_API_URL PATH PYTHONPATH
 cit_version ()
 {
     lv="$(layer_versions)"
-    rm .ci/Dockerfile.1 .ci/Dockerfile.2 .ci/Dockerfile.3
+    rm ${rootdir}/.ci/Dockerfile.1 ${rootdir}/.ci/Dockerfile.2 ${rootdir}/.ci/Dockerfile.3
     echo "${lv:34:16}"
 }
 
 current_state ()
 {
-    test `cat .ci/status.txt` == "success" 
+    test `cat ${rootdir}/.ci/status.txt` == "success" 
 }
 
 download ()
@@ -63,14 +63,14 @@ download ()
 
 get_state ()
 {
-    cat .ci/status.txt
+    cat ${rootdir}/.ci/status.txt
 }
 
 layer_versions ()
 {
     python3 <<EOF
-with open ('.ci/Dockerfile.os', 'rt') as f: text = f.read()
-with open ('.ci/Dockerfile.1', 'tw') as f: f.write (text.replace ("ghrVersion", "${ghrVersion}"))
+with open ('${rootdir}/.ci/Dockerfile.os', 'rt') as f: text = f.read()
+with open ('${rootdir}/.ci/Dockerfile.1', 'tw') as f: f.write (text.replace ("ghrVersion", "${ghrVersion}"))
 EOF
     osVersion=$(python3 <<EOF
 
@@ -79,14 +79,14 @@ try:
 except:
     import hashlib
 
-with open ('.ci/Dockerfile.1', 'br') as f: data = f.read()
+with open ('${rootdir}/.ci/Dockerfile.1', 'br') as f: data = f.read()
 k = hashlib.blake2b (data, digest_size=8)
 print (k.hexdigest())
 EOF
            )
     python3 <<EOF
-with open ('.ci/Dockerfile.py', 'rt') as f: text = f.read()
-with open ('.ci/Dockerfile.2', 'tw') as f: f.write (text.replace ("ghrVersion", "${osVersion}"))
+with open ('${rootdir}/.ci/Dockerfile.py', 'rt') as f: text = f.read()
+with open ('${rootdir}/.ci/Dockerfile.2', 'tw') as f: f.write (text.replace ("ghrVersion", "${osVersion}"))
 EOF
     pyVersion=$(python3 <<EOF
 try:
@@ -94,14 +94,14 @@ try:
 except:
     import hashlib
 
-with open ('.ci/Dockerfile.2', 'br') as f: data = f.read()
+with open ('${rootdir}/.ci/Dockerfile.2', 'br') as f: data = f.read()
 k = hashlib.blake2b (data, digest_size=8)
 print (k.hexdigest())
 EOF
            )
     python3 <<EOF
-with open ('.ci/Dockerfile.cit', 'rt') as f: text = f.read()
-with open ('.ci/Dockerfile.3', 'tw') as f: f.write (text.replace ("ghrVersion", "${pyVersion}"))
+with open ('${rootdir}/.ci/Dockerfile.cit', 'rt') as f: text = f.read()
+with open ('${rootdir}/.ci/Dockerfile.3', 'tw') as f: f.write (text.replace ("ghrVersion", "${pyVersion}"))
 EOF
     citVersion=$(python3 <<EOF
 try:
@@ -109,7 +109,7 @@ try:
 except:
     import hashlib
 
-with open ('.ci/Dockerfile.3', 'br') as f: data = f.read()
+with open ('${rootdir}/.ci/Dockerfile.3', 'br') as f: data = f.read()
 k = hashlib.blake2b (data, digest_size=8)
 print (k.hexdigest())
 EOF
