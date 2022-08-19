@@ -1228,19 +1228,30 @@ def trace (task_alg_names):
         result[tn] = {}
         for tan in task_alg_names:
             tskn,algn = tan.split('.')
+            version = []
             cur.execute ('SELECT PK FROM Target WHERE name = ANY(%s);',
                          [['__all__', tn]])
             tnids = list({pk[0] for pk in cur.fetchall()})
             cur.execute ('SELECT PK FROM Task WHERE name = %s;', [tskn])
             tid = cur.fetchone()[0]
-            cur.execute ('SELECT MAX(design),MAX(implementation),MAX(bugfix) '+
+            cur.execute ('SELECT MAX(design) ' +
                          'FROM Algorithm WHERE task_ID = %s AND name = %s;',
                          [tid, algn])
-            version = cur.fetchone()
+            version.extend (cur.fetchone())
+            cur.execute ('SELECT MAX(implementation) ' +
+                         'FROM Algorithm WHERE task_ID = %s AND name = %s ' +
+                         'AND design = %s;',
+                         [tid, algn] + version)
+            version.extend (cur.fetchone())
+            cur.execute ('SELECT MAX(bugfix) ' +
+                         'FROM Algorithm WHERE task_ID = %s AND name = %s ' +
+                         'AND design = %s AND implementation = %s;',
+                         [tid, algn] + version)
+            version.extend (cur.fetchone())
             cur.execute ('SELECT PK FROM Algorithm WHERE task_ID = %s AND ' +
                          'name = %s AND design = %s AND implementation = %s ' +
                          'AND bugfix = %s;',
-                         [tid, algn, version[0], version[1], version[2]])
+                         [tid, algn] + version)
             aid = cur.fetchone()[0]
             cur.execute ('SELECT run_ID FROM Prime WHERE ' +
                          'tn_ID = ANY(%s) AND task_ID = %s AND alg_ID = %s;',
