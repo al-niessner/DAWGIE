@@ -87,7 +87,7 @@ def execute (address:(str,int), inc:int, ps_hint:int, rev:str):
                                         tim=m.timing,
                                         val=nv)
         except (dawgie.NoValidInputDataError, dawgie.NoValidOutputDataError):
-            logging.getLogger(__name__).exception ('Job "%s" had invalid data for run id %s and target "%s"',  str(m.jobid), str(m.runid), str(m.target))
+            logging.getLogger(__name__).info ('Job "%s" had invalid data for run id %s and target "%s"',  str(m.jobid), str(m.runid), str(m.target))
             m = dawgie.pl.message.make (typ=dawgie.pl.message.Type.response,
                                         inc=m.target,
                                         jid=m.jobid,
