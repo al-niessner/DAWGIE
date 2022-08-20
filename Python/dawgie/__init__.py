@@ -488,6 +488,10 @@ class Dataset(_Metric):
         '''see load() of this class'''
         raise NotImplementedError()
 
+    def _redirect(self, subname:str)->'Dataset':
+        '''see redirect() of this class'''
+        raise NotImplementedError()
+
     def _runid(self)->int: return self.__bot._runid()
     def _task(self)->str: return self.__bot._name()
     def _tn(self)->str: return self.__tn
@@ -515,6 +519,17 @@ class Dataset(_Metric):
         '''
         self.measure (self._load, args=(algref, err, ver))
         return
+
+    def redirect (self, subname:str)->'Dataset':
+        '''Redirect this Dataset to a new subtarget in a new Dataset
+
+        subname - create a new target name based on the current target name and
+                  the new given subname where the actual resulting name in the
+                  database will be target_name(subname)
+
+        returns a new Dataset that using the target_name(subname) as its target
+        '''
+        return self._redirect (f'{self.__tn}({subname})')
 
     def update(self)->None:
         '''Update intermediate data in the database

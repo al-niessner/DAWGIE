@@ -47,6 +47,7 @@ NTR: 49811
 # pylint: disable=protected-access,redefined-builtin,too-many-arguments
 
 import collections
+import dawgie
 import dawgie.context
 import dawgie.util
 import importlib
@@ -69,13 +70,23 @@ def _prime_keys():
 def _prime_values():
     return _db_in_use()._prime_values()
 
+def add (target_name:str)->bool:
+    '''Add a new target to the known list
+
+    target_name - the name of the target to add
+
+    return True if the target already exists or was successfully added and
+           False otherwise
+    '''
+    return _db_in_use().add (target_name)
+
 def archive (done): return _db_in_use().archive (done)
 
 def close():
     '''Close the database'''
     return _db_in_use().close()
 
-def connect (alg, bot, tn):
+def connect (alg, bot, tn)->dawgie.Dataset:
     '''Connect an dawgie.Dataset to the database backend
 
     Separates the user from the database implementation.
@@ -109,7 +120,7 @@ def copy (dst, method, gateway):
     '''Copy database to destination.'''
     return _db_in_use().copy(dst, method, gateway)
 
-def gather (anz, ans):
+def gather (anz, ans)->dawgie.Aspect:
     '''Gather an dawgie.Aspect to the database backend
 
     anz : instance of dawgie.Analyzer that will be using the Aspect
@@ -152,7 +163,7 @@ def reopen()->bool:
     '''
     return _db_in_use().reopen()
 
-def retreat (reg, ret):
+def retreat (reg, ret)->dawgie.Timeline:
     '''Get a dawgie.Timeline from the database backend
 
     reg : instance of dawgie.Regression that will be using the Timeline
