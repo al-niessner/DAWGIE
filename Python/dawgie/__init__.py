@@ -534,10 +534,9 @@ class Dataset(_Metric):
         returns a new Dataset that using the target_name(subname) as its target
         '''
         if subname == '..' and '(' not in self.__tn:
-            raise ArguementError(f'{self.__tn} is not a sub-target')
-        return self._redirect (self.__tn[:self.__tn.rfind ('(')
-                                         if subname == '..' else
-                               f'{self.__tn}({subname})')
+            raise TypeError(f'{self.__tn} is not a sub-target')
+        return self._redirect (self.__tn[:self.__tn.rfind ('(')]
+                               if subname == '..' else f'{self.__tn}({subname})')
 
     def update(self)->None:
         '''Update intermediate data in the database

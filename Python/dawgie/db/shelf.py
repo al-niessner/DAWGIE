@@ -709,6 +709,13 @@ def _update (table, name, ver):
         pass
     return
 
+def add (target_name:str)->bool:
+    if isinstance (dawgie.db.shelf._db, bool): Connector()._set (target_name,
+                                                                 Table.target,
+                                                                 None)
+    else: dawgie.db.shelf._db.target.add (target_name)
+    return True
+
 def archive (done):
     path = dawgie.context.db_rotate_path
     if not (os.path.exists (path) and os.path.isdir (path)):
