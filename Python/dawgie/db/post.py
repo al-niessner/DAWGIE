@@ -440,6 +440,9 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         self.__purge()
         return
 
+    def _redirect (self, subname:str)->dawgie.Dataset:
+        return Interface(self._alg(), self._bot(), subname)
+
     def _update (self):
         # pylint: disable=too-many-locals,too-many-statements
         if self._alg().abort(): raise dawgie.AbortAEError()

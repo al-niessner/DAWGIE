@@ -352,6 +352,9 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
             pass
         return
 
+    def _redirect (self, subname:str)->dawgie.Dataset:
+        return Interface(self._alg(), self._bot(), subname)
+
     def _update (self):
         if self._alg().abort(): raise dawgie.AbortAEError()
 

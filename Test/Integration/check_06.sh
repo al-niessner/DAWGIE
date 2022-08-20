@@ -105,7 +105,7 @@ EOF
     rm -f ${rootdir}/.ci/Dockerfile.[1-4]
 
     command -v gpg2 && gpg_cmd="gpg2" || gpg_cmd="gpg"
-    plname=dit #$(mktemp -u dit_XXXXX)
+    plname=$(mktemp -u dit_XXXXX)
     tempdir=$(mktemp -d /tmp/tmp.XXXXXX)
     mkdir -p ${tempdir}/{db,dbs,fe,gnupg,logs,stg}
     mkdir ${tempdir}/gnupg/private-keys-v1.d
@@ -168,8 +168,8 @@ EOF
     wait_for_idle
     wait_for_running
     ## check logs for archiving
-    #docker stop ${plname}
-    #rm -r ${tempdir}
+    docker stop ${plname}
+    rm -r ${tempdir}
     state=`get_state`
 fi
 
