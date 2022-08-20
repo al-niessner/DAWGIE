@@ -89,6 +89,14 @@ class DB:
                            dawgie.db.testdata.VAL_CNT), len(values))
         return
 
+    def test_add (self):
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.add,
+                           dawgie.db.testdata.TARGET)
+        # actual testing of adding is done in test_targets because no way
+        # to delete added targets
+        return
+
     def test_archive(self):
         self.assertTrue (True)  # not testable in a reasonable sense
         return
@@ -311,6 +319,9 @@ class DB:
         targets = dawgie.db.targets()
         self.assertEqual (1, len(targets))
         self.assertEqual (dawgie.db.testdata.TARGET, targets[0])
+        self.assertTrue (dawgie.db.add (dawgie.db.testdata.TARGET))
+        self.assertTrue (dawgie.db.add (dawgie.db.testdata.TARGET + '_a'))
+        dawgie.db.close()
         return
 
     def test_trace(self):
@@ -323,7 +334,8 @@ class DB:
                 'Task_02.Algorithm_{:02d}'.format (last_alg)]
         runids = dawgie.db.trace (tans)
         dawgie.db.close()
-        self.assertEqual (1, len(runids))
+        self.assertEqual (2 if dawgie.db.testdata.TARGET + '_a' in runids else 1,
+                          len(runids))
         self.assertEqual (3, len(runids[dawgie.db.testdata.TARGET]))
         self.assertEqual (17, runids[dawgie.db.testdata.TARGET][tans[0]])
         self.assertEqual (0, runids[dawgie.db.testdata.TARGET][tans[1]])
