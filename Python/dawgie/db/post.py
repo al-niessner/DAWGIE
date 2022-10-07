@@ -440,6 +440,9 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         self.__purge()
         return
 
+    def _redirect (self, subname:str)->dawgie.Dataset:
+        return Interface(self._alg(), self._bot(), subname)
+
     def _update (self):
         # pylint: disable=too-many-locals,too-many-statements
         if self._alg().abort(): raise dawgie.AbortAEError()
@@ -746,6 +749,27 @@ def _prime_values():
     cur.close()
     conn.close()
     return [v[0] for v in vals]
+
+def add (target_name:str)->bool:
+    if not dawgie.db.post._db: raise RuntimeError('called connect before open')
+
+    conn = _conn()
+    cur = _cur (conn, True)
+    exists = False
+    cur.execute('SELECT pk from Target WHERE name = %s;', [target_name])
+    pk = cur.fetchone()
+
+    if pk: exists = len (pk) == 1
+    else:
+        try:
+            cur.execute('INSERT into Target (name) values (%s)', [target_name])
+            conn.commit()
+            exists = True
+        except psycopg.IntegrityError: conn.rollback()
+        except psycopg.ProgrammingError: conn.rollback()  # permission issue
+    cur.close()
+    conn.close()
+    return exists
 
 def archive (done):
     bfn = dawgie.context.db_name + '.{:02d}.bck'

@@ -352,6 +352,9 @@ class Interface(Connector, dawgie.db.util.aspect.Container,
             pass
         return
 
+    def _redirect (self, subname:str)->dawgie.Dataset:
+        return Interface(self._alg(), self._bot(), subname)
+
     def _update (self):
         if self._alg().abort(): raise dawgie.AbortAEError()
 
@@ -708,6 +711,13 @@ def _update (table, name, ver):
         table[name] = l
         pass
     return
+
+def add (target_name:str)->bool:
+    if isinstance (dawgie.db.shelf._db, bool): Connector()._set (target_name,
+                                                                 Table.target,
+                                                                 None)
+    else: dawgie.db.shelf._db.target.add (target_name)
+    return True
 
 def archive (done):
     path = dawgie.context.db_rotate_path

@@ -41,6 +41,8 @@ NTR: 49811
 
 from dawgie.db import REF
 
+def add (target_name:str)->bool: return False
+
 def archive (done): raise NotImplementedError()
 
 def close(): return

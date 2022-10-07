@@ -66,7 +66,7 @@ class Analyzer(dawgie.Analyzer):
         fid,tn = tempfile.mkstemp()
         os.close (fid)
         os.unlink (tn)
-        dawgie.db.connect (Engine(), aspects.ds()._bot(), tn).load()
+        dawgie.db.add (tn)
         aspects.ds().update()
         return
 
