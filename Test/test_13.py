@@ -189,7 +189,9 @@ class DB:
         dawgie.db.close()
         self.assertRaises (RuntimeError, dawgie.db.gather, anz, ans)
         dawgie.db.open()
-        self.assertIsNotNone (dawgie.db.gather (anz, ans))
+        asp = dawgie.db.gather (anz, ans)
+        self.assertIsNotNone (asp)
+        self.assertEquals (0, len (asp))
         dawgie.db.close()
         return
 
@@ -308,7 +310,9 @@ class DB:
         dawgie.db.close()
         self.assertRaises (RuntimeError, dawgie.db.retreat, reg, ret)
         dawgie.db.open()
-        self.assertIsNotNone (dawgie.db.retreat (reg, ret))
+        tl = dawgie.db.retreat (reg, ret)
+        self.assertIsNotNone (tl)
+        self.assertEqual (0, len(tl))
         dawgie.db.close()
         return
 
