@@ -387,20 +387,14 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                          'sv_ID = ANY(%s);', [tnid, task_ID, alg_IDs, sv_IDs])
             rids = sorted ({r[0] for r in cur.fetchall()})
             for rid in rids:
-                cur.execute ('SELECT alg_ID,sv_ID FROM Prime WHERE ' +
+                cur.execute ('SELECT PK,alg_ID,sv_ID FROM Prime WHERE ' +
                              'run_ID = %s AND  tn_ID = %s AND ' +
                              'task_ID = %s AND alg_ID = ANY(%s) AND ' +
                              'sv_ID = ANY(%s);',
                              [rid, tnid, task_ID, alg_IDs, sv_IDs])
                 ids = cur.fetchall()
-                aids = {id[0] for id in ids}
-                svids = {id[1] for id in ids}
-
-                if len (aids) != 1 and len (svids) != 1:
-                    log.critical ('Database corruption from many versions at one run id.')
-                    continue
-
-                alg_ID,sv_ID = aids.pop(),svids.pop()
+                pks = [id[0] for id in ids]
+                pk_ID,alg_ID,sv_ID = ids[pks.index(max(pks))]
                 cur.execute('SELECT val_ID from Prime WHERE run_ID = %s AND ' +
                             'alg_ID = %s AND tn_ID = %s and task_ID = %s and ' +
                             'sv_ID = %s;',
