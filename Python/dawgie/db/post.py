@@ -394,7 +394,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                              [rid, tnid, task_ID, alg_IDs, sv_IDs])
                 ids = cur.fetchall()
                 pks = [id[0] for id in ids]
-                pk_ID_,alg_ID,sv_ID = ids[pks.index(max(pks))]
+                alg_ID,sv_ID = ids[pks.index(max(pks))][1:]
                 cur.execute('SELECT val_ID from Prime WHERE run_ID = %s AND ' +
                             'alg_ID = %s AND tn_ID = %s and task_ID = %s and ' +
                             'sv_ID = %s;',
