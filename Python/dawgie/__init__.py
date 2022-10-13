@@ -425,7 +425,7 @@ class Aspect:
 
     Access to the data is provided by making the Aspect look behave like
     a dictionary. The data is arranged as [tn][fsvn][vn] where
-        tm - target name
+        tn - target name
         fsvn - algorithm name and state vector name
         vn - value or feature name
 
