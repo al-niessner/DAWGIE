@@ -374,11 +374,11 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
             cur.execute('SELECT PK from Algorithm WHERE name = %s and ' +
                         'task_ID = %s;',
                         (ref.impl.name(), task_ID,))
-            alg_IDs = cur.fetchall()
+            alg_IDs = [aid[0] for aid in cur.fetchall()]
             cur.execute('SELECT PK FROM StateVector WHERE name = %s and ' +
                         'alg_ID = ANY(%s);',
                         (ref.item.name(), alg_IDs,))
-            sv_IDs = cur.fetchall()
+            sv_IDs = [svid[0] for svid in cur.fetchall()]
             fsvn = '.'.join ([dawgie.util.task_name (ref.factory),
                               ref.impl.name(),
                               ref.item.name()])
