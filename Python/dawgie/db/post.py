@@ -434,7 +434,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         self.__purge()
         return
 
-    def _redirect (self, subname:str)->dawgie.Dataset:
+    def _retarget (self,subname:str,upstream:[dawgie.ALG_REF])->dawgie.Dataset:
         return Interface(self._alg(), self._bot(), subname)
 
     def _update (self):

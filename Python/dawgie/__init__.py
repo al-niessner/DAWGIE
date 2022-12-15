@@ -488,8 +488,8 @@ class Dataset(_Metric):
         '''see load() of this class'''
         raise NotImplementedError()
 
-    def _redirect(self, subname:str)->'Dataset':
-        '''see redirect() of this class'''
+    def _retarget(self, subname:str, upstream:[ALG_REF])->'Dataset':
+        '''see retarget() of this class'''
         raise NotImplementedError()
 
     def _runid(self)->int: return self.__bot._runid()
@@ -520,8 +520,8 @@ class Dataset(_Metric):
         self.measure (self._load, args=(algref, err, ver))
         return
 
-    def redirect (self, subname:str)->'Dataset':
-        '''Redirect this Dataset to a new subtarget in a new Dataset
+    def retarget (self, subname:str, upstream:[ALG_REF])->'Dataset':
+        '''Retarget this Dataset to a new subtarget in a new Dataset
 
         subname - create a new target name based on the current target name and
                   the new given subname where the actual resulting name in the
@@ -533,10 +533,12 @@ class Dataset(_Metric):
 
         returns a new Dataset that using the target_name(subname) as its target
         '''
-        if subname == '..' and '(' not in self.__tn:
-            raise TypeError(f'{self.__tn} is not a sub-target')
-        return self._redirect (self.__tn[:self.__tn.rfind ('(')]
-                               if subname == '..' else f'{self.__tn}({subname})')
+        if subname == '..' and '(' not in self._tn():
+            raise TypeError(f'{self._tn()} is not a sub-target')
+
+        name = (self._tn()[:self._tn().rfind ('(')]
+                if subname == '..' else f'{self._tn()}({subname})')
+        return self._retarget (name, upstream)
 
     def update(self)->None:
         '''Update intermediate data in the database
