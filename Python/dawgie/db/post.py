@@ -133,15 +133,15 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
             pass
         return
 
-    def __tn_id (self, conn, cur):
+    def __tn_id (self, conn, cur, tn=None):
+        tn = tn if tn else self._tn()
         # Get target id that matches target name or create it if not there
         try:
-            cur.execute('INSERT into Target (name) values (%s)', [self._tn()])
+            cur.execute('INSERT into Target (name) values (%s)', [tn])
             conn.commit()
         except psycopg.IntegrityError: conn.rollback()
         except psycopg.ProgrammingError: conn.rollback()  # permission issue
-        cur.execute('SELECT * from Target WHERE name = %s;',
-                    [self._tn()])
+        cur.execute('SELECT * from Target WHERE name = %s;', [tn])
         tn_ID = _fetchone(cur,'Dataset: Could not find target ID')
         return tn_ID
 
@@ -435,6 +435,44 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         return
 
     def _retarget (self,subname:str,upstream:[dawgie.ALG_REF])->dawgie.Dataset:
+        conn = dawgie.db.post._conn()
+        cur = dawgie.db.post._cur (conn)
+        target_ID = self.__tn_id (conn, cur)
+        subname_ID = self.__tn_id (conn, cur, subname)
+        for ref in upstream:
+            cur.execute ('SELECT PK FROM Task WHERE name = %s;',
+                         [dawgie.util.task_name (ref.factory)])
+            task_ID = cur.fetchone()[0]
+            cur.execute('SELECT PK from Algorithm WHERE name = %s and ' +
+                        'task_ID = %s and ' +
+                        'design = %s and implementation = %s and bugfix = %s;',
+                        (ref.impl.name(), task_ID, ref.impl.design(),
+                         ref.impl.implementation(), ref.impl.bugfix()))
+            alg_ID = cur.fetchone()[0]
+            cur.execute ('SELECT run_ID FROM Prime WHERE tn_ID = %s AND ' +
+                         'task_ID = %s AND alg_ID = %s;',
+                         [target_ID, task_ID, alg_ID])
+            rid = max(r[0] for r in cur.fetchall())
+            cur.execute ('SELECT sv_ID,val_ID,blob_name FROM Prime WHERE ' +
+                         'run_ID %s AND tn_ID = %s AND task_ID = %s AND ' +
+                         'alg_ID = %s;', [rid, target_ID, task_ID, alg_ID])
+            for sv_ID,val_ID,bn in cur.fetchall():
+                cur.execute ('SELECT EXISTS (SELECT 1 FROM Prime WHERE ' +
+                             'run_ID = %s AND tn_ID = %s AND task_ID = %s ' +
+                             'AND alg_ID = %s AND sv_ID = %s AND val_ID = %s ' +
+                             'AND blob_name = %s);',
+                             [rid,subname_ID,task_ID,alg_ID,sv_ID,val_ID,bn])
+                if not cur.fetchone()[0]:
+                    cur.execute ('INSERT INTO Prime ' +
+                                 '(run_ID,tn_ID,task_ID,alg_ID,sv_ID,val_ID) ' +
+                                 'values (%s, %s, %s, %s, %s, %s, %s);',
+                                 [rid,subname_ID,task_ID,alg_ID,sv_ID,val_ID,bn])
+                    pass
+                pass
+            pass
+        conn.commit()
+        cur.close()
+        conn.close()
         return Interface(self._alg(), self._bot(), subname)
 
     def _update (self):
