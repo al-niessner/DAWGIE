@@ -454,7 +454,7 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                          [target_ID, task_ID, alg_ID])
             rid = max(r[0] for r in cur.fetchall())
             cur.execute ('SELECT sv_ID,val_ID,blob_name FROM Prime WHERE ' +
-                         'run_ID %s AND tn_ID = %s AND task_ID = %s AND ' +
+                         'run_ID = %s AND tn_ID = %s AND task_ID = %s AND ' +
                          'alg_ID = %s;', [rid, target_ID, task_ID, alg_ID])
             for sv_ID,val_ID,bn in cur.fetchall():
                 cur.execute ('SELECT EXISTS (SELECT 1 FROM Prime WHERE ' +
@@ -464,8 +464,9 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                              [rid,subname_ID,task_ID,alg_ID,sv_ID,val_ID,bn])
                 if not cur.fetchone()[0]:
                     cur.execute ('INSERT INTO Prime ' +
-                                 '(run_ID,tn_ID,task_ID,alg_ID,sv_ID,val_ID) ' +
-                                 'values (%s, %s, %s, %s, %s, %s, %s);',
+                                 '(run_ID, tn_ID, task_ID, alg_ID, sv_ID, ' +
+                                 'val_ID, blob_name) values ' +
+                                 '(%s, %s, %s, %s, %s, %s, %s);',
                                  [rid,subname_ID,task_ID,alg_ID,sv_ID,val_ID,bn])
                     pass
                 pass
