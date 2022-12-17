@@ -439,6 +439,8 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
         cur = dawgie.db.post._cur (conn)
         target_ID = self.__tn_id (conn, cur)
         subname_ID = self.__tn_id (conn, cur, subname)
+        log.info ('retarget "%s"[%d] as "%s"[%d]',
+                  self._tn(), target_ID, subname, subname_ID)
         for ref in upstream:
             cur.execute ('SELECT PK FROM Task WHERE name = %s;',
                          [dawgie.util.task_name (ref.factory)])
@@ -462,7 +464,11 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                              'AND alg_ID = %s AND sv_ID = %s AND val_ID = %s ' +
                              'AND blob_name = %s);',
                              [rid,subname_ID,task_ID,alg_ID,sv_ID,val_ID,bn])
-                if not cur.fetchone()[0]:
+                already_exists = cur.fetchone()[0]
+                log.info ('retarget %s: %s',
+                          ('exists' if already_exists else 'does not exist'),
+                          str ([rid,subname_ID,task_ID,alg_ID,sv_ID,val_ID,bn]))
+                if not already_exists:
                     cur.execute ('INSERT INTO Prime ' +
                                  '(run_ID, tn_ID, task_ID, alg_ID, sv_ID, ' +
                                  'val_ID, blob_name) values ' +
