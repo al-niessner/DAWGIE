@@ -536,8 +536,8 @@ class Dataset(_Metric):
         if subname == '..' and '(' not in self._tn():
             raise TypeError(f'"{self._tn()}" is not a sub-target')
 
-        if subname != '..' and subname.contains ('.'):
-            raise ValueError(f'"{subname}" contain an illegal .')
+        if subname != '..' and '.' in subname:
+            raise ValueError(f'"{subname}" contain the illegal . character')
 
         name = (self._tn()[:self._tn().rfind ('(')]
                 if subname == '..' else f'{self._tn()}({subname})')
