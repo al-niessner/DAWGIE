@@ -533,14 +533,18 @@ class Dataset(_Metric):
 
         returns a new Dataset that using the target_name(subname) as its target
         '''
-        if subname == '..' and '(' not in self._tn():
+        is_not_subnamed = '(' not in self._tn()
+
+        if subname == '..' and is_not_subnamed:
             raise TypeError(f'"{self._tn()}" is not a sub-target')
 
-        if subname != '..' and '.' in subname:
-            raise ValueError(f'"{subname}" contain the illegal . character')
+        if subname != '..' and any(c in subname for c in '(.)'):
+            raise ValueError(f'"{subname}" contains an illegal character "(.)"')
 
-        name = (self._tn()[:self._tn().rfind ('(')]
-                if subname == '..' else f'{self._tn()}({subname})')
+        name = (self._tn()[:self._tn().rfind ('(')].strip()
+                if subname == '..' else (f'{self._tn()} ({subname})'
+                                         if is_not_subnamed else
+                                         f'{self._tn()}({subname})'))
         return self._retarget (name, upstream)
 
     def update(self)->None:
