@@ -467,13 +467,14 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                 already_exists = cur.fetchone()[0]
                 log.debug ('retarget %s: %s',
                            ('exists' if already_exists else 'does not exist'),
-                          str ([rid,subname_ID,task_ID,alg_ID,sv_ID,val_ID,bn]))
+                           str([rid,subname_ID,task_ID,alg_ID,sv_ID,val_ID,bn]))
                 if not already_exists:
                     cur.execute ('INSERT INTO Prime ' +
                                  '(run_ID, tn_ID, task_ID, alg_ID, sv_ID, ' +
                                  'val_ID, blob_name) values ' +
                                  '(%s, %s, %s, %s, %s, %s, %s);',
                                  [rid,subname_ID,task_ID,alg_ID,sv_ID,val_ID,bn])
+                    conn.commit()
                     pass
                 pass
             pass
