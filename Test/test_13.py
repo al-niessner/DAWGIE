@@ -436,7 +436,6 @@ class Post(DB,unittest.TestCase):
         return
     pass
 
-@unittest.skip ('current shelf is not a true replacement for postgres')
 class Shelf(DB,unittest.TestCase):
     @classmethod
     def setUpClass(cls):
