@@ -65,9 +65,11 @@ def _db_in_use():
     return m
 
 def _prime_keys():
+    '''return all the kyes in the form runid.targetname.task.alg.sv.valname'''
     return _db_in_use()._prime_keys()
 
 def _prime_values():
+    '''return all of the blob names'''
     return _db_in_use()._prime_values()
 
 def add (target_name:str)->bool:
