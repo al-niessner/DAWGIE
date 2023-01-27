@@ -38,13 +38,13 @@ NTR:
 '''
 
 import argparse
-import dawgie.db.shelve
+import dawgie.db.shelve.util
 import logging; log = logging.getLogger(__name__)
 import os
 import shelve
 import sys
 
-from dawgie.db.shelve import LocalVersion
+from dawgie.db.shelve.util import LocalVersion
 
 def _cur(conn):
     '''consolidate the pylint disabling'''
@@ -88,7 +88,7 @@ def convert_algorithm_db(conn, fn:str, trans:{int:int}, all_vers:bool):
         parent = trans[r[2]]
         version = LocalVersion(r[-3:])
         tdb[r[0]] = len(i)
-        dawgie.db.shelve.append (name, table, index, parent, version)
+        dawgie.db.shelve.util.append (name, table, index, parent, version)
         pass
     table.close()
     conn.commit()
@@ -132,7 +132,7 @@ def convert_state_vector_db(conn, fn:str, trans:{int:int}, all_vers:bool):
         parent = trans[r[2]]
         version = LocalVersion(r[-3:])
         tdb[r[0]] = len(i)
-        dawgie.db.shelve.append (name, table, index, parent, version)
+        dawgie.db.shelve.util.append (name, table, index, parent, version)
         pass
     table.close()
     conn.commit()
@@ -149,7 +149,7 @@ def convert_target_db(conn, fn):
     tdb = {}
     for r in rows:
         tdb[r[0]] = len(i)
-        dawgie.db.shelve.append (r[1], table, index)
+        dawgie.db.shelve.util.append (r[1], table, index)
         pass
     table.close()
     conn.commit()
@@ -166,7 +166,7 @@ def convert_task_db(conn, fn):
     tdb = {}
     for r in rows:
         tdb[r[0]] = len(i)
-        dawgie.db.shelve.append (r[1], table, index)
+        dawgie.db.shelve.util.append (r[1], table, index)
         pass
     table.close()
     conn.commit()
@@ -187,7 +187,7 @@ def convert_value_vector_db(conn, fn, trans:{int:int}, all_vers:bool):
         parent = trans[r[2]]
         version = LocalVersion(r[-3:])
         tdb[r[0]] = len(i)
-        dawgie.db.shelve.append (name, table, index, parent, version)
+        dawgie.db.shelve.util.append (name, table, index, parent, version)
         pass
     table.close()
     conn.commit()

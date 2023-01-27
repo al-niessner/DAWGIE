@@ -64,7 +64,7 @@ def _db_in_use():
     m = importlib.import_module ('dawgie.db.' + dawgie.context.db_impl)
     return m
 
-def _prime_keys()->[(int,str,str,str,str,str)]:
+def _prime_keys()->[str]:
     '''return all the kyes in the form runid.targetname.task.alg.sv.valname'''
     return _db_in_use()._prime_keys()
 

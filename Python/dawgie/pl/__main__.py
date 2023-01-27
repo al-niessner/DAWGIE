@@ -92,7 +92,7 @@ if args.port != dawgie.context.fe_port:
                                       args.context_cloud_port)
     args.context_db_port = _merge (dawgie.context.fe_port,
                                    gnew,
-                                   dawgie.context.PortOffset.shelf.value,
+                                   dawgie.context.PortOffset.shelve.value,
                                    args.context_db_port)
     args.context_farm_port = _merge (dawgie.context.fe_port,
                                      gnew,

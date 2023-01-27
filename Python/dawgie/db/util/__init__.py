@@ -37,7 +37,7 @@ NTR:
 '''
 
 import dawgie.context
-import logging
+import logging; log = logging.getLogger(__name__)
 import os
 import pickle
 import shutil
@@ -85,7 +85,7 @@ def rotate(path, orig, backup):
     if not orig:
         for i in sorted(backup.keys()):
             if backup[i]:
-                logging.getLogger(__name__).warning("orig db missing, copying from db %d", i)
+                log.warning("orig db missing, copying from db %d", i)
                 for v in backup[i]:
                     t = v.split(".")[-1]
                     shutil.copy(v, f'{path}/{dawgie.context.db_name}.{t}')
