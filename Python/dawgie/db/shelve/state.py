@@ -50,15 +50,18 @@ from .enums import Table
 class DBI:
     '''contains the shelve dictionary-file and tracks their state'''
     def __init__(self):
-        self.__indices = self.__Group({n:None for n in self.__names})
-        self.__reopened = False
-        self.__tables = self.__Group({n:None for n in self.__names})
-        self.__task_engine = None
+        if not hasattr (self, '_DBI__tables'):
+            self.__indices = self.__Group(**{n:None for n in self.__names})
+            self.__reopened = False
+            self.__tables = self.__Group(**{n:None for n in self.__names})
+            self.__task_engine = None
+            pass
         return
 
     def __new__(cls):
         if not hasattr (cls, '_DBI__myself'):
-            cls.__names = [tab.name for tab in sorted (lambda e:e.value, Table)]
+            cls.__names = [tab.name for tab in sorted (Table,
+                                                       key=lambda e:e.value)]
             cls.__Group = collections.namedtuple ('Group', cls.__names)
             cls.__myself = super(DBI, cls).__new__(cls)
             pass
@@ -82,15 +85,17 @@ class DBI:
 
     def open(self):
         '''open all the dictionary-files'''
-        db,idx = {},{}
-        path = os.path.join (dawgie.context.db_path, dawgie.context.db_name)
-        for name in self.__names:
-            db[name] = shelve.open ('.'.join ([path, name]))
-            idx[name] = util.indexed (db[name])
+        if not self.is_open:
+            db,idx = {},{}
+            path = os.path.join (dawgie.context.db_path, dawgie.context.db_name)
+            for name in self.__names:
+                db[name] = shelve.open ('.'.join ([path, name]))
+                idx[name] = util.indexed (db[name])
+                pass
+            self.__indices = self.__Group(**idx)
+            self.__tables = self.__Group(**db)
+            self.__task_engine = dawgie.db.lockview.TaskLockEngine()
             pass
-        self.__indices = self.__Group(**idx)
-        self.__tables = self.__Group(**db)
-        self.__task_engine = dawgie.db.lockview.TaskLockEngine()
         return
 
     def reopen(self):

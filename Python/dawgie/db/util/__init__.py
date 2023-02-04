@@ -61,7 +61,7 @@ def decode (entry):
 
 def encode (value):
     fid,fn = tempfile.mkstemp (dir=dawgie.context.data_stg,
-                               prefix='shelf_', suffix='.pkl')
+                               prefix='shelve_', suffix='.pkl')
     os.close (fid)
     with open (fn, 'wb') as f: pickle.dump (value, f, pickle.HIGHEST_PROTOCOL)
     os.chmod (fn, int ('0664', 8))  # -rw-rw-r--

@@ -94,11 +94,11 @@ def _regression (regress, regression):
     timeline.recede (regression.variables())
     return regression.feedback() + regression.variables()
 
-def _shelf (fn): return shelve.open (fn) if fn else fn
+def _shelve (fn): return shelve.open (fn) if fn else fn
 
 ap = argparse.ArgumentParser(description='Replicate a small part of the DAWGIE data stored by DAWGIE into --output-dir. The output can then be used by private pipelines detached from the original DAWGIE system.')
 ap.add_argument ('-DB', '--private-database', default=None, required=False,
-                 type=_shelf, help='when the database contains old data')
+                 type=_shelve, help='when the database contains old data')
 ap.add_argument ('-O', '--output-dir', required=True, type=_dir,
                  help='directory to write the value files to')
 ap.add_argument ('-r', '--runid', default=1 << 30, required=False, type=int,

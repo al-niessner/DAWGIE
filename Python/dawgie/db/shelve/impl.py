@@ -228,7 +228,9 @@ def next():  # pylint: disable=redefined-builtin
     '''Return the next run ID'''
     if not DBI().is_open: raise RuntimeError('called next before open')
     if DBI().is_reopened: raise RuntimeError('called outside of Foreman context')
-    return max(*[key[0] for key in DBI().tables.primary], 0) + 1
+
+    known = [int(key[0]) for key in DBI().tables.primary]
+    return max(known) if known else 1
 
 def open():  # pylint: disable=redefined-builtin
     '''Open the database'''
@@ -343,13 +345,11 @@ def update (tsk, alg, sv, vn, v):
     util.append (tsk._name(),  # pylint: disable=protected-access
                  DBI().tables.task, DBI().indices.task)
     tskid = DBI().tables.task
-    util.append (alg.name(), DBI().tables.alg, DBI().indices.alg,
-                 tskid, alg.asstring())
-    algid = DBI().tables.alg[util.construct (alg.name(), tskid, alg.asstring())]
-    util.append (sv.name(), DBI().tables.state, DBI().indices.state,
-                 algid, sv.asstring())
-    svid = DBI().tables.state[util.construct (sv.name(), algid, sv.asstring())]
-    util.append (vn, DBI().tables.value, DBI().indices.value, svid, v.asstring())
+    util.append (alg.name(), DBI().tables.alg, DBI().indices.alg, tskid, alg)
+    algid = DBI().tables.alg[util.construct (alg.name(), tskid, alg)]
+    util.append (sv.name(), DBI().tables.state, DBI().indices.state, algid, sv)
+    svid = DBI().tables.state[util.construct (sv.name(), algid, sv)]
+    util.append (vn, DBI().tables.value, DBI().indices.value, svid, v)
     return
 
 def versions():

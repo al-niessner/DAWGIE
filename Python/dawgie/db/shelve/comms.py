@@ -57,8 +57,7 @@ from .enums import Mutex
 from .enums import Table
 from .state import DBI
 
-COMMAND = collections.namedtuple('COMMAND',
-                                 ['func', 'key', 'parent', 'table', 'value'])
+COMMAND = collections.namedtuple('COMMAND', ['func', 'key', 'table', 'value'])
 
 class Connector:
     # this class is meant to be extendend not used hence
@@ -99,9 +98,6 @@ class Connector:
 
     def _update_cmd (self, key, table, value):
         return self.__do (COMMAND(Func.upd, key, table, value))
-
-    def _version (self, key, table, value):
-        return self.__do (COMMAND(Func.ver, key, table, value.asstring()))
 
     # public methods for modules in this package
     def copy (self, dat):
@@ -231,11 +227,6 @@ class Worker(twisted.internet.protocol.Protocol):
                 DBI().tables[request.table.value][request.key] = None
                 self._send (False)
                 pass
-            pass
-        elif request.func == Func.ver:
-            util.append (request.key, DBI().tables[request.table.value],
-                         request.parent, util.LocalVersion(request.value))
-            self._send (True)
             pass
         else: log.error ('Did not understand %s', str (request))
         return

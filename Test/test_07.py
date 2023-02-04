@@ -40,6 +40,7 @@ NTR:
 import dawgie
 import dawgie.context
 import dawgie.db
+import dawgie.db.shelve.comms
 import os
 import shutil
 import tempfile
@@ -80,14 +81,14 @@ class aV(dawgie.Value):
     def features(self): return []
     pass
 
-class Shelf(unittest.TestCase):
+class Shelve(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.root = tempfile.mkdtemp()
         print (cls.root)
         for subdir in ['db', 'dbs', 'stg']: os.makedirs(os.path.join
                                                         (cls.root, subdir))
-        dawgie.context.db_impl = 'shelf'
+        dawgie.context.db_impl = 'shelve'
         dawgie.context.db_path = os.path.join (cls.root, 'db')
         dawgie.context.data_dbs = os.path.join (cls.root, 'dbs')
         dawgie.context.data_log = os.path.join (cls.root, 'logs')
@@ -95,14 +96,14 @@ class Shelf(unittest.TestCase):
         dawgie.db_rotate_path = dawgie.context.db_path
         dawgie.db.open()
         base = aFoo('foo', 0, 1)
-        cls._acquire = getattr (dawgie.db.shelf.Connector, '_keys')
-        cls._do = getattr (dawgie.db.shelf.Connector, '_Connector__do')
-        cls._release = getattr (dawgie.db.shelf.Connector, '_keys')
-        cls._send = getattr (dawgie.db.shelf.Worker, '_send')
-        setattr (dawgie.db.shelf.Connector, '_acquire', mock_acquire)
-        setattr (dawgie.db.shelf.Connector, '_Connector__do', mock_do)
-        setattr (dawgie.db.shelf.Connector, '_release', mock_release)
-        setattr (dawgie.db.shelf.Worker, '_send', mock_send)
+        cls._acquire = getattr (dawgie.db.shelve.comms, 'acquire')
+        cls._do = getattr (dawgie.db.shelve.comms.Connector, '_Connector__do')
+        cls._release = getattr (dawgie.db.shelve.comms, 'release')
+        cls._send = getattr (dawgie.db.shelve.comms.Worker, '_send')
+        setattr (dawgie.db.shelve.comms, 'acquire', mock_acquire)
+        setattr (dawgie.db.shelve.comms.Connector, '_Connector__do', mock_do)
+        setattr (dawgie.db.shelve.comms, 'release', mock_release)
+        setattr (dawgie.db.shelve.comms.Worker, '_send', mock_send)
         dawgie.db.update (base,base.list()[0],base.list()[0].state_vectors()[0],
                           'oops', base.list()[0].state_vectors()[0]['oops'])
         dawgie.db.update (base,base.list()[0],base.list()[0].state_vectors()[0],
@@ -114,10 +115,10 @@ class Shelf(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree (cls.root)
-        setattr (dawgie.db.shelf.Connector, '_acquire', cls._acquire)
-        setattr (dawgie.db.shelf.Connector, '_Connector__do', cls._do)
-        setattr (dawgie.db.shelf.Connector, '_release', cls._release)
-        setattr (dawgie.db.shelf.Worker, '_send', cls._send)
+        setattr (dawgie.db.shelve.comms, 'acquire', cls._acquire)
+        setattr (dawgie.db.shelve.comms.Connector, '_Connector__do', cls._do)
+        setattr (dawgie.db.shelve.comms, 'release', cls._release)
+        setattr (dawgie.db.shelve.comms.Worker, '_send', cls._send)
         return
 
     def test_issue_16(self):
@@ -140,14 +141,14 @@ class Shelf(unittest.TestCase):
         return
     pass
 
-def mock_acquire (self, name): return True
-def mock_release (self, s): return True
+def mock_acquire (name): return True
+def mock_release (s): return True
 
 do_response = [None]
 def mock_do (self, request):
     print ('mock do', request)
-    import dawgie.db.shelf
-    dawgie.db.shelf.Worker(None).do (request)
+    import dawgie.db.shelve
+    dawgie.db.shelve.comms.Worker(None).do (request)
     return do_response[0]
 
 def mock_send (self, response):
