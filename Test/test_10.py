@@ -101,7 +101,7 @@ class Farm(unittest.TestCase):
     def test_rerunid (self):
         n = dawgie.pl.dag.Node('a')
         r = dawgie.pl.farm.rerunid (n)
-        self.assertEqual (2, r)
+        self.assertEqual (1, r)
         n.set ('runid', 17)
         r = dawgie.pl.farm.rerunid (n)
         self.assertEqual (17, r)
