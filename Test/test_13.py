@@ -53,19 +53,48 @@ from datetime import datetime as dt
 class DB:
     @classmethod
     def setup(cls):
+        dawgie.db.close()  # might be open from another TestSuite
         dawgie.db.open()
         for tsk,alg,sv,vn,v in dawgie.db.testdata.KNOWNS:
             dawgie.db.update (tsk, alg, sv, vn, v)
             pass
+        print ('knowns:')
+        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
+        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
+        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
+        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
+        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
+        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         for tgt,tsk,alg in dawgie.db.testdata.DATASETS:
             dawgie.db.connect (alg, tsk, tgt).update()
             pass
+        print ('datasets:')
+        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
+        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
+        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
+        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
+        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
+        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         for tsk,alg in dawgie.db.testdata.ASPECTS:
             dawgie.db.gather (alg, tsk).ds().update()
             pass
+        print ('aspects:')
+        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
+        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
+        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
+        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
+        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
+        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         for tsk,alg in dawgie.db.testdata.TIMELINES:
             dawgie.db.retreat (alg, tsk).ds().update()
             pass
+        print ('timelines:')
+        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
+        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
+        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
+        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
+        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
+        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         dawgie.db.close()
         return
 
@@ -73,6 +102,13 @@ class DB:
         dawgie.db.close()
         self.assertRaises (RuntimeError, dawgie.db._prime_keys)
         dawgie.db.open()
+        print ('PKs:')
+        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
+        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
+        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
+        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
+        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
+        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         keys = dawgie.db._prime_keys()
         self.assertEqual ((dawgie.db.testdata.TSK_CNT *
                            dawgie.db.testdata.SVN_CNT *
@@ -401,7 +437,6 @@ class DB:
 # notes:
 #   takes about 5 minutes to load the database
 #   once loaded it can simply be re-used (no reason to dump and start again)
-# unittest.skip ('no automatic way to build postgres database')
 class Post(DB,unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -436,7 +471,6 @@ class Post(DB,unittest.TestCase):
         return
     pass
 
-@unittest.skip ('current shelf is not a true replacement for postgres')
 class Shelve(DB,unittest.TestCase):
     @classmethod
     def setUpClass(cls):

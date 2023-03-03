@@ -44,7 +44,7 @@ class Func(enum.IntEnum):
     acquire = 0  # acquire a lock to the database
     dbcopy = 1  # copy the database to a new location (backup)
     get = 2  # get the value of the table for the key
-    keys = 3  # get the keys to a table in the database
+    table = 3  # get a table in the database
     release = 4  # release a lock being held on the database
     set = 5  # set the value of the table for the key
     upd = 6  # update the table[key], returning True if it exists else False
@@ -64,7 +64,7 @@ class Mutex(enum.IntEnum):
 
 class Table(enum.IntEnum):
     alg = 0
-    primary = 1
+    prime = 1
     state = 2
     target = 3
     task = 4

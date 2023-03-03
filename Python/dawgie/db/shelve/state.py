@@ -71,11 +71,12 @@ class DBI:
         '''close all the dictionary-files'''
         self.__reopened = False
         for table in self.__tables:
+            print ('closing table:', table)
             if table is not None: table.close()
             pass
-        self.__indices = self.__Group({n:None for n in self.__names})
+        self.__indices = self.__Group(**{n:None for n in self.__names})
         self.__reopened = False
-        self.__tables = self.__Group({n:None for n in self.__names})
+        self.__tables = self.__Group(**{n:None for n in self.__names})
         self.__task_engine = None
         return
 
@@ -85,11 +86,20 @@ class DBI:
 
     def open(self):
         '''open all the dictionary-files'''
+        print ('DBI().open()')
+        print ('   __names:', self.__names)
+        print ('   __reopened:', self.__reopened)
+        print ('   __tables:', self.__tables)
         if not self.is_open:
+            print ('   open file')
             db,idx = {},{}
             path = os.path.join (dawgie.context.db_path, dawgie.context.db_name)
             for name in self.__names:
-                db[name] = shelve.open ('.'.join ([path, name]))
+                print ('      db file: ', '.'.join ([path, name]))
+                db[name] = shelve.open ('.'.join ([path, name]),'c')
+
+                if name == 'target':
+                    print ('         items:', list(db[name].items()))
                 idx[name] = util.indexed (db[name])
                 pass
             self.__indices = self.__Group(**idx)

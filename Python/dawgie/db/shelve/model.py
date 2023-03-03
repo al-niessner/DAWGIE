@@ -60,21 +60,28 @@ class Interface(Connector, Container, Dataset, Timeline):
         self.msv = dawgie.util.MetricStateVector(null_metric, null_metric)
         return
 
-    # pylint: disable=too-many-arguments
-    def __to_key (self, runid, tn, taskn, algn, svn, vn):
-        if not (tn.startswith ('__') and tn.endswith ('__')):
-            self._update_cmd (tn, Table.target, None)
-            pass
-
-        self._update_cmd (taskn, Table.task, None)
-        return dawgie.db.util.to_key (runid, tn, taskn, algn, svn, vn)
+    # pylint: disable=protected-access,too-many-arguments
+    def __to_key (self, runid:int, tn:str, task:str, alg:dawgie.Algorithm,
+                  sv:dawgie.StateVector, vn:str):
+        if any(arg is None for arg in [runid, tn, task, alg, sv, vn]):
+            raise ValueError('cannot be None')
+        trgtid = self._update_cmd (tn, None, Table.target, None, None)
+        tid = self._update_cmd (task, None, Table.task, None, None)
+        if isinstance (alg, dawgie.Algorithm): raise ValueError('Should be dawgie.Algorithm')
+        if isinstance (sv, dawgie.StateVector): raise ValueError('Should be dawgie.StateVector')
+        if isinstance (vn, str): raise ValueError('Should be dawgie.Value')
+        aid = self._update_cmd (alg.name(), tid, Table.alg, None, alg._get_ver())
+        sid = self._update_cmd (sv.name(), aid, Table.state, None, sv._get_ver())
+        vid = self._update_cmd (vn, sid, Table.value, None, sv[vn]._get_ver())
+        return (runid, trgtid, tid, aid, sid, vid)
+    # pylint: enable=protected-access,too-many-arguments
 
     def _collect (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
         self.__span = {}
         pk = {}
         span = {}
-        tnl = self._keys (Table.target)
-        for k in filter (lambda k:k[0] != '-', self._keys (Table.primary)):
+        tnl = [keyset.name for keyset in self._keys (Table.target)]
+        for k in filter (lambda k:k[0] != '-', self._keys (Table.prime)):
             runid = int(k.split ('.')[0])
             sk = '.'.join (k.split ('.')[1:])
             pk['.'.join (k.split ('.')[1:])] = max (runid, pk.get (sk, -1))
@@ -94,7 +101,7 @@ class Interface(Connector, Container, Dataset, Timeline):
 
                 for k in filter (lambda k,a=fsvn,b=vn:k.endswith ('.'.join (['',a,b])), pk):
                     tn = k.split ('.')[1]
-                    span[fsvn][tn][vn] = self._get (k, Table.primary)
+                    span[fsvn][tn][vn] = self._get (k, Table.prime)
                     pass
                 pass
             pass
@@ -168,16 +175,16 @@ class Interface(Connector, Container, Dataset, Timeline):
                     # need to get some private information
                     # pylint: disable=protected-access
                     base = self.__to_key (self._bot()._runid(), self._tn(),
-                                          self._task(), self._algn(), sv.name(),
+                                          self._task(), self._alg(), sv,
                                           None) + '.'
                     # pylint: enable=protected-access
 
                     if not list(filter (lambda n,base=base:n.startswith (base),
-                                        self._keys (Table.primary))):
+                                        self._keys (Table.prime))):
                         base = self.__to_key (None, self._tn(), self._task(),
-                                              self._algn(), sv.name(), None) + '.'
+                                              self._alg(), sv, None) + '.'
                         prev = -1
-                        for k in self._keys (Table.primary):
+                        for k in self._keys (Table.prime):
                             runid = int(k.split ('.')[0])
                             if '.'.join (k.split ('.')[1:]).startswith (base):
                                 prev = max (prev, runid)
@@ -187,10 +194,10 @@ class Interface(Connector, Container, Dataset, Timeline):
                     else: prev = self._bot()._runid()  # pylint: disable=protected-access
 
                     base = self.__to_key (prev, self._tn(), self._task(),
-                                          self._algn(), sv.name(), None) + '.'
+                                          self._alg(), sv, None) + '.'
                     for k in filter (lambda n,b=base:n.startswith (b),
-                                     self._keys (Table.primary)):
-                        sv[k.split ('.')[-1]] = self._get (k, Table.primary)
+                                     self._keys (Table.prime)):
+                        sv[k.split ('.')[-1]] = self._get (k, Table.prime)
                         pass
                     pass
                 self.msv = msv
@@ -208,7 +215,7 @@ class Interface(Connector, Container, Dataset, Timeline):
     def _recede (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
         span = {}
         pk = sorted (set (filter (lambda k:k.split('.')[1] == self._tn(),
-                                  self._keys (Table.primary))))
+                                  self._keys (Table.prime))))
         rids = sorted ({int(k.split ('.')[0]) for k in pk})
         for ref in refs:
             clone = pickle.dumps (ref.item)
@@ -225,7 +232,7 @@ class Interface(Connector, Container, Dataset, Timeline):
                               ref.item.keys()):
                 for k in filter (lambda k,a=fsvn,b=vn:k.endswith ('.'.join (['',a,b])), pk):
                     rid = int(k.split ('.')[0])
-                    span[fsvn][rid][vn] = self._get (k, Table.primary)
+                    span[fsvn][rid][vn] = self._get (k, Table.prime)
                     pass
                 pass
             pass
@@ -272,15 +279,12 @@ class Interface(Connector, Container, Dataset, Timeline):
                       ('StateVector contains data that does not extend ' +
                        'dawgie.Value correctly. See log for details.')
 
-            if self._tn() not in self._keys (Table.target):\
-               self._set (self._tn(), Table.target, None)
-
             for sv in self._alg().state_vectors():
                 for k in sv.keys():
                     runid, tn, task = self._runid(), self._tn(), self._task()
-                    algn, svn, vn = self._algn(), sv.name(), k
-                    vname = self.__to_key (runid, tn, task, algn, svn, vn)
-                    isnew = self._set (vname, Table.primary, sv[k])
+                    alg, vn = self._alg(), k
+                    vname = self.__to_key (runid, tn, task, alg, sv, vn)
+                    isnew = self._set_prime (vname, sv[k])
                     self._bot().new_values ((vname, isnew))
                     pass
                 pass
@@ -313,14 +317,11 @@ class Interface(Connector, Container, Dataset, Timeline):
                       ('MetricStateVector contains data that does not extend ' +
                        'dawgie.Value correctly. See log for details.')
 
-            if self._tn() not in self._keys (Table.target):\
-               self._set (self._tn(), Table.target, None)
-
             for k in msv.keys():
                 runid, tn, task = self._runid(), self._tn(), self._task()
-                algn, svn, vn = self._algn(), msv.name(), k
-                vname = self.__to_key (runid, tn, task, algn, svn, vn)
-                isnew = self._set (vname, Table.primary, msv[k])
+                alg = self._alg()
+                vname = self.__to_key (runid, tn, task, alg, msv, k)
+                isnew = self._set_prime (vname, msv[k])
                 self._bot().new_values ((vname, isnew))
                 pass
         finally:

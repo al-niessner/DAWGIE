@@ -57,10 +57,11 @@ from .enums import Mutex
 from .enums import Table
 from .state import DBI
 
-COMMAND = collections.namedtuple('COMMAND', ['func', 'key', 'table', 'value'])
+COMMAND = collections.namedtuple('COMMAND', ['func','keyset','table','value'])
+KEYSET = collections.namedtuple('KEYSET', ['name', 'parent', 'ver'])
 
-class Connector:
-    # this class is meant to be extendend not used hence
+class Connector:  # pylint: disable=too-few-public-methods
+    # this class is meant to be extendend like an abstract class
     def _copy (self, dst):
         return self.__do (COMMAND(Func.dbcopy, None, None, dst))
 
@@ -80,33 +81,32 @@ class Connector:
         s.close()
         return pickle.loads (buf)
 
-    def _get (self, key, table):
-        ret = self.__do (COMMAND(Func.get, key, table, None))
-        if table == Table.primary: ret = dawgie.db.util.decode (ret)
+    def _get_prime (self, key:(int,int,int,int,int,int)):
+        ret = self.__do (COMMAND(Func.get, key, Table.prime, None))
+        ret = dawgie.db.util.decode (ret)
         return ret
-
-    def _keys (self, table):
-        return self.__do (COMMAND(Func.keys, None, table, None))
 
     def _prime_keys (self):
         log.debug ('Connector._prime_keys() - get prime keys')
-        return self._keys (Table.primary)
+        return self._table (Table.prime).keys()
 
-    def _set (self, key, table, value):
-        if table == Table.primary: value = dawgie.db.util.encode (value)
-        return self.__do (COMMAND(Func.set, key, table, value))
+    def _set_prime (self, key:(int,int,int,int,int,int), value:dawgie.Value):
+        value = dawgie.db.util.encode (value)
+        return self.__do (COMMAND(Func.set, key, Table.prime, value))
 
-    def _update_cmd (self, key, table, value):
-        return self.__do (COMMAND(Func.upd, key, table, value))
+    def _table (self, table):
+        return self.__do (COMMAND(Func.table, None, table, None))
+
+    # pylint: disable=too-many-arguments
+    def _update_cmd (self, name, parent, table, value, ver):
+        keyset = KEYSET(name, parent, ver)
+        return self.__do (COMMAND(Func.upd, keyset, table, value))
+    # pylint: enable=too-many-arguments
 
     # public methods for modules in this package
     def copy (self, dat):
         '''public method for .impl'''
         return self._copy (dat)
-
-    def set (self, key, table, value):
-        '''public method for .impl'''
-        return self._set (key, table, value)
     pass
 
 class DBSerializer(twisted.internet.protocol.Factory):
@@ -195,39 +195,37 @@ class Worker(twisted.internet.protocol.Protocol):
             DBI().task_engine.add_task(self.__id_name,
                                        dawgie.db.lockview.LockRequest.lrqb)
             self.__looping_call.start(3)
-            pass
         elif request.func == Func.dbcopy:
             twisted.internet.threads.deferToThread(self._do_copy, request.value)
-            pass
         elif request.func == Func.get:
-            self._send (DBI().tables[request.table.value][request.key])
-            pass
-        elif request.func == Func.keys:
-            log.debug ('Worker.do() - received request for keys')
-            log.debug ('Worker.do() - table %s', request.table.name)
-            log.debug ('Worker.do() - table size %d',
-                       len (DBI().tables[request.table.value]))
-            self._send (list(DBI().tables[request.table.value].keys()))
-            pass
+            key = util.construct (**request.keyset)
+            self._send (DBI().tables[request.table.value][key])
         elif request.func == Func.release:
             log.debug("Inside worker: Release")
             self._do_release()
-            pass
         elif request.func == Func.set:
-            if request.table == Table.primary:
+            if request.table == Table.prime:
                 value,exists = dawgie.db.util.move(*request.value)
             else: value,exists = request.value,False
 
-            DBI().tables[request.table.value][request.key] = value
+            key = KEYSET(**request.keyset)
+            DBI().tables[request.table.value][key] = value
             self._send (exists)
-            pass
+        elif request.func == Func.table:
+            log.debug ('Worker.do() - received request for table')
+            log.debug ('Worker.do() - table %s', request.table.name)
+            log.debug ('Worker.do() - table size %d',
+                       len (DBI().tables[request.table.value]))
+            self._send(dict(DBI().tables[request.table.value]))
         elif request.func == Func.upd:
-            if request.key in DBI().tables[request.table.value]: self._send (True)
-            else:
-                DBI().tables[request.table.value][request.key] = None
-                self._send (False)
-                pass
-            pass
+            if request.table.value == Table.prime:
+                log.error ('Cannot update prime. Must use set')
+                return
+
+            response = util.append (table=DBI().tables[request.table.value],
+                                    index=DBI().tables[request.table.value],
+                                    **request.keyset)
+            self._send (response)
         else: log.error ('Did not understand %s', str (request))
         return
 
@@ -277,7 +275,6 @@ class Worker(twisted.internet.protocol.Protocol):
                 if method == Method.connector:
                     DBI().open()
                     retValue = DBI().copy()
-                    pass
                 else:
                     r = os.system(f"rsync --delete -ax {src}/ {tmpdst}/")
                     retValue = tmpdst if r == 0 else None
@@ -312,7 +309,6 @@ class Worker(twisted.internet.protocol.Protocol):
             # Lock Release End
             DBI().task_engine.add_task(self.__id_name,
                                        dawgie.db.lockview.LockRequest.lrle)
-            pass
         else: self._send (False)
         return
 

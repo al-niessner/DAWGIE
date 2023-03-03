@@ -109,12 +109,6 @@ def rotate(path, orig, backup):
 
     return
 
-# pylint: disable=too-many-arguments
-def to_key (runid, tn, taskn, algn, svn, vn):
-    return '.'.join ([str (i) for i in filter
-                      (lambda n:n is not None,
-                       [runid, tn, taskn, algn, svn, vn])])
-
 def verify (value):
     # pylint: disable=bare-except
     result = [False, False, False, False]
