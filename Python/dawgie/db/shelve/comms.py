@@ -94,7 +94,7 @@ class Connector:  # pylint: disable=too-few-public-methods
         value = dawgie.db.util.encode (value)
         return self.__do (COMMAND(Func.set, key, Table.prime, value))
 
-    def _table (self, table):
+    def _table (self, table)->{}:
         return self.__do (COMMAND(Func.table, None, table, None))
 
     # pylint: disable=too-many-arguments

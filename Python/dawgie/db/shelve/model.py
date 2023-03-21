@@ -38,8 +38,8 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+import dawgie.util
 import logging;  log = logging.getLogger(__name__)
-import pickle
 
 from dawgie import Dataset, Timeline
 from dawgie.db.util.aspect import Container
@@ -60,6 +60,30 @@ class Interface(Connector, Container, Dataset, Timeline):
         self.msv = dawgie.util.MetricStateVector(null_metric, null_metric)
         return
 
+    def __refs2indices (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->{(int,int,int,int):(str,str)}:
+        '''convert references into tuple of index stored in the primary table
+
+        return a dictionary of (tskid,algid,svid,vid):("tskn.algn.svn",vn)
+        '''
+        reftable = {}
+        for vref in dawgie.util.as_vref (refs):
+            task = dawgie.util.task_name (vref.factory)
+            algn = vref.impl.name()
+            svn = vref.item.name()
+            vn = vref.feat
+            # pylint: disable=protected-access
+            tid = self._update_cmd (task, None, Table.task, None, None)
+            aid = self._update_cmd (algn, tid, Table.alg, None,
+                                    vref.impl._get_ver())
+            sid = self._update_cmd (svn, aid, Table.state, None,
+                                    vref.item._get_ver())
+            vid = self._update_cmd (vn, sid, Table.value, None,
+                                    vref.item[vn]._get_ver())
+            # pylint: enable=protected-access
+            reftable[(tid,aid,sid,vid)] = ('.'.join([task,algn,svn]),vn)
+            pass
+        return reftable
+
     # pylint: disable=protected-access,too-many-arguments
     def __to_key (self, runid:int, tn:str, task:str, alg:dawgie.Algorithm,
                   sv:dawgie.StateVector, vn:str):
@@ -78,45 +102,21 @@ class Interface(Connector, Container, Dataset, Timeline):
 
     def _collect (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
         self.__span = {}
-        pk = {}
-        span = {}
-        tnl = [keyset.name for keyset in self._keys (Table.target)]
-        for k in filter (lambda k:k[0] != '-', self._keys (Table.prime)):
-            runid = int(k.split ('.')[0])
-            sk = '.'.join (k.split ('.')[1:])
-            pk['.'.join (k.split ('.')[1:])] = max (runid, pk.get (sk, -1))
+        refis = self.__refs2indices (refs)
+        tnis = {index:name for name,index in self._table (Table.target).items()}
+        for pk in self._prime_keys():
+            if pk[2:] in refis:
+                tn = tnis[pk[1]]
+                fsvn,vn = refis[pk[2:]]
+                if tn not in self.__span: self.__span[tn] = {}
+                if fsvn not in self.__span[tn]: self.__span[tn][fsvn] = {}
+                if vn not in self.__span[tn][fsvn]:\
+                   self.__span[tn][fsvn][vn] = pk
+                if self.__span[tn][fsvn][vn][0] < pk[0]:\
+                   self.__span[tn][fsvn][vn] = pk
             pass
-        pk = ['.'.join ([str (i[1])] + i[0].split ('.')) for i in pk.items()]
-        for ref in refs:
-            clone = pickle.dumps (ref.item)
-            fsvn = '.'.join ([dawgie.util.task_name (ref.factory),
-                              ref.impl.name(),
-                              ref.item.name()])
-
-            if fsvn not in span: span[fsvn] = {}
-
-            span[fsvn].update ({tn:pickle.loads (clone) for tn in tnl})
-            for vn in ref.item.keys():
-                if isinstance (ref, dawgie.V_REF) and vn != ref.feat: continue
-
-                for k in filter (lambda k,a=fsvn,b=vn:k.endswith ('.'.join (['',a,b])), pk):
-                    tn = k.split ('.')[1]
-                    span[fsvn][tn][vn] = self._get (k, Table.prime)
-                    pass
-                pass
-            pass
-        for tn in tnl:
-            for fsvn,fsv in span.items():
-                if tn in fsv:
-                    for vn in fsv[tn]:
-                        if tn not in self.__span: self.__span[tn] = {}
-                        if fsvn not in self.__span[tn]:\
-                           self.__span[tn][fsvn] = {}
-
-                        self.__span[tn][fsvn][vn] = span[fsvn][tn][vn]
-                        pass
-                    pass
-                pass
+        for fsvn in self.__span.values():
+            for vn,val in fsvn.items(): fsvn[vn] = self._get_prime (val)
             pass
         return
 
@@ -171,33 +171,23 @@ class Interface(Connector, Container, Dataset, Timeline):
             else:
                 msv = dawgie.util.MetricStateVector(dawgie.METRIC(-1,-1,-1,-1,-1,-1),
                                                     dawgie.METRIC(-1,-1,-1,-1,-1,-1))
+                pks = self._prime_keys()
                 for sv in self._alg().state_vectors() + [msv]:
-                    # need to get some private information
-                    # pylint: disable=protected-access
-                    base = self.__to_key (self._bot()._runid(), self._tn(),
-                                          self._task(), self._alg(), sv,
-                                          None) + '.'
-                    # pylint: enable=protected-access
+                    for vn in sv:
+                        # need to get some private information
+                        # pylint: disable=protected-access
+                        pk = self.__to_key (self._bot()._runid(), self._tn(),
+                                            self._task(), self._alg(), sv, vn)
+                        # pylint: enable=protected-access
 
-                    if not list(filter (lambda n,base=base:n.startswith (base),
-                                        self._keys (Table.prime))):
-                        base = self.__to_key (None, self._tn(), self._task(),
-                                              self._alg(), sv, None) + '.'
-                        prev = -1
-                        for k in self._keys (Table.prime):
-                            runid = int(k.split ('.')[0])
-                            if '.'.join (k.split ('.')[1:]).startswith (base):
-                                prev = max (prev, runid)
-                                pass
+                        if pk not in pks:
+                            spks = list(filter (lambda k,K=pk:k[1:] == K[1:],
+                                                pks))
+                            spks.sort (key=lambda t:t[0])
+                            pk = spks[-1]
                             pass
-                        pass
-                    else: prev = self._bot()._runid()  # pylint: disable=protected-access
 
-                    base = self.__to_key (prev, self._tn(), self._task(),
-                                          self._alg(), sv, None) + '.'
-                    for k in filter (lambda n,b=base:n.startswith (b),
-                                     self._keys (Table.prime)):
-                        sv[k.split ('.')[-1]] = self._get (k, Table.prime)
+                        sv[vn] = self._get_prime (pk)
                         pass
                     pass
                 self.msv = msv
@@ -213,40 +203,15 @@ class Interface(Connector, Container, Dataset, Timeline):
     def ds (self): return self
 
     def _recede (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->None:
-        span = {}
-        pk = sorted (set (filter (lambda k:k.split('.')[1] == self._tn(),
-                                  self._keys (Table.prime))))
-        rids = sorted ({int(k.split ('.')[0]) for k in pk})
-        for ref in refs:
-            clone = pickle.dumps (ref.item)
-            fsvn = '.'.join ([dawgie.util.task_name (ref.factory),
-                              ref.impl.name(),
-                              ref.item.name()])
-
-            if fsvn not in span: span[fsvn] = {}
-
-            span[fsvn].update ({rid:pickle.loads (clone) for rid in rids})
-            for vn in filter (lambda n,ref=ref:(not isinstance
-                                                (ref,dawgie.V_REF) or
-                                                n == ref.feat),
-                              ref.item.keys()):
-                for k in filter (lambda k,a=fsvn,b=vn:k.endswith ('.'.join (['',a,b])), pk):
-                    rid = int(k.split ('.')[0])
-                    span[fsvn][rid][vn] = self._get (k, Table.prime)
-                    pass
-                pass
-            pass
         self.__span = {}
-        for rid in rids:
-            for fsvn,fsv in span.items():
-                if rid in fsv:
-                    for vn in fsv[rid]:
-                        if rid not in self.__span: self.__span[rid] = {}
-                        if fsvn not in self.__span[rid]:\
-                           self.__span[rid][fsvn] = {}
-                        self.__span[rid][fsvn][vn] = fsv[rid][vn]
-                        pass
-                    pass
+        refis = self.__refs2indices (refs)
+        tni = self._table (Table.target)[self._tn()]
+        for pk in filter (lambda t,k=tni:t[1] == k, self._prime_keys()):
+            if pk[2:] in refis:
+                fsvn,vn = refis[pk[2:]]
+                if pk[0] not in self.__span: self.__span[pk[0]] = {}
+                if fsvn not in self.__span[pk[0]]: self.__span[fsvn] = {}
+                self.__span[pk[0]][fsvn][vn] = self._get_prime (pk)
                 pass
             pass
         return
