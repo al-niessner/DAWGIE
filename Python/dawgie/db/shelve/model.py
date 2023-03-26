@@ -89,14 +89,11 @@ class Interface(Connector, Container, Dataset, Timeline):
                   sv:dawgie.StateVector, vn:str):
         if any(arg is None for arg in [runid, tn, task, alg, sv, vn]):
             raise ValueError('cannot be None')
-        trgtid = self._update_cmd (tn, None, Table.target, None, None)
-        tid = self._update_cmd (task, None, Table.task, None, None)
-        if isinstance (alg, dawgie.Algorithm): raise ValueError('Should be dawgie.Algorithm')
-        if isinstance (sv, dawgie.StateVector): raise ValueError('Should be dawgie.StateVector')
-        if isinstance (vn, str): raise ValueError('Should be dawgie.Value')
-        aid = self._update_cmd (alg.name(), tid, Table.alg, None, alg._get_ver())
-        sid = self._update_cmd (sv.name(), aid, Table.state, None, sv._get_ver())
-        vid = self._update_cmd (vn, sid, Table.value, None, sv[vn]._get_ver())
+        trgtid = self._update_cmd (tn, None, Table.target, None, None)[1]
+        tid = self._update_cmd (task, None, Table.task, None, None)[1]
+        aid = self._update_cmd (alg.name(),tid,Table.alg,None,alg._get_ver())[1]
+        sid = self._update_cmd (sv.name(),aid,Table.state,None,sv._get_ver())[1]
+        vid = self._update_cmd (vn, sid, Table.value, None, sv[vn]._get_ver())[1]
         return (runid, trgtid, tid, aid, sid, vid)
     # pylint: enable=protected-access,too-many-arguments
 

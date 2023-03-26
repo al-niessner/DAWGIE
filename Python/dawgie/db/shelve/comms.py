@@ -88,7 +88,7 @@ class Connector:  # pylint: disable=too-few-public-methods
 
     def _prime_keys (self):
         log.debug ('Connector._prime_keys() - get prime keys')
-        return self._table (Table.prime).keys()
+        return util.prime_keys(self._table (Table.prime))
 
     def _set_prime (self, key:(int,int,int,int,int,int), value:dawgie.Value):
         value = dawgie.db.util.encode (value)
@@ -204,11 +204,12 @@ class Worker(twisted.internet.protocol.Protocol):
             log.debug("Inside worker: Release")
             self._do_release()
         elif request.func == Func.set:
-            if request.table == Table.prime:
-                value,exists = dawgie.db.util.move(*request.value)
-            else: value,exists = request.value,False
+            if request.table != Table.prime:
+                log.error ('Cannot set non-prime table. Muse use updatt_cmd')
+                return
 
-            key = KEYSET(**request.keyset)
+            value,exists = dawgie.db.util.move(*request.value)
+            key = str(request.keyset)
             DBI().tables[request.table.value][key] = value
             self._send (exists)
         elif request.func == Func.table:
@@ -222,9 +223,11 @@ class Worker(twisted.internet.protocol.Protocol):
                 log.error ('Cannot update prime. Must use set')
                 return
 
+            kwds = request.keyset._asdict()
+            if kwds['ver']: kwds['ver'] = util.LocalVersion(kwds['ver'])
             response = util.append (table=DBI().tables[request.table.value],
-                                    index=DBI().tables[request.table.value],
-                                    **request.keyset)
+                                    index=DBI().indices[request.table.value],
+                                    **kwds)
             self._send (response)
         else: log.error ('Did not understand %s', str (request))
         return

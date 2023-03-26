@@ -60,7 +60,7 @@ def _prime_keys()->[(int,str,str,str,str,str)]:
                        util.dissect(DBI().indices.alg[key[3]])[1],
                        util.dissect(DBI().indices.state[key[4]])[1],
                        util.dissect(DBI().indices.value[key[5]])[1]])
-            for key in DBI().tables.prime]
+            for key in util.prime_keys(DBI().tables.prime)]
 
 def _prime_values()->[str]:
     if not DBI().is_open:
@@ -77,7 +77,8 @@ def add (target_name:str)->bool:
     '''
     if DBI().is_reopened:
         Connector().set (target_name, None, Table.target, None, None)
-    elif DBI().is_open(): util.append (target_name, DBI().tables, DBI().indices)
+    elif DBI().is_open:
+        util.append (target_name, DBI().tables.target, DBI().indices.target)
     else: raise RuntimeError('called add before open')
     return
 
@@ -229,8 +230,8 @@ def next():  # pylint: disable=redefined-builtin
     if not DBI().is_open: raise RuntimeError('called next before open')
     if DBI().is_reopened: raise RuntimeError('called outside of Foreman context')
 
-    known = [int(key[0]) for key in DBI().tables.prime]
-    return max(known) if known else 1
+    known = [int(key[0]) for key in util.prime_keys (DBI().tables.prime)]
+    return max(known)+1 if known else 1
 
 def open():  # pylint: disable=redefined-builtin
     '''Open the database'''
@@ -342,13 +343,12 @@ def update (tsk, alg, sv, vn, v):
     if not DBI().is_open: raise RuntimeError('called next before open')
     if DBI().is_reopened: raise RuntimeError('called outside of Foreman context')
 
-    util.append (tsk._name(),  # pylint: disable=protected-access
-                 DBI().tables.task, DBI().indices.task)
-    tskid = DBI().tables.task
-    util.append (alg.name(), DBI().tables.alg, DBI().indices.alg, tskid, alg)
-    algid = DBI().tables.alg[util.construct (alg.name(), tskid, alg)]
-    util.append (sv.name(), DBI().tables.state, DBI().indices.state, algid, sv)
-    svid = DBI().tables.state[util.construct (sv.name(), algid, sv)]
+    tskid = util.append (tsk._name(),  # pylint: disable=protected-access
+                         DBI().tables.task, DBI().indices.task)[1]
+    algid = util.append (alg.name(), DBI().tables.alg, DBI().indices.alg,
+                         tskid, alg)[1]
+    svid = util.append (sv.name(), DBI().tables.state, DBI().indices.state,
+                        algid, sv)[1]
     util.append (vn, DBI().tables.value, DBI().indices.value, svid, v)
     return
 

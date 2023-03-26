@@ -47,7 +47,7 @@ import os
 class LocalVersion (dawgie.Version):
     def __init__ (self, version):
         if isinstance (version, str): version = version.split('.')
-        self._version_ = dawgie.VERSION(version)
+        self._version_ = dawgie.VERSION(*version)
         return
 
     @property
@@ -55,7 +55,7 @@ class LocalVersion (dawgie.Version):
     pass
 
 def append (name:str, table:{}, index:[],
-            parent:int=None, ver:dawgie.Version=None)->None:
+            parent:int=None, ver:dawgie.Version=None)->(bool,int,str):
     existed = True
     name = construct (name, parent, ver)
     if name not in table:
@@ -63,11 +63,12 @@ def append (name:str, table:{}, index:[],
         table[name] = len(index)
         index.append (name)
         pass
-    return existed
+    idx = table[name]
+    return existed,idx,name
 
 def construct (name:str, parent:int=None, ver:dawgie.Version=None)->str:
     if parent is not None: name = str(parent) + ':parent___' + name
-    if ver: name = name + '___verion:' + ver.asstring()
+    if ver: name = name + '___version:' + ver.asstring()
     return name
 
 def dissect (name:str)->(int,str,dawgie.Version):
@@ -79,6 +80,10 @@ def dissect (name:str)->(int,str,dawgie.Version):
         ver = LocalVersion(ver)
     else: ver = None
     return parent,name,ver
+
+def prime_keys(prime_table):
+    # because shelve key must be a string, pylint: disable=eval-used
+    return [eval(k) for k in prime_table]
 
 def indexed (table:{})->[]:
     return [t[0] for t in sorted (table.items(), key=lambda t:t[1])]
