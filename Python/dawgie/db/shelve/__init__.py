@@ -269,7 +269,7 @@ def remove(runid:int, tn:str, taskn:str, algn:str, svn:str, vn:str):
     for algid in algids:
         for svid in svids:
             for vid in vids:
-                key = (runid, tnid, tskid, algid, svid, vid)
+                key = str((runid, tnid, tskid, algid, svid, vid))
                 if key in prime: del prime[key]
                 pass
             pass
