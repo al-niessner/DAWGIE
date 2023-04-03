@@ -38,6 +38,8 @@ NTR:
 '''
 
 import dawgie
+import dawgie.db.shelve.enums
+import dawgie.db.shelve.state
 import dawgie.db.testdata
 import dawgie.context
 import os
@@ -217,7 +219,8 @@ class DB:
         return
 
     def test_copy(self):
-        self.assertTrue (False)
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.copy, None, None, None)
         return
 
     def test_gather(self):
@@ -227,7 +230,7 @@ class DB:
         dawgie.db.open()
         asp = dawgie.db.gather (anz, ans)
         self.assertIsNotNone (asp)
-        self.assertEquals (0, len (asp))
+        self.assertEqual (0, len (asp))
         dawgie.db.close()
         return
 
@@ -248,12 +251,7 @@ class DB:
         return
 
     def test_open(self):
-        dawgie.db.close()
-        self.assertFalse (dawgie.db.post._db)
-        dawgie.db.open()
-        self.assertTrue (dawgie.db.post._db)
-        dawgie.db.close()
-        self.assertFalse (dawgie.db.post._db)
+        self.assertFalse(True)
         return
 
     def test_promote(self):
@@ -333,12 +331,7 @@ class DB:
         return
 
     def test_reopen(self):
-        dawgie.db.close()
-        self.assertFalse (dawgie.db.post._db)
-        dawgie.db.reopen()
-        self.assertTrue (dawgie.db.post._db)
-        dawgie.db.close()
-        self.assertFalse (dawgie.db.post._db)
+        self.assertFalse(True)
         return
 
     def test_retreat(self):
@@ -469,6 +462,24 @@ class Post(DB,unittest.TestCase):
     def test_locks(self):
         self.assertTrue (True)  # locks not used in postgres
         return
+
+    def test_open(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
+        dawgie.db.open()
+        self.assertTrue (dawgie.db.post._db)
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
+        return
+
+    def test_reopen(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
+        dawgie.db.reopen()
+        self.assertTrue (dawgie.db.post._db)
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
+        return
     pass
 
 class Shelve(DB,unittest.TestCase):
@@ -504,6 +515,42 @@ class Shelve(DB,unittest.TestCase):
         setattr (dawgie.db.shelve.comms.Connector, '_Connector__do', cls._do)
         setattr (dawgie.db.shelve.comms, 'release', cls._release)
         setattr (dawgie.db.shelve.comms.Worker, '_send', cls._send)
+        return
+
+    def test_consistent(self):
+        self.assertRaises(NotImplementedError, dawgie.db.consistent, [],[],'')
+        return
+
+    def test_copy(self):
+        super().test_copy()
+        root = os.path.join (self.root, 'connector')
+        dawgie.db.open()
+        retval = dawgie.db.copy (root, dawgie.db.shelve.enums.Method.connector, 'localhost')
+        self.assertEqual (0, retval)
+        dawgie.db.close()
+        return
+
+    def test_open(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.shelve.state.DBI().is_open)
+        dawgie.db.open()
+        self.assertTrue (dawgie.db.shelve.state.DBI().is_open)
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.shelve.state.DBI().is_open)
+        return
+
+    def test_promote(self):
+        self.assertRaises(NotImplementedError, dawgie.db.promote, [],1)
+        return
+
+    def test_reopen(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.shelve.state.DBI().is_open)
+        dawgie.db.reopen()
+        self.assertTrue (dawgie.db.shelve.state.DBI().is_open)
+        self.assertTrue (dawgie.db.shelve.state.DBI().is_reopened)
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.shelve.state.DBI().is_open)
         return
     pass
 

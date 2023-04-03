@@ -56,15 +56,15 @@ class LocalVersion (dawgie.Version):
 
 def append (name:str, table:{}, index:[],
             parent:int=None, ver:dawgie.Version=None)->(bool,int,str):
-    existed = True
+    exists = False
     name = construct (name, parent, ver)
     if name not in table:
-        existed = False
         table[name] = len(index)
         index.append (name)
         pass
     idx = table[name]
-    return existed,idx,name
+    exists = True
+    return exists,idx,name
 
 def construct (name:str, parent:int=None, ver:dawgie.Version=None)->str:
     if parent is not None: name = str(parent) + ':parent___' + name

@@ -76,11 +76,13 @@ def add (target_name:str)->bool:
            False otherwise
     '''
     if DBI().is_reopened:
-        Connector().set (target_name, None, Table.target, None, None)
+        result = Connector().set (target_name, None, Table.target, None, None)
     elif DBI().is_open:
-        util.append (target_name, DBI().tables.target, DBI().indices.target)
+        result = util.append (target_name,
+                              DBI().tables.target, DBI().indices.target)
     else: raise RuntimeError('called add before open')
-    return
+    print ('target add (' + target_name + '): ' + str(result))
+    return result[0]
 
 def archive (done):
     '''Archive the current state of the database'''
