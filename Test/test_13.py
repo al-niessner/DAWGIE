@@ -530,6 +530,13 @@ class Shelve(DB,unittest.TestCase):
         dawgie.db.close()
         return
 
+    def test_locks(self):
+        dawgie.db.close()
+        dawgie.db.open()
+        self.assertEqual(dawgie.db.view_locks(), {'tasks':[]})
+        dawgie.db.close()
+        return
+
     def test_open(self):
         dawgie.db.close()
         self.assertFalse (dawgie.db.shelve.state.DBI().is_open)
