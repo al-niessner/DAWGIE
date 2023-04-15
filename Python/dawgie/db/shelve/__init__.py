@@ -81,7 +81,6 @@ def add (target_name:str)->bool:
         result = util.append (target_name,
                               DBI().tables.target, DBI().indices.target)
     else: raise RuntimeError('called add before open')
-    print ('target add (' + target_name + '): ' + str(result))
     return result[0]
 
 def archive (done):
@@ -189,19 +188,19 @@ def metrics()->[dawgie.db.METRIC_DATA]:
 
     result = []
     log.debug ('metrics() - starting')
-    keys = list(DBI().tables.prime)
+    keys = util.prime_keys(DBI().tables.prime)
     log.debug ('metrics() - total prime keys %d', len (keys))
     mkeys = [fk for _pk,fk in filter (lambda t:'__metric__' in t[0],
                                       DBI().tables.state.items())]
-    keys = list(filter(lambda t,K=mkeys:t[4] in K, keys))
+    keys = list(filter(lambda k,K=mkeys:k[4] in K, keys))
     log.debug ('metrics() - total __metric__ in prime keys %d', len (keys))
     for m in keys:
         runid = int(m[0])
-        target = util.dissect(DBI().indices(m[1]))[1]
-        task = util.dissect(DBI().indices(m[2]))[1]
-        alg = util.dissect(DBI().indices(m[3]))[1:]
-        sv = util.dissect(DBI().indices(m[4]))[1:]
-        val = util.dissect(DBI().indices(m[5]))[1:]
+        target = util.dissect(DBI().indices.target[m[1]])[1]
+        task = util.dissect(DBI().indices.task[m[2]])[1]
+        alg = util.dissect(DBI().indices.alg[m[3]])[1:]
+        sv = util.dissect(DBI().indices.state[m[4]])[1:]
+        val = util.dissect(DBI().indices.value[m[5]])[1:]
         mn = '.'.join ([str(runid), target, task, alg[0], sv[0], val[0]])
         log.debug ('metrics() - working on %s', mn)
 
@@ -222,7 +221,7 @@ def metrics()->[dawgie.db.METRIC_DATA]:
 
         try:
             log.debug ('metrics() - reading data and decoding')
-            msv[val[0]] = dawgie.db.util.decode (DBI().tables.prime[m])
+            msv[val[0]] = dawgie.db.util.decode (DBI().tables.prime[str(m)])
         except FileNotFoundError: log.exception('missing metric data for %s',mn)
         pass
     return result
