@@ -313,7 +313,7 @@ def trace (task_alg_names:[str])->{str:{str:int}}:
 
     result = {}
     subprime = {}
-    for runid,tid,tskid,algid,_svid,_vid in DBI().tables.prime:
+    for runid,tid,tskid,algid,_svid,_vid in util.prime_keys(DBI().tables.prime):
         subkey = (tid,tskid,algid)
         if subkey in subprime: subprime[subkey].append (runid)
         else: subprime[subkey] = [runid]
@@ -321,12 +321,19 @@ def trace (task_alg_names:[str])->{str:{str:int}}:
     for subkey,runids in subprime.items(): subprime[subkey] = max(runids)
     for tn in dawgie.db.targets():
         result[tn] = {}
+        tid = DBI().tables.target[tn]
         for tan in task_alg_names:
             taskn,algn = tan.split('.')
             tskid = DBI().tables.task[taskn]
-            algid = sorted (list(util.subset (DBI().tables.alg, algn, tskid)),
-                            key=lambda id:util.dissect(id)[2])[-1]
-            result[tn][tan] = subprime[(tn, tskid, algid)]
+            algid = DBI().tables.alg[sorted (list(util.subset (DBI().tables.alg,
+                                                               algn, [tskid])),
+                                             key=lambda id:util.dissect(id)[2])[-1]]
+            subkey = (tid,tskid,algid)
+            if subkey in subprime: result[tn][tan] = subprime[subkey]
+            elif '__all__' in DBI().tables.target:
+                subkey = (DBI().tables.target['__all__'],tskid,algid)
+                if subkey in subprime: result[tn][tan] = subprime[subkey]
+                pass
             pass
         pass
     return result

@@ -46,7 +46,8 @@ import os
 
 class LocalVersion (dawgie.Version):
     def __init__ (self, version):
-        if isinstance (version, str): version = version.split('.')
+        if isinstance (version, str): version = [int(v)
+                                                 for v in version.split('.')]
         self._version_ = dawgie.VERSION(*version)
         return
 
