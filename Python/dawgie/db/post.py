@@ -1033,7 +1033,7 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
         try:
             msv[vn] = dawgie.db.util.decode(row[7])
             svs[key] = msv
-        except FileNotFoundError: log.error ('possible database corruption because cannot fine __metric__ state vector value: %s', row[7])
+        except FileNotFoundError: log.error ('possible database corruption because cannot find __metric__ state vector value: %s', row[7])
         pass
     for key,msv in svs.items():
         cur.execute ('SELECT name FROM Target where PK = %s;', (key[2],))

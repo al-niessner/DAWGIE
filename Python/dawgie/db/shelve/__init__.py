@@ -190,11 +190,28 @@ def metrics()->[dawgie.db.METRIC_DATA]:
     log.debug ('metrics() - starting')
     keys = util.prime_keys(DBI().tables.prime)
     log.debug ('metrics() - total prime keys %d', len (keys))
-    mkeys = [fk for _pk,fk in filter (lambda t:'__metric__' in t[0],
-                                      DBI().tables.state.items())]
+    mkeys = {}
+    for k in filter (lambda k:'__metric__' in k, DBI().tables.state):
+        name = k[:k.rfind(':')]
+        if name not in mkeys: mkeys[name] = []
+        mkeys[name].append (k)
+        pass
+    mkeys = [sorted(mk, key=lambda k:util.dissect(k)[2])[-1]
+             for mk in mkeys.values()]
+    akeys = {}
+    for k in mkeys:
+        k = DBI().indices.alg[util.dissect (k)[0]]
+        name = k[:k.rfind(':')]
+        if name not in akeys: akeys[name] = []
+        akeys[name].append (k)
+        pass
+    akeys = [DBI().tables.alg[sorted(ak, key=lambda k:util.dissect(k)[2])[-1]]
+             for ak in akeys.values()]
+    mkeys = [DBI().tables.state[mk]
+             for mk in filter (lambda k,K=akeys:util.dissect(k)[0] in K, mkeys)]
     keys = list(filter(lambda k,K=mkeys:k[4] in K, keys))
     log.debug ('metrics() - total __metric__ in prime keys %d', len (keys))
-    for m in keys:
+    for m in sorted(keys):
         runid = int(m[0])
         target = util.dissect(DBI().indices.target[m[1]])[1]
         task = util.dissect(DBI().indices.task[m[2]])[1]

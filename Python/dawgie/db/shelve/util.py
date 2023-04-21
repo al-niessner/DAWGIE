@@ -73,7 +73,9 @@ def construct (name:str, parent:int=None, ver:dawgie.Version=None)->str:
     return name
 
 def dissect (name:str)->(int,str,dawgie.Version):
-    if ':parent___' in name: parent,name = name.split(':parent___')
+    if ':parent___' in name:
+        parent,name = name.split(':parent___')
+        parent = int(parent)
     else: parent = None
 
     if '___version:' in name:
