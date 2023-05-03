@@ -2,7 +2,7 @@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -1033,7 +1033,7 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
         try:
             msv[vn] = dawgie.db.util.decode(row[7])
             svs[key] = msv
-        except FileNotFoundError: log.error ('possible database corruption because cannot fine __metric__ state vector value: %s', row[7])
+        except FileNotFoundError: log.error ('possible database corruption because cannot find __metric__ state vector value: %s', row[7])
         pass
     for key,msv in svs.items():
         cur.execute ('SELECT name FROM Target where PK = %s;', (key[2],))

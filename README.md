@@ -68,13 +68,13 @@ DAWGIE supports two styles of databases. It supports Python shelve for tiny appl
   <dd>The IP port number of the POSTGRESQL server. When DAWGIE_DB_IMPL is 'post', this value defaults to 5432 because POSTGRESQL is independent of DAWGIE.</dd>
 </dl>
 
-##### Shelf
+##### Shelve
 
 <dl>
   <dt>DAWGIE_DB_HOST --context-db-host</dt>
   <dd>The IP hostname of the machine running DAWGIE.</dd>
   <dt>DAWGIE_DB_IMPL --context-db-impl</dt>
-  <dd>Must be 'shelf'</dd>
+  <dd>Must be 'shelve'</dd>
   <dt>DAWGIE_DB_NAME --context-db-name</dt>
   <dd>The name of the database to use.</dd>
   <dt>DAWGIE_DB_PATH --context-db-path</dt>

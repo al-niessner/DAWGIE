@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 # COPYRIGHT:
-# Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
+# Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
 # U.S. Government sponsorship acknowledged.
 #
 # All rights reserved.

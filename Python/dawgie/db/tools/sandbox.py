@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 '''
 COPYRIGHT:
-Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -40,14 +40,14 @@ NTR:
 import argparse
 import dawgie
 import dawgie.context
-import dawgie.db.shelf
-from dawgie.db.shelf import Method
 import dawgie.db.util
 import dawgie.util
 import getpass
 import logging
 import os
 import sys
+
+from dawgie.db.shelve.enums import Method
 
 def mkDir(dst):
     return os.system(f"mkdir -p {dst}")

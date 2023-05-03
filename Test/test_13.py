@@ -1,7 +1,7 @@
 ''' show that all DBs behave the same
 
 COPYRIGHT:
-Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -38,6 +38,8 @@ NTR:
 '''
 
 import dawgie
+import dawgie.db.shelve.enums
+import dawgie.db.shelve.state
 import dawgie.db.testdata
 import dawgie.context
 import os
@@ -53,19 +55,48 @@ from datetime import datetime as dt
 class DB:
     @classmethod
     def setup(cls):
+        dawgie.db.close()  # might be open from another TestSuite
         dawgie.db.open()
         for tsk,alg,sv,vn,v in dawgie.db.testdata.KNOWNS:
             dawgie.db.update (tsk, alg, sv, vn, v)
             pass
+        print ('knowns:')
+        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
+        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
+        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
+        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
+        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
+        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         for tgt,tsk,alg in dawgie.db.testdata.DATASETS:
             dawgie.db.connect (alg, tsk, tgt).update()
             pass
+        print ('datasets:')
+        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
+        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
+        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
+        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
+        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
+        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         for tsk,alg in dawgie.db.testdata.ASPECTS:
             dawgie.db.gather (alg, tsk).ds().update()
             pass
+        print ('aspects:')
+        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
+        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
+        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
+        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
+        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
+        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         for tsk,alg in dawgie.db.testdata.TIMELINES:
             dawgie.db.retreat (alg, tsk).ds().update()
             pass
+        print ('timelines:')
+        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
+        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
+        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
+        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
+        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
+        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         dawgie.db.close()
         return
 
@@ -73,6 +104,13 @@ class DB:
         dawgie.db.close()
         self.assertRaises (RuntimeError, dawgie.db._prime_keys)
         dawgie.db.open()
+        print ('PKs:')
+        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
+        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
+        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
+        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
+        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
+        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         keys = dawgie.db._prime_keys()
         self.assertEqual ((dawgie.db.testdata.TSK_CNT *
                            dawgie.db.testdata.SVN_CNT *
@@ -181,7 +219,8 @@ class DB:
         return
 
     def test_copy(self):
-        self.assertTrue (False)
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.copy, None, None, None)
         return
 
     def test_gather(self):
@@ -191,7 +230,7 @@ class DB:
         dawgie.db.open()
         asp = dawgie.db.gather (anz, ans)
         self.assertIsNotNone (asp)
-        self.assertEquals (0, len (asp))
+        self.assertEqual (0, len (asp))
         dawgie.db.close()
         return
 
@@ -212,12 +251,7 @@ class DB:
         return
 
     def test_open(self):
-        dawgie.db.close()
-        self.assertFalse (dawgie.db.post._db)
-        dawgie.db.open()
-        self.assertTrue (dawgie.db.post._db)
-        dawgie.db.close()
-        self.assertFalse (dawgie.db.post._db)
+        self.assertFalse(True)
         return
 
     def test_promote(self):
@@ -297,12 +331,7 @@ class DB:
         return
 
     def test_reopen(self):
-        dawgie.db.close()
-        self.assertFalse (dawgie.db.post._db)
-        dawgie.db.reopen()
-        self.assertTrue (dawgie.db.post._db)
-        dawgie.db.close()
-        self.assertFalse (dawgie.db.post._db)
+        self.assertFalse(True)
         return
 
     def test_retreat(self):
@@ -401,7 +430,6 @@ class DB:
 # notes:
 #   takes about 5 minutes to load the database
 #   once loaded it can simply be re-used (no reason to dump and start again)
-# unittest.skip ('no automatic way to build postgres database')
 class Post(DB,unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -434,10 +462,27 @@ class Post(DB,unittest.TestCase):
     def test_locks(self):
         self.assertTrue (True)  # locks not used in postgres
         return
+
+    def test_open(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
+        dawgie.db.open()
+        self.assertTrue (dawgie.db.post._db)
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
+        return
+
+    def test_reopen(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
+        dawgie.db.reopen()
+        self.assertTrue (dawgie.db.post._db)
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
+        return
     pass
 
-@unittest.skip ('current shelf is not a true replacement for postgres')
-class Shelf(DB,unittest.TestCase):
+class Shelve(DB,unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.root = tempfile.mkdtemp()
@@ -445,43 +490,94 @@ class Shelf(DB,unittest.TestCase):
         os.mkdir (os.path.join (cls.root, 'dbs'))
         os.mkdir (os.path.join (cls.root, 'logs'))
         os.mkdir (os.path.join (cls.root, 'stg'))
-        dawgie.context.db_impl = 'shelf'
+        dawgie.context.db_impl = 'shelve'
         dawgie.context.db_name = 'testspace'
         dawgie.context.db_path = os.path.join (cls.root, 'db')
         dawgie.context.data_dbs = os.path.join (cls.root, 'dbs')
         dawgie.context.data_log = os.path.join (cls.root, 'logs')
         dawgie.context.data_stg = os.path.join (cls.root, 'stg')
         dawgie.db_rotate_path = dawgie.context.db_path
-        cls._acquire = getattr (dawgie.db.shelf.Connector, '_keys')
-        cls._do = getattr (dawgie.db.shelf.Connector, '_Connector__do')
-        cls._release = getattr (dawgie.db.shelf.Connector, '_keys')
-        cls._send = getattr (dawgie.db.shelf.Worker, '_send')
-        setattr (dawgie.db.shelf.Connector, '_acquire', mock_acquire)
-        setattr (dawgie.db.shelf.Connector, '_Connector__do', mock_do)
-        setattr (dawgie.db.shelf.Connector, '_release', mock_release)
-        setattr (dawgie.db.shelf.Worker, '_send', mock_send)
+        cls._acquire = getattr (dawgie.db.shelve.comms, 'acquire')
+        cls._delay_copy = (dawgie.db.shelve.comms.Worker, '_delay_copy')
+        cls._do = getattr (dawgie.db.shelve.comms.Connector, '_Connector__do')
+        cls._release = getattr (dawgie.db.shelve.comms, 'release')
+        cls._send = getattr (dawgie.db.shelve.comms.Worker, '_send')
+        setattr (dawgie.db.shelve.comms, 'acquire', mock_acquire)
+        setattr (dawgie.db.shelve.comms.Worker, '_delay_copy', mock_delay_copy)
+        setattr (dawgie.db.shelve.comms.Connector, '_Connector__do', mock_do)
+        setattr (dawgie.db.shelve.comms, 'release', mock_release)
+        setattr (dawgie.db.shelve.comms.Worker, '_send', mock_send)
         DB.setup()
         return
 
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree (cls.root, True)
-        setattr (dawgie.db.shelf.Connector, '_acquire', cls._acquire)
-        setattr (dawgie.db.shelf.Connector, '_Connector__do', cls._do)
-        setattr (dawgie.db.shelf.Connector, '_release', cls._release)
-        setattr (dawgie.db.shelf.Worker, '_send', cls._send)
+        setattr (dawgie.db.shelve.comms, 'acquire', cls._acquire)
+        setattr (dawgie.db.shelve.comms.Worker,'_delay_copy',cls._delay_copy)
+        setattr (dawgie.db.shelve.comms.Connector, '_Connector__do', cls._do)
+        setattr (dawgie.db.shelve.comms, 'release', cls._release)
+        setattr (dawgie.db.shelve.comms.Worker, '_send', cls._send)
+        return
+
+    def test_consistent(self):
+        self.assertRaises(NotImplementedError, dawgie.db.consistent, [],[],'')
+        return
+
+    def test_copy(self):
+        super().test_copy()
+        root = os.path.join (self.root, 'connector')
+        os.makedirs(root)
+        dawgie.db.open()
+        retval = dawgie.db.copy (root, dawgie.db.shelve.enums.Method.connector, 'localhost')
+        self.assertEqual (0, retval)
+        dawgie.db.close()
+        return
+
+    def test_locks(self):
+        dawgie.db.close()
+        dawgie.db.open()
+        self.assertEqual(dawgie.db.view_locks(), {'tasks':[]})
+        dawgie.db.close()
+        return
+
+    def test_open(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.shelve.state.DBI().is_open)
+        dawgie.db.open()
+        self.assertTrue (dawgie.db.shelve.state.DBI().is_open)
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.shelve.state.DBI().is_open)
+        return
+
+    def test_promote(self):
+        self.assertRaises(NotImplementedError, dawgie.db.promote, [],1)
+        return
+
+    def test_reopen(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.shelve.state.DBI().is_open)
+        dawgie.db.reopen()
+        self.assertTrue (dawgie.db.shelve.state.DBI().is_open)
+        self.assertTrue (dawgie.db.shelve.state.DBI().is_reopened)
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.shelve.state.DBI().is_open)
         return
     pass
 
-def mock_acquire (self, name): return True
-def mock_release (self, s): return True
+def mock_acquire (name): return True
+def mock_release (s): return True
 
 do_response = [None]
 def mock_do (self, request):
     # print ('mock do', request)
-    import dawgie.db.shelf
-    dawgie.db.shelf.Worker(None).do (request)
+    import dawgie.db.shelve.comms
+    dawgie.db.shelve.comms.Worker(None).do (request)
     return do_response[0]
+
+def mock_delay_copy (self, request_value):
+    self._do_copy (request_value)
+    return
 
 def mock_send (self, response):
     do_response[0] = response

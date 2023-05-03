@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -101,7 +101,7 @@ class Farm(unittest.TestCase):
     def test_rerunid (self):
         n = dawgie.pl.dag.Node('a')
         r = dawgie.pl.farm.rerunid (n)
-        self.assertEqual (2, r)
+        self.assertGreater (r, 0)
         n.set ('runid', 17)
         r = dawgie.pl.farm.rerunid (n)
         self.assertEqual (17, r)

@@ -1,7 +1,7 @@
 '''
 --
 COPYRIGHT:
-Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -256,6 +256,31 @@ class Version:
     self._get_ver() and self._set_ver(). However, this should be done with
     extreme caution.
     '''
+    def __eq__(self, other):
+        return all ([self.design() == other.design(),
+                     self.implementation() == other.implementation(),
+                     self.bugfix() == other.bugfix()])
+    def __ge__(self, other):
+        if self.design() > other.design(): return True
+        if self.design() == other.design():
+            if self.implementation() > other.implementation(): return True
+            if self.implementation() == other.implementation():
+                return self.bugfix() >= other.bugfix()
+        return False
+    def __gt__(self, other): return self.__ge__ (other) and self.__ne__ (other)
+    def __le__(self, other):
+        if self.design() < other.design(): return True
+        if self.design() == other.design():
+            if self.implementation() < other.implementation(): return True
+            if self.implementation() == other.implementation():
+                return self.bugfix() <= other.bugfix()
+        return False
+    def __lt__(self, other): return self.__le__ (other) and self.__ne__ (other)
+    def __ne__(self, other):
+        return any ([self.design() != other.design(),
+                     self.implementation() != other.implementation(),
+                     self.bugfix() != other.bugfix()])
+
     def _get_ver(self)->VERSION: return self._version_
     def _set_ver(self, ver:VERSION): self._version_ = ver
     def asstring(self)->str: return '.'.join ([str(self.design()),

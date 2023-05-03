@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -37,7 +37,7 @@ NTR:
 '''
 
 import dawgie.context
-import logging
+import logging; log = logging.getLogger(__name__)
 import os
 import pickle
 import shutil
@@ -61,7 +61,7 @@ def decode (entry):
 
 def encode (value):
     fid,fn = tempfile.mkstemp (dir=dawgie.context.data_stg,
-                               prefix='shelf_', suffix='.pkl')
+                               prefix='shelve_', suffix='.pkl')
     os.close (fid)
     with open (fn, 'wb') as f: pickle.dump (value, f, pickle.HIGHEST_PROTOCOL)
     os.chmod (fn, int ('0664', 8))  # -rw-rw-r--
@@ -85,7 +85,7 @@ def rotate(path, orig, backup):
     if not orig:
         for i in sorted(backup.keys()):
             if backup[i]:
-                logging.getLogger(__name__).warning("orig db missing, copying from db %d", i)
+                log.warning("orig db missing, copying from db %d", i)
                 for v in backup[i]:
                     t = v.split(".")[-1]
                     shutil.copy(v, f'{path}/{dawgie.context.db_name}.{t}')
@@ -108,12 +108,6 @@ def rotate(path, orig, backup):
             shutil.copy(v, f'{path}/0.{dawgie.context.db_name}.{ext}')
 
     return
-
-# pylint: disable=too-many-arguments
-def to_key (runid, tn, taskn, algn, svn, vn):
-    return '.'.join ([str (i) for i in filter
-                      (lambda n:n is not None,
-                       [runid, tn, taskn, algn, svn, vn])])
 
 def verify (value):
     # pylint: disable=bare-except

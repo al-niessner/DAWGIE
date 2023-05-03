@@ -8,7 +8,7 @@ The database interface has N goals:
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -64,10 +64,12 @@ def _db_in_use():
     m = importlib.import_module ('dawgie.db.' + dawgie.context.db_impl)
     return m
 
-def _prime_keys():
+def _prime_keys()->[str]:
+    '''return all the kyes in the form runid.targetname.task.alg.sv.valname'''
     return _db_in_use()._prime_keys()
 
-def _prime_values():
+def _prime_values()->[str]:
+    '''return all of the blob names'''
     return _db_in_use()._prime_values()
 
 def add (target_name:str)->bool:

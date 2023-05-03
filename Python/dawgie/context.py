@@ -1,7 +1,7 @@
 '''
 --
 COPYRIGHT:
-Copyright (c) 2015-2022, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -57,7 +57,7 @@ class PortOffset(enum.Enum):
     farm = 1
     frontend = 0
     log = 2
-    shelf = 3
+    shelve = 3
     pass
 
 ae_base_path = os.environ.get ('DAWGIE_AE_BASE_PATH', '/proj/src/ae')
@@ -77,14 +77,14 @@ data_log = os.environ.get ('DAWGIE_DATA_LOGDIR', '/proj/data/logs')
 data_stg = os.environ.get ('DAWGIE_DATA_STAGED', '/proj/data/stg')
 
 db_host = os.environ.get ('DAWGIE_DB_HOST', 'localhost')
-db_impl = os.environ.get ('DAWGIE_DB_IMPL', 'shelf')
+db_impl = os.environ.get ('DAWGIE_DB_IMPL', 'shelve')
 db_name = os.environ.get ('DAWGIE_DB_NAME', 'undefined')
 db_path = os.environ.get ('DAWGIE_DB_PATH', '/proj/data/db')
 db_post2shelve_prefix = os.environ.get ('DAWGIE_DB_POST2SHELVE_PREFIX',
                                         'undefined')
 db_rotate_path = os.environ.get ('DAWGIE_DB_ROTATE_PATH', '/proj/data/db')
 db_copy_path = os.environ.get ('DAWGIE_DB_COPY_PATH', '/tmp')
-db_port = int(os.environ.get ('DAWGIE_DB_PORT', 8080 + PortOffset.shelf.value))
+db_port = int(os.environ.get ('DAWGIE_DB_PORT', 8080 + PortOffset.shelve.value))
 db_rotate = os.environ.get('DAWGIE_DB_ROTATES', 10)
 db_lock = False
 
@@ -231,7 +231,7 @@ def override (args):
         pass
 
     if args.context_db_impl == 'post':
-        if args.context_db_port == fe_port + PortOffset.shelf.value:
+        if args.context_db_port == fe_port + PortOffset.shelve.value:
             args.context_db_port = 5432
             pass
         if args.context_db_path.find (':') < 0:
@@ -239,7 +239,7 @@ def override (args):
             pass
         pass
 
-    if args.context_db_impl == 'shelf':
+    if args.context_db_impl == 'shelve':
         # This db_path is the value before it is overriden
         if args.context_db_rotate_path == db_path:
             args.context_db_rotate_path = args.context_db_path
