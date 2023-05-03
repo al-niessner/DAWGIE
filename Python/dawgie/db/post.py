@@ -190,8 +190,9 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
                 run_ID = {rid[0] for rid in cur.fetchall()}
 
                 if not run_ID:
-                    log.warning ('Aspect collect: Could not find any runids for %s',
-                                 str (ref))
+                    # long message more readable pylint: disable=logging-not-lazy
+                    log.warning ('Aspect collect: Could not find any runids ' +
+                                 'for target %s and %s', tn, str (ref))
                     continue
 
                 run_ID = max (run_ID) if 1 < len (run_ID) else run_ID.pop()
