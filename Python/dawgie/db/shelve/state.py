@@ -107,7 +107,7 @@ class DBI:
     def save_as (db:{str:{}}, path:str):
         '''save a shelve db to a new path'''
         for name,table in db.items():
-            dbt = shelve.open ('.'.join ([path, name]))
+            dbt = shelve.open ('.'.join ([path, name]), 'c')
             dbt.update (table)
             dbt.close()
             pass

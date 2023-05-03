@@ -159,7 +159,7 @@ def copy (dst, method, gateway):
     if not DBI().is_open: raise RuntimeError('called copy before open')
 
     connection = Connector()
-    retValue = connection.copy([method,dst])
+    retValue = connection.copy(dst, method)
 
     if method == Method.connector:
         DBI.save_as (retValue, os.path.join (dst, dawgie.context.db_name))

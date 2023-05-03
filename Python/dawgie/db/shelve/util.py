@@ -95,10 +95,9 @@ def mkStgDir():
     t = datetime.datetime.now()
     # too error prone to fix and probably not much more readable anyway so
     # pylint: disable=consider-using-f-string
-    tString = "%s/%d%d%d%d%d%d%d" % (dawgie.context. data_stg, t.year, t.month,
-                                     t.day, t.hour, t.minute, t.second,
-                                     t.microsecond)
-    os.system("mkdir %s" % tString)
+    tString = "%s/%d-%d-%dT%d:%d" % (dawgie.context.data_stg, t.year, t.month,
+                                     t.day, t.hour, t.minute)
+    os.system(f'mkdir {tString}')
     return tString
 
 def rotated_files(index=None):

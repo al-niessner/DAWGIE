@@ -62,8 +62,8 @@ KEYSET = collections.namedtuple('KEYSET', ['name', 'parent', 'ver'])
 
 class Connector:  # pylint: disable=too-few-public-methods
     # this class is meant to be extendend like an abstract class
-    def _copy (self, dst):
-        return self.__do (COMMAND(Func.dbcopy, None, None, dst))
+    def _copy (self, dst, method):
+        return self.__do (COMMAND(Func.dbcopy, None, None, [method,dst]))
 
     @staticmethod
     def __do (request):
@@ -104,9 +104,9 @@ class Connector:  # pylint: disable=too-few-public-methods
     # pylint: enable=too-many-arguments
 
     # public methods for modules in this package
-    def copy (self, dat):
+    def copy (self, dst, method):
         '''public method for .impl'''
-        return self._copy (dat)
+        return self._copy (dst, method)
     pass
 
 class DBSerializer(twisted.internet.protocol.Factory):
@@ -196,7 +196,7 @@ class Worker(twisted.internet.protocol.Protocol):
                                        dawgie.db.lockview.LockRequest.lrqb)
             self.__looping_call.start(3)
         elif request.func == Func.dbcopy:
-            twisted.internet.threads.deferToThread(self._do_copy, request.value)
+            self._delay_copy (request.value)
         elif request.func == Func.get:
             key = util.construct (**request.keyset)
             self._send (DBI().tables[request.table.value][key])
@@ -260,6 +260,10 @@ class Worker(twisted.internet.protocol.Protocol):
         self._send(s)
         return
 
+    def _delay_copy (self, request_value):
+        twisted.internet.threads.deferToThread(self._do_copy, request_value)
+        return
+
     def _do_copy(self, param):
         method = param[0]
         dst = param[1]
@@ -287,14 +291,14 @@ class Worker(twisted.internet.protocol.Protocol):
                 log.error ('%s does not exists.', src)
                 retValue = None
         finally:
-            if not DBI().is_open(): DBI().open()
+            if not DBI().is_open: DBI().open()
 
             log.debug("_do_copy: Releasing")
             release(lok)
             pass
 
         self._send(retValue)
-        self.transport.loseConnection()
+        if self.transport is not None: self.transport.loseConnection()
         return
 
     def _do_release(self):

@@ -498,10 +498,12 @@ class Shelve(DB,unittest.TestCase):
         dawgie.context.data_stg = os.path.join (cls.root, 'stg')
         dawgie.db_rotate_path = dawgie.context.db_path
         cls._acquire = getattr (dawgie.db.shelve.comms, 'acquire')
+        cls._delay_copy = (dawgie.db.shelve.comms.Worker, '_delay_copy')
         cls._do = getattr (dawgie.db.shelve.comms.Connector, '_Connector__do')
         cls._release = getattr (dawgie.db.shelve.comms, 'release')
         cls._send = getattr (dawgie.db.shelve.comms.Worker, '_send')
         setattr (dawgie.db.shelve.comms, 'acquire', mock_acquire)
+        setattr (dawgie.db.shelve.comms.Worker, '_delay_copy', mock_delay_copy)
         setattr (dawgie.db.shelve.comms.Connector, '_Connector__do', mock_do)
         setattr (dawgie.db.shelve.comms, 'release', mock_release)
         setattr (dawgie.db.shelve.comms.Worker, '_send', mock_send)
@@ -512,6 +514,7 @@ class Shelve(DB,unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree (cls.root, True)
         setattr (dawgie.db.shelve.comms, 'acquire', cls._acquire)
+        setattr (dawgie.db.shelve.comms.Worker,'_delay_copy',cls._delay_copy)
         setattr (dawgie.db.shelve.comms.Connector, '_Connector__do', cls._do)
         setattr (dawgie.db.shelve.comms, 'release', cls._release)
         setattr (dawgie.db.shelve.comms.Worker, '_send', cls._send)
@@ -524,6 +527,7 @@ class Shelve(DB,unittest.TestCase):
     def test_copy(self):
         super().test_copy()
         root = os.path.join (self.root, 'connector')
+        os.makedirs(root)
         dawgie.db.open()
         retval = dawgie.db.copy (root, dawgie.db.shelve.enums.Method.connector, 'localhost')
         self.assertEqual (0, retval)
@@ -570,6 +574,10 @@ def mock_do (self, request):
     import dawgie.db.shelve.comms
     dawgie.db.shelve.comms.Worker(None).do (request)
     return do_response[0]
+
+def mock_delay_copy (self, request_value):
+    self._do_copy (request_value)
+    return
 
 def mock_send (self, response):
     do_response[0] = response
