@@ -181,7 +181,7 @@ def add_arguments (ap):
     ap.add_argument ('--context-email-signature', default=email_signature, required=False,
                      help='Sign e-mail summary reports with this signature. [%(default)s]')
     ap.add_argument ('--context-ssl-pem-file', default=ssl_pem_file, required=False,
-                     help='when pointing at an existing file, it will be used to initiate an https service')
+                     help='when pointing at an existing file, it will be used to initiate an https service [%(default)s]')
     ap.add_argument ('--context-worker-backlog', default=worker_backlog,
                      required=False, type=int,
                      help='the number of expected workers that may try to contact the foreman at the same time [%(default)s]')
