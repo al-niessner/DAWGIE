@@ -53,6 +53,9 @@ class Engine:
             self.todo (original, rid, values)
         elif any (arg_state):  # error because its all or nothing
             log.error ('Inconsistent arguments. Ignoring request.')
+            log.error ('  values: %s', str(values))
+            log.error ('  original: %s', str(original))
+            log.error ('  run ID: %s', str(rid))
         else: self.do()
 
         return self.more()

@@ -411,7 +411,7 @@ def update (values:[(str,bool)], original:dawgie.pl.dag.Node, rid:int):
                 pass
             pass
         organize (sorted (task_names), rid, targets, event)
-        promote (values, original, rid)
+        if rid: promote (values, original, rid)
     else: log.error('Node %s for run ID %d did not update its state vector',
                     original.tag, rid)
     return
