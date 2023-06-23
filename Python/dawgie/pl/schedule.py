@@ -21,7 +21,7 @@ Rules:
     3. Given a 'dawgie.Analyzer' node A and a 'dawgie.Algorithm' node B where B is dependant on data produced by A, then B can begin processing as soon as A finishes.
 
     4. Rule 1 is the same if either 'dawgie.Algorithm' node is replaced by 'dawgie.Regression'.
-    
+
     5. Rules 2 and 3 are the same if 'dawgie.Algorithm' is replaced by 'dawgie.Regression'.
 
     6. Once a change event is detected, all subsequent changes are under the umbrella of the first change event (aka 'run ID').
@@ -437,8 +437,8 @@ def view_success() -> [dict]: return suc
 
 def view_todo() -> [dict]:
     wait = list(filter(lambda t:all([t.get ('status') in [State.waiting,
-                                                          State.running], 
-                                     len(t.get ('todo'))]), # prevents undefined
+                                                          State.running],
+                                     len(t.get ('todo'))]),  # prevents undefined
                        que))
     wait.sort (key=lambda t:t.get ('level'))
     return [{'name':w.tag,
