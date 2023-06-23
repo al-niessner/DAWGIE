@@ -254,9 +254,3 @@ _fb.append (dawgie.SV_REF(task, _C, _sv))
 _al.append (_E)
 _rl.append (_D)
 _tl.extend ([_root, _A, _B, _C])
-
-
-if __name__ == '__main__':
-    ScheduleRules.setUpClass()
-    ScheduleRules().test_issue_194()
-    ScheduleRules.tearDownClass()
