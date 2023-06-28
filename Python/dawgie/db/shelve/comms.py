@@ -41,6 +41,7 @@ NTR:
 import collections
 import dawgie.db.lockview
 import dawgie.context
+import dawgie.security
 import logging; log = logging.getLogger(__name__)
 import os
 import pickle

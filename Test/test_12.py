@@ -67,9 +67,17 @@ class AlgMock(dawgie.Algorithm):
 class PromotionEngine(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls.allow_promotion = dawgie.context.allow_promotion
+        cls.db_impl = dawgie.context.db_impl
         cls.promote = dawgie.pl.promotion.Engine()
         dawgie.context.allow_promotion = True
         dawgie.context.db_impl = 'test'
+        return
+    @classmethod
+    def tearDownClass(cls):
+        cls.promote = dawgie.pl.promotion.Engine()
+        dawgie.context.allow_promotion = cls.allow_promotion
+        dawgie.context.db_impl = cls.db_impl
         return
 
     def mock_consistent (self, inputs:[dawgie.db.REF], outputs:[dawgie.db.REF],

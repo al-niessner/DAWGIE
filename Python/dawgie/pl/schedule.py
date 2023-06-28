@@ -1,4 +1,55 @@
-'''
+'''schedule jobs based on DAG
+
+Theory of operation is: given a DAG and a change event, determine which work can be done and in what order.
+
+Definitions:
+    DAG - directed graph normally built from source code as is done in Test/test_06
+    change event - is identified by the 'run ID' and can be caused by:
+        1. source code has changed
+            a. git commit on main
+            b. merge of a branch to main
+        2. parent node has generated new data
+        3. user has requested work be accomplished via command line or UI
+    work - running of a 'dawgie.Algorithm', 'dawgie.Analyzer', or 'dawgie.Regression'.
+    order - root of the DAG to its deepest leaf node. The level of the root is 0 and the deepest level is L. Available work at the lowest level should be done before work at higher levels.
+
+Rules:
+    1. Given two 'dawgie.Algorithm' nodes A and B with B is dependant on data produced by A, then B can begin processing a target as soon as A finishes.
+
+    2. Given a 'dawgie.Algorithm' node A and a 'dawgie.Analyzer' node B where B is dependant on data produced by A, then B must wait for A to finish processing all targets before it can begin.
+
+    3. Given a 'dawgie.Analyzer' node A and a 'dawgie.Algorithm' node B where B is dependant on data produced by A, then B can begin processing as soon as A finishes.
+
+    4. Rule 1 is the same if either 'dawgie.Algorithm' node is replaced by 'dawgie.Regression'.
+
+    5. Rules 2 and 3 are the same if 'dawgie.Algorithm' is replaced by 'dawgie.Regression'.
+
+    6. Once a change event is detected, all subsequent changes are under the umbrella of the first change event (aka 'run ID').
+
+Implementation:
+
+The DAG is stored in a 'dawgie.pl.dag.Construct.at' where 'at' is specifically the algorithm tree (at) and it includes all work elements. Each node is of type 'xml.etree.ElementTree.Element' where the tag is the full name of the work element. The attributes of the node are used by the scheduler to maintain the scheduler queues. The attributes of the nodes are:
+   {'feedback': {<Element 'feedback.model' at 0x7fb80ec79d50>},
+    'shape': <Shape.ellipse: 0>,
+    'visitors': {'feedback.sensor.measured.voltage'},
+    'alg': <ae.feedback.bot.Sensor object at 0x7fb80e9e62f0>,
+    'do': set(),
+    'doing': set(),
+    'factory': <function task at 0x7fb838aa6290>,
+    'status': <State.initial: 5>,
+    'todo': set(),
+    'ancestry': set(),
+    'been_here': True,
+    'level': 0}
+
+The important elements to the scheduler are do, doing, feedback, level, and todo. These allow the node to be added to 'per' and 'que' as necessary and keep track of what has been done and what has not. Processing a change event always starts by adding the information to the todo. When the event is processed with the DAG todo is completed, then the lowest level items are moved to do and doing - do is used by 'dawgie.farm' but setup in the scheduler.
+
+Flow:
+
+  organize() -> put targets into 'todo' and mark the 'state' 'waiting' if it is not running.
+  next_job_batch() -> move 'todo' targets into 'doing' and 'do' for 'dawgie.pl.farm' where they are queued up for later processing and status changed to 'running'.
+--
+
 COPYRIGHT:
 Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
@@ -257,7 +308,13 @@ def next_job_batch():
     todo.sort (key=lambda j:j.get ('level'))
     return todo
 
-def organize (task_names, runid=None, targets=None, event=None):
+def organize (task_names:[str], runid:int=None, targets:[str]=None,
+              event:str=None):
+    '''organize a schedule based on the calling event and what is already known
+
+    Adds new targets to the todo list if it is not already there. If the job is
+    already 'running' for a target, then keep the status as 'running'.
+    '''
     jobs = {j.tag:j for j in que}
     targets = targets if targets else set()
     log.debug ('organize() - looping over targets')
@@ -271,7 +328,7 @@ def organize (task_names, runid=None, targets=None, event=None):
                 if event: n.set ('event', event)
                 if _is_asp (n): n.get ('todo').add ('__all__')
                 elif '__all__' in targets:
-                    n.get ('todo').update (set(dawgie.db.targets()))
+                    n.get ('todo').update (dawgie.db.targets())
                 else: n.get ('todo').update (targets)
                 pass
             pass
@@ -354,7 +411,7 @@ def update (values:[(str,bool)], original:dawgie.pl.dag.Node, rid:int):
                 pass
             pass
         organize (sorted (task_names), rid, targets, event)
-        promote (values, original, rid)
+        if rid: promote (values, original, rid)
     else: log.error('Node %s for run ID %d did not update its state vector',
                     original.tag, rid)
     return
@@ -379,8 +436,10 @@ def view_failure() -> [dict]: return err
 def view_success() -> [dict]: return suc
 
 def view_todo() -> [dict]:
-    wait = list(filter(lambda t:t.get ('status')in [State.waiting,
-                                                    State.running], que))
+    wait = list(filter(lambda t:all([t.get ('status') in [State.waiting,
+                                                          State.running],
+                                     len(t.get ('todo'))]),  # prevents undefined
+                       que))
     wait.sort (key=lambda t:t.get ('level'))
     return [{'name':w.tag,
              'targets':sorted (list(w.get ('todo')))} for w in wait]
