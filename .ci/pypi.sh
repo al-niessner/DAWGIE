@@ -44,6 +44,7 @@ then
 fi
 
 # sudo pip3 install -U twine wheel setuptools
+# . ${HOME}/.venv/dawgie/bin/activate
 export DAWGIE_VERSION=$1
 bdir=$(pwd)
 wdir=$(mktemp -d)
