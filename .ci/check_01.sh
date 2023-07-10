@@ -60,3 +60,4 @@ then
 fi
 
 post_state "$context" "$description" "$state"
+current_state
