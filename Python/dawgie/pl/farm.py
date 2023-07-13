@@ -209,6 +209,7 @@ def _put (job, runid:int, target:str, where:dawgie.Distribution):
     return
 
 def clear():
+    log.info ('clearing the entire estate')
     _busy.clear()
     _cloud.clear()
     _cluster.clear()
