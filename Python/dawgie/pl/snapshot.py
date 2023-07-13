@@ -42,7 +42,6 @@ NTR:
 import dawgie.context
 import dawgie.pl.farm
 import dawgie.pl.schedule
-import json
 
 # snapshoting requires peeking so pylint: disable=protected-access
 
