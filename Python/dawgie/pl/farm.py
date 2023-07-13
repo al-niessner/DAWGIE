@@ -93,6 +93,7 @@ class Hand(twisted.internet.protocol.Protocol):
         self.__address = address
         self.__blen = len (struct.pack ('>I', 0))
         self.__buf = b''
+        self.__incarnation = None
         self.__len = None
         log.debug ('work application submission from %s', str(address))
         # really is used so pylint: disable=unused-private-member
@@ -102,7 +103,10 @@ class Hand(twisted.internet.protocol.Protocol):
         self.__wait = dawgie.pl.message.make()
         return
 
-    def __str__(self): return 'dawgie.pl.farm.Hand from ' + str(self.__address)
+    def __str__(self):
+        addr = str(self.__address)
+        incr = str(self.__incarnation)
+        return f'dawgie.pl.farm.Hand from {addr} incarnation {incr}'
 
     def _process (self, msg):
         if msg.type == dawgie.pl.message.Type.register: self._reg(msg)
@@ -130,6 +134,7 @@ class Hand(twisted.internet.protocol.Protocol):
             self.transport.loseConnection()
         else:
             _workers.append (self)
+            self.__incarnation = msg.incarnation
             log.debug ('Registered a worker for its %d incarnation.',
                        msg.incarnation)
             pass
