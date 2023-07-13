@@ -58,7 +58,7 @@ def _clean (item):
                                       target=item.target,
                                       tim=item.timing,
                                       typ=item.type,
-                                      val=item.value)
+                                      val=item.values)
     return item
 
 def _grab_context():
