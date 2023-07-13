@@ -47,7 +47,7 @@ import dawgie.pl.schedule
 # snapshoting requires peeking so pylint: disable=protected-access
 
 def _clean (item):
-    if instanceof (item, dawgie.pl.message.MSG):
+    if isinstance (item, dawgie.pl.message.MSG):
         return dawgie.pl.message(fac=item.factory,
                                  inc=item.incarnation,
                                  jid=item.jobid,
