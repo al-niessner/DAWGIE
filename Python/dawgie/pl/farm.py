@@ -55,6 +55,8 @@ import twisted.internet.task
 archive = False
 
 class Hand(twisted.internet.protocol.Protocol):
+    # need to retain state for string representation so
+    # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _res (msg):
         done = (msg.jobid + '[' +
