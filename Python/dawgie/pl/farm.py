@@ -88,6 +88,7 @@ class Hand(twisted.internet.protocol.Protocol):
     def __init__ (self, address):
         twisted.internet.protocol.Protocol.__init__(self)
         self._abort = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, suc=False)
+        self.__address = address
         self.__blen = len (struct.pack ('>I', 0))
         self.__buf = b''
         self.__len = None
@@ -98,6 +99,8 @@ class Hand(twisted.internet.protocol.Protocol):
         self.__proceed = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, suc=True)
         self.__wait = dawgie.pl.message.make()
         return
+
+    def __str__(self): return 'dawgie.pl.farm.Hand from ' + str(self.__address)
 
     def _process (self, msg):
         if msg.type == dawgie.pl.message.Type.register: self._reg(msg)
