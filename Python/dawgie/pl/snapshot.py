@@ -46,8 +46,8 @@ import dawgie.pl.schedule
 # snapshoting requires peeking so pylint: disable=protected-access
 
 def _grab_context():
-    if '@' in dawgie.context.db_path:
-        dbp = dawgie.context.db_path[:dawgie.context.db_path.find('@')] + '@****'
+    if ':' in dawgie.context.db_path:
+        dbp = dawgie.context.db_path[:dawgie.context.db_path.find(':')] + ':****'
     else: dbp = dawgie.context.db_path
     return {'context':{'ae_base_path':dawgie.context.ae_base_path,
                        'ae_base_package':dawgie.context.ae_base_package,
