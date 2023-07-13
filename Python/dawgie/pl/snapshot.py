@@ -48,17 +48,17 @@ import dawgie.pl.schedule
 
 def _clean (item):
     if isinstance (item, dawgie.pl.message.MSG):
-        return dawgie.pl.message(fac=item.factory,
-                                 inc=item.incarnation,
-                                 jid=item.jobid,
-                                 psh=item.ps_hint,
-                                 rev=item.revision,
-                                 rid=item.runid,
-                                 suc=item.success,
-                                 target=item.target,
-                                 tim=item.timing,
-                                 typ=item.type,
-                                 val=item.value)
+        return dawgie.pl.message.make(fac=item.factory,
+                                      inc=item.incarnation,
+                                      jid=item.jobid,
+                                      psh=item.ps_hint,
+                                      rev=item.revision,
+                                      rid=item.runid,
+                                      suc=item.success,
+                                      target=item.target,
+                                      tim=item.timing,
+                                      typ=item.type,
+                                      val=item.value)
     return item
 
 def _grab_context():
