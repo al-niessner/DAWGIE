@@ -41,9 +41,25 @@ NTR:
 
 import dawgie.context
 import dawgie.pl.farm
+import dawgie.pl.message
 import dawgie.pl.schedule
 
 # snapshoting requires peeking so pylint: disable=protected-access
+
+def _clean (item):
+    if instanceof (item, dawgie.pl.message.MSG):
+        return dawgie.pl.message(fac=item.factory,
+                                 inc=item.incarnation,
+                                 jid=item.jobid,
+                                 psh=item.ps_hint,
+                                 rev=item.revision,
+                                 rid=item.runid,
+                                 suc=item.success,
+                                 target=item.target,
+                                 tim=item.timing,
+                                 typ=item.type,
+                                 val=item.value)
+    return item
 
 def _grab_context():
     if ':' in dawgie.context.db_path:
@@ -76,9 +92,9 @@ def _grab_context():
 
 def _grab_farm():
     return {'farm':{'agency':str(dawgie.pl.farm._agency),
-                    'busy':[str(b) for b in dawgie.pl.farm._busy],
-                    'cloud':[str(b) for b in dawgie.pl.farm._cloud],
-                    'cluster':[str(b) for b in dawgie.pl.farm._cluster],
+                    'busy':[str(_clean(b)) for b in dawgie.pl.farm._busy],
+                    'cloud':[str(_clean(c)) for c in dawgie.pl.farm._cloud],
+                    'cluster':[str(_clean(c)) for c in dawgie.pl.farm._cluster],
                     'crew':dawgie.pl.farm.crew(),
                     'something_to_do':dawgie.pl.farm.something_to_do(),
                     'time':{str(k):str(t) for k,t in dawgie.pl.farm._time.items()},
