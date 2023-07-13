@@ -81,7 +81,7 @@ def _grab_farm():
                     'cluster':[str(b) for b in dawgie.pl.farm._cluster],
                     'crew':dawgie.pl.farm.crew(),
                     'something_to_do':dawgie.pl.farm.something_to_do(),
-                    'time':{str(k):str(t) for k,t in dawgie.pl.farm._time},
+                    'time':{str(k):str(t) for k,t in dawgie.pl.farm._time.items()},
                     'workers':[str(b) for b in dawgie.pl.farm._workers]}}
 
 def _grab_fsm():
