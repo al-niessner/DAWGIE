@@ -55,6 +55,8 @@ import twisted.internet.task
 archive = False
 
 class Hand(twisted.internet.protocol.Protocol):
+    # need to retain state for string representation so
+    # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _res (msg):
         done = (msg.jobid + '[' +
@@ -88,8 +90,10 @@ class Hand(twisted.internet.protocol.Protocol):
     def __init__ (self, address):
         twisted.internet.protocol.Protocol.__init__(self)
         self._abort = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, suc=False)
+        self.__address = address
         self.__blen = len (struct.pack ('>I', 0))
         self.__buf = b''
+        self.__incarnation = None
         self.__len = None
         log.debug ('work application submission from %s', str(address))
         # really is used so pylint: disable=unused-private-member
@@ -98,6 +102,11 @@ class Hand(twisted.internet.protocol.Protocol):
         self.__proceed = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, suc=True)
         self.__wait = dawgie.pl.message.make()
         return
+
+    def __str__(self):
+        addr = str(self.__address)
+        incr = str(self.__incarnation)
+        return f'dawgie.pl.farm.Hand from {addr} incarnation {incr}'
 
     def _process (self, msg):
         if msg.type == dawgie.pl.message.Type.register: self._reg(msg)
@@ -125,6 +134,7 @@ class Hand(twisted.internet.protocol.Protocol):
             self.transport.loseConnection()
         else:
             _workers.append (self)
+            self.__incarnation = msg.incarnation
             log.debug ('Registered a worker for its %d incarnation.',
                        msg.incarnation)
             pass
@@ -209,6 +219,7 @@ def _put (job, runid:int, target:str, where:dawgie.Distribution):
     return
 
 def clear():
+    log.info ('clearing the entire estate')
     _busy.clear()
     _cloud.clear()
     _cluster.clear()
