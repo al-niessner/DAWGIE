@@ -213,6 +213,7 @@ def clear():
     _busy.clear()
     _cloud.clear()
     _cluster.clear()
+    _jobs.clear()
     _time.clear()
     _workers.clear()
     return
@@ -229,20 +230,21 @@ def delta_time_to_string(diff):
                                diff.seconds % 60)
 
 insights = {}
-try_again = []
+_jobs = []
 def dispatch():
     # pylint: disable=too-many-branches
     if not something_to_do(): return
 
-    try_again.extend(dawgie.pl.schedule.next_job_batch())
-    jobs = try_again.copy()
+    _jobs.extend(dawgie.pl.schedule.next_job_batch())
 
-    if archive and not sum ([len(jobs),len(_busy),len(_cluster),len(_cloud)]):
+    if archive and not sum ([len(_jobs),len(_busy),len(_cluster),len(_cloud)]):
         dawgie.context.fsm.archiving_trigger()
         pass
 
+    # allow db impl to throw an exception via rerunid() which means exception
+    # class name is unknowable so pylint: disable=bare-except
     try:
-        for j in jobs:
+        for j in _jobs.copy():
             runid = rerunid (j)
             j.set ('status', dawgie.pl.schedule.State.running)
             fm = j.get ('factory').__module__
@@ -267,8 +269,9 @@ def dispatch():
             else: log.error ('Unknown factory name: %s', str(fn))
 
             j.get ('do').clear()
-            try_again.remove (j)
+            _jobs.remove (j)
     except: log.exception ("Error processing from next_job_batch()")
+    # pylint: enable=bare-except
 
     if _agency:
         _cloud.extend (_repeat)
@@ -314,14 +317,7 @@ def rerunid (job):
     runid = job.get ('runid', None)
 
     if runid is None:
-        count = 0
-        thresh = 1000000
-        while count < thresh:
-            try:
-                runid = dawgie.db.next()
-                count = thresh + 1
-            except: yield
-            pass
+        runid = dawgie.db.next()
         log.critical ('New run ID (%d) for algorithm %s trigger by the event: %s',
                       runid, job.tag, job.get ('event', 'Not Specified'))
         pass
