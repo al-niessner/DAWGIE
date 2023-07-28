@@ -229,42 +229,46 @@ def delta_time_to_string(diff):
                                diff.seconds % 60)
 
 insights = {}
+try_again = []
 def dispatch():
     # pylint: disable=too-many-branches
     if not something_to_do(): return
 
-    jobs = dawgie.pl.schedule.next_job_batch()
+    try_again.extend(dawgie.pl.schedule.next_job_batch())
+    jobs = try_again.copy()
 
     if archive and not sum ([len(jobs),len(_busy),len(_cluster),len(_cloud)]):
         dawgie.context.fsm.archiving_trigger()
         pass
 
-    for j in jobs:
-        runid = rerunid (j)
-        j.set ('status', dawgie.pl.schedule.State.running)
-        fm = j.get ('factory').__module__
-        fn = j.get ('factory').__name__
-        factory = getattr (importlib.import_module (fm), fn)
-        where = dawgie.Distribution.auto
-        for alg in factory (dawgie.util.task_name (factory)).list():
-            if alg.name() == j.tag.split('.')[-1]: where = alg.where()
-            pass
-
-        if fn == dawgie.Factories.analysis.name:
-            _put (job=j, runid=runid, target=None, where=where)
-        elif fn == dawgie.Factories.task.name:
-            for t in sorted(list(j.get ('do'))):
-                _put (job=j, runid=runid, target=t, where=where)
+    try:
+        for j in jobs:
+            runid = rerunid (j)
+            j.set ('status', dawgie.pl.schedule.State.running)
+            fm = j.get ('factory').__module__
+            fn = j.get ('factory').__name__
+            factory = getattr (importlib.import_module (fm), fn)
+            where = dawgie.Distribution.auto
+            for alg in factory (dawgie.util.task_name (factory)).list():
+                if alg.name() == j.tag.split('.')[-1]: where = alg.where()
                 pass
-        elif fn == dawgie.Factories.regress.name:
-            for t in sorted(list(j.get ('do'))):
-                _put (job=j, runid=0, target=t, where=where)
-                pass
-            pass
-        else: log.error ('Unknown factory name: %s', str(fn))
 
-        j.get ('do').clear()
-        pass
+            if fn == dawgie.Factories.analysis.name:
+                _put (job=j, runid=runid, target=None, where=where)
+            elif fn == dawgie.Factories.task.name:
+                for t in sorted(list(j.get ('do'))):
+                    _put (job=j, runid=runid, target=t, where=where)
+                    pass
+            elif fn == dawgie.Factories.regress.name:
+                for t in sorted(list(j.get ('do'))):
+                    _put (job=j, runid=0, target=t, where=where)
+                    pass
+                pass
+            else: log.error ('Unknown factory name: %s', str(fn))
+
+            j.get ('do').clear()
+            try_again.remove (j)
+    except: log.exception ("Error processing from next_job_batch()")
 
     if _agency:
         _cloud.extend (_repeat)
@@ -310,7 +314,14 @@ def rerunid (job):
     runid = job.get ('runid', None)
 
     if runid is None:
-        runid = dawgie.db.next()
+        count = 0
+        thresh = 1000000
+        while count < thresh:
+            try:
+                runid = dawgie.db.next()
+                count = thresh + 1
+            except: yield
+            pass
         log.critical ('New run ID (%d) for algorithm %s trigger by the event: %s',
                       runid, job.tag, job.get ('event', 'Not Specified'))
         pass
