@@ -389,7 +389,7 @@ def versions():
     svs_vers = {}
     tasks_vers = {}
     vals_vers = {}
-    for vk,pid in DBI().tables.value:
+    for vk,pid in DBI().tables.value.items():
         pid,vn,vv = util.dissect (vk)
         pid,svn,svv = util.dissect (DBI().indices.state[pid])
         pid,algn,algv = util.dissect (DBI().indices.alg[pid])
