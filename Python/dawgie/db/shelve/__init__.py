@@ -397,18 +397,18 @@ def versions():
         tasks_vers[tskn] = True
         key = '.'.join([tskn, algn])
 
-        if key in algs_vers: algs_vers[key].add (algv.asstring())
-        else: algs_vers[key] = {algv.asstring()}
+        if key in algs_vers: algs_vers[key].append (algv.asstring())
+        else: algs_vers[key] = [algv.asstring()]
 
         key = '.'.join([tskn, algn, svn])
 
-        if key in svs_vers: svs_vers[key].add (svv.asstring())
-        else: svs_vers[key] = {svv.asstring()}
+        if key in svs_vers: svs_vers[key].append (svv.asstring())
+        else: svs_vers[key] = [svv.asstring()]
 
         key = '.'.join([tskn, algn, svn, vn])
 
-        if key in vals_vers: vals_vers[key].add (vv.asstring())
-        else: vals_vers[key] = {vv.asstring()}
+        if key in vals_vers: vals_vers[key].append (vv.asstring())
+        else: vals_vers[key] = [vv.asstring()]
         pass
     return tasks_vers,algs_vers,svs_vers,vals_vers
 
