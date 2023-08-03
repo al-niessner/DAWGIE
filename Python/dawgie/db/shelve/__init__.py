@@ -304,6 +304,10 @@ def reopen()->bool:
     '''
     return DBI().reopen()
 
+def reset (_runid:int, _tn:str, _tskn, _alg)->None:
+    log.warning('reset() is not implemented for shelve')
+    return
+
 def retreat (reg, ret)->dawgie.Timeline:
     '''Get a dawgie.Timeline from the database backend
 
