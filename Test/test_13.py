@@ -104,14 +104,6 @@ class DB:
         self.assertTrue (True)  # not testable in a reasonable sense
         return
 
-    def test_close(self):
-        dawgie.db.close()
-        self.assertFalse (dawgie.db.post._db)
-        dawgie.db.open()
-        dawgie.db.close()
-        self.assertFalse (dawgie.db.post._db)
-        return
-
     def test_connect(self):
         tgt,tsk,alg = dawgie.db.testdata.DATASETS[0]
         dawgie.db.close()
@@ -361,7 +353,6 @@ class DB:
         dawgie.db.close()
         return
 
-    @unittest.skip ('takes too long while developing other tests')
     def test_versions(self):
         dawgie.db.close()
         self.assertRaises (RuntimeError, dawgie.db.versions)
@@ -418,6 +409,14 @@ class Post(DB,unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree (cls.root, True)
+        return
+
+    def test_close(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
+        dawgie.db.open()
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
         return
 
     def test_copy(self):
@@ -483,6 +482,14 @@ class Shelve(DB,unittest.TestCase):
         setattr (dawgie.db.shelve.comms.Connector, '_Connector__do', cls._do)
         setattr (dawgie.db.shelve.comms, 'release', cls._release)
         setattr (dawgie.db.shelve.comms.Worker, '_send', cls._send)
+        return
+
+    def test_close(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.shelve.state.DBI().is_open)
+        dawgie.db.open()
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.shelve.state.DBI().is_open)
         return
 
     def test_consistent(self):

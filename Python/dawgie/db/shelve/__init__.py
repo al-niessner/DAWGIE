@@ -304,6 +304,10 @@ def reopen()->bool:
     '''
     return DBI().reopen()
 
+def reset (_runid:int, _tn:str, _tskn, _alg)->None:
+    log.warning('reset() is not implemented for shelve')
+    return
+
 def retreat (reg, ret)->dawgie.Timeline:
     '''Get a dawgie.Timeline from the database backend
 
@@ -389,7 +393,7 @@ def versions():
     svs_vers = {}
     tasks_vers = {}
     vals_vers = {}
-    for vk,pid in DBI().tables.value:
+    for vk,pid in DBI().tables.value.items():
         pid,vn,vv = util.dissect (vk)
         pid,svn,svv = util.dissect (DBI().indices.state[pid])
         pid,algn,algv = util.dissect (DBI().indices.alg[pid])
@@ -397,18 +401,18 @@ def versions():
         tasks_vers[tskn] = True
         key = '.'.join([tskn, algn])
 
-        if key in algs_vers: algs_vers[key].add (algv.asstring())
-        else: algs_vers[key] = {algv.asstring()}
+        if key in algs_vers: algs_vers[key].append (algv.asstring())
+        else: algs_vers[key] = [algv.asstring()]
 
         key = '.'.join([tskn, algn, svn])
 
-        if key in svs_vers: svs_vers[key].add (svv.asstring())
-        else: svs_vers[key] = {svv.asstring()}
+        if key in svs_vers: svs_vers[key].append (svv.asstring())
+        else: svs_vers[key] = [svv.asstring()]
 
         key = '.'.join([tskn, algn, svn, vn])
 
-        if key in vals_vers: vals_vers[key].add (vv.asstring())
-        else: vals_vers[key] = {vv.asstring()}
+        if key in vals_vers: vals_vers[key].append (vv.asstring())
+        else: vals_vers[key] = [vv.asstring()]
         pass
     return tasks_vers,algs_vers,svs_vers,vals_vers
 
