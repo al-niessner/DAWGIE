@@ -125,7 +125,8 @@ class DBSerializer(twisted.internet.protocol.Factory):
 class Worker(twisted.internet.protocol.Protocol):
     def __init__ (self, address):
         twisted.internet.protocol.Protocol.__init__(self)
-        self.__buf = {'actual':len(struct.pack('>I',0)),'data':b'','expected':0}
+        self.__buf = {'actual':len(struct.pack('>I',0)),
+                      'data':b'','expected':None}
         # really is used so pylint: disable=unused-private-member
         self.__handshake = dawgie.security.TwistedWrapper(self, address)
         # really is used so pylint: enable=unused-private-member

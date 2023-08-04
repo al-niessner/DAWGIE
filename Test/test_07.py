@@ -42,7 +42,9 @@ import dawgie.context
 import dawgie.db
 import dawgie.db.shelve.comms
 import os
+import pickle
 import shutil
+import struct
 import tempfile
 import unittest
 
@@ -136,8 +138,22 @@ class Shelve(unittest.TestCase):
         Even forcing __all__ into the search fails.
         '''
         full_list = dawgie.db.targets (True)
-        print (full_list)
         self.assertTrue ('__all__' in full_list)
+        return
+
+    def test_issue_214(self):
+        '''pipelines using shelve fail to load data
+
+        File "/usr/local/lib/python3.10/dist-packages/dawgie/db/shelve/comms.py", line 168, in dataReceived
+        request = pickle.loads (self.__buf['data'][:length])
+        builtins.EOFError: Ran out of input
+
+        try 1: give the function a good stream and see if it works
+        '''
+        worker = dawgie.db.shelve.comms.Worker(None)
+        data = pickle.dumps ({'a':1,'b':2})
+        data = struct.pack ('>I', len(data)) + data
+        self.assertRaises (AttributeError, worker.dataReceived, data)
         return
     pass
 
