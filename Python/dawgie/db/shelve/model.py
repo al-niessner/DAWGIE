@@ -181,7 +181,13 @@ class Interface(Connector, Container, Dataset, Timeline):
                             spks = list(filter (lambda k,K=pk:k[1:] == K[1:],
                                                 pks))
                             spks.sort (key=lambda t:t[0])
-                            pk = spks[-1]
+
+                            if spks: pk = spks[-1]
+                            else:
+                                log.warning('No matches for: %s.%s.%s.%s.%s',
+                                             self._tn(), self._task(),
+                                            self._alg(), sv.name(), vn)
+                                continue
                             pass
 
                         sv[vn] = self._get_prime (pk)
