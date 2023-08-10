@@ -72,13 +72,13 @@ class Interface(Connector, Container, Dataset, Timeline):
             svn = vref.item.name()
             vn = vref.feat
             # pylint: disable=protected-access
-            tid = self._update_cmd (task, None, Table.task, None, None)
+            tid = self._update_cmd (task, None, Table.task, None, None)[1]
             aid = self._update_cmd (algn, tid, Table.alg, None,
-                                    vref.impl._get_ver())
+                                    vref.impl._get_ver())[1]
             sid = self._update_cmd (svn, aid, Table.state, None,
-                                    vref.item._get_ver())
+                                    vref.item._get_ver())[1]
             vid = self._update_cmd (vn, sid, Table.value, None,
-                                    vref.item[vn]._get_ver())
+                                    vref.item[vn]._get_ver())[1]
             # pylint: enable=protected-access
             reftable[(tid,aid,sid,vid)] = ('.'.join([task,algn,svn]),vn)
             pass
