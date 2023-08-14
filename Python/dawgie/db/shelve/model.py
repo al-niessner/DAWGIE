@@ -112,8 +112,9 @@ class Interface(Connector, Container, Dataset, Timeline):
                 if self.__span[tn][fsvn][vn][0] < pk[0]:\
                    self.__span[tn][fsvn][vn] = pk
             pass
-        for fsvn in self.__span.values():
-            for vn,val in fsvn.items(): fsvn[vn] = self._get_prime (val)
+        for fsvns in self.__span.values():
+            for fsvn,vns in fsvns.items():
+                for vn,val in vns.items(): fsvn[vn] = self._get_prime (val)
             pass
         return
 
