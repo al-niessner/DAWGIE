@@ -113,8 +113,8 @@ class Interface(Connector, Container, Dataset, Timeline):
                    self.__span[tn][fsvn][vn] = pk
             pass
         for fsvns in self.__span.values():
-            for fsvn,vns in fsvns.items():
-                for vn,val in vns.items(): fsvn[vn] = self._get_prime (val)
+            for vns in fsvns.values():
+                for vn,val in vns.items(): vns[vn] = self._get_prime (val)
             pass
         return
 
