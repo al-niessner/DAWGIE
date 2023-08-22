@@ -72,13 +72,13 @@ class Interface(Connector, Container, Dataset, Timeline):
             svn = vref.item.name()
             vn = vref.feat
             # pylint: disable=protected-access
-            tid = self._update_cmd (task, None, Table.task, None, None)
+            tid = self._update_cmd (task, None, Table.task, None, None)[1]
             aid = self._update_cmd (algn, tid, Table.alg, None,
-                                    vref.impl._get_ver())
+                                    vref.impl._get_ver())[1]
             sid = self._update_cmd (svn, aid, Table.state, None,
-                                    vref.item._get_ver())
+                                    vref.item._get_ver())[1]
             vid = self._update_cmd (vn, sid, Table.value, None,
-                                    vref.item[vn]._get_ver())
+                                    vref.item[vn]._get_ver())[1]
             # pylint: enable=protected-access
             reftable[(tid,aid,sid,vid)] = ('.'.join([task,algn,svn]),vn)
             pass
@@ -112,8 +112,9 @@ class Interface(Connector, Container, Dataset, Timeline):
                 if self.__span[tn][fsvn][vn][0] < pk[0]:\
                    self.__span[tn][fsvn][vn] = pk
             pass
-        for fsvn in self.__span.values():
-            for vn,val in fsvn.items(): fsvn[vn] = self._get_prime (val)
+        for fsvns in self.__span.values():
+            for vns in fsvns.values():
+                for vn,val in vns.items(): vns[vn] = self._get_prime (val)
             pass
         return
 
@@ -181,7 +182,13 @@ class Interface(Connector, Container, Dataset, Timeline):
                             spks = list(filter (lambda k,K=pk:k[1:] == K[1:],
                                                 pks))
                             spks.sort (key=lambda t:t[0])
-                            pk = spks[-1]
+
+                            if spks: pk = spks[-1]
+                            else:
+                                log.warning('No matches for: %s.%s.%s.%s.%s',
+                                             self._tn(), self._task(),
+                                            self._alg(), sv.name(), vn)
+                                continue
                             pass
 
                         sv[vn] = self._get_prime (pk)
