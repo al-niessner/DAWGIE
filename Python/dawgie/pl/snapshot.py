@@ -113,7 +113,7 @@ def _grab_fsm():
 
 def _grab_memory():
     gcnt = -1
-    gzie = -1
+    gsize = -1
     nodes = []
     objs_id = -1
     try:
@@ -125,7 +125,6 @@ def _grab_memory():
         gsize = sum ([sys.getsizeof(obj) for obj in gc.garbage])
         gc.collect()
         for obj in objs:
-            obj_id = hex(id(obj))
             refs = gc.get_referents(obj)
             nodes.append ({'obj':{'id':hex(id(obj)),
                                   'size':sys.getsizeof(obj),
@@ -133,16 +132,16 @@ def _grab_memory():
                            'refs':[hex(id(ref)) for ref in refs]})
             pass
     finally: gc.enable()
-    return { 'garbage':{'count':gcnt,
-                        'size':gsize},
-             'nodes':nodes,
-             'objs_id':objs_id}
+    return {'garbage':{'count':gcnt,
+                       'size':gsize},
+            'nodes':nodes,
+            'objs_id':objs_id}
 
 def _grab_res (who):
     ru = resource.getrusage(who)
     return {attrname:getattr(ru, attrname) for attrname in
             filter (lambda s:s.startswith ('ru_'), dir(ru))}
-        
+
 def _grab_schedule():
     return {'schedule':{'doing':dawgie.pl.schedule.view_doing(),
                         'events':dawgie.pl.schedule.view_events(),
