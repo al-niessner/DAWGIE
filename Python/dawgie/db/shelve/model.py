@@ -187,7 +187,7 @@ class Interface(Connector, Container, Dataset, Timeline):
                             else:
                                 log.warning('No matches for: %s.%s.%s.%s.%s',
                                              self._tn(), self._task(),
-                                            self._alg(), sv.name(), vn)
+                                            self._alg().name(), sv.name(), vn)
                                 continue
                             pass
 
