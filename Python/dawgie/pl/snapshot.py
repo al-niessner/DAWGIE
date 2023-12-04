@@ -43,6 +43,9 @@ import dawgie.context
 import dawgie.pl.farm
 import dawgie.pl.message
 import dawgie.pl.schedule
+import gc
+import resource
+import sys
 
 # snapshoting requires peeking so pylint: disable=protected-access
 
@@ -108,6 +111,37 @@ def _grab_fsm():
                    'waiting_on_doing':dawgie.context.fsm.waiting_on_doing(),
                    'waiting_on_todo':dawgie.context.fsm.waiting_on_todo()}}
 
+def _grab_memory():
+    gcnt = -1
+    gsize = -1
+    nodes = []
+    objs_id = -1
+    try:
+        gc.disable()
+        gc.collect()
+        objs = gc.get_objects()
+        objs_id = hex(id(objs))
+        gcnt = len(gc.garbage)
+        gsize = sum ([sys.getsizeof(obj) for obj in gc.garbage])
+        gc.collect()
+        for obj in objs:
+            refs = gc.get_referents(obj)
+            nodes.append ({'obj':{'id':hex(id(obj)),
+                                  'size':sys.getsizeof(obj),
+                                  'type':str(type(obj))},
+                           'refs':[hex(id(ref)) for ref in refs]})
+            pass
+    finally: gc.enable()
+    return {'garbage':{'count':gcnt,
+                       'size':gsize},
+            'nodes':nodes,
+            'objs_id':objs_id}
+
+def _grab_res (who):
+    ru = resource.getrusage(who)
+    return {attrname:getattr(ru, attrname) for attrname in
+            filter (lambda s:s.startswith ('ru_'), dir(ru))}
+
 def _grab_schedule():
     return {'schedule':{'doing':dawgie.pl.schedule.view_doing(),
                         'events':dawgie.pl.schedule.view_events(),
@@ -118,5 +152,9 @@ def grab(which:str='all')->{}:
     if 'all' in which or 'context' in which: result.update (_grab_context())
     if 'all' in which or 'farm' in which: result.update (_grab_farm())
     if 'all' in which or 'fsm' in which: result.update (_grab_fsm())
+    if 'all' in which or 'memory' in which: result.update (_grab_memory())
+    if 'all' in which or 'resources' in which:\
+       result.update ({'resources':{'self':_grab_res(resource.RUSAGE_SELF),
+                                    'children':_grab_res(resource.RUSAGE_CHILDREN)}})
     if 'all' in which or 'schedule' in which: result.update (_grab_schedule())
     return result
