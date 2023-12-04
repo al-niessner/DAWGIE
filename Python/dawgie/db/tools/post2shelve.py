@@ -104,7 +104,7 @@ def convert_prime_db(conn, fn, data, all_vers:bool):
                 'alg_ID = ANY(%s) AND sv_ID = ANY(%s) AND val_ID = ANY(%s);',
                 (list(data['target']), list(data['task']), list(data['alg']),
                  list(data['state']), list(data['value'])))
-    for rid,tnid,tid,aid,svid,vid,bn in cur.fetchall():
+    for rid,tnid,tid,aid,svid,vid,bn in sorted(cur.fetchall(), key=lambda t:t[0]):
         k = (rid if all_vers else 1,
              data['target'][tnid],
              data['task'][tid],
