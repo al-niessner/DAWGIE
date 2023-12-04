@@ -154,6 +154,21 @@ def remove(runid:int, tn:str, taskn:str, algn:str, svn:str, vn:str):
     '''Remove the specified key from the primary table'''
     return _db_in_use().remove (runid, tn, taskn, algn, svn, vn)
 
+def reset (runid:int, tn:str, tskn:str, alg:dawgie.Algorithm):
+    '''Reset the algorithm version
+
+    The version of the algorithm may be different than the one recorded for
+    the given runID. The reset() alters the version of the algorithm to match
+    that recorded with the given runID.
+
+    This reset then descends down into state vectors and values doing the same
+    version reset.
+
+    Once the objects have the correct versions, the rest of the database calls
+    can be used to look up their correct content.
+    '''
+    return _db_in_use().reset (runid, tn, tskn, alg)
+
 def reopen()->bool:
     '''open an already open database
 
@@ -264,7 +279,7 @@ def view (visitor, runid, tn, tskn, algn, svn):
         visitor.add_declaration (msg)
         return
 
-    _db_in_use().reset (runid, tn, tskn, alg)  # set the alg version
+    reset (runid, tn, tskn, alg)  # set the alg version
     ds = connect (alg, bot, tn)
     ds.load()
 
