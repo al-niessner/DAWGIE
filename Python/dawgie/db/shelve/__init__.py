@@ -304,8 +304,33 @@ def reopen()->bool:
     '''
     return DBI().reopen()
 
-def reset (_runid:int, _tn:str, _tskn, _alg)->None:
-    log.warning('reset() is not implemented for shelve')
+def reset (runid:int, tn:str, tskn, alg)->None:
+    # Need to set the version value which is a private function
+    # so, pylint: disable=protected-access
+    if not DBI().is_open: raise RuntimeError('called next before open')
+    if DBI().is_reopened: raise RuntimeError('called outside of Foreman context')
+
+    pk = [runid, DBI().tables.target[tn], DBI().tables.task[tskn]]
+    ptab = util.subset (DBI().tables.prime, str(tuple(pk)).replace (')', ','))
+    for algi in util.subset (DBI().tables.alg, alg.name(), [pk[-1]]).values():
+        tab = util.subset(DBI().tables.prime,
+                          str(tuple(pk + [algi])).replace (')', ','))
+        if tab:
+            ptab = tab
+            break
+        pass
+    for pk in util.prime_keys(ptab):
+        aid,svid,vid = pk[-3:]
+        alg._set_version (util.dissect(DBI().indices.alg[aid])[-1])
+        svn,ver = util.dissect(DBI().indices.state[svid])[1:]
+        if svn in alg.sv_asdict():
+            alg.sv_asdict()[svn]._set_version(ver)
+            vn,ver = util.dissect(DBI().indices.value[vid])[1:]
+            if vn in alg.sv_asdict()[svn]:
+                alg.sv_asdict()[svn][vn]._set_version(ver)
+                pass
+            pass
+        pass
     return
 
 def retreat (reg, ret)->dawgie.Timeline:
