@@ -63,7 +63,7 @@ class PortOffset(enum.Enum):
 ae_base_path = os.environ.get ('DAWGIE_AE_BASE_PATH', '/proj/src/ae')
 ae_base_package = os.environ.get ('DAWGIE_AE_BASE_PACKAGE', 'ae')
 
-allow_promotion = bool(os.environ.get ('DAWGIE_PROMOTION', ''))
+allow_promotion = os.environ.get ('DAWGIE_PROMOTION', 'false').lower() in 'true'
 
 cloud_data = os.environ.get ('DAWGIE_CLOUD_DATA','apikey@url@SQS_Name@AutoScalingGroupName@ClusterName@TaskDefinition')
 cloud_port = int(os.environ.get ('DAWGIE_CLOUD_PORT',
@@ -181,7 +181,7 @@ def add_arguments (ap):
     ap.add_argument ('--context-email-signature', default=email_signature, required=False,
                      help='Sign e-mail summary reports with this signature. [%(default)s]')
     ap.add_argument ('--context-ssl-pem-file', default=ssl_pem_file, required=False,
-                     help='when pointing at an existing file, it will be used to initiate an https service')
+                     help='when pointing at an existing file, it will be used to initiate an https service [%(default)s]')
     ap.add_argument ('--context-worker-backlog', default=worker_backlog,
                      required=False, type=int,
                      help='the number of expected workers that may try to contact the foreman at the same time [%(default)s]')

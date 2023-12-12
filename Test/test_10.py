@@ -37,11 +37,16 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import dawgie.context; dawgie.context.fsm = dawgie.pl.state.FSM()
+import mock
+
+import dawgie.context
 import dawgie.pl.dag
 import dawgie.pl.farm
 import dawgie.pl.message
 import dawgie.pl.schedule
+import os
+import shutil
+import tempfile
 import unittest
 
 class Farm(unittest.TestCase):
@@ -49,6 +54,25 @@ class Farm(unittest.TestCase):
     def loseConnection(): return
     @staticmethod
     def write (b:bytes): return
+
+    @classmethod
+    def setUpClass(cls):
+        cls.root = tempfile.mkdtemp()
+        os.mkdir (os.path.join (cls.root, 'db'))
+        os.mkdir (os.path.join (cls.root, 'dbs'))
+        os.mkdir (os.path.join (cls.root, 'logs'))
+        os.mkdir (os.path.join (cls.root, 'stg'))
+        dawgie.context.db_impl = 'shelve'
+        dawgie.context.db_name = 'testspace'
+        dawgie.context.db_path = os.path.join (cls.root, 'db')
+        dawgie.context.data_dbs = os.path.join (cls.root, 'dbs')
+        dawgie.context.data_log = os.path.join (cls.root, 'logs')
+        dawgie.context.data_stg = os.path.join (cls.root, 'stg')
+        return
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree (cls.root, True)
+        return
 
     def test_hand__process(self):
         dawgie.context.git_rev = 321
@@ -99,6 +123,7 @@ class Farm(unittest.TestCase):
         return
 
     def test_rerunid (self):
+        dawgie.db.open()
         n = dawgie.pl.dag.Node('a')
         r = dawgie.pl.farm.rerunid (n)
         self.assertGreater (r, 0)
@@ -108,6 +133,7 @@ class Farm(unittest.TestCase):
         n.set ('runid', 0)
         r = dawgie.pl.farm.rerunid (n)
         self.assertEqual (0, r)
+        dawgie.db.close()
         return
 
     def test_something_to_do(self):

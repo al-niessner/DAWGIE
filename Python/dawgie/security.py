@@ -72,7 +72,7 @@ class TwistedWrapper:
         self.__phase = self._p1
         self.__p = protocol
 
-        if 0 < dir (protocol).count ('dataReceived'):
+        if address and 0 < dir (protocol).count ('dataReceived'):
             self.__dr = getattr (protocol, 'dataReceived')
             setattr (protocol, 'dataReceived', self.process)
             pass

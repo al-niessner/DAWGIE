@@ -43,6 +43,7 @@ import datetime
 import dawgie.context
 import dawgie.pl.dag
 import dawgie.pl.jobinfo
+import dawgie.pl.scan
 import dawgie.pl.schedule
 import os
 import sys

@@ -69,11 +69,11 @@ def _latest (all_vers:bool, rows):
         key = (row[1], row[2])
         if key in latest:
             ver = LocalVersion(row[-3:])
-            if ver.newer (than=LocalVersion(latest[key][-3:])): \
+            if ver.newer (than=LocalVersion(latest[key][-3:]).version): \
                latest[key] = row
         else: latest[key] = row
         pass
-    return latest.items()
+    return latest.values()
 
 def convert_algorithm_db(conn, fn:str, trans:{int:int}, all_vers:bool):
     '''convert the postgres Algorithm table to compatible shelve format'''
@@ -87,7 +87,7 @@ def convert_algorithm_db(conn, fn:str, trans:{int:int}, all_vers:bool):
         name = r[1]
         parent = trans[r[2]]
         version = LocalVersion(r[-3:])
-        tdb[r[0]] = len(i)
+        tdb[r[0]] = len(index)
         dawgie.db.shelve.util.append (name, table, index, parent, version)
         pass
     table.close()
@@ -99,19 +99,19 @@ def convert_prime_db(conn, fn, data, all_vers:bool):
     '''convert the postgres Prime table to compatible shelve format'''
     cur = _cur(conn)
     table = {}
-    cur.execute('SELECT runid,tn_ID,task_ID,alg_ID,sv_ID,val_ID,blob_name ' +
+    cur.execute('SELECT run_ID,tn_ID,task_ID,alg_ID,sv_ID,val_ID,blob_name ' +
                 'FROM Prime WHERE tn_ID = ANY(%s) AND task_ID = ANY(%s) AND ' +
-                'alg_ID = ANY(%s}) AND sv_ID = ANY(%s) AND val_ID = ANY(%s);',
+                'alg_ID = ANY(%s) AND sv_ID = ANY(%s) AND val_ID = ANY(%s);',
                 (list(data['target']), list(data['task']), list(data['alg']),
                  list(data['state']), list(data['value'])))
-    for rid,tnid,tid,aid,svid,vid,bn in cur.fetchall():
+    for rid,tnid,tid,aid,svid,vid,bn in sorted(cur.fetchall(), key=lambda t:t[0]):
         k = (rid if all_vers else 1,
              data['target'][tnid],
              data['task'][tid],
              data['alg'][aid],
              data['state'][svid],
              data['value'][vid])
-        table[k] = bn
+        table[str(k)] = bn
         pass
     conn.commit()
     cur.close()
@@ -131,7 +131,7 @@ def convert_state_vector_db(conn, fn:str, trans:{int:int}, all_vers:bool):
         name = r[1]
         parent = trans[r[2]]
         version = LocalVersion(r[-3:])
-        tdb[r[0]] = len(i)
+        tdb[r[0]] = len(index)
         dawgie.db.shelve.util.append (name, table, index, parent, version)
         pass
     table.close()
@@ -148,7 +148,7 @@ def convert_target_db(conn, fn):
     table = shelve.open(fn)
     tdb = {}
     for r in rows:
-        tdb[r[0]] = len(i)
+        tdb[r[0]] = len(index)
         dawgie.db.shelve.util.append (r[1], table, index)
         pass
     table.close()
@@ -165,7 +165,7 @@ def convert_task_db(conn, fn):
     table = shelve.open(fn)
     tdb = {}
     for r in rows:
-        tdb[r[0]] = len(i)
+        tdb[r[0]] = len(index)
         dawgie.db.shelve.util.append (r[1], table, index)
         pass
     table.close()
@@ -186,7 +186,7 @@ def convert_value_vector_db(conn, fn, trans:{int:int}, all_vers:bool):
         name = r[1]
         parent = trans[r[2]]
         version = LocalVersion(r[-3:])
-        tdb[r[0]] = len(i)
+        tdb[r[0]] = len(index)
         dawgie.db.shelve.util.append (name, table, index, parent, version)
         pass
     table.close()
@@ -205,7 +205,7 @@ def main(all_vers, dpath):
         pass
 
     log.info('-------------target-----------')
-    target_k = convert_target_db(conn, f'{basefn}..target')
+    target_k = convert_target_db(conn, f'{basefn}.target')
     log.info('-------------task-----------')
     task_k = convert_task_db(conn, f'{basefn}.task')
     log.info('-------------alg-----------')

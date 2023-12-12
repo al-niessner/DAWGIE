@@ -84,10 +84,6 @@ def dissect (name:str)->(int,str,dawgie.Version):
     else: ver = None
     return parent,name,ver
 
-def prime_keys(prime_table):
-    # because shelve key must be a string, pylint: disable=eval-used
-    return [eval(k) for k in prime_table]
-
 def indexed (table:{})->[]:
     return [t[0] for t in sorted (table.items(), key=lambda t:t[1])]
 
@@ -99,6 +95,10 @@ def mkStgDir():
                                      t.day, t.hour, t.minute)
     os.system(f'mkdir {tString}')
     return tString
+
+def prime_keys(prime_table):
+    # because shelve key must be a string, pylint: disable=eval-used
+    return [eval(k) for k in prime_table]
 
 def rotated_files(index=None):
     path = dawgie.context.db_rotate_path

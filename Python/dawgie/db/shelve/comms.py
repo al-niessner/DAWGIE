@@ -41,6 +41,7 @@ NTR:
 import collections
 import dawgie.db.lockview
 import dawgie.context
+import dawgie.security
 import logging; log = logging.getLogger(__name__)
 import os
 import pickle
@@ -124,7 +125,8 @@ class DBSerializer(twisted.internet.protocol.Factory):
 class Worker(twisted.internet.protocol.Protocol):
     def __init__ (self, address):
         twisted.internet.protocol.Protocol.__init__(self)
-        self.__buf = {'actual':len(struct.pack('>I',0)),'data':b'','expected':0}
+        self.__buf = {'actual':len(struct.pack('>I',0)),
+                      'data':b'','expected':None}
         # really is used so pylint: disable=unused-private-member
         self.__handshake = dawgie.security.TwistedWrapper(self, address)
         # really is used so pylint: enable=unused-private-member
@@ -198,7 +200,8 @@ class Worker(twisted.internet.protocol.Protocol):
         elif request.func == Func.dbcopy:
             self._delay_copy (request.value)
         elif request.func == Func.get:
-            key = util.construct (**request.keyset)
+            if request.table == Table.prime: key = str(request.keyset)
+            else: key = util.construct (**request.keyset._asdict())
             self._send (DBI().tables[request.table.value][key])
         elif request.func == Func.release:
             log.debug("Inside worker: Release")

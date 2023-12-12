@@ -48,6 +48,7 @@ import dawgie.de
 import dawgie.pl.farm
 import dawgie.pl.logger.fe
 import dawgie.pl.schedule
+import dawgie.pl.snapshot
 import enum
 import json
 import logging; log = logging.getLogger(__name__)
@@ -111,6 +112,9 @@ def schedule_tasks():
 
 def schedule_todo():
     return json.dumps (dawgie.pl.schedule.view_todo()).encode()
+
+def snapshot():
+    return json.dumps (dawgie.pl.snapshot.grab()).encode()
 
 def _s0 (k): return k.split('.')[0]
 def _s1 (k): return k.split('.')[1]
@@ -227,6 +231,7 @@ DynamicContent(search_svn, '/app/search/sv')
 DynamicContent(search_tn, '/app/search/tn')
 
 DynamicContent(start_changeset, '/app/changeset.txt')
+DynamicContent(snapshot, '/app/snapshot')
 DynamicContent(start_state, '/app/state/status')
 DynamicContent(start_submit, '/app/submit', [HttpMethod.POST])
 DynamicContent(versions, '/app/versions')

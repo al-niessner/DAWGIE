@@ -60,43 +60,15 @@ class DB:
         for tsk,alg,sv,vn,v in dawgie.db.testdata.KNOWNS:
             dawgie.db.update (tsk, alg, sv, vn, v)
             pass
-        print ('knowns:')
-        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
-        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
-        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
-        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
-        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
-        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         for tgt,tsk,alg in dawgie.db.testdata.DATASETS:
             dawgie.db.connect (alg, tsk, tgt).update()
             pass
-        print ('datasets:')
-        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
-        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
-        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
-        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
-        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
-        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         for tsk,alg in dawgie.db.testdata.ASPECTS:
             dawgie.db.gather (alg, tsk).ds().update()
             pass
-        print ('aspects:')
-        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
-        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
-        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
-        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
-        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
-        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         for tsk,alg in dawgie.db.testdata.TIMELINES:
             dawgie.db.retreat (alg, tsk).ds().update()
             pass
-        print ('timelines:')
-        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
-        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
-        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
-        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
-        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
-        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         dawgie.db.close()
         return
 
@@ -104,13 +76,6 @@ class DB:
         dawgie.db.close()
         self.assertRaises (RuntimeError, dawgie.db._prime_keys)
         dawgie.db.open()
-        print ('PKs:')
-        print ('   alg:', len (dawgie.db.shelve.state.DBI().tables.alg))
-        print ('   prime:', len (dawgie.db.shelve.state.DBI().tables.prime))
-        print ('   state:', len (dawgie.db.shelve.state.DBI().tables.state))
-        print ('   target:', len (dawgie.db.shelve.state.DBI().tables.target))
-        print ('   task:', len (dawgie.db.shelve.state.DBI().tables.task))
-        print ('   value:', len (dawgie.db.shelve.state.DBI().tables.value))
         keys = dawgie.db._prime_keys()
         self.assertEqual ((dawgie.db.testdata.TSK_CNT *
                            dawgie.db.testdata.SVN_CNT *
@@ -137,14 +102,6 @@ class DB:
 
     def test_archive(self):
         self.assertTrue (True)  # not testable in a reasonable sense
-        return
-
-    def test_close(self):
-        dawgie.db.close()
-        self.assertFalse (dawgie.db.post._db)
-        dawgie.db.open()
-        dawgie.db.close()
-        self.assertFalse (dawgie.db.post._db)
         return
 
     def test_connect(self):
@@ -396,7 +353,6 @@ class DB:
         dawgie.db.close()
         return
 
-    @unittest.skip ('takes too long while developing other tests')
     def test_versions(self):
         dawgie.db.close()
         self.assertRaises (RuntimeError, dawgie.db.versions)
@@ -453,6 +409,14 @@ class Post(DB,unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree (cls.root, True)
+        return
+
+    def test_close(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
+        dawgie.db.open()
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.post._db)
         return
 
     def test_copy(self):
@@ -518,6 +482,14 @@ class Shelve(DB,unittest.TestCase):
         setattr (dawgie.db.shelve.comms.Connector, '_Connector__do', cls._do)
         setattr (dawgie.db.shelve.comms, 'release', cls._release)
         setattr (dawgie.db.shelve.comms.Worker, '_send', cls._send)
+        return
+
+    def test_close(self):
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.shelve.state.DBI().is_open)
+        dawgie.db.open()
+        dawgie.db.close()
+        self.assertFalse (dawgie.db.shelve.state.DBI().is_open)
         return
 
     def test_consistent(self):

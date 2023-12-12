@@ -38,6 +38,7 @@ NTR:
 '''
 
 import dawgie.pl.dag
+import dawgie.pl.scan
 import os
 import sys
 import unittest
