@@ -118,12 +118,23 @@ def rotated_files(index=None):
     orig += glob.glob(f"{path}/{index:d}.{dawgie.context.db_name}.value")
     return orig
 
-def subset (from_table:{str:int}, name:str, parents:[int])->{}:
-    '''extract a subset of table as a dictionary'''
+def subset (from_table:{str:int}, name:str, parents:[int]=None)->{}:
+    '''extract a subset of table as a dictionary
+
+    It behaves two different ways. If parnets is provided, then it will use
+    util.construct() to generate the full name given the parents. If parents is
+    not given, then it will simply use name.
+    '''
     result = {}
-    for parent in parents:
-        surname = construct (name, parent)
-        result.update (dict(filter(lambda t,sn=surname:t[0].startswith (sn),
+    if parents:
+        for parent in parents:
+            surname = construct (name, parent)
+            result.update (dict(filter(lambda t,sn=surname:t[0].startswith (sn),
+                                       from_table.items())))
+            pass
+        pass
+    else:
+        result.update (dict(filter(lambda t,sn=name:t[0].startswith (sn),
                                    from_table.items())))
         pass
     return result

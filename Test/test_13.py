@@ -291,6 +291,40 @@ class DB:
         self.assertFalse(True)
         return
 
+    def test_reset(self):
+        tgt,tsk,alg = dawgie.db.testdata.DATASETS[-1]
+        print (tgt, tsk._name(), alg.name())
+        alg._set_ver(dawgie.VERSION(100,100,100))
+        for sv in alg.state_vectors():
+            sv._set_ver(dawgie.VERSION(200,200,200))
+            for val in sv.values():
+                val._set_ver(dawgie.VERSION(400,500,600))
+                pass
+            pass
+        print (type(alg.design()),alg.design())
+        dawgie.db.close()
+        self.assertRaises (RuntimeError, dawgie.db.reset,
+                           dawgie.db.testdata.RUNID, tgt, tsk._name(), alg)
+        dawgie.db.open()
+        dawgie.db.reset (dawgie.db.testdata.RUNID, tgt, tsk._name(), alg)
+        dawgie.db.close()
+        print (type(alg.design()),alg.design())
+        self.assertEqual (alg.design(), 1, 'design')
+        self.assertEqual (alg.implementation(), 1, 'implementation')
+        self.assertEqual (alg.bugfix(), 2, 'bugfix')
+        for sv in alg.state_vectors():
+            self.assertEqual (sv.design(), 1, 'design')
+            self.assertEqual (sv.implementation(), 2, 'implementation')
+            self.assertEqual (sv.bugfix(), 3, 'bugfix')
+            # these should not have changed
+            for val in sv.values():
+                self.assertEqual (val.design(), 400, 'design')
+                self.assertEqual (val.implementation(), 500, 'implementation')
+                self.assertEqual (val.bugfix(), 600, 'bugfix')
+                pass
+            pass
+        return
+
     def test_retreat(self):
         ret,reg = dawgie.db.testdata.TIMELINES[0]
         dawgie.db.close()
