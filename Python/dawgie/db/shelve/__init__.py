@@ -320,15 +320,11 @@ def reset (runid:int, tn:str, tskn, alg)->None:
             break
         pass
     for pk in util.prime_keys(ptab):
-        aid,svid,vid = pk[-3:]
-        alg._set_version (util.dissect(DBI().indices.alg[aid])[-1])
+        aid,svid = pk[-3:-1]
+        alg._set_ver (util.dissect(DBI().indices.alg[aid])[-1]._get_ver())
         svn,ver = util.dissect(DBI().indices.state[svid])[1:]
-        if svn in alg.sv_asdict():
-            alg.sv_asdict()[svn]._set_version(ver)
-            vn,ver = util.dissect(DBI().indices.value[vid])[1:]
-            if vn in alg.sv_asdict()[svn]:
-                alg.sv_asdict()[svn][vn]._set_version(ver)
-                pass
+        if svn in alg.sv_as_dict():
+            alg.sv_as_dict()[svn]._set_ver(ver._get_ver())
             pass
         pass
     return
