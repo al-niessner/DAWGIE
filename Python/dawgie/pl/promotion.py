@@ -168,7 +168,7 @@ def _is_scheduled (ignore:dawgie.pl.dag.Node,
 
     if not result:
         for parent in node.get ('parents'):
-            if parent == ignore: continue
+            if parent == ignore or parent.get ('parents') is None: continue
             result |= _is_scheduled (ignore, parent, targets)
             pass
         pass
