@@ -193,7 +193,7 @@ def build (factories, latest, previous):
     log.info ('build() - starting to build DAG')
     dawgie.pl.schedule.ae = dawgie.pl.dag.Construct(factories)
     promote.ae = dawgie.pl.schedule.ae
-    promote.orgainize = dawgie.pl.schedule.organize
+    promote.organize = dawgie.pl.schedule.organize
     dawgie.pl.schedule.que = []
     dawgie.pl.schedule.per = []
     log.info ('build() - computing version differences')
