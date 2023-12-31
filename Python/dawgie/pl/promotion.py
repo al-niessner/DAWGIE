@@ -166,7 +166,7 @@ def _is_scheduled (ignore:dawgie.pl.dag.Node,
                    targets.issubset (node.get ('doing')),
                    targets.issubset (node.get ('todo'))])
 
-    if not result and node.get ('parents'):
+    if not result:
         for parent in node.get ('parents'):
             if parent == ignore: continue
             result |= _is_scheduled (ignore, parent, targets)
