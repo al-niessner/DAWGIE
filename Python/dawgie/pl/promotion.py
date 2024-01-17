@@ -127,7 +127,7 @@ class Engine:
                     continue
 
                 # 6: add decendent to todo list
-                self._todo.append (child, runid, outputs)
+                self._todo.append ((child, runid, outputs))
                 pass
         elif not dawgie.context.allow_promotion: self.clear()
         return

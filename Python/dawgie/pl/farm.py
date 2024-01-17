@@ -247,7 +247,8 @@ def dispatch():
 
     _jobs.extend(dawgie.pl.schedule.next_job_batch())
 
-    if archive and not sum ([len(_jobs),len(_busy),len(_cluster),len(_cloud)]):
+    if archive and not dawgie.pl.schedule.promote.more() \
+           and not sum ([len(_jobs),len(_busy),len(_cluster),len(_cloud)]):
         dawgie.context.fsm.archiving_trigger()
         pass
 
