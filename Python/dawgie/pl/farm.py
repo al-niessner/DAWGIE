@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -247,7 +247,8 @@ def dispatch():
 
     _jobs.extend(dawgie.pl.schedule.next_job_batch())
 
-    if archive and not sum ([len(_jobs),len(_busy),len(_cluster),len(_cloud)]):
+    if archive and not dawgie.pl.schedule.promote.more() \
+           and not sum ([len(_jobs),len(_busy),len(_cluster),len(_cloud)]):
         dawgie.context.fsm.archiving_trigger()
         pass
 

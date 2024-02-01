@@ -51,7 +51,7 @@ Flow:
 --
 
 COPYRIGHT:
-Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -193,7 +193,7 @@ def build (factories, latest, previous):
     log.info ('build() - starting to build DAG')
     dawgie.pl.schedule.ae = dawgie.pl.dag.Construct(factories)
     promote.ae = dawgie.pl.schedule.ae
-    promote.orgainize = dawgie.pl.schedule.organize
+    promote.organize = dawgie.pl.schedule.organize
     dawgie.pl.schedule.que = []
     dawgie.pl.schedule.per = []
     log.info ('build() - computing version differences')

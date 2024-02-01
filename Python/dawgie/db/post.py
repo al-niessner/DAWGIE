@@ -2,7 +2,7 @@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -920,7 +920,7 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
                     'sv_ID = ANY(%s) AND val_ID = ANY(%s);',
                     [tn_ID, task_ID, alg_IDs, sv_IDs, val_IDs])
         ridbns[key].append (sorted (cur.fetchall(), key=lambda t:t[0]))
-        kval = ridbns[key][-1][0][1]
+        kval = ridbns[key][-1][-1][1]
         i_runids[key].append ({runid for runid,_bn in filter
                                (lambda t,k=kval:t[1] == k, ridbns[key][-1])})
         pass

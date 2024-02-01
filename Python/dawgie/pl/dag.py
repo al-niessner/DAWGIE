@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2023, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -363,8 +363,14 @@ class Node(xml.etree.ElementTree.Element):
         if length == 2:
             aset = short_node.get ('ancestry')
             aset = aset if aset else set()
-            aset.update ([Construct.trim (a, length) for a in self.get ('ancestry')])
+            aset.update ([Construct.trim (a, length)
+                          for a in self.get ('ancestry')])
             short_node.set ('ancestry', aset)
+            aset = short_node.get ('parents')
+            aset = aset if aset else set()
+            aset.update ([known[Construct.trim (p.tag, length)]
+                          for p in self.get ('parents')])
+            short_node.set ('parents', aset)
             pass
         if self.tag not in short_node.get ('visitors'):
             short_node.get ('visitors').add (self.tag)
