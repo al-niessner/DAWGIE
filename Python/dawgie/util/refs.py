@@ -39,7 +39,7 @@ NTR: 49811
 '''
 
 import dawgie
-from .names import task_name
+import dawgie.util.names
 
 def algref2svref (ref:dawgie.ALG_REF)->[dawgie.SV_REF]:
     return [dawgie.SV_REF(factory=ref.factory, impl=ref.impl, item=sv)
@@ -64,5 +64,5 @@ def svref2vref (ref:dawgie.SV_REF)->[dawgie.V_REF]:
                          feat=key) for key in ref.item]
 
 def vref_as_name (vref:dawgie.V_REF)->str:
-    return '.'.join ([task_name (vref.factory), vref.impl.name(),
-                      vref.item.name(), vref.feat])
+    return '.'.join ([dawgie.util.names.task_name (vref.factory),
+                      vref.impl.name(), vref.item.name(), vref.feat])
