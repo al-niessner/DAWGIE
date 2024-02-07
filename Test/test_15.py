@@ -43,6 +43,7 @@ import dawgie
 import dawgie.db
 import dawgie.pl.schedule
 import dawgie.util
+import dawgie.util.names
 import unittest
 
 class Analysis(dawgie.Analysis):
@@ -94,9 +95,10 @@ class ScheduleRules(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls._targets_orig = getattr(dawgie.db, 'targets')
-        cls._task_name_orig = getattr(dawgie.util, 'task_name')
+        cls._task_name_orig = getattr(dawgie.util.names, 'task_name')
         setattr (dawgie.db, 'targets', _mock_targets)
         setattr (dawgie.util, 'task_name', _mock_task_name)
+        setattr (dawgie.util.names, 'task_name', _mock_task_name)
         factories = {dawgie.Factories.analysis:[analysis],
                      dawgie.Factories.events:[events],
                      dawgie.Factories.regress:[regress],
@@ -110,6 +112,7 @@ class ScheduleRules(unittest.TestCase):
     def tearDownClass(cls):
         setattr (dawgie.db, 'targets', cls._targets_orig)
         setattr (dawgie.util, 'task_name', cls._task_name_orig)
+        setattr (dawgie.util.names, 'task_name', cls._task_name_orig)
         return
 
     def test_issue_194(self):

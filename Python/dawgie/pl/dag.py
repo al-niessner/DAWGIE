@@ -41,6 +41,7 @@ from dawgie.pl.jobinfo import State
 import dawgie
 import dawgie.context
 import dawgie.util
+import dawgie.util.fifo
 import enum
 import logging; log = logging.getLogger (__name__)
 import os
@@ -358,7 +359,7 @@ class Node(xml.etree.ElementTree.Element):
             short_node.set ('doing', set())
             short_node.set ('factory', self.get ('factory'))
             short_node.set ('status', State.initial)
-            short_node.set ('todo', set())
+            short_node.set ('todo', dawgie.util.fifo.Unique())
             pass
         if length == 2:
             aset = short_node.get ('ancestry')

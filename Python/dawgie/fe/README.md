@@ -212,13 +212,34 @@ abc
 
 ## `/app/run`, (POST)
 ### Description
+
+Tells the scheduler to move the given targets and tasks into the TODO list. Every target will be run for every teask given. For instance:
+
+`target=a,target=b,target=c,task=g.h`
+
+means schedule targets a, b, and c for task g and algorithm h to run as soon as possible.
+
+`target=a,target=b,target=c,task=g.h,task=j.k`
+
+means schedule targets a, b, and c for task.alg g.h and task.alg j.k.
+
 ### Inputs
+
+- targets: one or more valid targets. The special target `__all__` will be translated into an alphabetical list of all know targets for non aspect algorithms.
+- tasks: one or more valid task.algorithms to execute.
+
 ### Outputs
+
+JSON object representing the success of the request.
+
+- alert_status: "success" when it works and "failed" when it does not.
+- alert_message: human readable detail of why success/failed.
+
 ### Example
 
 ```
-curl -X POST "<URL base>/app/run"
-abc
+curl -X POST "<URL base>/app/run?target=G,task=a.b"
+{"alert_status": "success", "alert_message": "All jobs scheduled to run."}
 ```
 
 ## `/app/schedule/crew` (GET)

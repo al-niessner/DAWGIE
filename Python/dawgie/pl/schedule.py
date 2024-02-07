@@ -37,7 +37,7 @@ The DAG is stored in a 'dawgie.pl.dag.Construct.at' where 'at' is specifically t
     'doing': set(),
     'factory': <function task at 0x7fb838aa6290>,
     'status': <State.initial: 5>,
-    'todo': set(),
+    'todo': dawgie.util.fifo.Unique(),
     'ancestry': set(),
     'been_here': True,
     'level': 0}
@@ -207,8 +207,8 @@ def build (factories, latest, previous):
     for tn in ans:
         for t in dawgie.pl.schedule.ae.at:
             for n in t.locate (tn):\
-                n.set ('todo',
-                       set(['__all__']) if _is_asp (n) else set(trglist))
+                n.set ('todo', dawgie.util.fifo.Unique
+                       (['__all__'] if _is_asp (n) else trglist))
             pass
         pass
     log.info ('build() - calling organize with new versions')
