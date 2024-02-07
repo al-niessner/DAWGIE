@@ -48,7 +48,7 @@ class Unique(collections.abc.MutableSet):
         pass
 
     def __contains__(self, value): return value in self.__unique
-    def __iter__(self): return self.__order.__iter__()
+    def __iter__(self): return self.__order.copy().__iter__()
     def __len__(self): return len(self.__unique)
 
     def __eq__(self, other):
@@ -66,8 +66,15 @@ class Unique(collections.abc.MutableSet):
             self.__unique.add (value)
             self.__order.append (value)
 
+    def copy(self): return Unique(self.__order)
+
+    def difference(self, other): return self.__unique.difference (other)
+
     def discard (self, value):
         if value in self.__unique:
             self.__order.remove (value)
             self.__unique.remove (value)
+
+    def update (self, it:collections.abc.Iterable):
+        for value in it if it else []: self.add (value)
     pass
