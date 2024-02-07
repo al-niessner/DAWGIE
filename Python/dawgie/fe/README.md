@@ -215,24 +215,25 @@ abc
 
 Tells the scheduler to move the given targets and tasks into the TODO list. Every target will be run for every teask given. For instance:
 
-target=a,target=b,target=c,task=g.h
+`target=a,target=b,target=c,task=g.h`
 
 means schedule targets a, b, and c for task g and algorithm h to run as soon as possible.
 
-target=a,target=b,target=c,task=g.h,task=j.k
+`target=a,target=b,target=c,task=g.h,task=j.k`
 
-means schedule targets a, b, and c for task/alg g.h and task/alg j.k.
+means schedule targets a, b, and c for task.alg g.h and task.alg j.k.
 
 ### Inputs
 
-targets: any number of valid targets. The special target `__all__` will be translated into an alphabetical list of all know targets for non aspect algorithms.
+- targets: one or more valid targets. The special target `__all__` will be translated into an alphabetical list of all know targets for non aspect algorithms.
+- tasks: one or more valid task.algorithms to execute.
 
 ### Outputs
 
 JSON object representing the success of the request.
 
-alert_status: "success" when it works and "failed" when it does not.
-alert_message: human readable detail of why success/failed.
+- alert_status: "success" when it works and "failed" when it does not.
+- alert_message: human readable detail of why success/failed.
 
 ### Example
 
