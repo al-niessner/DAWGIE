@@ -586,6 +586,19 @@ class Feature:
     # pylint: disable=too-few-public-methods
     pass
 
+class Generic:
+    '''Make an Algorithm, Analyzer, or Regression generic to a set of StateVector
+
+    Implementing this function will cause the DAG to blowout along the generic
+    axis. THe DAG will provide the generic view (not blown out) and standard
+    view (blown out) as it must be processed.
+    '''
+    # pylint: disable=too-few-public-methods
+    def specifics(self)->['StateVector']:
+        '''list of state vectors that are generalized to this generic'''
+        raise NotImplementedError()
+    pass
+
 class Regress(_Metric):
     '''The Regress is the base for all bots that analyze data across runids
 
