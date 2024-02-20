@@ -94,3 +94,10 @@ class SpecificRegression(Specific,dawgie.Regression):
     def variables(self)->[ALG_REF, SV_REF, V_REF]: return self.real.variables()
     def where(self)->Distribution: return self.real.where()
     pass
+
+def specify (general:dawgie.Generic)->[Specific]:
+    if isinstance (general, dawgie.Algorithm): cls = SpecificAlgorithm
+    elif isinstance (general, dawgie.Analyzer): cls = SpecificAnalyzer
+    elif isinstance (general, dawgie.Regression): cls = SpecificRegression
+    else: raise TypeError('general must be an instance of dawgie.Generic and dawigie.Algorith/Analyzer/Regression.')
+    return [cls(general,sv) for sv in general.specifics]
