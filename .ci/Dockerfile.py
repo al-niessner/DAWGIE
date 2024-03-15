@@ -47,7 +47,6 @@ RUN set -ex && \
                  pyparsing>=2.4.7 \
                  pyOpenSSL>=19.1.0 \
                  python-gnupg>=0.4.9 \
-                 pyxb==1.2.6 \
                  requests>=2.20.0 \
                  service_identity \
                  transitions>=0.6.8 \
