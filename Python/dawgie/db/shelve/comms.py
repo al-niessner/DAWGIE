@@ -109,7 +109,7 @@ class Connector:  # pylint: disable=too-few-public-methods
         '''public method for .impl'''
         return self._copy (dst, method)
     def keys (self, table)->[]:
-        return [k for k in self._table(table)]
+        return list(self._table(table))
     pass
 
 class DBSerializer(twisted.internet.protocol.Factory):
