@@ -59,11 +59,11 @@ class Cell(dawgie.Visitor):
     # pylint: disable=protected-access
     def __init__ (self):
         dawgie.Visitor.__init__(self)
-        self.__content = []
+        self._content = []
         return
 
     def _render (self, buf:io.StringIO)->None:
-        for c in self.__content: c._render (buf)
+        for c in self._content: c._render (buf)
         return
 
     def add_declaration (self, text:str, **kwds)->None:
@@ -74,18 +74,18 @@ class Cell(dawgie.Visitor):
         content += '<img alt="' + html.escape (alternate) + '" src="data:image/png;base64,'
         content += base64.encodebytes (img).decode()
         content += '">'
-        self.__content.append (AsIsText(content))
+        self._content.append (AsIsText(content))
         return
 
     def add_primitive (self, value, label:str=None)->None:
         content = (label + ' = ') if label else ''
         content += str (value)
-        self.__content.append (AsIsText('<p>' + html.escape (content) + '</p>'))
+        self._content.append (AsIsText('<p>' + html.escape (content) + '</p>'))
         return
 
     def add_table (self, clabels:[str], rows:int=0, title:str=None)->'dawgie.TableVisitor':
-        self.__content.append (Table(clabels, rows, title))
-        return self.__content[-1]
+        self._content.append (Table(clabels, rows, title))
+        return self._content[-1]
 
     pass
 
@@ -247,7 +247,7 @@ class Visitor(Cell):
             # clean potential closing tags / limit malicious code
             tag_value = re.sub(r"<\s*/\s*div\s*>", "", str(kwds['div']))
             tag_value = f"        <div{idd}{claz}{style}>{tag_value}</div>"
-            self.__content.append(AsIsText(tag_value))
+            self._content.append(AsIsText(tag_value))
         # text content is escaped and embedded in paragraph tag by default
         #     unless different tag is specified in kwds
         if text and 'title' not in kwds:
@@ -255,7 +255,7 @@ class Visitor(Cell):
             tag = tag if tag.strip() else "p"
             tag_open = f"<{tag}{idd}{claz}{style}>"
             tag_close = f"</{tag}>" if tag.strip() not in self.void_elements else ""
-            self.__content.append(AsIsText(tag_open + html.escape(text) + tag_close))
+            self._content.append(AsIsText(tag_open + html.escape(text) + tag_close))
         # NOTE that list and pre are placed below text to allow a compound
         #     add_declaration statement that includes text, tag, pre and/or
         #     list that places a paragraph above the formatted content to
@@ -265,17 +265,17 @@ class Visitor(Cell):
         if 'list' in kwds:
             # value of enum is ignored but presence implies numbered list
             tag_value = "ol" if 'enum' in kwds else "ul"
-            self.__content.append(AsIsText(f"<{tag_value}{idd}{claz}{style}>"))
+            self._content.append(AsIsText(f"<{tag_value}{idd}{claz}{style}>"))
             for item in list(kwds['list']):
                 item = html.escape(item)
-                self.__content.append(AsIsText(f"<li>{item}</li>"))
-            self.__content.append(AsIsText(f"</{tag_value}>"))
+                self._content.append(AsIsText(f"<li>{item}</li>"))
+            self._content.append(AsIsText(f"</{tag_value}>"))
         # pre -- display preformatted text
         if 'pre' in kwds:
             # clean potential closing tags / limit malicious code
             tag_value = re.sub(r"<\s*/\s*pre\s*>", "", str(kwds['pre']))
             tag_value = f"<pre{idd}{claz}{style}>{tag_value}</pre>"
-            self.__content.append(AsIsText(tag_value))
+            self._content.append(AsIsText(tag_value))
         return
 
     def render(self) -> str:
