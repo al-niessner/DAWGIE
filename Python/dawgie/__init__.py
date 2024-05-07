@@ -872,6 +872,8 @@ class Value(Version):
 class Visitor:
     def add_declaration (self, text:str, **kwds)->None:
         raise NotImplementedError()
+    def add_declaration_inline(self, text:str, **kwds)->None:
+        raise NotImplementedError()
     def add_image (self, alternate:str, label:str, img:bytes)->None:
         raise NotImplementedError()
     def add_primitive (self, value, label:str=None)->None:

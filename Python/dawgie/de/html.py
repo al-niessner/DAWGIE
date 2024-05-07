@@ -192,9 +192,11 @@ class Visitor(Cell):
         # escape double-quotes only, allow single-quotations for css
         # html.escape() rules out certain advanced constructs but they can
         # be inserted via a stylesheet
-        attrib_value = html.escape(str(kwds['style']),
-                                   quote=False).replace("\"", "&quot;")
-        style = f" style=\"{attrib_value}\" " if 'style' in kwds else ""
+        if 'style' in kwds:
+            attrib_value = html.escape(str(kwds['style']),
+                                       quote=False).replace("\"", "&quot;")
+            style = f" style=\"{attrib_value}\" "
+        else: style = ""
 
         # tags for configuration settings (e.g. __<custom_name> in class vars)
         # -- embed external files before inline scripts --
