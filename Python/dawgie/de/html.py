@@ -182,6 +182,10 @@ class Visitor(Cell):
         return
 
     def add_declaration_inline(self, text: str, **kwds) -> None:
+        # have to walk through a bunch of possiblities of input meaning that
+        # this function is basically a horde of branches. Therefore asking
+        # pylint: disable=too-many-branches
+        #
         # attributes that apply to presentation
         # class allows application of predefined css within preloaded
         #     stylesheets files -- if file isn't preloaded there is no effect
