@@ -50,6 +50,7 @@ import collections
 import dawgie
 import dawgie.context
 import dawgie.util
+import dawgie.util.metrics
 import importlib
 import logging; log = logging.getLogger(__name__)
 
@@ -270,8 +271,8 @@ def view (visitor, runid, tn, tskn, algn, svn):
 
     if len (sv) == 1: sv = sv[0]
     elif svn == '__metric__':
-        sv = dawgie.util.MetricStateVector(dawgie.METRIC(0,0,0,0,0,0),
-                                           dawgie.METRIC(0,0,0,0,0,0))
+        sv = dawgie.util.MetricStateVector(dawgie.util.metrics.filled(0),
+                                           dawgie.util.metrics.filled(0))
     else:
         msg = 'Could not find the state vector "' + svn + \
               '" within algorithm "' + algn + '" for task "' + tskn + '".'
