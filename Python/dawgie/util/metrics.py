@@ -41,7 +41,7 @@ NTR: 49811
 import dawgie
 
 class MetricStateVector(dawgie.StateVector):
-    def __init__ (self, db:dawgie.METRICS, task:dawgie.METRICS):
+    def __init__ (self, db:dawgie.METRIC, task:dawgie.METRIC):
         dawgie.StateVector.__init__(self)
         self._version_ = dawgie.VERSION(1,1,1)
         self['db_input'] = MetricValue(db.input)
@@ -83,7 +83,7 @@ class MetricValue(dawgie.Value):
     def value(self): return self.__content
     pass
 
-def filled(value:int=0)->dawgie.METRICS:
+def filled(value:int=0)->dawgie.METRIC:
     '''create and fill a dawgie.METRIC with given value'''
-    return dawgie.METRICS(input=value, mem=value, output=value, pages=value,
-                          sys=value, user=value, wall=value)
+    return dawgie.METRIC(input=value, mem=value, output=value, pages=value,
+                         sys=value, user=value, wall=value)

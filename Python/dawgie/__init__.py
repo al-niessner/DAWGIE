@@ -62,8 +62,8 @@ EVENT = collections.namedtuple ('EVENT', ['algref', 'moment'])
 # pages  : number of page faults serviced that required I/O     [ru_majflt]
 # sys    : total amount of time spent executing in kernel mode  [ru_stime]
 # user   : total amount of time spent executing in user mode    [ru_utime]
-METRICS = collections.namedtuple ('METRICS', ['input', 'mem', 'output',
-                                              'pages', 'sys', 'user', 'wall'])
+METRIC = collections.namedtuple ('METRIC', ['input', 'mem', 'output',
+                                            'pages', 'sys', 'user', 'wall'])
 # day : an instance of an object that describes a calendar date
 #       known working instances are:
 # dom : day-of-month or int from 1-31
@@ -168,15 +168,15 @@ class _Metric:
         return
 
     @staticmethod
-    def diff (a, b, dt)->METRICS:
+    def diff (a, b, dt)->METRIC:
         '''compute a - b'''
-        return METRICS(input=a.ru_inblock - b.ru_inblock,
-                       mem=a.ru_maxrss - b.ru_maxrss,
-                       output=a.ru_oublock - b.ru_oublock,
-                       pages=a.ru_majflt - b.ru_majflt,
-                       sys=a.ru_stime - b.ru_stime,
-                       user=a.ru_utime - b.ru_utime,
-                       wall=dt)
+        return METRIC(input=a.ru_inblock - b.ru_inblock,
+                      mem=a.ru_maxrss - b.ru_maxrss,
+                      output=a.ru_oublock - b.ru_oublock,
+                      pages=a.ru_majflt - b.ru_majflt,
+                      sys=a.ru_stime - b.ru_stime,
+                      user=a.ru_utime - b.ru_utime,
+                      wall=dt)
 
     def measure (self, func, args=(), ds:'Dataset'=None):
         c0 = resource.getrusage (resource.RUSAGE_CHILDREN)
@@ -204,15 +204,15 @@ class _Metric:
 
     def sum (self):
         '''return the sum of all collected metrics'''
-        s = METRICS(input=0, mem=0, output=0, pages=0, sys=0.0, user=0.0, wall=0)
+        s = METRIC(input=0, mem=0, output=0, pages=0, sys=0.0, user=0.0, wall=0)
         for h in self.__history:\
-            s = METRICS(input=s.input + h['child'].input + h['task'].input,
-                        mem=s.mem + h['child'].mem + h['task'].mem,
-                        output=s.output + h['child'].output + h['task'].output,
-                        pages=s.pages + h['child'].pages + h['task'].pages,
-                        sys=s.sys + h['child'].sys + h['task'].sys,
-                        user=s.user + h['child'].user + h['task'].user,
-                        wall=s.wall + h['child'].wall + h['task'].wall)
+            s = METRIC(input=s.input + h['child'].input + h['task'].input,
+                       mem=s.mem + h['child'].mem + h['task'].mem,
+                       output=s.output + h['child'].output + h['task'].output,
+                       pages=s.pages + h['child'].pages + h['task'].pages,
+                       sys=s.sys + h['child'].sys + h['task'].sys,
+                       user=s.user + h['child'].user + h['task'].user,
+                       wall=s.wall + h['child'].wall + h['task'].wall)
         return s
     pass
 
