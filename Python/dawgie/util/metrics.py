@@ -41,7 +41,7 @@ NTR: 49811
 import dawgie
 
 class MetricStateVector(dawgie.StateVector):
-    def __init__ (self, db, task):
+    def __init__ (self, db:dawgie.METRICS, task:dawgie.METRICS):
         dawgie.StateVector.__init__(self)
         self._version_ = dawgie.VERSION(1,1,1)
         self['db_input'] = MetricValue(db.input)
@@ -50,17 +50,19 @@ class MetricStateVector(dawgie.StateVector):
         self['db_pages'] = MetricValue(db.pages)
         self['db_system'] = MetricValue(db.sys)
         self['db_user'] = MetricValue(db.user)
+        self['db_wall'] = MetricValue(db.wall)
         self['task_input'] = MetricValue(task.input)
         self['task_memory'] = MetricValue(task.mem)
         self['task_output'] = MetricValue(task.output)
         self['task_pages'] = MetricValue(task.pages)
         self['task_system'] = MetricValue(task.sys)
         self['task_user'] = MetricValue(task.user)
+        self['task_wall'] = MetricValue(task.wall)
         return
     def name(self): return '__metric__'
     def view (self, visitor:dawgie.Visitor)->None:
         table = visitor.add_table (['', 'DB', 'Task'],
-                                   rows=6, title='Process Metrics')
+                                   rows=len(self)//2, title='Process Metrics')
         for r,k in enumerate (sorted (filter (lambda k:k.startswith ('db_'),
                                               self))):
             k = k.split ('_')[1]
@@ -80,3 +82,8 @@ class MetricValue(dawgie.Value):
     def features(self)->[dawgie.Feature]: return []
     def value(self): return self.__content
     pass
+
+def filled(value:int=0)->dawgie.METRICS:
+    '''create and fill a dawgie.METRIC with given value'''
+    return dawgie.METRICS(input=value, mem=value, output=value, pages=value,
+                          sys=value, user=value, wall=value)

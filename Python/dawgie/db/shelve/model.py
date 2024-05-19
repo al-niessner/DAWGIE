@@ -39,6 +39,7 @@ NTR:
 '''
 
 import dawgie.util
+import dawgie.util.metrics
 import logging;  log = logging.getLogger(__name__)
 
 from dawgie import Dataset, Timeline
@@ -55,9 +56,10 @@ class Interface(Connector, Container, Dataset, Timeline):
         dawgie.Dataset.__init__(self, *args)
         dawgie.db.util.aspect.Container.__init__(self)
         self.__span = {}
-        null_metric = dawgie.METRIC(-1,-1,-1,-1,-1,-1)
+        self.__null_metric = dawgie.util.metrics.filled(-1)
         self._log = log.getChild(self.__class__.__name__)
-        self.msv = dawgie.util.MetricStateVector(null_metric, null_metric)
+        self.msv = dawgie.util.MetricStateVector(self.__null_metric,
+                                                 self.__null_metric)
         return
 
     def __refs2indices (self, refs:[(dawgie.SV_REF, dawgie.V_REF)])->{(int,int,int,int):(str,str)}:
@@ -167,8 +169,8 @@ class Interface(Connector, Container, Dataset, Timeline):
                 child._load (err=err, ver=ver, lok=lok)  # pylint: disable=protected-access
                 pass
             else:
-                msv = dawgie.util.MetricStateVector(dawgie.METRIC(-1,-1,-1,-1,-1,-1),
-                                                    dawgie.METRIC(-1,-1,-1,-1,-1,-1))
+                msv = dawgie.util.MetricStateVector(self.__null_metric,
+                                                    self.__null_metric)
                 pks = self._prime_keys()
                 for sv in self._alg().state_vectors() + [msv]:
                     for vn in sv:

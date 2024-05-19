@@ -49,6 +49,7 @@ import dawgie.db.post
 import dawgie.db.util
 import dawgie.db.util.aspect
 import dawgie.util
+import dawgie.util.metrics
 import logging; log = logging.getLogger(__name__)
 import os
 import pickle
@@ -305,8 +306,8 @@ class Interface(dawgie.db.util.aspect.Container,dawgie.Dataset,dawgie.Timeline):
             cur.execute('SELECT pk FROM Algorithm WHERE name = %s AND ' +
                         'task_ID = %s;', [self._alg().name(), task_ID])
             alg_ID = list({pk[0] for pk in cur.fetchall()})
-            msv = dawgie.util.MetricStateVector(dawgie.METRIC(-1,-1,-1,-1,-1,-1),
-                                                dawgie.METRIC(-1,-1,-1,-1,-1,-1))
+            msv = dawgie.util.MetricStateVector(dawgie.util.metrics.filled(-1),
+                                                dawgie.util.metrics.filled(-1))
             for sv in self._alg().state_vectors() + [msv]:
                 cur.execute('SELECT pk FROM StateVector WHERE name = %s AND ' +
                             'alg_ID = ANY(%s);', [sv.name(), alg_ID])
@@ -1027,8 +1028,8 @@ def metrics()->'[dawgie.db.METRIC_DATA]':
     for row in cur.fetchall():
         key = (row[1], row[2], row[3], row[4])
         msv = svs[key] if key in svs else \
-              dawgie.util.MetricStateVector(dawgie.METRIC(-2,-2,-2,-2,-2,-2),
-                                            dawgie.METRIC(-2,-2,-2,-2,-2,-2))
+              dawgie.util.MetricStateVector(dawgie.util.metrics.filled(-2),
+                                            dawgie.util.metrics.filled(-2))
         cur.execute ('SELECT name FROM Value WHERE PK = %s;', (row[6],))
         vn = cur.fetchone()[0]
         try:

@@ -41,6 +41,7 @@ NTR:
 import dawgie.context
 import dawgie.db
 import dawgie.db.util
+import dawgie.util.metrics
 import logging; log = logging.getLogger(__name__)
 import os
 
@@ -227,8 +228,8 @@ def metrics()->[dawgie.db.METRIC_DATA]:
                                result[-1].alg_name != alg[0],
                                result[-1].alg_ver != alg[1].version]):
             log.debug ('metrics() - make new reuslt')
-            msv = dawgie.util.MetricStateVector(dawgie.METRIC(-2,-2,-2,-2,-2,-2),
-                                                dawgie.METRIC(-2,-2,-2,-2,-2,-2))
+            msv = dawgie.util.MetricStateVector(dawgie.util.metrics.filled(-2),
+                                                dawgie.util.metrics.filled(-2))
             result.append (dawgie.db.METRIC_DATA(alg_name=alg[0],
                                                  alg_ver=alg[1].version,
                                                  run_id=runid, sv=msv,
