@@ -39,6 +39,7 @@ NTR: 49811
 '''
 
 import dawgie.context
+import logging  # needed for eval in log_level so, pylint: disable=unused-import
 
 def log_level (l):
     """Allow log level to be symbolic or a plain integer

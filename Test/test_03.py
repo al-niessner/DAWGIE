@@ -39,6 +39,7 @@ NTR:
 
 import dawgie.context
 import dawgie.pl.logger
+import dawgie.util.args
 import logging
 import os
 import tempfile
@@ -88,5 +89,11 @@ class Logger(unittest.TestCase):
         with open (self.log_path, 'rt') as f: text = f.read()
         self.assertTrue (text)
         self.assertLess (text.find ('%s'), 0)
+        return
+
+    def test_issue_236(self):
+        self.assertEquals (10, dawgie.util.args.log_level('10'))
+        self.assertEquals (logging.INFO,
+                           dawgie.util.args.log_level('logging.INFO'))
         return
     pass
