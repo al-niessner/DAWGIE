@@ -188,8 +188,9 @@ class FSM:
                                                  'pages/database'))
         os.makedirs (basedir, exist_ok=True)
         self.open_again = dawgie.db.reopen()
-        dawgie.tools.trace.main (os.path.join(basedir, 'trace_report.html'),
-                                 dawgie.pl.schedule.ae.at)
+        # disable trace until issue 237 is addressed
+        # dawgie.tools.trace.main (os.path.join(basedir, 'trace_report.html'),
+        #                          dawgie.pl.schedule.ae.at)
         dawgie.db.close()
         dawgie.db.archive (self._archive_done)
         return
