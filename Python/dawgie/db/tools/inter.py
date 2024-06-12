@@ -86,7 +86,7 @@ def _ref (ident:str)->str:
     return ident
 
 def copy_blobs (blobs:[str], blobpath:str, outpath:str)->None:
-    for bfn in progressbar.progressbar(blobs):  # pylint: disable=not-callable
+    for bfn in progressbar.progressbar(blobs, prefix='DBS: '):  # pylint: disable=not-callable
         ifn = os.path.join (blobpath, bfn)
         ofn = os.path.join (os.path.join (outpath, 'dbs'), bfn)
 
@@ -116,7 +116,8 @@ def postgres (args:argparse.Namespace)->[str]:
                encoding="utf-8") as output_file:
         key = ''
         with open (args.backup_file, 'rt', encoding="utf-8") as input_file:
-            for line in progressbar.progressbar(input_file.readlines()):
+            for line in progressbar.progressbar(input_file.readlines(),
+                                                prefix='DB: '):  # pylint: disable=not-callable
                 if line.startswith ('\\.'): key = ''
                 elif line.startswith ('COPY public.prime'): key = 'prime'
                 elif key:
