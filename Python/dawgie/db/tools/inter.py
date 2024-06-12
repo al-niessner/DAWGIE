@@ -116,7 +116,7 @@ def postgres (args:argparse.Namespace)->[str]:
                encoding="utf-8") as output_file:
         key = ''
         with open (args.backup_file, 'rt', encoding="utf-8") as input_file:
-            for line in input_file.readlines():
+            for line in progressbar.progressbar(input_file.readlines()):
                 if line.startswith ('\\.'): key = ''
                 elif line.startswith ('COPY public.prime'): key = 'prime'
                 elif key:
@@ -203,8 +203,8 @@ if __name__ == '__main__':
         ARGS.items.extend ([_ref(item) for item in filter (lambda s:s, ITEMS)])
         pass
     mkdirs (ARGS.output_path)
-    if ARGS.verbose: print('Given {len(ARGS.items)} state vectors')
+    if ARGS.verbose: print(f'Given {len(ARGS.items)} state vectors')
     BLOBS = ARGS.func (ARGS)
-    if ARGS.verbose: print('State vector list became {len(BLOBS}}')
+    if ARGS.verbose: print(f'State vector list became {len(BLOBS)} pickles')
     copy_blobs (BLOBS, ARGS.blob_path, ARGS.output_path)
     pass
