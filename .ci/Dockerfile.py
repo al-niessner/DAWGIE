@@ -42,6 +42,7 @@ RUN set -ex && \
                  dawgie-pydot3==1.0.11 \
                  GitPython>=2.1.11 \
                  matplotlib>=2.1.1 \
+                 progressbar \
                  psycopg>3.0.0 \
                  psycopg-binary>3.0.0 \
                  pyparsing>=2.4.7 \

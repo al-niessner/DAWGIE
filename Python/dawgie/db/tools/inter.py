@@ -40,6 +40,7 @@ NTR:
 
 import argparse
 import os
+import progressbar
 import shutil
 import sys
 
@@ -85,7 +86,7 @@ def _ref (ident:str)->str:
     return ident
 
 def copy_blobs (blobs:[str], blobpath:str, outpath:str)->None:
-    for bfn in blobs:
+    for bfn in progressbar.progressbar(blobs):  # pylint: disable=not-callable
         ifn = os.path.join (blobpath, bfn)
         ofn = os.path.join (os.path.join (outpath, 'dbs'), bfn)
 
@@ -185,8 +186,14 @@ if __name__ == '__main__':
                      help='path to the blob data that the database references')
     AP.add_argument ('-O', '--output-path', required=True, type=_path,
                      help='path to output inter information')
+    AP.add_argument ('-v', '--verbose', action='set_true', default=False,
+                     help='some helpful information about what is happening')
     AP.add_argument ('items', default=[sys.stdin], metavar='items', nargs='*',
-                     type=_ref, help='list of references to inter to the mausoleum where they must be fully qualified with runid.target.task.alg.sv.value and "*" can be used for any of those 6 fields with *.*.*.*.*.* matching everything.')  # pylint: disable=line-too-long
+                     type=_ref, help='list of references to inter to the '
+                     'mausoleum where they must be fully qualified with '
+                     'runid.target.task.alg.sv.value and "*" can be used for '
+                     'any of those 6 fields with *.*.*.*.*.* matching '
+                     'everything.')
     ARGS = AP.parse_args()
 
     if ARGS.items[0] == sys.stdin:
@@ -196,6 +203,8 @@ if __name__ == '__main__':
         ARGS.items.extend ([_ref(item) for item in filter (lambda s:s, ITEMS)])
         pass
     mkdirs (ARGS.output_path)
-    copy_blobs (ARGS.func (ARGS),
-                ARGS.blob_path, ARGS.output_path)
+    if ARGS.verbose: print('Given {len(ARGS.items)} state vectors')
+    BLOBS = ARGS.func (ARGS)
+    if ARGS.verbose: print('State vector list became {len(BLOBS}}')
+    copy_blobs (BLOBS, ARGS.blob_path, ARGS.output_path)
     pass
