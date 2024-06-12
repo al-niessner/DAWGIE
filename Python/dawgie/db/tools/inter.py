@@ -102,7 +102,7 @@ def mkdirs (outpath:str)->None:
         pass
     return
 
-def postgres (args:argparse.Namespace, items:[str], outdir:str)->[str]:
+def postgres (args:argparse.Namespace)->[str]:
     '''inter postgresql dataset'''
     # Need two pasees to decode a postgresql backup file. First pass will change
     # the item name, specifically target, task, alg, sv, and value names, to
@@ -111,7 +111,7 @@ def postgres (args:argparse.Namespace, items:[str], outdir:str)->[str]:
     blobs = []
     ifn = 'interred.' + os.path.basename (args.backup_file)
     seconds = postgres_extract_secondary_tables (args.backup_file)
-    with open (os.path.join (os.path.join (outdir, 'db'), ifn), 'tw',
+    with open (os.path.join (os.path.join (args.output_path, 'db'), ifn), 'tw',
                encoding="utf-8") as output_file:
         key = ''
         with open (args.backup_file, 'rt', encoding="utf-8") as input_file:
@@ -121,7 +121,7 @@ def postgres (args:argparse.Namespace, items:[str], outdir:str)->[str]:
                 elif key:
                     reference,blob_name = postgres_translate (line, seconds)
 
-                    if postgres_is_match (reference, items):
+                    if postgres_is_match (reference, args.items):
                         blobs.append (blob_name)
                     else: line = None
                     pass
@@ -196,6 +196,6 @@ if __name__ == '__main__':
         ARGS.items.extend ([_ref(item) for item in filter (lambda s:s, ITEMS)])
         pass
     mkdirs (ARGS.output_path)
-    copy_blobs (ARGS.func (ARGS, ITEMS, ARGS.output_path),
+    copy_blobs (ARGS.func (ARGS),
                 ARGS.blob_path, ARGS.output_path)
     pass
