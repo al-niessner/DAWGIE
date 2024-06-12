@@ -43,6 +43,8 @@ import os
 import shutil
 import sys
 
+from progressbar import progressbar
+
 def _clean(line:str)->str:
     '''clean up an item to remove comments and end of line if read from stdin'''
     if '#' in line: line = line[:line.find('#')]
@@ -85,7 +87,7 @@ def _ref (ident:str)->str:
     return ident
 
 def copy_blobs (blobs:[str], blobpath:str, outpath:str)->None:
-    for bfn in blobs:
+    for bfn in progressbar(blobs, prefix='DBS:'):  # pylint: disable=not-callable
         ifn = os.path.join (blobpath, bfn)
         ofn = os.path.join (os.path.join (outpath, 'dbs'), bfn)
 
@@ -102,7 +104,7 @@ def mkdirs (outpath:str)->None:
         pass
     return
 
-def postgres (args:argparse.Namespace, items:[str], outdir:str)->[str]:
+def postgres (args:argparse.Namespace)->[str]:
     '''inter postgresql dataset'''
     # Need two pasees to decode a postgresql backup file. First pass will change
     # the item name, specifically target, task, alg, sv, and value names, to
@@ -111,17 +113,18 @@ def postgres (args:argparse.Namespace, items:[str], outdir:str)->[str]:
     blobs = []
     ifn = 'interred.' + os.path.basename (args.backup_file)
     seconds = postgres_extract_secondary_tables (args.backup_file)
-    with open (os.path.join (os.path.join (outdir, 'db'), ifn), 'tw',
+    with open (os.path.join (os.path.join (args.output_path, 'db'), ifn), 'tw',
                encoding="utf-8") as output_file:
         key = ''
         with open (args.backup_file, 'rt', encoding="utf-8") as input_file:
-            for line in input_file.readlines():
+            for line in progressbar(input_file.readlines(),  # pylint: disable=not-callable
+                                    prefix='DB:'):
                 if line.startswith ('\\.'): key = ''
                 elif line.startswith ('COPY public.prime'): key = 'prime'
                 elif key:
                     reference,blob_name = postgres_translate (line, seconds)
 
-                    if postgres_is_match (reference, items):
+                    if postgres_is_match (reference, args.items):
                         blobs.append (blob_name)
                     else: line = None
                     pass
@@ -185,8 +188,14 @@ if __name__ == '__main__':
                      help='path to the blob data that the database references')
     AP.add_argument ('-O', '--output-path', required=True, type=_path,
                      help='path to output inter information')
+    AP.add_argument ('-v', '--verbose', action='store_true', default=False,
+                     help='some helpful information about what is happening')
     AP.add_argument ('items', default=[sys.stdin], metavar='items', nargs='*',
-                     type=_ref, help='list of references to inter to the mausoleum where they must be fully qualified with runid.target.task.alg.sv.value and "*" can be used for any of those 6 fields with *.*.*.*.*.* matching everything.')  # pylint: disable=line-too-long
+                     type=_ref, help='list of references to inter to the '
+                     'mausoleum where they must be fully qualified with '
+                     'runid.target.task.alg.sv.value and "*" can be used for '
+                     'any of those 6 fields with *.*.*.*.*.* matching '
+                     'everything.')
     ARGS = AP.parse_args()
 
     if ARGS.items[0] == sys.stdin:
@@ -196,6 +205,8 @@ if __name__ == '__main__':
         ARGS.items.extend ([_ref(item) for item in filter (lambda s:s, ITEMS)])
         pass
     mkdirs (ARGS.output_path)
-    copy_blobs (ARGS.func (ARGS, ITEMS, ARGS.output_path),
-                ARGS.blob_path, ARGS.output_path)
+    if ARGS.verbose: print(f'Given {len(ARGS.items)} state vectors')
+    BLOBS = ARGS.func (ARGS)
+    if ARGS.verbose: print(f'State vector list became {len(BLOBS)} pickles')
+    copy_blobs (BLOBS, ARGS.blob_path, ARGS.output_path)
     pass
