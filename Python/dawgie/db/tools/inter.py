@@ -186,7 +186,7 @@ if __name__ == '__main__':
                      help='path to the blob data that the database references')
     AP.add_argument ('-O', '--output-path', required=True, type=_path,
                      help='path to output inter information')
-    AP.add_argument ('-v', '--verbose', action='set_true', default=False,
+    AP.add_argument ('-v', '--verbose', action='store_true', default=False,
                      help='some helpful information about what is happening')
     AP.add_argument ('items', default=[sys.stdin], metavar='items', nargs='*',
                      type=_ref, help='list of references to inter to the '
