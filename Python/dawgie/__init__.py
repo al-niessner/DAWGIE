@@ -335,6 +335,10 @@ class Algorithm(Version):
        - when called prior to run() Values should be the base Value
        - when called post to run() Values should contain current Value
     '''
+    def __repr__(self):
+        if 'caller' not in dir(self): self.caller = None
+        if self.caller: return '.'.join ([repr(self.caller), self.name()])
+        return self.name()
     def abort(self)->bool: return False
     def feedback(self)->[SV_REF, V_REF]: return []
     def name(self)->str: raise NotImplementedError()
@@ -361,7 +365,9 @@ class Analysis(_Metric):
         self.__runid = runid
         self.__timing = {}
         return
-
+    def __repr__(self): return '.'.join ([str(self.__runid),
+                                          '__all__',
+                                          self.__name])
     def _name(self)->str: return self.__name
     def _ps_hint(self)->int: return self.__ps_hint
     def _runid(self)->int: return self.__runid
@@ -388,6 +394,7 @@ class Analysis(_Metric):
             if self.abort(): raise AbortAEError()
 
             setattr (step, 'abort', self.abort)
+            setattr (step, 'caller', self)
             self.__timing['gather_' + step.name()] = datetime.datetime.utcnow()
             aspect = dawgie.db.gather (step, self)
             self.__timing['collect_' + step.name()] = datetime.datetime.utcnow()
@@ -396,6 +403,7 @@ class Analysis(_Metric):
             self.__timing['start_' + self._name()] = datetime.datetime.utcnow()
             log.debug ('Stepping into %s', step.name())
             self.measure (step.run, args=(aspect,), ds=aspect.ds())
+            setattr (step, 'caller', None)
         return
 
     def list(self)->'[Analyzer]': raise NotImplementedError()
@@ -436,6 +444,10 @@ class Analyzer(Version):
        - when called post to run() Values should contain current Value
     traits() -> list of traits to provide within an Aspect
     '''
+    def __repr__(self):
+        if 'caller' not in dir(self): self.caller = None
+        if self.caller: return '.'.join ([repr(self.caller), self.name()])
+        return self.name()
     def abort(self)->bool: return False
     def feedback(self)->[SV_REF, V_REF]: return []
     def name(self)->str: raise NotImplementedError()
@@ -606,6 +618,7 @@ class Regress(_Metric):
         self.__timing = {}
         return
 
+    def __repr__(self)->str: return '.'.join(['0', self.__target, self.__name])
     def _name(self)->str: return self.__name
     def _ps_hint(self)->int: return self.__ps_hint
     def _runid(self)->int: return 0
@@ -623,8 +636,7 @@ class Regress(_Metric):
 
     def do(self, goto:str=None)->None:
         # need to break circular dependancy so
-        # pylint: disable=import-outside-toplevel
-        import dawgie.db
+        import dawgie.db  # pylint: disable=import-outside-toplevel
 
         log = logging.getLogger (__name__ + '.Regress')
         for step in filter (lambda s:goto is None or s.name() == goto,
@@ -632,6 +644,7 @@ class Regress(_Metric):
             if self.abort(): raise AbortAEError()
 
             setattr (step, 'abort', self.abort)
+            setattr (step, 'caller', self)
             self.__timing['retreat_' + step.name()] = datetime.datetime.utcnow()
             timeline = dawgie.db.retreat (step, self)
             self.__timing['recede_' + step.name()] = datetime.datetime.utcnow()
@@ -641,6 +654,7 @@ class Regress(_Metric):
             log.debug ('Stepping into %s', step.name())
             self.measure (step.run,
                           args=(self._ps_hint(), timeline), ds=timeline.ds())
+            setattr (step, 'caller', None)
         return
 
     def list(self)->'[Regression]': raise NotImplementedError()
@@ -681,6 +695,10 @@ class Regression(Version):
        - when called post to run() Values should contain current Value
     variables() -> list of variables to provide within a Timeline
     '''
+    def __repr__(self):
+        if 'caller' not in dir(self): self.caller = None
+        if self.caller: return '.'.join ([repr(self.caller), self.name()])
+        return self.name()
     def abort(self)->bool: return False
     def feedback(self)->[SV_REF, V_REF]: return []
     def name(self)->str: raise NotImplementedError()
@@ -757,7 +775,9 @@ class Task(_Metric):
         self.__target = target
         self.__timing = {}
         return
-
+    def __repr__(self): return '.'.join([str(self.__runid),
+                                             self.__target,
+                                             self.__name])
     def _make_ds (self, alg) -> Dataset:
         '''Make a Dataset with the minimal help from self.do()'''
         # need to break circular dependancy so
@@ -788,6 +808,7 @@ class Task(_Metric):
             if self.abort(): raise AbortAEError()
 
             setattr (step, 'abort', self.abort)
+            setattr (step, 'caller', self)
             sname = f'{self._target()}.{self._name()}.{step.name()}'
             log.debug ('Loading into %s', sname)
             self.__timing['load_' + step.name()] = datetime.datetime.utcnow()
@@ -799,6 +820,7 @@ class Task(_Metric):
             log.debug ('Stepping into %s', sname)
             self.measure (step.run, args=(ds, self._ps_hint()), ds=ds)
             log.debug ('Returned from %s', sname)
+            setattr (step, 'caller', None)
             pass
         log.debug ('Completed %s for %s', self.__name, self._target())
         return
