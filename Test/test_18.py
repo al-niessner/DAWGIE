@@ -99,13 +99,13 @@ V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
         dawgie.security._tls_initialize(self.wdir)
         self.assertTrue (dawgie.security.useClientVerification(),
                          'find and load client cert')
-        base = os.path.join (self.wdir, 'myself')
+        base = os.path.join (self.wdir, 'myself.pem')
         with self.assertRaises(FileNotFoundError):
             dawgie.security._tls_initialize(self.wdir, base)
         self.assertTrue (dawgie.security.useClientVerification(),
                          'find and load client certs')
         self.assertFalse (dawgie.security.useTLS(), 'could not load')
-        with open (os.path.join (self.wdir, 'myself.private'),'tw') as file:
+        with open (base, 'tw') as file:
             file.write ('''-----BEGIN CERTIFICATE-----
 MIID7DCCAtSgAwIBAgIUB0JGjlKNuRBhs1ElGrhsobOa+AMwDQYJKoZIhvcNAQEL
 BQAwTDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMQswCQYDVQQHDAJMQTENMAsG
@@ -135,7 +135,7 @@ V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
         self.assertTrue (dawgie.security.useClientVerification(),
                          'find and load client certs')
         self.assertFalse (dawgie.security.useTLS(), 'could not load')
-        with open (os.path.join (self.wdir, 'myself.private'),'tw') as file:
+        with open (base, 'tw') as file:
             file.write ('''-----BEGIN PRIVATE KEY-----
 MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCsHUBbz4USAXfS
 raguO9CXuwi81BOMUOw19QcSsqg5ISc7r2T9G0TMQ/OyUXE8JZlBLIH7xxchp+3K
@@ -165,36 +165,6 @@ Qi0F/Y1hN1mm2UjP/ib74fmyGfVs8YO9wrXLgByWGwZOWTyfw99x3h0w0QOhrLpA
 M8M7jTBBKoKWY9y9yeplRA==
 -----END PRIVATE KEY-----
 -----BEGIN CERTIFICATE-----
-MIID7DCCAtSgAwIBAgIUB0JGjlKNuRBhs1ElGrhsobOa+AMwDQYJKoZIhvcNAQEL
-BQAwTDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMQswCQYDVQQHDAJMQTENMAsG
-A1UECgwETm9uZTEUMBIGA1UEAwwLZXhhbXBsZS5jb20wHhcNMjQwNjE3MjI1NzA5
-WhcNMjQwNzE3MjI1NzA5WjBMMQswCQYDVQQGEwJVUzELMAkGA1UECAwCQ0ExCzAJ
-BgNVBAcMAkxBMQ0wCwYDVQQKDAROb25lMRQwEgYDVQQDDAtleGFtcGxlLmNvbTCC
-ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKwdQFvPhRIBd9KtqC470Je7
-CLzUE4xQ7DX1BxKyqDkhJzuvZP0bRMxD87JRcTwlmUEsgfvHFyGn7coxiN13Mph7
-dsic1yvNsBtz6xnoBvwJ/wGKXXVy9zH10lzB8kEjRmtTpRkJPIY2M8pMqrqB7SsK
-7YH0/fbckppfJKVFZIAl6qMCgt9tWYvv8mQu6rTY64/6xR53/toCyz0OoQicw3qW
-TRicQzyUZge7U3We9rRDbijboqcRnB9uoEfnBnv8n5w0yO9WIllyrryjlv/bED8h
-e+ZClhfzoxcNLRxsHXwDoeGyOTejKWkOamuP9UkizxiBbRz4Thhb+8t4VOBU1eEC
-AwEAAaOBxTCBwjBxBgNVHSMEajBooVCkTjBMMQswCQYDVQQGEwJVUzELMAkGA1UE
-CAwCQ0ExCzAJBgNVBAcMAkxBMQ0wCwYDVQQKDAROb25lMRQwEgYDVQQDDAtleGFt
-cGxlLmNvbYIUB0JGjlKNuRBhs1ElGrhsobOa+AMwCQYDVR0TBAIwADALBgNVHQ8E
-BAMCBPAwFgYDVR0RBA8wDYILZXhhbXBsZS5jb20wHQYDVR0OBBYEFD5c+Y/S6R3o
-/YZFk1ryaocGvurPMA0GCSqGSIb3DQEBCwUAA4IBAQA7eiGwmY9ofOOFXpACRKHc
-uQBNALbz9eIA8RX8wZ3qwNJxFUoGQB5sxsJqHHuYnTwDVb4Ce2CYwyBFdlAxL2Vz
-VOC39NCgAjZWOf3k3cUcttthbGIHNfdutqEwHxRCm7Aeoe+MKWRll6yKwXu+klne
-l18iXAzutefQoEIOBI0V3/m3fgh5AIRqOlTiruFPnO6yLVLtg2GpQc2ZHMNhSWyg
-P3pZlXKkWW0k5n3SG2+I4YIPrPHwxcSQ9fugdGrnC6Vk6lIvTImxe7ljYbnSsSVV
-V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
------END CERTIFICATE-----
-''')
-        with self.assertRaises(FileNotFoundError):
-            dawgie.security._tls_initialize(self.wdir, base)
-        self.assertTrue (dawgie.security.useClientVerification(),
-                         'find and load client certs')
-        self.assertFalse (dawgie.security.useTLS(), 'could not load')
-        with open (os.path.join (self.wdir, 'myself.public'),'tw') as file:
-            file.write ('''-----BEGIN CERTIFICATE-----
 MIID7DCCAtSgAwIBAgIUB0JGjlKNuRBhs1ElGrhsobOa+AMwDQYJKoZIhvcNAQEL
 BQAwTDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMQswCQYDVQQHDAJMQTENMAsG
 A1UECgwETm9uZTEUMBIGA1UEAwwLZXhhbXBsZS5jb20wHhcNMjQwNjE3MjI1NzA5

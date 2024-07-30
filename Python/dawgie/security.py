@@ -269,11 +269,8 @@ def _tls_initialize (path:str=None, myself:str=None)->None:
     everyone access.
 
     path   : path to find the PGP keys dawgie.public.pem*
-    myself : the path and name prefix to the certificates used for internal
-             connections. For example /proj/dawgie/myself.pem will cause this
-             module to look for the two files /proj/dawgie/myself.pem.private
-             and /proj/dawgie/myself.pem.public.
-
+    myself : absolute file path a private certificate PEM that contains the
+             private key and a single certificate.
     '''
     _certs.clear()
     _myself.clear()
@@ -287,10 +284,11 @@ def _tls_initialize (path:str=None, myself:str=None)->None:
         # FUTURE: add check if not certs then raise ValueError()
     _certs.extend(certs)
     if myself:
-        with open (myself+'.private','rt',encoding='utf-8') as file:
-            prv = twisted.internet.ssl.PrivateCertificate.loadPEM(file.read())
-        with open (myself+ '.public','rt',encoding='utf-8') as file:
-            pub = twisted.internet.ssl.Certificate.loadPEM(file.read())
+        with open (myself, 'rt', encoding='utf-8') as file: cxt = file.read()
+        prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
+        cxt = cxt[cxt.find('-----BEGIN CERTIFICATE-----'):]
+        cxt = cxt[:cxt.find('-----END CERTIFICATE-----')+25]
+        pub = twisted.internet.ssl.Certificate.loadPEM(cxt)
         _myself.update ({'private':prv, 'public':pub})
     return
 
