@@ -102,6 +102,7 @@ log_capacity = 100
 log_level = logging.WARN
 log_port = int(os.environ.get('DAWGIE_LOG_PORT', 8080 + PortOffset.log.value))
 ssl_pem_file = os.environ.get ('DAWGIE_SSL_PEM_FILE', '')
+ssl_pem_myself = os.environ.get ('DAWGIE_SSL_PEM_MYSELF', '')
 worker_backlog = 50
 
 def _rev():

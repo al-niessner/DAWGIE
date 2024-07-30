@@ -60,6 +60,7 @@ import traceback
 import twisted.internet.ssl
 
 _certs = []
+_myself = {}
 _pgp = None
 gpgargname = 'gnupghome' if 'gnupghome' in inspect.signature (gnupg.GPG).parameters else 'homedir'
 
@@ -219,13 +220,13 @@ def finalize()->None:
     shutil.rmtree(getattr(_pgp, gpgargname), ignore_errors=True)
     return
 
-def initialize (path:str=None)->None:
+def initialize (path:str=None, myself:str=None)->None:
     '''initialie this library with the PGP keyring location and TLS certificates
 
     Load both PGP and TLS to be backward compatible.
     '''
     _pgp_initialize (path)
-    _tls_initialize (path)
+    _tls_initialize (path, myself)
     return
 
 def _pgp_initialize (path:str=None)->None:
@@ -260,17 +261,22 @@ def _pgp_initialize (path:str=None)->None:
         pass
     return
 
-def _tls_initialize (path:str=None)->None:
+def _tls_initialize (path:str=None, myself:str=None)->None:
     '''initialize this library with the TLS certificates
 
     An empty or None path indicates that we should ignore TLS certificates.
     Rather than have the user maintain a set of certificates, allow anyone and
     everyone access.
 
-    path  : path to find the PGP keys dawgie.public.pem*
+    path   : path to find the PGP keys dawgie.public.pem*
+    myself : the path and name prefix to the certificates used for internal
+             connections. For example /proj/dawgie/myself.pem will cause this
+             module to look for the two files /proj/dawgie/myself.pem.private
+             and /proj/dawgie/myself.pem.public.
 
     '''
     _certs.clear()
+    _myself.clear()
     certs = []
     if path and os.path.exists (path) and os.path.isdir (path):
         for fn in filter (lambda fn:fn.startswith ('dawgie.public.pem'),
@@ -280,12 +286,23 @@ def _tls_initialize (path:str=None)->None:
                 certs.append (cert)
         # FUTURE: add check if not certs then raise ValueError()
     _certs.extend(certs)
+    if myself:
+        with open (myself+'.private','rt',encoding='utf-8') as file:
+            prv = twisted.internet.ssl.PrivateCertificate.loadPEM(file.read())
+        with open (myself+ '.public','rt',encoding='utf-8') as file:
+            pub = twisted.internet.ssl.Certificate.loadPEM(file.read())
+        _myself.update ({'private':prv, 'public':pub})
     return
 
 def pgp(): return _pgp
 
+def tlsAuthority()->twisted.internet.ssl.PrivateCertificate:
+    return _myself['private']
+def tlsCertificate()->twisted.internet.ssl.Certificate.loadPEM:
+    return _myself['public']
 def tlsClients()->[twisted.internet.ssl.Certificate]: return _certs.copy()
-def useTLS(): return bool(_certs)
+def useClientVerification(): return bool(_certs)
+def useTLS(): return bool(_myself)
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(description='When run as a standalone tool, it used to generate keys for DAWGIE users. The public key generated here should be placed in the DAWGIE OPS gpg home directory and the secret key should go the DAWGIE user gpg home directory. In both cases, they should be -rw------- in that directory. If the DAWGIE loses control of private key, the public should be removed from the DAWGIE gpg home directory. The removal of the public key is equivalent to revoking the key.')
