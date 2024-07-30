@@ -150,6 +150,13 @@ def start(path:str, port:int)->None:
     import dawgie.context
     import dawgie.pl.logger
     dawgie.pl.logger._root = LogSinkFactory(path)
-    twisted.internet.reactor.listenTCP (port, dawgie.pl.logger._root,
-                                        dawgie.context.worker_backlog)
+    if dawgie.security.useTLS():
+        twisted.internet.reactor.listenSSL (port, dawgie.pl.logger._root,
+                                            dawgie.security.authority(),
+                                            dawgie.context.worker_backlog)
+    else:
+        # cannot call logging from here because we are trying to start it
+        print('PGP support is deprecated and will be removed')
+        twisted.internet.reactor.listenTCP (port, dawgie.pl.logger._root,
+                                            dawgie.context.worker_backlog)
     return

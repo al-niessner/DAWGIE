@@ -116,9 +116,17 @@ class DBSerializer(twisted.internet.protocol.Factory):
     def buildProtocol (self, addr): return Worker(addr)
     @staticmethod
     def open():
-        try: twisted.internet.reactor.listenTCP(int(dawgie.context.db_port),
-                                                DBSerializer(),
-                                                dawgie.context.worker_backlog)
+        try:
+            if dawgie.security.useTLS():
+                twisted.internet.reactor.listenSSL(int(dawgie.context.db_port),
+                                                   DBSerializer(),
+                                                   dawgie.security.authority(),
+                                                   dawgie.context.worker_backlog)
+            else:
+                log.critial('PGP support is deprecated and will be removed')
+                twisted.internet.reactor.listenTCP(int(dawgie.context.db_port),
+                                                   DBSerializer(),
+                                                   dawgie.context.worker_backlog)
         except twisted.internet.error.CannotListenError:\
                log.warning("Address already in use.")
         return
@@ -129,9 +137,9 @@ class Worker(twisted.internet.protocol.Protocol):
         twisted.internet.protocol.Protocol.__init__(self)
         self.__buf = {'actual':len(struct.pack('>I',0)),
                       'data':b'','expected':None}
-        # really is used so pylint: disable=unused-private-member
-        self.__handshake = dawgie.security.TwistedWrapper(self, address)
-        # really is used so pylint: enable=unused-private-member
+        if not dawgie.security.useTLS():
+            # really is used so pylint: disable=unused-private-member
+            self.__handshake = dawgie.security.TwistedWrapper(self, address)
         self.__has_lock = False
         self.__id_name = 'unknown'
         self.__looping_call = twisted.internet.task.LoopingCall(self._do_acquire)

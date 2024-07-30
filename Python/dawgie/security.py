@@ -289,16 +289,17 @@ def _tls_initialize (path:str=None, myself:str=None)->None:
         cxt = cxt[cxt.find('-----BEGIN CERTIFICATE-----'):]
         cxt = cxt[:cxt.find('-----END CERTIFICATE-----')+25]
         pub = twisted.internet.ssl.Certificate.loadPEM(cxt)
+        prv.options(pub)
         _myself.update ({'private':prv, 'public':pub})
     return
 
 def pgp(): return _pgp
 
-def tlsAuthority()->twisted.internet.ssl.PrivateCertificate:
+def authority()->twisted.internet.ssl.PrivateCertificate:
     return _myself['private']
-def tlsCertificate()->twisted.internet.ssl.Certificate.loadPEM:
+def cCertificate()->twisted.internet.ssl.Certificate.loadPEM:
     return _myself['public']
-def tlsClients()->[twisted.internet.ssl.Certificate]: return _certs.copy()
+def clients()->[twisted.internet.ssl.Certificate]: return _certs.copy()
 def useClientVerification(): return bool(_certs)
 def useTLS(): return bool(_myself)
 

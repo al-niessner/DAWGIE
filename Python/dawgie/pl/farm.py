@@ -319,8 +319,16 @@ def plow():
         _agency.initialize()
         pass
 
-    twisted.internet.reactor.listenTCP(int(dawgie.context.farm_port),
-                                       Foreman(), dawgie.context.worker_backlog)
+    if dawgie.security.useTLS():
+        twisted.internet.reactor.listenSSL(int(dawgie.context.farm_port),
+                                           Foreman(),
+                                           dawgie.security.authority(),
+                                           dawgie.context.worker_backlog)
+    else:
+        log.critical ('PGP support is deprecated and will be removed')
+        twisted.internet.reactor.listenTCP(int(dawgie.context.farm_port),
+                                           Foreman(),
+                                           dawgie.context.worker_backlog)
     twisted.internet.task.LoopingCall(dispatch).start(5).addErrback (dawgie.pl.LogFailure('dispatching scheduled jobs to workers on the farm', __name__).log)
     return
 
