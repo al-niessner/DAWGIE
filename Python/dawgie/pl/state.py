@@ -224,6 +224,10 @@ class FSM:
                     twisted.internet.reactor.listenSSL (dawgie.context.fe_port,
                                                         factory,
                                                         cert.options())
+                    if dawgie.security.clients():
+                        twisted.internet.reactor.listenSSL(
+                            dawgie.context.cfe_port, factory,
+                            cert.options (*dawgie.security.clients()))
                 else:
                     raise FileNotFoundError(dawgie.context.ssl_pem_file)
             else: twisted.internet.reactor.listenTCP (dawgie.context.fe_port,
@@ -458,8 +462,8 @@ class FSM:
         if self.__doctest: print ('self.start()')
 
         log.info ('entering state starting')
-        self._gui()
         self._security()
+        self._gui()
         self._logging()
         log.info ('Starting the pipeline')
         dawgie.pl.farm.plow()

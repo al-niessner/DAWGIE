@@ -266,8 +266,8 @@ def _pgp_initialize (path:str=None)->None:
             pass
 
         if keys: keys = _pgp.import_keys ('\n'.join (keys))
-        else: raise ValueError('No PGP keys found for secure handshake in ' +
-                               str(path))
+        else: log.warning('No PGP keys found for secure handshake in %s',
+                          str(path))
         pass
     return
 
@@ -289,11 +289,14 @@ def _tls_initialize (path:str=None, myname:str=None, myself:str=None)->None:
     if path and os.path.exists (path) and os.path.isdir (path):
         for fn in filter (lambda fn:fn.startswith ('dawgie.public.pem'),
                           os.listdir (path)):
+            log.info ('Found public key file: %s', fn)
             with open (os.path.join (path,fn), 'rt', encoding='utf-8') as file:
                 cert = twisted.internet.ssl.Certificate.loadPEM(file.read())
                 certs.append (cert)
         # FUTURE: add check if not certs then raise ValueError()
-    _certs.extend(certs)
+        if not certs: log.warning('No TLS kes found for secure clients in %s',
+                                  path)
+        _certs.extend(certs)
     if myself:
         with open (myself, 'rt', encoding='utf-8') as file: cxt = file.read()
         prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
@@ -309,7 +312,7 @@ def pgp(): return _pgp
 
 def authority()->twisted.internet.ssl.PrivateCertificate:
     return _myself['private']
-def cCertificate()->twisted.internet.ssl.Certificate.loadPEM:
+def certificate()->twisted.internet.ssl.Certificate.loadPEM:
     return _myself['public']
 def clients()->[twisted.internet.ssl.Certificate]: return _certs.copy()
 def useClientVerification(): return bool(_certs)

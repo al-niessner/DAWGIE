@@ -169,7 +169,8 @@ class Hand(twisted.internet.protocol.Protocol):
         _time[_busy[-1]] = datetime.datetime.now()
         return dawgie.pl.message.send (task, self)
 
-    def notify (self, keep=dawgie.context.fsm.is_pipeline_active()):
+    def notify (self, keep=None):
+        if keep is None: keep = dawgie.context.fsm.is_pipeline_active()
         if not keep:
             dawgie.pl.message.send (self._abort, self)
             self.transport.loseConnection()
