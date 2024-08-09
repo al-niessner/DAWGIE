@@ -51,6 +51,7 @@ def log_level (l):
 
 def set_ports (fe_port:int)->None:
     fep = int(fe_port)
+    dawgie.context.cfe_port = fep + dawgie.context.PortOffset.cfe.value
     dawgie.context.cloud_port = fep + dawgie.context.PortOffset.cloud.value
     dawgie.context.db_port = fep + dawgie.context.PortOffset.shelve.value
     dawgie.context.farm_port = fep + dawgie.context.PortOffset.farm.value

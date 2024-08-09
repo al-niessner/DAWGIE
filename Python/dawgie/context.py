@@ -53,6 +53,7 @@ class CloudProvider(enum.Enum):
     pass
 
 class PortOffset(enum.Enum):
+    cert = 5
     cloud = 4
     farm = 1
     frontend = 0
@@ -65,6 +66,7 @@ ae_base_package = os.environ.get ('DAWGIE_AE_BASE_PACKAGE', 'ae')
 
 allow_promotion = os.environ.get ('DAWGIE_PROMOTION', 'false').lower() in 'true'
 
+cfe_port = int(os.environ.get ('DAWGIE_CFE_PORT',8080 + PortOffset.cert.value))
 cloud_data = os.environ.get ('DAWGIE_CLOUD_DATA','apikey@url@SQS_Name@AutoScalingGroupName@ClusterName@TaskDefinition')
 cloud_port = int(os.environ.get ('DAWGIE_CLOUD_PORT',
                                  8080 + PortOffset.cloud.value))
@@ -133,6 +135,8 @@ def add_arguments (ap):
                      help='allow the dawgie to promote state vectors')
     ap.add_argument ('--context-cloud-data', default=cloud_data, required=False,
                      help='data used to communicate with the cloud provider')
+    ap.add_argument ('--context-cfe-port', default=cfe_port, required=False, type=int,
+                     help='the port to the client certified frontend [%(default)s]')
     ap.add_argument ('--context-cloud-port', default=cloud_port, required=False, type=int,
                      help='the port to the cloud foreman [%(default)s]')
     ap.add_argument ('--context-cloud-provider',
@@ -255,6 +259,7 @@ def override (args):
     dawgie.context.ae_base_path = args.context_ae_dir
     dawgie.context.ae_base_package = args.context_ae_pkg
     dawgie.context.allow_promotion = args.context_allow_promotion
+    dawgie.context.cfe_port = args.context_cfe_port
     dawgie.context.cloud_data = args.context_cloud_data
     dawgie.context.cloud_port = args.context_cloud_port
     dawgie.context.cloud_provider = CloudProvider[args.context_cloud_provider]
