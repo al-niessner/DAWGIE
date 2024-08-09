@@ -98,7 +98,7 @@ farm_port = int(os.environ.get ('DAWGIE_FARM_PORT',
 fe_path = '/tmp/' + os.environ.get ('USERNAME', 'unknown') + '/fe'
 fe_port = int(os.environ.get ('DAWGIE_FE_PORT',8080 + PortOffset.frontend.value))
 git_rev = None
-gpg_home = os.environ.get ('GNUPGHOME', '~/.gnupg')
+guest_public_keys = os.environ.get ('GNUPGHOME', '~/.gnupg')
 log_backup = 10
 log_capacity = 100
 log_level = logging.WARN
@@ -174,8 +174,8 @@ def add_arguments (ap):
                      help='the port to the farm foreman [%(default)s]')
     ap.add_argument ('--context-fe-path', default=fe_path, required=False, type=str,
                      help='AE specific directory for the front-end [%(default)s]')
-    ap.add_argument ('--context-gpg-home', default=gpg_home, required=False,
-                     help='location to find the PGP keys [%(default)s]')
+    ap.add_argument ('--context-guest-keys', default=guest_public_keys, required=False,
+                     help='location to find the public keys for all guests [%(default)s]')
     ap.add_argument ('--context-log-backup', default=log_backup, required=False, type=int,
                      help='the number of log files to accumulate in the log directory [%(default)s]')
     ap.add_argument ('--context-log-capacity', default=log_capacity, required=False, type=int,
@@ -281,7 +281,7 @@ def override (args):
     dawgie.context.farm_port = args.context_farm_port
     dawgie.context.fe_path = args.context_fe_path
     dawgie.context.git_rev = _rev()
-    dawgie.context.gpg_home = args.context_gpg_home
+    dawgie.context.guest_public_keys = args.context_guest_public_keys
     dawgie.context.log_backup = args.context_log_backup
     dawgie.context.log_capacity = args.context_log_capacity
     dawgie.context.log_port = args.context_log_port

@@ -96,7 +96,8 @@ if __name__ == '__main__':
                          level=args.log_level)
 
     dawgie.security.initialize (path=os.path.expandvars
-                                (os.path.expanduser(dawgie.context.gpg_home)),
+                                (os.path.expanduser
+                                 (dawgie.context.guest_public_keys)),
                                 myname=dawgie.context.ssl_pem_myname,
                                 myself=os.path.expandvars
                                 (os.path.expanduser

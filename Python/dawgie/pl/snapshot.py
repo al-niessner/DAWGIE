@@ -88,7 +88,7 @@ def _grab_context():
                        'fe_path':dawgie.context.fe_path,
                        'fe_port':dawgie.context.fe_port,
                        'git_rev':str(dawgie.context.git_rev),
-                       'gpg_home':dawgie.context.gpg_home,
+                       'guest_public_keys':dawgie.context.guest_public_keys,
                        'log_level':dawgie.context.log_level,
                        'log_port':dawgie.context.log_port,
                        'worker_backlog':dawgie.context.worker_backlog}}

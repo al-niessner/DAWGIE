@@ -77,7 +77,8 @@ for junk in dawgie.context.ae_base_package.split ('.'):\
     python_path = os.path.dirname (python_path)
 sys.path.insert (0, python_path)
 dawgie.security.initialize (path=os.path.expandvars
-                            (os.path.expanduser(dawgie.context.gpg_home)),
+                            (os.path.expanduser
+                             (dawgie.context.guest_public_keys)),
                             myname=dawgie.context.ssl_pem_myname,
                             myself=os.path.expandvars
                             (os.path.expanduser(dawgie.context.ssl_pem_myself)))

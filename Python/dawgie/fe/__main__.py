@@ -39,11 +39,15 @@ NTR:
 
 import dawgie.context
 import dawgie.fe
+import dawgie.security
 import os
 import twisted.internet
 import twisted.web.resource
 import twisted.web.server
 
+dawgie.security.initialize(path=context.guest_public_keys,
+                           myname=dawgie.context.ssl_pem_myname,
+                           myself=dawgie.content.ssl_pem_myself)
 factory = twisted.web.server.Site(dawgie.fe.root())
 
 if dawgie.context.ssl_pem_file:
@@ -58,4 +62,5 @@ if dawgie.context.ssl_pem_file:
         raise FileNotFoundError(dawgie.context.ssl_pem_file)
 else: twisted.internet.reactor.listenTCP (dawgie.context.fe_port, factory)
 
+if dawgie.
 twisted.internet.reactor.run()

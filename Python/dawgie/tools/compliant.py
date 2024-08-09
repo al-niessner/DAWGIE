@@ -600,7 +600,7 @@ def verify (repo:str, silent:bool, verbose:bool, spawn):
            '--ae-pkg={0}'.format (dawgie.context.ae_base_package),
            '--log-file=::{0}::{1}::{2}::'.format (dawgie.context.db_host,
                                                   dawgie.context.log_port,
-                                                  dawgie.context.gpg_home),
+                                                  dawgie.context.guest_public_keys),
            '--log-level={}'.format (dawgie.context.log_level)]
     # pylint: enable=consider-using-f-string
     silent = False

@@ -318,7 +318,7 @@ class FSM:
         if self.__doctest: print ('self._security()')
         else: dawgie.security.initialize (path=os.path.expandvars
                                           (os.path.expanduser
-                                           (dawgie.context.gpg_home)),
+                                           (dawgie.context.guest_public_keys)),
                                           myname=dawgie.context.ssl_pem_myname,
                                           myself=os.path.expandvars
                                           (os.path.expanduser
