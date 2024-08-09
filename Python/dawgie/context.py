@@ -53,7 +53,7 @@ class CloudProvider(enum.Enum):
     pass
 
 class PortOffset(enum.Enum):
-    cert = 5
+    certFE = 5
     cloud = 4
     farm = 1
     frontend = 0
@@ -66,7 +66,7 @@ ae_base_package = os.environ.get ('DAWGIE_AE_BASE_PACKAGE', 'ae')
 
 allow_promotion = os.environ.get ('DAWGIE_PROMOTION', 'false').lower() in 'true'
 
-cfe_port = int(os.environ.get ('DAWGIE_CFE_PORT',8080 + PortOffset.cert.value))
+cfe_port = int(os.environ.get ('DAWGIE_CFE_PORT',8080 + PortOffset.certFE.value))
 cloud_data = os.environ.get ('DAWGIE_CLOUD_DATA','apikey@url@SQS_Name@AutoScalingGroupName@ClusterName@TaskDefinition')
 cloud_port = int(os.environ.get ('DAWGIE_CLOUD_PORT',
                                  8080 + PortOffset.cloud.value))

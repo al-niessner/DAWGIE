@@ -200,7 +200,7 @@ def _static (fn:str,
     return result
 
 _root = RoutePoint('root')
-def root() -> bytes:
+def root() -> RoutePoint:
     _root.putChild (b'', RedirectContent('/pages/index.html'))
     _root.putChild (b'fonts', StaticContent())
     _root.putChild (b'images', StaticContent())
