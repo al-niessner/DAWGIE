@@ -95,9 +95,11 @@ if __name__ == '__main__':
                                                 args.log_file),
                          level=args.log_level)
 
-    dawgie.security.initialize (os.path.expandvars
-                                (os.path.expanduser
-                                 (dawgie.context.gpg_home)))
+    dawgie.security.initialize (path=os.path.expandvars
+                                (os.path.expanduser(dawgie.context.gpg_home)),
+                                myname=dawgie.context.myname,
+                                myself==os.path.expandvars
+                                (os.path.expanduser(dawgie.context.myself)))
     info (args.run_id,
           args.target_name,
           args.task_name,

@@ -316,9 +316,13 @@ class FSM:
         import dawgie.security
 
         if self.__doctest: print ('self._security()')
-        else: dawgie.security.initialize (os.path.expandvars
+        else: dawgie.security.initialize (path=os.path.expandvars
                                           (os.path.expanduser
-                                           (dawgie.context.gpg_home)))
+                                           (dawgie.context.gpg_home)),
+                                          myname=dawgie.context.myname,
+                                          myself==os.path.expandvars
+                                          (os.path.expanduser
+                                           (dawgie.context.myself)))
         return
 
     def archive (self):

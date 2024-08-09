@@ -181,7 +181,11 @@ def main():
     if args.log_file and args.log_file.startswith ('::') and args.log_file.endswith ('::'):
         host,port,gpghome = args.log_file.split ('::')[1:-1]
         print (args.log_file, host, port, gpghome)
-        dawgie.security.initialize (gpghome)
+        dawgie.security.initialize (path=os.path.expandvars
+                                    (os.path.expanduser(gpghome)),
+                                    myname=dawgie.context.myname,
+                                    myself==os.path.expandvars
+                                    (os.path.expanduser(dawgie.context.myself)))
         print ('dawgie.security.initialize')
         handler = dawgie.pl.logger.TwistedHandler (host=host, port=int(port))
         print ('dawgie.pl.logger.TwistedHandler')
