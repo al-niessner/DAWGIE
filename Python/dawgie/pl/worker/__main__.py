@@ -78,9 +78,9 @@ for junk in dawgie.context.ae_base_package.split ('.'):\
 sys.path.insert (0, python_path)
 dawgie.security.initialize (path=os.path.expandvars
                             (os.path.expanduser(dawgie.context.gpg_home)),
-                            myname=dawgie.context.myname,
-                            myself==os.path.expandvars
-                            (os.path.expanduser(dawgie.context.myself)))
+                            myname=dawgie.context.ssl_pem_myname,
+                            myself=os.path.expandvars
+                            (os.path.expanduser(dawgie.context.ssl_pem_myself)))
 try:
     if args.cloud_provider == 'aws': \
        dawgie.pl.worker.aws.execute ((args.hostname, args.port),

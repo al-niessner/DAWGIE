@@ -319,10 +319,10 @@ class FSM:
         else: dawgie.security.initialize (path=os.path.expandvars
                                           (os.path.expanduser
                                            (dawgie.context.gpg_home)),
-                                          myname=dawgie.context.myname,
-                                          myself==os.path.expandvars
+                                          myname=dawgie.context.ssl_pem_myname,
+                                          myself=os.path.expandvars
                                           (os.path.expanduser
-                                           (dawgie.context.myself)))
+                                           (dawgie.context.ssl_pem_myself)))
         return
 
     def archive (self):

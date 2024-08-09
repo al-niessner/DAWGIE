@@ -183,9 +183,10 @@ def main():
         print (args.log_file, host, port, gpghome)
         dawgie.security.initialize (path=os.path.expandvars
                                     (os.path.expanduser(gpghome)),
-                                    myname=dawgie.context.myname,
-                                    myself==os.path.expandvars
-                                    (os.path.expanduser(dawgie.context.myself)))
+                                    myname=dawgie.context.ssl_pem_myname,
+                                    myself=os.path.expandvars
+                                    (os.path.expanduser
+                                     (dawgie.context.ssl_pem_myself)))
         print ('dawgie.security.initialize')
         handler = dawgie.pl.logger.TwistedHandler (host=host, port=int(port))
         print ('dawgie.pl.logger.TwistedHandler')

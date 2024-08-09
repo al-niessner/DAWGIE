@@ -184,6 +184,10 @@ def add_arguments (ap):
                      help='Sign e-mail summary reports with this signature. [%(default)s]')
     ap.add_argument ('--context-ssl-pem-file', default=ssl_pem_file, required=False,
                      help='when pointing at an existing file, it will be used to initiate an https service [%(default)s]')
+    ap.add_argument ('--context-ssl-pem-myname', default=ssl_pem_myname, required=False,
+                     help='host name for the "myself" certificate [%(default)s]')
+    ap.add_argument ('--context-ssl-pem-myself', default=ssl_pem_myself, required=False,
+                     help='a private SSL/TLS key and cert to be used for internal communications [%(default)s]')
     ap.add_argument ('--context-worker-backlog', default=worker_backlog,
                      required=False, type=int,
                      help='the number of expected workers that may try to contact the foreman at the same time [%(default)s]')
@@ -277,6 +281,8 @@ def override (args):
     dawgie.context.log_capacity = args.context_log_capacity
     dawgie.context.log_port = args.context_log_port
     dawgie.context.ssl_pem_file = args.context_ssl_pem_file
+    dawgie.context.ssl_pem_myname = args.context_ssl_pem_myname
+    dawgie.context.ssl_pem_myself = args.context_ssl_pem_myself
     dawgie.context.worker_backlog = args.context_worker_backlog
 
     if not dawgie.context.ae_base_path.endswith (os.path.sep + dawgie.context.ae_base_package.replace ('.', os.path.sep)): raise ValueError(f'context-ae-dir ({0}) does not end with context-ae-pkg ({dawgie.context.ae_base_path,dawgie.context.ae_base_package})')

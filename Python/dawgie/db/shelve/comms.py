@@ -123,7 +123,7 @@ class DBSerializer(twisted.internet.protocol.Factory):
                                                    dawgie.security.authority(),
                                                    dawgie.context.worker_backlog)
             else:
-                log.critial('PGP support is deprecated and will be removed')
+                log.critical('PGP support is deprecated and will be removed')
                 twisted.internet.reactor.listenTCP(int(dawgie.context.db_port),
                                                    DBSerializer(),
                                                    dawgie.context.worker_backlog)
