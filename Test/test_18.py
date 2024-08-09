@@ -101,7 +101,7 @@ V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
                          'find and load client cert')
         base = os.path.join (self.wdir, 'myself.pem')
         with self.assertRaises(FileNotFoundError):
-            dawgie.security._tls_initialize(self.wdir, base)
+            dawgie.security._tls_initialize(self.wdir, 'example.com', base)
         self.assertTrue (dawgie.security.useClientVerification(),
                          'find and load client certs')
         self.assertFalse (dawgie.security.useTLS(), 'could not load')
@@ -131,7 +131,7 @@ V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
 -----END CERTIFICATE-----
 ''')
         with self.assertRaises(OpenSSL.crypto.Error):
-            dawgie.security._tls_initialize(self.wdir, base)
+            dawgie.security._tls_initialize(self.wdir, 'example.com', base)
         self.assertTrue (dawgie.security.useClientVerification(),
                          'find and load client certs')
         self.assertFalse (dawgie.security.useTLS(), 'could not load')
@@ -188,7 +188,7 @@ P3pZlXKkWW0k5n3SG2+I4YIPrPHwxcSQ9fugdGrnC6Vk6lIvTImxe7ljYbnSsSVV
 V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
 -----END CERTIFICATE-----
 ''')
-        dawgie.security._tls_initialize(self.wdir, base)
+        dawgie.security._tls_initialize(self.wdir, 'example.com', base)
         self.assertTrue (dawgie.security.useClientVerification(),
                          'find and load client certs')
         self.assertTrue (dawgie.security.useTLS(), 'could not load')

@@ -54,6 +54,7 @@ import os
 import random
 import shutil
 import socket
+import ssl
 import struct
 import tempfile
 import traceback
@@ -201,6 +202,15 @@ def _send (s:socket.socket, message:str):
 def connect (address:(str, int))->socket.socket:
     '''connect using PGP handshaking'''
     s = socket.socket()
+
+    if useTLS():
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        context.load_verify_locations(_myself['file'])
+        context.load_cert_chain(_myself['file'])
+        ss = context.wrap_socket (s, server_hostname=_myself['name'])
+        ss.connect(address)
+        return ss
+
     s.connect (address)
     message = ' machine: ' + _my_ip() + '\n'
     message += 'temporal: ' + str (datetime.datetime.utcnow()) + '\n'
@@ -220,13 +230,13 @@ def finalize()->None:
     shutil.rmtree(getattr(_pgp, gpgargname), ignore_errors=True)
     return
 
-def initialize (path:str=None, myself:str=None)->None:
+def initialize (path:str=None, myname:str=None, myself:str=None)->None:
     '''initialie this library with the PGP keyring location and TLS certificates
 
     Load both PGP and TLS to be backward compatible.
     '''
     _pgp_initialize (path)
-    _tls_initialize (path, myself)
+    _tls_initialize (path, myname, myself)
     return
 
 def _pgp_initialize (path:str=None)->None:
@@ -261,7 +271,7 @@ def _pgp_initialize (path:str=None)->None:
         pass
     return
 
-def _tls_initialize (path:str=None, myself:str=None)->None:
+def _tls_initialize (path:str=None, myname:str=None, myself:str=None)->None:
     '''initialize this library with the TLS certificates
 
     An empty or None path indicates that we should ignore TLS certificates.
@@ -269,6 +279,7 @@ def _tls_initialize (path:str=None, myself:str=None)->None:
     everyone access.
 
     path   : path to find the PGP keys dawgie.public.pem*
+    myname : the host name in the certificate
     myself : absolute file path a private certificate PEM that contains the
              private key and a single certificate.
     '''
@@ -290,7 +301,8 @@ def _tls_initialize (path:str=None, myself:str=None)->None:
         cxt = cxt[:cxt.find('-----END CERTIFICATE-----')+25]
         pub = twisted.internet.ssl.Certificate.loadPEM(cxt)
         prv.options(pub)
-        _myself.update ({'private':prv, 'public':pub})
+        _myself.update ({'file':myself, 'name':myname,
+                         'private':prv, 'public':pub})
     return
 
 def pgp(): return _pgp
