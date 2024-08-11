@@ -52,7 +52,7 @@ class StateVector(dawgie.StateVector):
 
     def name(self): return 'test'
 
-    def view(self, visitor:dawgie.Visitor):
+    def view(self, _caller, visitor:dawgie.Visitor):
         fig = bokeh.plotting.figure(title='Current state of the data',
                                     x_range=[0,self['image'].array().shape[1]],
                                     y_range=[0,self['image'].array().shape[0]])

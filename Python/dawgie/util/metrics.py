@@ -60,7 +60,7 @@ class MetricStateVector(dawgie.StateVector):
         self['task_wall'] = MetricValue(task.wall)
         return
     def name(self): return '__metric__'
-    def view (self, visitor:dawgie.Visitor)->None:
+    def view (self, _caller, visitor:dawgie.Visitor)->None:
         table = visitor.add_table (['', 'DB', 'Task'],
                                    rows=len(self)//2, title='Process Metrics')
         for r,k in enumerate (sorted (filter (lambda k:k.startswith ('db_'),

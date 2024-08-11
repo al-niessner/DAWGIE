@@ -12,4 +12,4 @@ pyOpenSSL>=19.1.0
 python-gnupg==0.4.9
 requests>=2.20.0
 transitions==0.6.8
-twisted>=18.7.0
+twisted>=24.3.0

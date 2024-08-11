@@ -91,7 +91,7 @@ class StateVector(dawgie.StateVector):
         self._version_ = dawgie.VERSION(1,2,3)
         return
     def name(self): return self.myname
-    def view(self, visitor): return
+    def view(self, caller, visitor): return
     pass
 
 class Task(dawgie.Task):

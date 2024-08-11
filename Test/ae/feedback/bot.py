@@ -201,7 +201,7 @@ class StateVector(dawgie.StateVector):
         return
 
     def name(self): return self.__name
-    def view(self, visitor:dawgie.Visitor):
+    def view(self, _caller, visitor:dawgie.Visitor):
         for vn in sorted (self): visitor.add_primitive (self[vn].array(), vn)
         return
     pass
