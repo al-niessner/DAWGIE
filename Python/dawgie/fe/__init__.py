@@ -39,8 +39,10 @@ NTR:
 
 import dawgie.context
 import dawgie.de
+import dawgie.security
 import enum
 import inspect
+import json
 import logging; log = logging.getLogger(__name__)
 import os
 import twisted.web.resource
@@ -88,6 +90,14 @@ class DynamicContent(twisted.web.resource.Resource):
     def __render (self, request, method:HttpMethod):
         sig = inspect.signature (self.__fnc)
         kwds = {}
+        if 'getPeerCertificate' in dir(request.transport):
+            cert = request.transport.getPeerCertificate()
+        else: cert = None
+
+        if not dawgie.security.sanctioned(self.__uri, cert):
+            return json.dumps({'alert_status':'error',
+                               'alert_message':f'The endpoint {self.__uri} requires a client certficate to be provided and that certificate be known to this service.'}).encode()
+
         for ak in request.args.keys():
             if ak.decode() in sig.parameters:
                 kwds[ak.decode()] = [a.decode() for a in request.args[ak]]

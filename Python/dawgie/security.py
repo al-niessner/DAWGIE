@@ -315,6 +315,46 @@ def authority()->twisted.internet.ssl.PrivateCertificate:
 def certificate()->twisted.internet.ssl.Certificate.loadPEM:
     return _myself['public']
 def clients()->[twisted.internet.ssl.Certificate]: return _certs.copy()
+def sanctioned(endpoint:str, cert:twisted.internet.ssl.Certificate)->bool:
+    '''determine if access to the endpoint is sectioned
+
+    endpoint : string representation of the endpoint being evoked
+    cert : the client certificate if there is one - None means anonymous
+
+    Try for simplicity in that if no clients are given, then all endpoints
+    are accessable. Yes, this can be a security leak but that should be resolved
+    when the PGP is removed and no client TLS certs causes an error.
+    '''
+    if clients():
+        all_access = ['/app/db/item',
+                      '/app/db/lockview',
+                      '/app/db/prime',
+                      '/app/db/targets',
+                      '/app/db/versions',
+                      '/app/pl/log',
+                      '/app/pl/state',
+                      '/app/schedule/crew',
+                      '/app/schedule/doing',
+                      '/app/schedule/events',
+                      '/app/schedule/failure',
+                      '/app/schedule/success',
+                      '/app/schedule/tasks',
+                      '/app/schedule/todo',
+                      '/app/search/completion/sv',
+                      '/app/search/completion/tn',
+                      '/app/filter/admin',
+                      '/app/filter/dev',
+                      '/app/filter/user',
+                      '/app/search/ri',
+                      '/app/search/sv',
+                      '/app/search/tn',
+                      '/app/changeset.txt',
+                      '/app/state/status',
+                      '/app/versions']
+        if cert is None and endpoint in all_access: return True
+        if cert is None: return False
+        return True
+    return True
 def useClientVerification(): return bool(_certs)
 def useTLS(): return bool(_myself)
 
