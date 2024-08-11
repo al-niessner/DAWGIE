@@ -99,10 +99,14 @@ fe_path = '/tmp/' + os.environ.get ('USERNAME', 'unknown') + '/fe'
 fe_port = int(os.environ.get ('DAWGIE_FE_PORT',8080 + PortOffset.frontend.value))
 git_rev = None
 guest_public_keys = os.environ.get ('DAWGIE_GUEST_PUBLIC_KEYS', '~/.gnupg')
+identity_override = os.environ.get ('DAWGIE_SECURiTY_IDENTITY_OVERRIDE',
+                                    'dawgie.security.fetch_identity')
 log_backup = 10
 log_capacity = 100
 log_level = logging.WARN
 log_port = int(os.environ.get('DAWGIE_LOG_PORT', 8080 + PortOffset.log.value))
+sanction_override = os.environ.get ('DAWGIE_SECURITY_SANCTION_OVRRIDE',
+                                    'dawgie.security.is_sanctioned')
 ssl_pem_file = os.environ.get ('DAWGIE_SSL_PEM_FILE', '')
 ssl_pem_myname = os.environ.get ('DAWGIE_SSL_PEM_MYNAME', 'dawgie')
 ssl_pem_myself = os.environ.get ('DAWGIE_SSL_PEM_MYSELF', '')

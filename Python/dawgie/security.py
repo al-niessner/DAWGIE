@@ -48,6 +48,7 @@ import argparse
 import datetime
 import getpass
 import gnupg
+import importlib
 import inspect
 import logging; log = logging.getLogger (__name__)
 import os
@@ -310,12 +311,41 @@ def _tls_initialize (path:str=None, myname:str=None, myself:str=None)->None:
 
 def pgp(): return _pgp
 
+def _lookup (fullname:str):
+    name = fullname.split('.')
+    modname = '.'.join(name[:-1])
+    fncname = name[-1]
+    mod = importlib.import_module(modname)
+    return getattr(mod, fncname)
 def authority()->twisted.internet.ssl.PrivateCertificate:
     return _myself['private']
 def certificate()->twisted.internet.ssl.Certificate.loadPEM:
     return _myself['public']
 def clients()->[twisted.internet.ssl.Certificate]: return _certs.copy()
-def sanctioned(endpoint:str, cert:twisted.internet.ssl.Certificate)->bool:
+def fetch_identity(cert:twisted.internet.ssl.Certificate):
+    '''fetch a meaningful identity from the certificate
+
+    The defalt case is simple to return the serial number. DAQGIE does not use
+    this value but does pass it down to dawgie.db.view() and then to the AE
+    implementations for StateVector.view(). Therefore, any AE that wants to use
+    this value should override the default case and return something meaningful
+    to itself.
+
+    Empty string is returned if no meaningful identity could be fetched from the
+    given certificate or the certificate is None. In essence, the empty string is
+    the anonymous or blank identity.
+    '''
+    return hex(cert.serialNumber())
+def identity(of_cert:twisted.internet.ssl.Certificate):
+    # avoiding circles, pylint: disable=import-outside-toplevel
+    import dawgie.context
+    try:
+        return _lookup(dawgie.context.identity_override)(of_cert)
+    except:  # all exceptions are equal, pylint: disable=bare-except
+        log.exception('Could not translate certificate to any response. '
+                      'Defaulting to anonymous.')
+    return ''
+def is_sanctioned(endpoint:str, cert:twisted.internet.ssl.Certificate)->bool:
     '''determine if access to the endpoint is sectioned
 
     endpoint : string representation of the endpoint being evoked
@@ -355,6 +385,15 @@ def sanctioned(endpoint:str, cert:twisted.internet.ssl.Certificate)->bool:
         if cert is None: return False
         return True
     return True
+def sanctioned(endpoint:str, cert:twisted.internet.ssl.Certificate)->bool:
+    # avoiding circles, pylint: disable=import-outside-toplevel
+    import dawgie.context
+    try:
+        return _lookup(dawgie.context.sanction_override)(endpoint, cert)
+    except:  # all exceptions are equal, pylint: disable=bare-except
+        log.exception('Could not determine if endpoint is sanctioned. '
+                      'Defaulting to False.')
+    return False
 def useClientVerification(): return bool(_certs)
 def useTLS(): return bool(_myself)
 

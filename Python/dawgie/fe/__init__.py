@@ -56,9 +56,17 @@ class HttpMethod(enum.Enum):
     pass
 
 class Defer:
-    def __init__(self): self.__request = None
-    def get_request(self): return self.__request
-    def set_request(self, req): self.__request = req
+    def __init__(self):
+        self.identity = None
+        self.request = None
+    @property
+    def identity(self): return self.__identity
+    @identity.setter
+    def identity(self, ident): self.__identity = ident
+    @property
+    def request(self): return self.__request
+    @request.setter
+    def request(self, req): self.__request = req
     pass
 
 class DynamicContent(twisted.web.resource.Resource):
@@ -104,7 +112,9 @@ class DynamicContent(twisted.web.resource.Resource):
                 pass
             pass
 
-        if isinstance (self.__fnc, Defer): self.__fnc.set_request (request)
+        if isinstance (self.__fnc, Defer):
+            self.__fnc.identity = dawgie.security.identity(cert)
+            self.__fnc.request = request
         if 0 < self.__methods.count (method): resp = self.__fnc(**kwds)
         else: resp = self.__err (method)
 
