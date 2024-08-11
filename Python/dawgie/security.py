@@ -335,7 +335,8 @@ def fetch_identity(cert:twisted.internet.ssl.Certificate):
     given certificate or the certificate is None. In essence, the empty string is
     the anonymous or blank identity.
     '''
-    return hex(cert.serialNumber())
+    if cert: print (dir(cert))
+    return hex(cert.get_serial_number()) if cert else ''
 def identity(of_cert:twisted.internet.ssl.Certificate):
     # avoiding circles, pylint: disable=import-outside-toplevel
     import dawgie.context

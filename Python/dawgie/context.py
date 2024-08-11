@@ -99,13 +99,13 @@ fe_path = '/tmp/' + os.environ.get ('USERNAME', 'unknown') + '/fe'
 fe_port = int(os.environ.get ('DAWGIE_FE_PORT',8080 + PortOffset.frontend.value))
 git_rev = None
 guest_public_keys = os.environ.get ('DAWGIE_GUEST_PUBLIC_KEYS', '~/.gnupg')
-identity_override = os.environ.get ('DAWGIE_SECURiTY_IDENTITY_OVERRIDE',
+identity_override = os.environ.get ('DAWGIE_SECURITY_FETCH_IDENTITY',
                                     'dawgie.security.fetch_identity')
 log_backup = 10
 log_capacity = 100
 log_level = logging.WARN
 log_port = int(os.environ.get('DAWGIE_LOG_PORT', 8080 + PortOffset.log.value))
-sanction_override = os.environ.get ('DAWGIE_SECURITY_SANCTION_OVRRIDE',
+sanction_override = os.environ.get ('DAWGIE_SECURITY_IS_SANCTIONED',
                                     'dawgie.security.is_sanctioned')
 ssl_pem_file = os.environ.get ('DAWGIE_SSL_PEM_FILE', '')
 ssl_pem_myname = os.environ.get ('DAWGIE_SSL_PEM_MYNAME', 'dawgie')
@@ -190,6 +190,10 @@ def add_arguments (ap):
                      help='email address(es) to send alerts to using a , to separate them when more than one. [%(default)s]')
     ap.add_argument ('--context-email-signature', default=email_signature, required=False,
                      help='Sign e-mail summary reports with this signature. [%(default)s]')
+    ap.add_argument ('--context-security-fetch-identity', default=identity_override, required=False,
+                     help='fetch a meaningful identity from the client certificate [%(default)s]')
+    ap.add_argument ('--context-security-is-sanctioned', default=sanction_override, required=False,
+                     help='determine if a client has access to the endpoint [%(default)s]')
     ap.add_argument ('--context-ssl-pem-file', default=ssl_pem_file, required=False,
                      help='when pointing at an existing file, it will be used to initiate an https service [%(default)s]')
     ap.add_argument ('--context-ssl-pem-myname', default=ssl_pem_myname, required=False,
@@ -286,9 +290,11 @@ def override (args):
     dawgie.context.fe_path = args.context_fe_path
     dawgie.context.git_rev = _rev()
     dawgie.context.guest_public_keys = args.context_guest_public_keys
+    dawgie.context.identity_override = args.context_security_fetch_identity
     dawgie.context.log_backup = args.context_log_backup
     dawgie.context.log_capacity = args.context_log_capacity
     dawgie.context.log_port = args.context_log_port
+    dawgie.context.sanction_override = args.context_security_is_sanctioned
     dawgie.context.ssl_pem_file = args.context_ssl_pem_file
     dawgie.context.ssl_pem_myname = args.context_ssl_pem_myname
     dawgie.context.ssl_pem_myself = args.context_ssl_pem_myself
