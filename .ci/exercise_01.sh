@@ -36,6 +36,8 @@
 #
 # NTR:
 
+cidir=$(realpath $(dirname $0))
+rootdir=$(realpath ${cidir}/..)
 . .ci/util.sh
 
 state="pending" # "success" "pending" "failure" "error"

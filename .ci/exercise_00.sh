@@ -36,6 +36,8 @@
 #
 # NTR:
 
+cidir=$(realpath $(dirname $0))
+rootdir=$(realpath ${cidir}/..)
 . .ci/util.sh
 $(dirname $0)/step_00.sh
 
