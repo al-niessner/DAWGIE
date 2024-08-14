@@ -51,12 +51,14 @@ if current_state
 then
     git reset --hard HEAD
     #git clean -df
+    lv="$(layer_versions)"
+    pyVersion="${lv:17:16}"
     declare -i count=3
     for filename in .ci/Dockerfile.ap .ci/Dockerfile.ex
     do
         python3 <<EOF
 with open ("${filename}", 'rt') as f: text = f.read()
-with open (".ci/Dockerfile.${count}", 'tw') as f: f.write (text.replace ("ghrVersion", "${ghrVersion}"))
+with open (".ci/Dockerfile.${count}", 'tw') as f: f.write (text.replace ("ghrVersion", "${pyVersion}"))
 EOF
         count=count+1
     done
@@ -81,7 +83,7 @@ with open ('.ci/Dockerfile.4', 'tw') as f: f.write (txt.replace ('FROM dawgie', 
 EOF
     docker build --network=host -t ex:${ghrVersion} - < .ci/Dockerfile.4
     git reset --hard HEAD
-    git clean -df
+    #git clean -df
     state=`get_state`
 fi
 
