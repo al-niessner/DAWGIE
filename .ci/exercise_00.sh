@@ -50,7 +50,7 @@ post_state "$context" "$description" "$state"
 if current_state
 then
     git reset --hard HEAD
-    git clean -df
+    #git clean -df
     declare -i count=3
     for filename in .ci/Dockerfile.ap .ci/Dockerfile.ex
     do
