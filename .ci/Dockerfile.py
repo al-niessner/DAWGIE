@@ -51,5 +51,5 @@ RUN set -ex && \
                  requests>=2.20.0 \
                  service_identity \
                  transitions>=0.6.8 \
-                 twisted>=18.7.0  && \
+                 twisted>=24.3.0  && \
     rm -rf ${HOME}/.cache /tmp/,ci

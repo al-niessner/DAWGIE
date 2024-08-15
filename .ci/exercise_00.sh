@@ -73,7 +73,7 @@ EOF
     docker build --network=host -t ap:${tag} - < .ci/Dockerfile.3
 
     docker build --network=host -t ex:latest - < .ci/Dockerfile.4
-    #rm -rf Dockerfile.[1-4]
+    rm -rf .ci/Dockerfile.[1-4]
     state=`get_state`
 fi
 
