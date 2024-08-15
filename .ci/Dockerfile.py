@@ -44,6 +44,7 @@ RUN set -ex && \
                  matplotlib>=2.1.1 \
                  progressbar \
                  psycopg>3.0.0 \
+                 'psycopg<3.2.0' \
                  psycopg-binary>3.0.0 \
                  pyparsing>=2.4.7 \
                  pyOpenSSL>=19.1.0 \
