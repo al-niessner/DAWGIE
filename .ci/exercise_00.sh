@@ -49,41 +49,31 @@ post_state "$context" "$description" "$state"
 
 if current_state
 then
-    git reset --hard HEAD
-    #git clean -df
+    cv="$(git rev-parse HEAD)"
     lv="$(layer_versions)"
     pyVersion="${lv:17:16}"
-    declare -i count=3
-    for filename in .ci/Dockerfile.ap .ci/Dockerfile.ex
-    do
-        python3 <<EOF
+    tag=${1:-latest}
+    filename=.ci/Dockerfile.ap
+    python3 <<EOF
 with open ("${filename}", 'rt') as f: text = f.read()
-with open (".ci/Dockerfile.${count}", 'tw') as f: f.write (text.replace ("ghrVersion", "${pyVersion}"))
+with open (".ci/Dockerfile.3", 'tw') as f: f.write (text.replace ("pyVersion", "${pyVersion}").replace ("cvVersion","${cv}"))
 EOF
-        count=count+1
-    done
+    filename=.ci/Dockerfile.ex
+    python3 <<EOF
+with open ("${filename}", 'rt') as f: text = f.read()
+with open (".ci/Dockerfile.4", 'tw') as f: f.write (text.replace ("apVersion", "${tag}").replace ('##DAWGIE_DOCKERIZED_AE_GIT_REVISION##',"$cv}"))
+EOF
 
     python3 <<EOF
 with open ('Python/setup.py', 'rt') as f: text = f.read()
 with open ('Python/setup.py', 'tw') as f:
-    f.write (text.replace ("ghrVersion", "${ghrVersion}"))
+    f.write (text.replace ("pyVersion", "${pyVersion}"))
 EOF
 
-    .ci/dcp.py --server .ci/Dockerfile.3 &
-    while [ ! -f .ci/Dockerfile.3.dcp ]
-    do
-        sleep 3
-    done
-    docker build --network=host -t ap:${ghrVersion} - < .ci/Dockerfile.3.dcp
+    docker build --network=host -t ap:${tag} - < .ci/Dockerfile.3
 
-        DAWGIE_DOCKERIZED_AE_GIT_REVISION=`git rev-parse HEAD`
-    python3 <<EOF
-with open ('.ci/Dockerfile.4', 'rt') as f: txt = f.read()
-with open ('.ci/Dockerfile.4', 'tw') as f: f.write (txt.replace ('FROM dawgie', 'FROM ap:${ghrVersion}').replace ('##DAWGIE_DOCKERIZED_AE_GIT_REVISION##', '$DAWGIE_DOCKERIZED_AE_GIT_REVISION'))
-EOF
-    docker build --network=host -t ex:${ghrVersion} - < .ci/Dockerfile.4
-    git reset --hard HEAD
-    #git clean -df
+    docker build --network=host -t ex:latest - < .ci/Dockerfile.4
+    #rm -rf Dockerfile.[1-4]
     state=`get_state`
 fi
 

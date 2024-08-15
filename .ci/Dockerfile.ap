@@ -34,11 +34,14 @@
 #
 # NTR:
 
-FROM py:ghrVersion
+FROM py:pyVersion
 RUN set -ex && \
-    /bin/dcp.py -p DCP_PORT_NUMBER -r .ci/dawgie.bot.pub Python /tmp && \
-    mkdir ${HOME}/.gnupg && chmod 600 ${HOME}/.gnupg && \
-    mv /tmp/.ci/dawgie.bot.pub ${HOME}/.gnupg/ && \
-    cd /tmp/Python && \
+    cd /tmp && \
+    git clone https://github.com/al-niessner/DAWGIE.git && \
+    cd DAWGIE && \
+    git -c advice.detachedHead=false checkout cvVersion && \
+    mkdir ${HOME}/.certs && chmod 600 ${HOME}/.certs && \
+    cd ${HOME}/.certs &&\
+    cd /tmp/DAWGIE/Python && \
     python3 setup.py build install && \
-    cd && rm -rf /tmp/Python /tmp/.ci
+    cd && rm -rf /tmp/DAWGIE
