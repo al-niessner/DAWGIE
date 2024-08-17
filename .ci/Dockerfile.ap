@@ -40,8 +40,6 @@ RUN set -ex && \
     git clone https://github.com/al-niessner/DAWGIE.git && \
     cd DAWGIE && \
     git -c advice.detachedHead=false checkout cvVersion && \
-    mkdir ${HOME}/.certs && chmod 600 ${HOME}/.certs && \
-    cd ${HOME}/.certs &&\
     cd /tmp/DAWGIE/Python && \
     python3 -m pip install . && \
     cd && rm -rf /tmp/DAWGIE

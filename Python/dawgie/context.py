@@ -178,7 +178,7 @@ def add_arguments (ap):
                      help='the port to the farm foreman [%(default)s]')
     ap.add_argument ('--context-fe-path', default=fe_path, required=False, type=str,
                      help='AE specific directory for the front-end [%(default)s]')
-    ap.add_argument ('--context-guest-keys', default=guest_public_keys, required=False,
+    ap.add_argument ('--context-guest-public-keys', default=guest_public_keys, required=False,
                      help='location to find the public keys for all guests [%(default)s]')
     ap.add_argument ('--context-log-backup', default=log_backup, required=False, type=int,
                      help='the number of log files to accumulate in the log directory [%(default)s]')
