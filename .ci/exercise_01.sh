@@ -76,18 +76,22 @@ then
     make_cert ${tempdir}/certs/server.pem # for https
     # rename guest certificate to something dawgie will find
     cp ${tempdir}/certs/guest.pem.public ${tempdir}/certs/dawgie.public.pem.guest
-    docker run --rm \
+    docker run --detach --rm \
            -e DAWGIE_GUEST_PUBLIC_KEYS=/proj/data/certs \
            -e DAWGIE_SSL_PEM_FILE=/proj/data/certs/server.pem \
+           -e DAWGIE_SSL_PEM_MYNAME=exercise.dawgie \
            -e DAWGIE_SSL_PEM_MYSELF=/proj/data/certs/myself.pem \
            -e USER=$USER -p 8080-8089:8080-8089 -u $UID \
            -v ${PWD}/Test:/proj/src -v ${tempdir}:/proj/data \
-           ex dawgie.pl --context-fe-path=/proj/data/fe &
+           ex dawgie.pl --context-fe-path=/proj/data/fe
+    echo "server is booting"
     python3 <<EOF
 import json
+import ssl
 import time
 import urllib.request
 
+ssl._create_default_https_context = ssl._create_unverified_context
 isRunning = False
 while not isRunning:
     time.sleep (3)
@@ -95,11 +99,13 @@ while not isRunning:
     isRunning = state['name'] == 'running' and state['status'] == 'active'
     pass
 EOF
+    echo "server is now running"
     declare -i jobs=1
     declare -i inc=1
     while [[ 0 -lt $jobs ]]
     do
         docker run --rm \
+               -e DAWGIE_SSL_PEM_MYNAME=exercise.dawgie \
                -e DAWGIE_SSL_PEM_MYSELF=/proj/data/certs/myself.pem \
                -e USER=$USER --network host -u $UID \
                -v ${PWD}/Test:/proj/src -v ${tempdir}:/proj/data \
@@ -118,9 +124,11 @@ EOF
         inc=inc+1
         jobs=$(python3 <<EOF
 import json
+import ssl
 import time
 import urllib.request
 
+ssl._create_default_https_context = ssl._create_unverified_context
 doing = json.loads (urllib.request.urlopen ('https://localhost:8080/app/schedule/doing').read())
 todo = json.loads (urllib.request.urlopen ('https://localhost:8080/app/schedule/todo').read())
 jobs = 0 # len (doing) + len (todo)
@@ -129,6 +137,7 @@ jobs += sum ([max (len (d['targets']), 1) for d in todo])
 print (jobs)
 EOF
             )
+        echo "Have ${jobs} jobs to run"
     done
     
     docker stop $(docker ps | grep "ex" | awk '{print $1}')

@@ -96,9 +96,9 @@ class Hand(twisted.internet.protocol.Protocol):
         self.__incarnation = None
         self.__len = None
         log.debug ('work application submission from %s', str(address))
-        # really is used so pylint: disable=unused-private-member
-        self.__handshake = dawgie.security.TwistedWrapper(self, address)
-        # really is used so pylint: enable=unused-private-member
+        if not dawgie.security.useTLS():
+            # really is used so pylint: disable=unused-private-member
+            self.__handshake = dawgie.security.TwistedWrapper(self, address)
         self.__proceed = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, suc=True)
         self.__wait = dawgie.pl.message.make()
         return

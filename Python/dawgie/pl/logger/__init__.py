@@ -65,8 +65,9 @@ class LogSink(twisted.internet.protocol.Protocol):
         self.__buf = b''
         self.__blen = len (struct.pack ('>L', 0))
         self.__len = None
-        # this is really used so pylint: disable=unused-private-member
-        self.__handshake = dawgie.security.TwistedWrapper(self, address)
+        if not dawgie.security.useTLS():
+            # this is really used so pylint: disable=unused-private-member
+            self.__handshake = dawgie.security.TwistedWrapper(self, address)
         return
 
     def dataReceived (self, data):
