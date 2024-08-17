@@ -38,7 +38,7 @@
 
 make_cert () {
     # make CSR
-    openssl req -days 36500 -newkey rsa:2048 -nodes -keyout device.key \
+    openssl req -newkey rsa:2048 -nodes -keyout device.key \
             -subj "/C=US/ST=CA/L=LA/O=None/CN=exercise.dawgie" -out device.csr
     # write the v3.ext file
     echo "authorityKeyIdentifier=keyid,issuer
@@ -69,7 +69,13 @@ post_state "$context" "$description" "$state"
 
 if current_state
 then
-    tempdir=$(mktemp -d /tmp/tmp.XXXXXX) # will be deleted when fininshed
+    docker network create exer
+    docker run --detach \
+           --env POSTGRES_PASSWORD=password --env POSTGRES_USER=exerciser \
+           --name post_ex --network exer --publish 8088:8080 --rm  postgres
+    sleep 3
+    docker exec -i post_ex createdb -U exerciser gym
+     tempdir=$(mktemp -d /tmp/tmp.XXXXXX) # will be deleted when fininshed
     mkdir -p ${tempdir}/{certs,db,dbs,fe,logs,stg}
     make_cert ${tempdir}/certs/guest.pem  # client should load this into browser
     make_cert ${tempdir}/certs/myself.pem # allows interconnection
@@ -77,11 +83,17 @@ then
     # rename guest certificate to something dawgie will find
     cp ${tempdir}/certs/guest.pem.public ${tempdir}/certs/dawgie.public.pem.guest
     docker run --detach --rm \
+           -e DAWGIE_DB_HOST=post_ex \
+           -e DAWGIE_DB_IMPL=post \
+           -e DAWGIE_DB_NAME=gym \
+           -e DAWGIE_DB_PATH="exerciser:password" \
+           -e DAWGIE_DB_PORT=5432 \
            -e DAWGIE_GUEST_PUBLIC_KEYS=/proj/data/certs \
            -e DAWGIE_SSL_PEM_FILE=/proj/data/certs/server.pem \
            -e DAWGIE_SSL_PEM_MYNAME=exercise.dawgie \
            -e DAWGIE_SSL_PEM_MYSELF=/proj/data/certs/myself.pem \
-           -e USER=$USER -p 8080-8089:8080-8089 -u $UID \
+           -e USER=$USER --publish 8080-8085:8080-8085 -u $UID \
+           --name server_ex --network exer \
            -v ${PWD}/Test:/proj/src -v ${tempdir}:/proj/data \
            ex dawgie.pl --context-fe-path=/proj/data/fe
     echo "server is booting"
@@ -107,10 +119,10 @@ EOF
         docker run --rm \
                -e DAWGIE_SSL_PEM_MYNAME=exercise.dawgie \
                -e DAWGIE_SSL_PEM_MYSELF=/proj/data/certs/myself.pem \
-               -e USER=$USER --network host -u $UID \
+               -e USER=$USER --network exer -u $UID \
                -v ${PWD}/Test:/proj/src -v ${tempdir}:/proj/data \
                ex dawgie.pl.worker \
-                  -a /proj/src/ae -b ae -c cluster -i $inc -n localhost -p 8081
+                  -a /proj/src/ae -b ae -c cluster -i $inc -n server_ex -p 8081
 
         if [[ 4 -eq $inc ]]
         then
@@ -139,8 +151,9 @@ EOF
             )
         echo "Have ${jobs} jobs to run"
     done
-    
-    docker stop $(docker ps | grep "ex" | awk '{print $1}')
+    read -p "press enter"
+    docker stop post_ex $(docker ps | grep "ex" | awk '{print $1}')
+    docker network rm exer
     python3 <<EOF
 import os
 
