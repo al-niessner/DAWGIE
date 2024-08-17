@@ -151,8 +151,10 @@ def start(path:str, port:int)->None:
     import dawgie.pl.logger
     dawgie.pl.logger._root = LogSinkFactory(path)
     if dawgie.security.useTLS():
+        controller = dawgie.security.authority().options(
+            dawgie.security.certificate())
         twisted.internet.reactor.listenSSL (port, dawgie.pl.logger._root,
-                                            dawgie.security.authority(),
+                                            controller,
                                             dawgie.context.worker_backlog)
     else:
         # cannot call logging from here because we are trying to start it

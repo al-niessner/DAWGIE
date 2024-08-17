@@ -321,9 +321,11 @@ def plow():
         pass
 
     if dawgie.security.useTLS():
+        controller = dawgie.security.authority().options(
+            dawgie.security.certificate())
         twisted.internet.reactor.listenSSL(int(dawgie.context.farm_port),
                                            Foreman(),
-                                           dawgie.security.authority(),
+                                           controller,
                                            dawgie.context.worker_backlog)
     else:
         log.critical ('PGP support is deprecated and will be removed')

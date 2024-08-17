@@ -118,9 +118,11 @@ class DBSerializer(twisted.internet.protocol.Factory):
     def open():
         try:
             if dawgie.security.useTLS():
+                controller = dawgie.security.authority().options(
+                    dawgie.security.certificate())
                 twisted.internet.reactor.listenSSL(int(dawgie.context.db_port),
                                                    DBSerializer(),
-                                                   dawgie.security.authority(),
+                                                   controller,
                                                    dawgie.context.worker_backlog)
             else:
                 log.critical('PGP support is deprecated and will be removed')
