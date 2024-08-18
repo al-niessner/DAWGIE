@@ -119,6 +119,7 @@ EOF
         docker run --rm \
                -e DAWGIE_SSL_PEM_MYNAME=exercise.dawgie \
                -e DAWGIE_SSL_PEM_MYSELF=/proj/data/certs/myself.pem \
+               -e MPLCONFIGDIR=/tmp \
                -e USER=$USER --network exer -u $UID \
                -v ${PWD}/Test:/proj/src -v ${tempdir}:/proj/data \
                ex dawgie.pl.worker \
@@ -126,10 +127,15 @@ EOF
 
         if [[ 4 -eq $inc ]]
         then
-            target=$(curl https://localhost:8080/app/db/targets)
+            target=$(curl -k https://localhost:8080/app/db/targets)
             target=${target:13:${#target}-15}
             echo "target: $target"
-            curl -X POST -F tasks=feedback.command -F tasks=feedback.sensor -F targets=${target} https://localhost:8080/app/run
+            curl -k -X POST \
+                 -cert ${tempdir}/certs/guest.pem \
+                 -F tasks=feedback.command \
+                 -F tasks=feedback.sensor \
+                 -F targets=${target} \
+                 https://localhost:8080/app/run
             echo ""
         fi
 
@@ -151,7 +157,6 @@ EOF
             )
         echo "Have ${jobs} jobs to run"
     done
-    read -p "press enter"
     docker stop post_ex $(docker ps | grep "ex" | awk '{print $1}')
     docker network rm exer
     python3 <<EOF
@@ -173,7 +178,7 @@ if v and not all ([9.9 < x < 10.1 for x in v[-3:]]):
     with open ('.ci/status.txt', 'tw') as f: f.write ('failure')
     pass
 EOF
-    rm -r ${tempdir}
+    rm -rf ${tempdir} ert
     state=`get_state`
 fi
 
