@@ -98,7 +98,7 @@ farm_port = int(os.environ.get ('DAWGIE_FARM_PORT',
 fe_path = '/tmp/' + os.environ.get ('USERNAME', 'unknown') + '/fe'
 fe_port = int(os.environ.get ('DAWGIE_FE_PORT',8080 + PortOffset.frontend.value))
 git_rev = None
-guest_public_keys = os.environ.get ('DAWGIE_GUEST_PUBLIC_KEYS', '~/.gnupg')
+guest_public_keys = os.environ.get ('DAWGIE_GUEST_PUBLIC_KEYS', '/proj/data/certs')
 identity_override = os.environ.get ('DAWGIE_SECURITY_FETCH_IDENTITY',
                                     'dawgie.security.fetch_identity')
 log_backup = 10
