@@ -236,7 +236,10 @@ def initialize (path:str=None, myname:str=None, myself:str=None)->None:
 
     Load both PGP and TLS to be backward compatible.
     '''
+    print ('dawgie.secirity.initialize()')
+    print ('  doing pgp')
     _pgp_initialize (path)
+    print ('  doing tls')
     _tls_initialize (path, myname, myself)
     return
 
