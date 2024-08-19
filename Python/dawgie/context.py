@@ -53,6 +53,7 @@ class CloudProvider(enum.Enum):
     pass
 
 class PortOffset(enum.Enum):
+    certFE = 5
     cloud = 4
     farm = 1
     frontend = 0
@@ -65,6 +66,7 @@ ae_base_package = os.environ.get ('DAWGIE_AE_BASE_PACKAGE', 'ae')
 
 allow_promotion = os.environ.get ('DAWGIE_PROMOTION', 'false').lower() in 'true'
 
+cfe_port = int(os.environ.get ('DAWGIE_CFE_PORT',8080 + PortOffset.certFE.value))
 cloud_data = os.environ.get ('DAWGIE_CLOUD_DATA','apikey@url@SQS_Name@AutoScalingGroupName@ClusterName@TaskDefinition')
 cloud_port = int(os.environ.get ('DAWGIE_CLOUD_PORT',
                                  8080 + PortOffset.cloud.value))
@@ -96,12 +98,18 @@ farm_port = int(os.environ.get ('DAWGIE_FARM_PORT',
 fe_path = '/tmp/' + os.environ.get ('USERNAME', 'unknown') + '/fe'
 fe_port = int(os.environ.get ('DAWGIE_FE_PORT',8080 + PortOffset.frontend.value))
 git_rev = None
-gpg_home = os.environ.get ('GNUPGHOME', '~/.gnupg')
+guest_public_keys = os.environ.get ('DAWGIE_GUEST_PUBLIC_KEYS', '~/.gnupg')
+identity_override = os.environ.get ('DAWGIE_SECURITY_FETCH_IDENTITY',
+                                    'dawgie.security.fetch_identity')
 log_backup = 10
 log_capacity = 100
 log_level = logging.WARN
 log_port = int(os.environ.get('DAWGIE_LOG_PORT', 8080 + PortOffset.log.value))
+sanction_override = os.environ.get ('DAWGIE_SECURITY_IS_SANCTIONED',
+                                    'dawgie.security.is_sanctioned')
 ssl_pem_file = os.environ.get ('DAWGIE_SSL_PEM_FILE', '')
+ssl_pem_myname = os.environ.get ('DAWGIE_SSL_PEM_MYNAME', 'dawgie')
+ssl_pem_myself = os.environ.get ('DAWGIE_SSL_PEM_MYSELF', '')
 worker_backlog = 50
 
 def _rev():
@@ -131,6 +139,8 @@ def add_arguments (ap):
                      help='allow the dawgie to promote state vectors')
     ap.add_argument ('--context-cloud-data', default=cloud_data, required=False,
                      help='data used to communicate with the cloud provider')
+    ap.add_argument ('--context-cfe-port', default=cfe_port, required=False, type=int,
+                     help='the port to the client certified frontend [%(default)s]')
     ap.add_argument ('--context-cloud-port', default=cloud_port, required=False, type=int,
                      help='the port to the cloud foreman [%(default)s]')
     ap.add_argument ('--context-cloud-provider',
@@ -168,8 +178,8 @@ def add_arguments (ap):
                      help='the port to the farm foreman [%(default)s]')
     ap.add_argument ('--context-fe-path', default=fe_path, required=False, type=str,
                      help='AE specific directory for the front-end [%(default)s]')
-    ap.add_argument ('--context-gpg-home', default=gpg_home, required=False,
-                     help='location to find the PGP keys [%(default)s]')
+    ap.add_argument ('--context-guest-public-keys', default=guest_public_keys, required=False,
+                     help='location to find the public keys for all guests [%(default)s]')
     ap.add_argument ('--context-log-backup', default=log_backup, required=False, type=int,
                      help='the number of log files to accumulate in the log directory [%(default)s]')
     ap.add_argument ('--context-log-capacity', default=log_capacity, required=False, type=int,
@@ -180,8 +190,16 @@ def add_arguments (ap):
                      help='email address(es) to send alerts to using a , to separate them when more than one. [%(default)s]')
     ap.add_argument ('--context-email-signature', default=email_signature, required=False,
                      help='Sign e-mail summary reports with this signature. [%(default)s]')
+    ap.add_argument ('--context-security-fetch-identity', default=identity_override, required=False,
+                     help='fetch a meaningful identity from the client certificate [%(default)s]')
+    ap.add_argument ('--context-security-is-sanctioned', default=sanction_override, required=False,
+                     help='determine if a client has access to the endpoint [%(default)s]')
     ap.add_argument ('--context-ssl-pem-file', default=ssl_pem_file, required=False,
                      help='when pointing at an existing file, it will be used to initiate an https service [%(default)s]')
+    ap.add_argument ('--context-ssl-pem-myname', default=ssl_pem_myname, required=False,
+                     help='host name for the "myself" certificate [%(default)s]')
+    ap.add_argument ('--context-ssl-pem-myself', default=ssl_pem_myself, required=False,
+                     help='a private SSL/TLS key and cert to be used for internal communications [%(default)s]')
     ap.add_argument ('--context-worker-backlog', default=worker_backlog,
                      required=False, type=int,
                      help='the number of expected workers that may try to contact the foreman at the same time [%(default)s]')
@@ -249,6 +267,7 @@ def override (args):
     dawgie.context.ae_base_path = args.context_ae_dir
     dawgie.context.ae_base_package = args.context_ae_pkg
     dawgie.context.allow_promotion = args.context_allow_promotion
+    dawgie.context.cfe_port = args.context_cfe_port
     dawgie.context.cloud_data = args.context_cloud_data
     dawgie.context.cloud_port = args.context_cloud_port
     dawgie.context.cloud_provider = CloudProvider[args.context_cloud_provider]
@@ -270,11 +289,15 @@ def override (args):
     dawgie.context.farm_port = args.context_farm_port
     dawgie.context.fe_path = args.context_fe_path
     dawgie.context.git_rev = _rev()
-    dawgie.context.gpg_home = args.context_gpg_home
+    dawgie.context.guest_public_keys = args.context_guest_public_keys
+    dawgie.context.identity_override = args.context_security_fetch_identity
     dawgie.context.log_backup = args.context_log_backup
     dawgie.context.log_capacity = args.context_log_capacity
     dawgie.context.log_port = args.context_log_port
+    dawgie.context.sanction_override = args.context_security_is_sanctioned
     dawgie.context.ssl_pem_file = args.context_ssl_pem_file
+    dawgie.context.ssl_pem_myname = args.context_ssl_pem_myname
+    dawgie.context.ssl_pem_myself = args.context_ssl_pem_myself
     dawgie.context.worker_backlog = args.context_worker_backlog
 
     if not dawgie.context.ae_base_path.endswith (os.path.sep + dawgie.context.ae_base_package.replace ('.', os.path.sep)): raise ValueError(f'context-ae-dir ({0}) does not end with context-ae-pkg ({dawgie.context.ae_base_path,dawgie.context.ae_base_package})')

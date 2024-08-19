@@ -96,9 +96,9 @@ class Hand(twisted.internet.protocol.Protocol):
         self.__incarnation = None
         self.__len = None
         log.debug ('work application submission from %s', str(address))
-        # really is used so pylint: disable=unused-private-member
-        self.__handshake = dawgie.security.TwistedWrapper(self, address)
-        # really is used so pylint: enable=unused-private-member
+        if not dawgie.security.useTLS():
+            # really is used so pylint: disable=unused-private-member
+            self.__handshake = dawgie.security.TwistedWrapper(self, address)
         self.__proceed = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, suc=True)
         self.__wait = dawgie.pl.message.make()
         return
@@ -169,7 +169,8 @@ class Hand(twisted.internet.protocol.Protocol):
         _time[_busy[-1]] = datetime.datetime.now()
         return dawgie.pl.message.send (task, self)
 
-    def notify (self, keep=dawgie.context.fsm.is_pipeline_active()):
+    def notify (self, keep=None):
+        if keep is None: keep = dawgie.context.fsm.is_pipeline_active()
         if not keep:
             dawgie.pl.message.send (self._abort, self)
             self.transport.loseConnection()
@@ -319,8 +320,18 @@ def plow():
         _agency.initialize()
         pass
 
-    twisted.internet.reactor.listenTCP(int(dawgie.context.farm_port),
-                                       Foreman(), dawgie.context.worker_backlog)
+    if dawgie.security.useTLS():
+        controller = dawgie.security.authority().options(
+            dawgie.security.certificate())
+        twisted.internet.reactor.listenSSL(int(dawgie.context.farm_port),
+                                           Foreman(),
+                                           controller,
+                                           dawgie.context.worker_backlog)
+    else:
+        log.critical ('PGP support is deprecated and will be removed')
+        twisted.internet.reactor.listenTCP(int(dawgie.context.farm_port),
+                                           Foreman(),
+                                           dawgie.context.worker_backlog)
     twisted.internet.task.LoopingCall(dispatch).start(5).addErrback (dawgie.pl.LogFailure('dispatching scheduled jobs to workers on the farm', __name__).log)
     return
 

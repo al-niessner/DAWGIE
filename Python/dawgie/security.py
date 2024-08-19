@@ -48,16 +48,21 @@ import argparse
 import datetime
 import getpass
 import gnupg
+import importlib
 import inspect
 import logging; log = logging.getLogger (__name__)
 import os
 import random
 import shutil
 import socket
+import ssl
 import struct
 import tempfile
 import traceback
+import twisted.internet.ssl
 
+_certs = []
+_myself = {}
 _pgp = None
 gpgargname = 'gnupghome' if 'gnupghome' in inspect.signature (gnupg.GPG).parameters else 'homedir'
 
@@ -198,6 +203,15 @@ def _send (s:socket.socket, message:str):
 def connect (address:(str, int))->socket.socket:
     '''connect using PGP handshaking'''
     s = socket.socket()
+
+    if useTLS():
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        context.load_verify_locations(_myself['file'])
+        context.load_cert_chain(_myself['file'])
+        ss = context.wrap_socket (s, server_hostname=_myself['name'])
+        ss.connect(address)
+        return ss
+
     s.connect (address)
     message = ' machine: ' + _my_ip() + '\n'
     message += 'temporal: ' + str (datetime.datetime.utcnow()) + '\n'
@@ -217,7 +231,16 @@ def finalize()->None:
     shutil.rmtree(getattr(_pgp, gpgargname), ignore_errors=True)
     return
 
-def initialize (path:str=None)->None:
+def initialize (path:str=None, myname:str=None, myself:str=None)->None:
+    '''initialie this library with the PGP keyring location and TLS certificates
+
+    Load both PGP and TLS to be backward compatible.
+    '''
+    _pgp_initialize (path)
+    _tls_initialize (path, myname, myself)
+    return
+
+def _pgp_initialize (path:str=None)->None:
     '''initialize this library with the PGP keyring location
 
     An empty or None path indicates that we should ignore PGP key verification.
@@ -244,12 +267,135 @@ def initialize (path:str=None)->None:
             pass
 
         if keys: keys = _pgp.import_keys ('\n'.join (keys))
-        else: raise ValueError('No PGP keys found for secure handshake in ' +
-                               str(path))
+        else: log.warning('No PGP keys found for secure handshake in %s',
+                          str(path))
         pass
     return
 
+def _tls_initialize (path:str=None, myname:str=None, myself:str=None)->None:
+    '''initialize this library with the TLS certificates
+
+    An empty or None path indicates that we should ignore TLS certificates.
+    Rather than have the user maintain a set of certificates, allow anyone and
+    everyone access.
+
+    path   : path to find the PGP keys dawgie.public.pem*
+    myname : the host name in the certificate
+    myself : absolute file path a private certificate PEM that contains the
+             private key and a single certificate.
+    '''
+    _certs.clear()
+    _myself.clear()
+    certs = []
+    if path and os.path.exists (path) and os.path.isdir (path):
+        for fn in filter (lambda fn:fn.startswith ('dawgie.public.pem'),
+                          os.listdir (path)):
+            log.info ('Found public key file: %s', fn)
+            with open (os.path.join (path,fn), 'rt', encoding='utf-8') as file:
+                cert = twisted.internet.ssl.Certificate.loadPEM(file.read())
+                certs.append (cert)
+        # FUTURE: add check if not certs then raise ValueError()
+        if not certs: log.warning('No TLS kes found for secure clients in %s',
+                                  path)
+        _certs.extend(certs)
+    if myself:
+        with open (myself, 'rt', encoding='utf-8') as file: cxt = file.read()
+        prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
+        cxt = cxt[cxt.find('-----BEGIN CERTIFICATE-----'):]
+        cxt = cxt[:cxt.find('-----END CERTIFICATE-----')+25]
+        pub = twisted.internet.ssl.Certificate.loadPEM(cxt)
+        prv.options(pub)
+        _myself.update ({'file':myself, 'name':myname,
+                         'private':prv, 'public':pub})
+    return
+
 def pgp(): return _pgp
+
+def _lookup (fullname:str):
+    name = fullname.split('.')
+    modname = '.'.join(name[:-1])
+    fncname = name[-1]
+    mod = importlib.import_module(modname)
+    return getattr(mod, fncname)
+def authority()->twisted.internet.ssl.PrivateCertificate:
+    return _myself['private']
+def certificate()->twisted.internet.ssl.Certificate.loadPEM:
+    return _myself['public']
+def clients()->[twisted.internet.ssl.Certificate]: return _certs.copy()
+def fetch_identity(cert:twisted.internet.ssl.Certificate):
+    '''fetch a meaningful identity from the certificate
+
+    The defalt case is simple to return the serial number. DAQGIE does not use
+    this value but does pass it down to dawgie.db.view() and then to the AE
+    implementations for StateVector.view(). Therefore, any AE that wants to use
+    this value should override the default case and return something meaningful
+    to itself.
+
+    Empty string is returned if no meaningful identity could be fetched from the
+    given certificate or the certificate is None. In essence, the empty string is
+    the anonymous or blank identity.
+    '''
+    return hex(cert.get_serial_number()) if cert else ''
+def identity(of_cert:twisted.internet.ssl.Certificate):
+    # avoiding circles, pylint: disable=import-outside-toplevel
+    import dawgie.context
+    try:
+        return _lookup(dawgie.context.identity_override)(of_cert)
+    except:  # all exceptions are equal, pylint: disable=bare-except
+        log.exception('Could not translate certificate to any response. '
+                      'Defaulting to anonymous.')
+    return ''
+def is_sanctioned(endpoint:str, cert:twisted.internet.ssl.Certificate)->bool:
+    '''determine if access to the endpoint is sectioned
+
+    endpoint : string representation of the endpoint being evoked
+    cert : the client certificate if there is one - None means anonymous
+
+    Try for simplicity in that if no clients are given, then all endpoints
+    are accessable. Yes, this can be a security leak but that should be resolved
+    when the PGP is removed and no client TLS certs causes an error.
+    '''
+    if clients():
+        all_access = ['/app/db/item',
+                      '/app/db/lockview',
+                      '/app/db/prime',
+                      '/app/db/targets',
+                      '/app/db/versions',
+                      '/app/pl/log',
+                      '/app/pl/state',
+                      '/app/schedule/crew',
+                      '/app/schedule/doing',
+                      '/app/schedule/events',
+                      '/app/schedule/failure',
+                      '/app/schedule/success',
+                      '/app/schedule/tasks',
+                      '/app/schedule/todo',
+                      '/app/search/completion/sv',
+                      '/app/search/completion/tn',
+                      '/app/filter/admin',
+                      '/app/filter/dev',
+                      '/app/filter/user',
+                      '/app/search/ri',
+                      '/app/search/sv',
+                      '/app/search/tn',
+                      '/app/changeset.txt',
+                      '/app/state/status',
+                      '/app/versions']
+        if cert is None and endpoint in all_access: return True
+        if cert is None: return False
+        return True
+    return True
+def sanctioned(endpoint:str, cert:twisted.internet.ssl.Certificate)->bool:
+    # avoiding circles, pylint: disable=import-outside-toplevel
+    import dawgie.context
+    try:
+        return _lookup(dawgie.context.sanction_override)(endpoint, cert)
+    except:  # all exceptions are equal, pylint: disable=bare-except
+        log.exception('Could not determine if endpoint is sanctioned. '
+                      'Defaulting to False.')
+    return False
+def useClientVerification(): return bool(_certs)
+def useTLS(): return bool(_myself)
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(description='When run as a standalone tool, it used to generate keys for DAWGIE users. The public key generated here should be placed in the DAWGIE OPS gpg home directory and the secret key should go the DAWGIE user gpg home directory. In both cases, they should be -rw------- in that directory. If the DAWGIE loses control of private key, the public should be removed from the DAWGIE gpg home directory. The removal of the public key is equivalent to revoking the key.')

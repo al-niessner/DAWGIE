@@ -52,7 +52,7 @@ class Defer(absDefer):
         if changeset[0].lower() != '':
             if not self.__busy:
                 self.__busy = True
-                process = Process(changeset[0], self.clear, self.get_request(),
+                process = Process(changeset[0], self.clear, self.request,
                                   submission[0])
                 process.step_0()
                 return twisted.web.server.NOT_DONE_YET

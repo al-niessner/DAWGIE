@@ -43,13 +43,13 @@ RUN set -ex && \
                  GitPython>=2.1.11 \
                  matplotlib>=2.1.1 \
                  progressbar \
-                 psycopg>3.0.0 \
-                 psycopg-binary>3.0.0 \
+                 'psycopg<3.2.0' \
+                 'psycopg-binary<3.2.0' \
                  pyparsing>=2.4.7 \
                  pyOpenSSL>=19.1.0 \
                  python-gnupg>=0.4.9 \
                  requests>=2.20.0 \
                  service_identity \
                  transitions>=0.6.8 \
-                 twisted>=18.7.0  && \
+                 twisted>=24.3.0  && \
     rm -rf ${HOME}/.cache /tmp/,ci

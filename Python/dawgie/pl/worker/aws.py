@@ -422,9 +422,18 @@ def execute (address:(str,int), inc:int, ps_hint:int, rev:str):
     return
 
 def initialize():
-    twisted.internet.reactor.listenTCP (int(dawgie.context.cloud_port),
-                                        Company(),
-                                        dawgie.context.worker_backlog)
+    if dawgie.security.useTLS():
+        controller = dawgie.security.authority().options(
+            dawgie.security.certificate())
+        twisted.internet.reactor.listenSSL (int(dawgie.context.cloud_port),
+                                            Company(),
+                                            controller,
+                                            dawgie.context.worker_backlog)
+    else:
+        logging.critical ('PGP support is deprecated and will be removed')
+        twisted.internet.reactor.listenTCP (int(dawgie.context.cloud_port),
+                                            Company(),
+                                            dawgie.context.worker_backlog)
     return
 
 def sqs_pop():

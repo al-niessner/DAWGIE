@@ -224,6 +224,10 @@ class FSM:
                     twisted.internet.reactor.listenSSL (dawgie.context.fe_port,
                                                         factory,
                                                         cert.options())
+                    if dawgie.security.clients():
+                        twisted.internet.reactor.listenSSL(
+                            dawgie.context.cfe_port, factory,
+                            cert.options (*dawgie.security.clients()))
                 else:
                     raise FileNotFoundError(dawgie.context.ssl_pem_file)
             else: twisted.internet.reactor.listenTCP (dawgie.context.fe_port,
@@ -316,9 +320,13 @@ class FSM:
         import dawgie.security
 
         if self.__doctest: print ('self._security()')
-        else: dawgie.security.initialize (os.path.expandvars
+        else: dawgie.security.initialize (path=os.path.expandvars
                                           (os.path.expanduser
-                                           (dawgie.context.gpg_home)))
+                                           (dawgie.context.guest_public_keys)),
+                                          myname=dawgie.context.ssl_pem_myname,
+                                          myself=os.path.expandvars
+                                          (os.path.expanduser
+                                           (dawgie.context.ssl_pem_myself)))
         return
 
     def archive (self):
@@ -454,8 +462,8 @@ class FSM:
         if self.__doctest: print ('self.start()')
 
         log.info ('entering state starting')
-        self._gui()
         self._security()
+        self._gui()
         self._logging()
         log.info ('Starting the pipeline')
         dawgie.pl.farm.plow()

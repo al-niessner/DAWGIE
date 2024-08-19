@@ -92,8 +92,8 @@ class Logger(unittest.TestCase):
         return
 
     def test_issue_236(self):
-        self.assertEquals (10, dawgie.util.args.log_level('10'))
-        self.assertEquals (logging.INFO,
-                           dawgie.util.args.log_level('logging.INFO'))
+        self.assertEqual (10, dawgie.util.args.log_level('10'))
+        self.assertEqual (logging.INFO,
+                          dawgie.util.args.log_level('logging.INFO'))
         return
     pass

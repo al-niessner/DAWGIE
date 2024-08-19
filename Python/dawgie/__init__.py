@@ -748,7 +748,7 @@ class StateVector(Version, dict):
     the implementation of the abstract method:
 
     name() -> the unique name of the state vector
-    view() -> use the visitor to convert the content to a nice view
+    view() -> use the visitee to convert the content to a nice view
     '''
     # pylint: disable=unused-argument
     def clear(self): return
@@ -756,7 +756,7 @@ class StateVector(Version, dict):
     def pop(self): return
     def popitem (self,i): return
     def setdefault (self,k,d=None): return
-    def view(self, visitor:'Visitor')->None: raise NotImplementedError()
+    def view(self, caller, visitor:'Visitor')->None: raise NotImplementedError()
     pass
 
 class Task(_Metric):

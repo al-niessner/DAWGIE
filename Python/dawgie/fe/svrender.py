@@ -54,7 +54,7 @@ class Defer(absDefer):
         display = dawgie.de.factory()
         d = twisted.internet.threads.deferToThread(self._db_item,
                                                    display=display, path=path)
-        h = Renderer(display, self.get_request())
+        h = Renderer(display, self.request)
         d.addCallbacks (h.success, h.failure)
         return twisted.web.server.NOT_DONE_YET
     pass

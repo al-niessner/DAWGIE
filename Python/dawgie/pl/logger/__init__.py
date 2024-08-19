@@ -65,8 +65,9 @@ class LogSink(twisted.internet.protocol.Protocol):
         self.__buf = b''
         self.__blen = len (struct.pack ('>L', 0))
         self.__len = None
-        # this is really used so pylint: disable=unused-private-member
-        self.__handshake = dawgie.security.TwistedWrapper(self, address)
+        if not dawgie.security.useTLS():
+            # this is really used so pylint: disable=unused-private-member
+            self.__handshake = dawgie.security.TwistedWrapper(self, address)
         return
 
     def dataReceived (self, data):
@@ -150,6 +151,15 @@ def start(path:str, port:int)->None:
     import dawgie.context
     import dawgie.pl.logger
     dawgie.pl.logger._root = LogSinkFactory(path)
-    twisted.internet.reactor.listenTCP (port, dawgie.pl.logger._root,
-                                        dawgie.context.worker_backlog)
+    if dawgie.security.useTLS():
+        controller = dawgie.security.authority().options(
+            dawgie.security.certificate())
+        twisted.internet.reactor.listenSSL (port, dawgie.pl.logger._root,
+                                            controller,
+                                            dawgie.context.worker_backlog)
+    else:
+        # cannot call logging from here because we are trying to start it
+        print('PGP support is deprecated and will be removed')
+        twisted.internet.reactor.listenTCP (port, dawgie.pl.logger._root,
+                                            dawgie.context.worker_backlog)
     return

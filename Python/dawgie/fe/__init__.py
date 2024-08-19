@@ -39,8 +39,10 @@ NTR:
 
 import dawgie.context
 import dawgie.de
+import dawgie.security
 import enum
 import inspect
+import json
 import logging; log = logging.getLogger(__name__)
 import os
 import twisted.web.resource
@@ -54,9 +56,17 @@ class HttpMethod(enum.Enum):
     pass
 
 class Defer:
-    def __init__(self): self.__request = None
-    def get_request(self): return self.__request
-    def set_request(self, req): self.__request = req
+    def __init__(self):
+        self.identity = None
+        self.request = None
+    @property
+    def identity(self): return self.__identity
+    @identity.setter
+    def identity(self, ident): self.__identity = ident
+    @property
+    def request(self): return self.__request
+    @request.setter
+    def request(self, req): self.__request = req
     pass
 
 class DynamicContent(twisted.web.resource.Resource):
@@ -88,13 +98,23 @@ class DynamicContent(twisted.web.resource.Resource):
     def __render (self, request, method:HttpMethod):
         sig = inspect.signature (self.__fnc)
         kwds = {}
+        if 'getPeerCertificate' in dir(request.transport):
+            cert = request.transport.getPeerCertificate()
+        else: cert = None
+
+        if not dawgie.security.sanctioned(self.__uri, cert):
+            return json.dumps({'alert_status':'error',
+                               'alert_message':f'The endpoint {self.__uri} requires a client certficate to be provided and that certificate be known to this service.'}).encode()
+
         for ak in request.args.keys():
             if ak.decode() in sig.parameters:
                 kwds[ak.decode()] = [a.decode() for a in request.args[ak]]
                 pass
             pass
 
-        if isinstance (self.__fnc, Defer): self.__fnc.set_request (request)
+        if isinstance (self.__fnc, Defer):
+            self.__fnc.identity = dawgie.security.identity(cert)
+            self.__fnc.request = request
         if 0 < self.__methods.count (method): resp = self.__fnc(**kwds)
         else: resp = self.__err (method)
 
@@ -200,7 +220,7 @@ def _static (fn:str,
     return result
 
 _root = RoutePoint('root')
-def root() -> bytes:
+def root() -> RoutePoint:
     _root.putChild (b'', RedirectContent('/pages/index.html'))
     _root.putChild (b'fonts', StaticContent())
     _root.putChild (b'images', StaticContent())

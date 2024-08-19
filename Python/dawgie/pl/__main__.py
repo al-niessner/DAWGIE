@@ -86,6 +86,10 @@ args = ap.parse_args()
 
 if args.port != dawgie.context.fe_port:
     gnew = args.port + dawgie.context.PortOffset.frontend.value
+    args.context_cfe_port = _merge (dawgie.context.fe_port,
+                                    gnew,
+                                    dawgie.context.PortOffset.certFE.value,
+                                    args.context_cfe_port)
     args.context_cloud_port = _merge (dawgie.context.fe_port,
                                       gnew,
                                       dawgie.context.PortOffset.cloud.value,

@@ -34,7 +34,7 @@
 #
 # NTR:
 
-FROM ap:ghrVersion
+FROM ap:apVersion
 ENV DAWGIE_DOCKERIZED_AE_GIT_REVISION='##DAWGIE_DOCKERIZED_AE_GIT_REVISION##' PYTHONPATH='/proj/src'
-RUN pip3 install scipy==1.1.0
+RUN pip3 install scipy
 ENTRYPOINT [ "python3", "-m" ]

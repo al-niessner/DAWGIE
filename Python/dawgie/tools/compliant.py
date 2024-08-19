@@ -181,7 +181,12 @@ def main():
     if args.log_file and args.log_file.startswith ('::') and args.log_file.endswith ('::'):
         host,port,gpghome = args.log_file.split ('::')[1:-1]
         print (args.log_file, host, port, gpghome)
-        dawgie.security.initialize (gpghome)
+        dawgie.security.initialize (path=os.path.expandvars
+                                    (os.path.expanduser(gpghome)),
+                                    myname=dawgie.context.ssl_pem_myname,
+                                    myself=os.path.expandvars
+                                    (os.path.expanduser
+                                     (dawgie.context.ssl_pem_myself)))
         print ('dawgie.security.initialize')
         handler = dawgie.pl.logger.TwistedHandler (host=host, port=int(port))
         print ('dawgie.pl.logger.TwistedHandler')
@@ -595,7 +600,7 @@ def verify (repo:str, silent:bool, verbose:bool, spawn):
            '--ae-pkg={0}'.format (dawgie.context.ae_base_package),
            '--log-file=::{0}::{1}::{2}::'.format (dawgie.context.db_host,
                                                   dawgie.context.log_port,
-                                                  dawgie.context.gpg_home),
+                                                  dawgie.context.guest_public_keys),
            '--log-level={}'.format (dawgie.context.log_level)]
     # pylint: enable=consider-using-f-string
     silent = False
