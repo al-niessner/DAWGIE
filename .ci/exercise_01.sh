@@ -47,7 +47,9 @@ keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
 subjectAltName = @alt_names
 
 [alt_names]
-DNS.1 = exercise.dawgie" > v3.ext
+DNS.1 = exercise.dawgie
+DNS.2 = localhost
+DNS.3 = server_ex" > v3.ext
     # build the certificate
     openssl x509 -req -in device.csr -signkey device.key -out device.crt \
             -sha256 -extfile v3.ext -days 36500 
@@ -127,11 +129,13 @@ EOF
 
         if [[ 4 -eq $inc ]]
         then
-            target=$(curl -k https://localhost:8080/app/db/targets)
-            target=${target:13:${#target}-15}
+            target=$(curl --cacert ${tempdir}/certs/server.pem.public https://localhost:8080/app/db/targets)
             echo "target: $target"
-            curl -k -X POST \
-                 -cert ${tempdir}/certs/guest.pem \
+            target=${target:1:${#target}-13}
+            echo "target: $target"
+            curl -X POST \
+                 --cacert ${tempdir}/certs/server.pem.public \
+                 --cert ${tempdir}/certs/guest.pem \
                  -F tasks=feedback.command \
                  -F tasks=feedback.sensor \
                  -F targets=${target} \
@@ -178,7 +182,7 @@ if v and not all ([9.9 < x < 10.1 for x in v[-3:]]):
     with open ('.ci/status.txt', 'tw') as f: f.write ('failure')
     pass
 EOF
-    rm -rf ${tempdir} ert
+    rm -rf ${tempdir} acert ert
     state=`get_state`
 fi
 
