@@ -94,10 +94,11 @@ then
            -e DAWGIE_SSL_PEM_FILE=/proj/data/certs/server.pem \
            -e DAWGIE_SSL_PEM_MYNAME=exercise.dawgie \
            -e DAWGIE_SSL_PEM_MYSELF=/proj/data/certs/myself.pem \
+           -e MPLCONFIGDIR=/tmp \
            -e USER=$USER --publish 8080-8085:8080-8085 -u $UID \
            --name server_ex --network exer \
            -v ${PWD}/Test:/proj/src -v ${tempdir}:/proj/data \
-           ex dawgie.pl --context-fe-path=/proj/data/fe
+           ex dawgie.pl --context-fe-path=/proj/data/fe -L logging.INFO
     echo "server is booting"
     python3 <<EOF
 import json
@@ -139,7 +140,7 @@ EOF
                  -F tasks=feedback.command \
                  -F tasks=feedback.sensor \
                  -F targets=${target} \
-                 https://localhost:8080/app/run
+                 https://localhost:8085/app/run
             echo ""
         fi
 
