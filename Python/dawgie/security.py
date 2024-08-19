@@ -236,11 +236,12 @@ def initialize (path:str=None, myname:str=None, myself:str=None)->None:
 
     Load both PGP and TLS to be backward compatible.
     '''
-    print ('dawgie.secirity.initialize()')
-    print ('  doing pgp')
+    log.info ('dawgie.secirity.initialize()')
+    log.info ('  doing pgp: %s', path)
     _pgp_initialize (path)
-    print ('  doing tls')
+    log.info ('  doing tls: %s', path)
     _tls_initialize (path, myname, myself)
+    log.info ('  done')
     return
 
 def _pgp_initialize (path:str=None)->None:
@@ -290,14 +291,14 @@ def _tls_initialize (path:str=None, myname:str=None, myself:str=None)->None:
     _certs.clear()
     _myself.clear()
     certs = []
-    print ('path:',path)
-    print ('myname:',myname)
-    print ('myself',myself)
+    log.info ('path: %s',path)
+    log.info ('myname: %s',myname)
+    log.info ('myself %s',myself)
     if path and os.path.exists (path) and os.path.isdir (path):
-        print ('path exists and is dir')
+        log.info ('path exists and is dir')
         for fn in filter (lambda fn:fn.startswith ('dawgie.public.pem'),
                           os.listdir (path)):
-            log.info ('Found public key file: %s', fn)
+            log.error ('Found public key file: %s', fn)
             with open (os.path.join (path,fn), 'rt', encoding='utf-8') as file:
                 cert = twisted.internet.ssl.Certificate.loadPEM(file.read())
                 certs.append (cert)
