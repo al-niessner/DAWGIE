@@ -45,15 +45,17 @@ import twisted.internet.threads
 
 class Defer(absDefer):
     @staticmethod
-    def _db_item (display:dawgie.Visitor, path:str)->None:
+    def _db_item (display:dawgie.Visitor, identity, path:str)->None:
         runid,tn,task,alg,sv = path[0].split ('.')
-        dawgie.db.view (display, int(runid), tn, task, alg, sv)
+        dawgie.db.view (display, identity, int(runid), tn, task, alg, sv)
         return
 
     def __call__ (self, path:str):
         display = dawgie.de.factory()
         d = twisted.internet.threads.deferToThread(self._db_item,
-                                                   display=display, path=path)
+                                                   display=display,
+                                                   identity=self.identity,
+                                                   path=path)
         h = Renderer(display, self.request)
         d.addCallbacks (h.success, h.failure)
         return twisted.web.server.NOT_DONE_YET

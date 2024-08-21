@@ -221,10 +221,11 @@ def versions():
     '''
     return _db_in_use().versions()
 
-def view (visitor, runid, tn, tskn, algn, svn):
+def view (visitor:dawgie.Visitor, cid, runid, tn, tskn, algn, svn):
     '''Given a specific state vector, create a view for it
 
     visitor : instance of dawgie.Visitor
+    cid     : caller ID
     runid   : the run id
     tn      : target name
     tskn    : task name
@@ -286,7 +287,7 @@ def view (visitor, runid, tn, tskn, algn, svn):
 
     if svn == '__metric__' and ds.msv: sv = ds.msv
 
-    try: sv.view (visitor)
+    try: sv.view (cid, visitor)
     except NotImplementedError:
         msg = 'view() is not implemented for the state vector "' + svn + \
               '" within algorithm "' + algn + '" for task "' + tskn + '".'
