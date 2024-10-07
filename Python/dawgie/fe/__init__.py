@@ -103,7 +103,7 @@ class DynamicContent(twisted.web.resource.Resource):
         else: cert = None
 
         if not dawgie.security.sanctioned(self.__uri, cert):
-            return json.dumps({'alert_status':'error',
+            return json.dumps({'alert_status':'danger',
                                'alert_message':f'The endpoint {self.__uri} requires a client certficate to be provided and that certificate be known to this service.'}).encode()
 
         for ak in request.args.keys():

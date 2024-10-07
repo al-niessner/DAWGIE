@@ -95,6 +95,15 @@ def schedule_events():
 def schedule_failure():
     return json.dumps (dawgie.pl.schedule.view_failure()).encode()
 
+def schedule_reset():
+    msg = {'alert_status':'danger',
+           'alert_message':'Could not reset because the FSM is not defined.'}
+    if 'fsm' in dir(dawgie.context):
+        msg = {'alert_status':'success',
+               'alert_message':'Triggered updating then load.'}
+        dawgie.context.fsm.wait_for_nothing()
+    return json.dumps (msg)
+
 def schedule_run (tasks:[str], targets:[str]):
     log.debug ('schedule_run: targets %s', str(targets))
     log.debug ('schedule_run: tasks %s', str(tasks))
@@ -216,6 +225,7 @@ DynamicContent(schedule_crew, '/app/schedule/crew')
 DynamicContent(schedule_doing, '/app/schedule/doing')
 DynamicContent(schedule_events, '/app/schedule/events')
 DynamicContent(schedule_failure, '/app/schedule/failure')
+DynamicContent(schedule_reset, '/app/reset', [HttpMethod.POST])
 DynamicContent(schedule_run, '/app/run', [HttpMethod.POST])
 DynamicContent(schedule_success, '/app/schedule/success')
 DynamicContent(schedule_tasks, '/app/schedule/tasks')
