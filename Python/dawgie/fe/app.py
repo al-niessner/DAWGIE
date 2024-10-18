@@ -102,7 +102,7 @@ def schedule_reset():
         msg = {'alert_status':'success',
                'alert_message':'Triggered updating then load.'}
         dawgie.context.fsm.wait_for_nothing()
-    return json.dumps (msg)
+    return json.dumps (msg).encode()
 
 def schedule_run (tasks:[str], targets:[str]):
     log.debug ('schedule_run: targets %s', str(targets))
