@@ -49,8 +49,10 @@ import sys
 
 from dawgie.db.shelve.enums import Method
 
+
 def mkDir(dst):
     return os.system(f"mkdir -p {dst}")
+
 
 def dbcopy(host, port, dst, method, gateway):
     print(host, port, dst, method, gateway)
@@ -62,45 +64,55 @@ def dbcopy(host, port, dst, method, gateway):
 
     return 0
 
+
 if __name__ == "__main__":
-    root = os.path.dirname (__file__)
-    for i in range(4): root = os.path.join (root, '..')
-    root = os.path.abspath (root)
-    sys.path.append (root)
+    root = os.path.dirname(__file__)
+    for i in range(4):
+        root = os.path.join(root, '..')
+    root = os.path.abspath(root)
+    sys.path.append(root)
 
     import dawgie.db
 
-    unique_fn = '.'.join (['copy', getpass.getuser(), 'log'])
+    unique_fn = '.'.join(['copy', getpass.getuser(), 'log'])
 
-    ap = argparse.ArgumentParser(description='Safely copies database to a specified location. This tool is necessary when creating a database sandbox.\n\nExample:\n    sandbox.py --context-db-copy-path=/tmp/mysandboxdb --context-db-port=9999')
-    ap.add_argument ('-l', '--log-file', default=unique_fn, required=False,
-                     help='a filename to put all of the log messages into [%(default)s]')
-    ap.add_argument ('-L', '--log-level', default=logging.INFO, required=False,
-                     type=dawgie.util.log_level,
-                     help='set the verbosity that you want where a smaller number means more verbose [logging.INFO]')
-    ap.add_argument ('-m', '--method', default=Method.connector, required=False,
-                     help='method to copy database. Options are connector, rsync, scp, cp. Please use connector as a last resort. [%(default)s]')
-    dawgie.context.add_arguments (ap)
-    ap.add_argument ('-g', '--gateway', default=dawgie.context.db_host, required=False,
-                     help='Database source machine. [%(default)s]')
+    ap = argparse.ArgumentParser(
+        description='Safely copies database to a specified location. This tool is necessary when creating a database sandbox.\n\nExample:\n    sandbox.py --context-db-copy-path=/tmp/mysandboxdb --context-db-port=9999'
+    )
+    ap.add_argument('-l', '--log-file', default=unique_fn, required=False, help='a filename to put all of the log messages into [%(default)s]')
+    ap.add_argument(
+        '-L',
+        '--log-level',
+        default=logging.INFO,
+        required=False,
+        type=dawgie.util.log_level,
+        help='set the verbosity that you want where a smaller number means more verbose [logging.INFO]',
+    )
+    ap.add_argument(
+        '-m',
+        '--method',
+        default=Method.connector,
+        required=False,
+        help='method to copy database. Options are connector, rsync, scp, cp. Please use connector as a last resort. [%(default)s]',
+    )
+    dawgie.context.add_arguments(ap)
+    ap.add_argument('-g', '--gateway', default=dawgie.context.db_host, required=False, help='Database source machine. [%(default)s]')
 
     args = ap.parse_args()
-    dawgie.context.override (args)
+    dawgie.context.override(args)
 
-    logging.basicConfig (filename=os.path.join (dawgie.context.data_log,
-                                                args.log_file),
-                         level=args.log_level)
+    logging.basicConfig(filename=os.path.join(dawgie.context.data_log, args.log_file), level=args.log_level)
 
-    if args.method == "connector": args.method = Method.connector
-    elif args.method == "rsync": args.method = Method.rsync
-    elif args.method == "scp": args.method = Method.scp
-    elif args.method == "cp": args.method = Method.cp
+    if args.method == "connector":
+        args.method = Method.connector
+    elif args.method == "rsync":
+        args.method = Method.rsync
+    elif args.method == "scp":
+        args.method = Method.scp
+    elif args.method == "cp":
+        args.method = Method.cp
 
-    returnCode = dbcopy(args.context_db_host,
-                        int(args.context_db_port),
-                        args.context_db_copy_path,
-                        args.method,
-                        args.gateway)
+    returnCode = dbcopy(args.context_db_host, int(args.context_db_port), args.context_db_copy_path, args.method, args.gateway)
     print(returnCode)
     sys.exit(returnCode)
     pass

@@ -40,43 +40,49 @@ import dawgie
 import dawgie.db
 import dawgie.util
 
-def current (factories):
+
+def current(factories):
     '''Get the current version numbers from the software'''
     talg = {}
     tsv = {}
     tv = {}
     for f in factories:
-        bot = f(dawgie.util.task_name (f))
+        bot = f(dawgie.util.task_name(f))
         for alg in bot.list():
-            name = '.'.join ([bot._name(), alg.name()])
-            if name not in talg: talg[name] = alg.asstring()
+            name = '.'.join([bot._name(), alg.name()])
+            if name not in talg:
+                talg[name] = alg.asstring()
 
             for sv in alg.state_vectors():
-                name = '.'.join ([bot._name(), alg.name(), sv.name()])
-                if sv.keys() and name not in tsv: tsv[name] = sv.asstring()
+                name = '.'.join([bot._name(), alg.name(), sv.name()])
+                if sv.keys() and name not in tsv:
+                    tsv[name] = sv.asstring()
 
                 for k in sv.keys():
-                    name = '.'.join ([bot._name(), alg.name(), sv.name(), k])
-                    if name not in tv: tv[name] = sv[k].asstring()
+                    name = '.'.join([bot._name(), alg.name(), sv.name(), k])
+                    if name not in tv:
+                        tv[name] = sv[k].asstring()
                     pass
                 pass
             pass
         pass
     return talg, tsv, tv
 
+
 def persistent():
     '''Get the known versions from the database'''
     return dawgie.db.versions()
 
-def record (task, only=None):
+
+def record(task, only=None):
     '''Record this version of the software'''
-    if isinstance (task, (dawgie.Task, dawgie.Analysis, dawgie.Regress)):
-        for alg in filter (lambda a:only is None or a.name() == only,
-                           task.list()):
-            if not alg.state_vectors(): dawgie.db.update (task, alg,
-                                                          None, None, None)
+    if isinstance(task, (dawgie.Task, dawgie.Analysis, dawgie.Regress)):
+        for alg in filter(lambda a: only is None or a.name() == only, task.list()):
+            if not alg.state_vectors():
+                dawgie.db.update(task, alg, None, None, None)
             for sv in alg.state_vectors():
-                for k,v in sv.items(): dawgie.db.update (task, alg, sv, k, v)
+                for k, v in sv.items():
+                    dawgie.db.update(task, alg, sv, k, v)
                 pass
             pass
         pass

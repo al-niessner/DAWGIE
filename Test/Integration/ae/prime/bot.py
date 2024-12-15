@@ -43,63 +43,77 @@ import numpy.random
 import os
 import tempfile
 
+
 class Actor(dawgie.Analysis):
-    def list(self)->[dawgie.Analyzer]: return [Analyzer()]
+    def list(self) -> [dawgie.Analyzer]:
+        return [Analyzer()]
+
     pass
 
+
 class Agent(dawgie.Task):
-    def list(self)->[dawgie.Task]: return [Engine()]
+    def list(self) -> [dawgie.Task]:
+        return [Engine()]
+
     pass
+
 
 class Analyzer(dawgie.Analyzer):
     def __init__(self):
         dawgie.Analyzer.__init__(self)
-        self._version_ = dawgie.VERSION(1,0,0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         self.__sv = ae.StateVector()
-        self.__sv['z'] = ae.Value (0xffff, 0xffff)
+        self.__sv['z'] = ae.Value(0xFFFF, 0xFFFF)
         return
 
-    def name(self): return 'initializer'
+    def name(self):
+        return 'initializer'
 
     def run(self, aspects):
         # pylint: disable=protected-access
-        fid,tn = tempfile.mkstemp()
-        os.close (fid)
-        os.unlink (tn)
-        dawgie.db.add (tn)
+        fid, tn = tempfile.mkstemp()
+        os.close(fid)
+        os.unlink(tn)
+        dawgie.db.add(tn)
         aspects.ds().update()
         return
 
-    def state_vectors(self): return [self.__sv]
-    def traits(self): return []
+    def state_vectors(self):
+        return [self.__sv]
+
+    def traits(self):
+        return []
+
     pass
+
 
 class Engine(dawgie.Algorithm):
     def __init__(self):
         dawgie.Algorithm.__init__(self)
         self.__initializer = Analyzer()
         self.__sv = ae.StateVector()
-        self.__sv['a'] = ae.Value (1.0, 0)
-        self.__sv['b'] = ae.Value (1.0, 0)
-        self.__sv['c'] = ae.Value (1.0, 0)
-        self.__sv['d'] = ae.Value (1.0, 0)
-        self._version_ = dawgie.VERSION(1,0,0)
+        self.__sv['a'] = ae.Value(1.0, 0)
+        self.__sv['b'] = ae.Value(1.0, 0)
+        self.__sv['c'] = ae.Value(1.0, 0)
+        self.__sv['d'] = ae.Value(1.0, 0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         return
 
-    def name(self): return 'engine'
-    def previous(self):
-        return [dawgie.V_REF(factory=ae.prime.analysis,
-                             impl=self.__initializer,
-                             item=self.__initializer.state_vectors()[0],
-                             feat='z')]
+    def name(self):
+        return 'engine'
 
-    def run (self, ds, ps):
-        self.__sv['a'] = ae.Value (numpy.random.rand(), 0x0001)
-        self.__sv['b'] = ae.Value (numpy.random.rand(), 0x0002)
-        self.__sv['c'] = ae.Value (numpy.random.rand(), 0x0003)
-        self.__sv['d'] = ae.Value (numpy.random.rand(), 0x0004)
+    def previous(self):
+        return [dawgie.V_REF(factory=ae.prime.analysis, impl=self.__initializer, item=self.__initializer.state_vectors()[0], feat='z')]
+
+    def run(self, ds, ps):
+        self.__sv['a'] = ae.Value(numpy.random.rand(), 0x0001)
+        self.__sv['b'] = ae.Value(numpy.random.rand(), 0x0002)
+        self.__sv['c'] = ae.Value(numpy.random.rand(), 0x0003)
+        self.__sv['d'] = ae.Value(numpy.random.rand(), 0x0004)
         ds.update()
         return
 
-    def state_vectors (self): return [self.__sv]
+    def state_vectors(self):
+        return [self.__sv]
+
     pass

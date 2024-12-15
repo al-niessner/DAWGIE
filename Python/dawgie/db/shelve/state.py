@@ -47,22 +47,23 @@ import shelve
 from . import util
 from .enums import Table
 
+
 class DBI:
     '''contains the shelve dictionary-file and tracks their state'''
+
     def __init__(self):
-        if not hasattr (self, '_DBI__tables'):
-            self.__indices = self.__Group(**{n:None for n in self.__names})
+        if not hasattr(self, '_DBI__tables'):
+            self.__indices = self.__Group(**{n: None for n in self.__names})
             self.__reopened = False
-            self.__tables = self.__Group(**{n:None for n in self.__names})
+            self.__tables = self.__Group(**{n: None for n in self.__names})
             self.__task_engine = None
             pass
         return
 
     def __new__(cls):
-        if not hasattr (cls, '_DBI__myself'):
-            cls.__names = [tab.name for tab in sorted (Table,
-                                                       key=lambda e:e.value)]
-            cls.__Group = collections.namedtuple ('Group', cls.__names)
+        if not hasattr(cls, '_DBI__myself'):
+            cls.__names = [tab.name for tab in sorted(Table, key=lambda e: e.value)]
+            cls.__Group = collections.namedtuple('Group', cls.__names)
             cls.__myself = super(DBI, cls).__new__(cls)
             pass
         return cls.__myself
@@ -71,26 +72,26 @@ class DBI:
         '''close all the dictionary-files'''
         self.__reopened = False
         for table in self.__tables:
-            if table is not None: table.close()
+            if table is not None:
+                table.close()
             pass
-        self.__indices = self.__Group(**{n:None for n in self.__names})
+        self.__indices = self.__Group(**{n: None for n in self.__names})
         self.__reopened = False
-        self.__tables = self.__Group(**{n:None for n in self.__names})
+        self.__tables = self.__Group(**{n: None for n in self.__names})
         self.__task_engine = None
         return
 
-    def copy(self)->{}:
-        return {name:dict(table) for name,table in zip(self.__names,
-                                                       self.__tables)}
+    def copy(self) -> {}:
+        return {name: dict(table) for name, table in zip(self.__names, self.__tables)}
 
     def open(self):
         '''open all the dictionary-files'''
         if not self.is_open:
-            db,idx = {},{}
-            path = os.path.join (dawgie.context.db_path, dawgie.context.db_name)
+            db, idx = {}, {}
+            path = os.path.join(dawgie.context.db_path, dawgie.context.db_name)
             for name in self.__names:
-                db[name] = shelve.open ('.'.join ([path, name]),'c')
-                idx[name] = util.indexed (db[name])
+                db[name] = shelve.open('.'.join([path, name]), 'c')
+                idx[name] = util.indexed(db[name])
                 pass
             self.__indices = self.__Group(**idx)
             self.__tables = self.__Group(**db)
@@ -104,28 +105,35 @@ class DBI:
         return self.is_open
 
     @staticmethod
-    def save_as (db:{str:{}}, path:str):
+    def save_as(db: {str: {}}, path: str):
         '''save a shelve db to a new path'''
-        for name,table in db.items():
-            dbt = shelve.open ('.'.join ([path, name]), 'c')
-            dbt.update (table)
+        for name, table in db.items():
+            dbt = shelve.open('.'.join([path, name]), 'c')
+            dbt.update(table)
             dbt.close()
             pass
         return
 
     @property
-    def is_open(self)->bool:
+    def is_open(self) -> bool:
         '''determine if we have access to the database'''
-        return self.__reopened or all (table is not None
-                                       for table in self.__tables)
+        return self.__reopened or all(table is not None for table in self.__tables)
+
     @property
-    def is_reopened(self)->bool:
+    def is_reopened(self) -> bool:
         '''determine if was a reopen or opened locally'''
         return self.__reopened
+
     @property
-    def indices(self): return self.__indices
+    def indices(self):
+        return self.__indices
+
     @property
-    def tables(self): return self.__tables
+    def tables(self):
+        return self.__tables
+
     @property
-    def task_engine(self): return self.__task_engine
+    def task_engine(self):
+        return self.__task_engine
+
     pass

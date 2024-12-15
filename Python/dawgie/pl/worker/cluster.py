@@ -40,73 +40,60 @@ NTR:
 import dawgie
 import dawgie.pl.worker
 import importlib
-import logging; log = logging.getLogger(__name__)
+import logging
+
+log = logging.getLogger(__name__)
 import signal
 
-def _die (signum):
+
+def _die(signum):
     if signum == signal.SIGABRT:
         raise dawgie.AbortAEError('OS signaled an abort')
     return
 
-def execute (address:(str,int), inc:int, ps_hint:int, rev:str):
-    signal.signal (signal.SIGABRT, _die)
-    s = dawgie.security.connect (address)
-    m = dawgie.pl.message.make (typ=dawgie.pl.message.Type.register,
-                                inc=inc,
-                                rev=rev)
-    dawgie.pl.message.send (m, s)
-    m = dawgie.pl.message.make (typ=dawgie.pl.message.Type.wait)
+
+def execute(address: (str, int), inc: int, ps_hint: int, rev: str):
+    signal.signal(signal.SIGABRT, _die)
+    s = dawgie.security.connect(address)
+    m = dawgie.pl.message.make(typ=dawgie.pl.message.Type.register, inc=inc, rev=rev)
+    dawgie.pl.message.send(m, s)
+    m = dawgie.pl.message.make(typ=dawgie.pl.message.Type.wait)
     while m.type == dawgie.pl.message.Type.wait:
-        m = dawgie.pl.message.receive (s)
+        m = dawgie.pl.message.receive(s)
         pass
     s.close()
     ctxt = dawgie.pl.worker.Context(address, rev)
 
     if m.type == dawgie.pl.message.Type.task:
         # pylint: disable=bare-except
-        if m.ps_hint is not None: ps_hint = m.ps_hint
+        if m.ps_hint is not None:
+            ps_hint = m.ps_hint
 
-        dawgie.context.loads (m.context)
+        dawgie.context.loads(m.context)
         dawgie.db.reopen()
-        handler = dawgie.pl.logger.TwistedHandler\
-                  (host=address[0], port=dawgie.context.log_port)
-        logging.basicConfig (handlers=[handler],
-                             level=dawgie.context.log_level)
-        logging.captureWarnings (True)
+        handler = dawgie.pl.logger.TwistedHandler(host=address[0], port=dawgie.context.log_port)
+        logging.basicConfig(handlers=[handler], level=dawgie.context.log_level)
+        logging.captureWarnings(True)
         try:
-            factory = getattr (importlib.import_module (m.factory[0]),
-                               m.factory[1])
-            nv = ctxt.run (factory, ps_hint,
-                           m.jobid, m.runid, m.target, m.timing)
-            m = dawgie.pl.message.make (typ=dawgie.pl.message.Type.response,
-                                        inc=m.target,
-                                        jid=m.jobid,
-                                        rid=m.runid,
-                                        suc=True,
-                                        tim=m.timing,
-                                        val=nv)
+            factory = getattr(importlib.import_module(m.factory[0]), m.factory[1])
+            nv = ctxt.run(factory, ps_hint, m.jobid, m.runid, m.target, m.timing)
+            m = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, inc=m.target, jid=m.jobid, rid=m.runid, suc=True, tim=m.timing, val=nv)
         except (dawgie.NoValidInputDataError, dawgie.NoValidOutputDataError):
-            logging.getLogger(__name__).info ('Job "%s" had invalid data for run id %s and target "%s"',  str(m.jobid), str(m.runid), str(m.target))
-            m = dawgie.pl.message.make (typ=dawgie.pl.message.Type.response,
-                                        inc=m.target,
-                                        jid=m.jobid,
-                                        rid=m.runid,
-                                        suc=None,
-                                        tim=m.timing)
+            logging.getLogger(__name__).info('Job "%s" had invalid data for run id %s and target "%s"', str(m.jobid), str(m.runid), str(m.target))
+            m = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, inc=m.target, jid=m.jobid, rid=m.runid, suc=None, tim=m.timing)
         except:
-            logging.getLogger(__name__).exception ('Job "%s" failed to execute successfully for run id %s and target "%s"', str (m.jobid), str (m.runid), str (m.target))
-            m = dawgie.pl.message.make (typ=dawgie.pl.message.Type.response,
-                                        inc=m.target,
-                                        jid=m.jobid,
-                                        rid=m.runid,
-                                        suc=False,
-                                        tim=m.timing)
+            logging.getLogger(__name__).exception(
+                'Job "%s" failed to execute successfully for run id %s and target "%s"', str(m.jobid), str(m.runid), str(m.target)
+            )
+            m = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, inc=m.target, jid=m.jobid, rid=m.runid, suc=False, tim=m.timing)
         finally:
             dawgie.db.close()
-            s = dawgie.security.connect (address)
-            if not ctxt.abort (): dawgie.pl.message.send (m, s)
+            s = dawgie.security.connect(address)
+            if not ctxt.abort():
+                dawgie.pl.message.send(m, s)
             pass
     elif m.type == dawgie.pl.message.Type.response and not m.success:
         raise ValueError('Not the same software revisions!')
-    else: raise ValueError('Wrong message type: ' + str (m.type))
+    else:
+        raise ValueError('Wrong message type: ' + str(m.type))
     return

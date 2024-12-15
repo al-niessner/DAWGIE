@@ -43,36 +43,42 @@ import bokeh.plotting
 import dawgie
 import numpy
 
+
 class StateVector(dawgie.StateVector):
     def __init__(self):
         dawgie.StateVector.__init__(self)
         self['image'] = Value(None)
-        self._version_ = dawgie.VERSION(1,0,0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         return
 
-    def name(self): return 'test'
+    def name(self):
+        return 'test'
 
-    def view(self, visitor:dawgie.Visitor):
-        fig = bokeh.plotting.figure(title='Current state of the data',
-                                    x_range=[0,self['image'].array().shape[1]],
-                                    y_range=[0,self['image'].array().shape[0]])
-        fig.image (image=[self['image'].array()], x=[0], y=[0],
-                   dw=[self['image'].array().shape[1]],
-                   dn=[self['image'].array().shape[0]],
-                   palette='Greys256')
-        js,div = bokeh.embed.components (fig)
-        visitor.add_declaration (None, div=div, js=js)
+    def view(self, visitor: dawgie.Visitor):
+        fig = bokeh.plotting.figure(title='Current state of the data', x_range=[0, self['image'].array().shape[1]], y_range=[0, self['image'].array().shape[0]])
+        fig.image(image=[self['image'].array()], x=[0], y=[0], dw=[self['image'].array().shape[1]], dn=[self['image'].array().shape[0]], palette='Greys256')
+        js, div = bokeh.embed.components(fig)
+        visitor.add_declaration(None, div=div, js=js)
         return
+
     pass
 
+
 class Value(dawgie.Value):
-    def __init__(self, array:numpy.ndarray=None, uid:int=0):
+    def __init__(self, array: numpy.ndarray = None, uid: int = 0):
         dawgie.Value.__init__(self)
         self.__array = array
         self.__uid = uid
-        self._version_ = dawgie.VERSION(1,0,0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         return
-    def array(self)->numpy.ndarray: return self.__array
-    def features(self): return []
-    def uid(self)->int: return self.__uid
+
+    def array(self) -> numpy.ndarray:
+        return self.__array
+
+    def features(self):
+        return []
+
+    def uid(self) -> int:
+        return self.__uid
+
     pass

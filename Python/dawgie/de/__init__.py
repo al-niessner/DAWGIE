@@ -42,17 +42,22 @@ import dawgie
 import dawgie.context
 import importlib
 
+
 class Type(enum.Enum):
     html = 0
     pass
 
 
-def factory (dt:Type=None) -> dawgie.Visitor:
-    if dt is None: dt = dawgie.context.display
-    if isinstance (dt, Type): dt = dt.name
-    if not isinstance (dt, str): dt = str(dt)
+def factory(dt: Type = None) -> dawgie.Visitor:
+    if dt is None:
+        dt = dawgie.context.display
+    if isinstance(dt, Type):
+        dt = dt.name
+    if not isinstance(dt, str):
+        dt = str(dt)
 
-    if not dt.count ('.'): dt = 'dawgie.de.' + dt
+    if not dt.count('.'):
+        dt = 'dawgie.de.' + dt
 
-    mod = importlib.import_module (dt)
+    mod = importlib.import_module(dt)
     return mod.Visitor()

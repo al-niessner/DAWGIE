@@ -47,41 +47,36 @@ import dawgie.pl.version
 import dawgie.security
 import dawgie.util
 
+
 class Context:
-    def __init__(self, address:(str,int), revision:str):
+    def __init__(self, address: (str, int), revision: str):
         self.__address = address
         self.__revision = revision
         pass
 
-    def _communicate (self, msg):
-        s = dawgie.security.connect (self.__address)
-        dawgie.pl.message.send (msg, s)
-        m = dawgie.pl.message.receive (s)
+    def _communicate(self, msg):
+        s = dawgie.security.connect(self.__address)
+        dawgie.pl.message.send(msg, s)
+        m = dawgie.pl.message.receive(s)
         s.close()
         return m
 
-    def abort (self)->bool:
-        m = self._communicate (dawgie.pl.message.make
-                               (typ=dawgie.pl.message.Type.status,
-                                rev=self.__revision))
+    def abort(self) -> bool:
+        m = self._communicate(dawgie.pl.message.make(typ=dawgie.pl.message.Type.status, rev=self.__revision))
         return m.type == dawgie.pl.message.Type.response and not m.success
 
     # pylint: disable=too-many-arguments
-    def run (self, factory, ps_hint, jobid, runid, target, timing)->[str]:
-        task = (factory (dawgie.util.task_name (factory),
-                         ps_hint,
-                         runid,
-                         target) if runid and target else
-                (factory (dawgie.util.task_name (factory),
-                          ps_hint,
-                          runid) if runid else
-                 factory (dawgie.util.task_name (factory),
-                          ps_hint,
-                          target)))
-        setattr (task, 'abort', self.abort)
-        dawgie.pl.version.record (task, only=jobid.split('.')[1])
+    def run(self, factory, ps_hint, jobid, runid, target, timing) -> [str]:
+        task = (
+            factory(dawgie.util.task_name(factory), ps_hint, runid, target)
+            if runid and target
+            else (factory(dawgie.util.task_name(factory), ps_hint, runid) if runid else factory(dawgie.util.task_name(factory), ps_hint, target))
+        )
+        setattr(task, 'abort', self.abort)
+        dawgie.pl.version.record(task, only=jobid.split('.')[1])
         timing['started'] = datetime.datetime.utcnow()
-        task.do (goto=jobid.split('.')[1])
-        timing.update (task.timing())
+        task.do(goto=jobid.split('.')[1])
+        timing.update(task.timing())
         return task.new_values()
+
     pass

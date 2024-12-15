@@ -44,61 +44,73 @@ import dawgie.context
 import glob
 import os
 
-class LocalVersion (dawgie.Version):
-    def __init__ (self, version):
-        if isinstance (version, str): version = [int(v)
-                                                 for v in version.split('.')]
+
+class LocalVersion(dawgie.Version):
+    def __init__(self, version):
+        if isinstance(version, str):
+            version = [int(v) for v in version.split('.')]
         self._version_ = dawgie.VERSION(*version)
         return
 
     @property
-    def version(self): return self._version_
+    def version(self):
+        return self._version_
+
     pass
 
-def append (name:str, table:{}, index:[],
-            parent:int=None, ver:dawgie.Version=None)->(bool,int,str):
+
+def append(name: str, table: {}, index: [], parent: int = None, ver: dawgie.Version = None) -> (bool, int, str):
     exists = False
-    name = construct (name, parent, ver)
+    name = construct(name, parent, ver)
     if name not in table:
         table[name] = len(index)
-        index.append (name)
+        index.append(name)
         pass
     idx = table[name]
     exists = True
-    return exists,idx,name
+    return exists, idx, name
 
-def construct (name:str, parent:int=None, ver:dawgie.Version=None)->str:
-    if parent is not None: name = str(parent) + ':parent___' + name
-    if ver: name = name + '___version:' + ver.asstring()
+
+def construct(name: str, parent: int = None, ver: dawgie.Version = None) -> str:
+    if parent is not None:
+        name = str(parent) + ':parent___' + name
+    if ver:
+        name = name + '___version:' + ver.asstring()
     return name
 
-def dissect (name:str)->(int,str,dawgie.Version):
+
+def dissect(name: str) -> (int, str, dawgie.Version):
     if ':parent___' in name:
-        parent,name = name.split(':parent___')
+        parent, name = name.split(':parent___')
         parent = int(parent)
-    else: parent = None
+    else:
+        parent = None
 
     if '___version:' in name:
-        name,ver = name.split ('___version:')
+        name, ver = name.split('___version:')
         ver = LocalVersion(ver)
-    else: ver = None
-    return parent,name,ver
+    else:
+        ver = None
+    return parent, name, ver
 
-def indexed (table:{})->[]:
-    return [t[0] for t in sorted (table.items(), key=lambda t:t[1])]
+
+def indexed(table: {}) -> []:
+    return [t[0] for t in sorted(table.items(), key=lambda t: t[1])]
+
 
 def mkStgDir():
     t = datetime.datetime.now()
     # too error prone to fix and probably not much more readable anyway so
     # pylint: disable=consider-using-f-string
-    tString = "%s/%d-%d-%dT%d:%d" % (dawgie.context.data_stg, t.year, t.month,
-                                     t.day, t.hour, t.minute)
+    tString = "%s/%d-%d-%dT%d:%d" % (dawgie.context.data_stg, t.year, t.month, t.day, t.hour, t.minute)
     os.system(f'mkdir {tString}')
     return tString
+
 
 def prime_keys(prime_table):
     # because shelve key must be a string, pylint: disable=eval-used
     return [eval(k) for k in prime_table]
+
 
 def rotated_files(index=None):
     path = dawgie.context.db_rotate_path
@@ -118,7 +130,8 @@ def rotated_files(index=None):
     orig += glob.glob(f"{path}/{index:d}.{dawgie.context.db_name}.value")
     return orig
 
-def subset (from_table:{str:int}, name:str, parents:[int]=None)->{}:
+
+def subset(from_table: {str: int}, name: str, parents: [int] = None) -> {}:
     '''extract a subset of table as a dictionary
 
     It behaves two different ways. If parnets is provided, then it will use
@@ -128,13 +141,11 @@ def subset (from_table:{str:int}, name:str, parents:[int]=None)->{}:
     result = {}
     if parents:
         for parent in parents:
-            surname = construct (name, parent)
-            result.update (dict(filter(lambda t,sn=surname:t[0].startswith (sn),
-                                       from_table.items())))
+            surname = construct(name, parent)
+            result.update(dict(filter(lambda t, sn=surname: t[0].startswith(sn), from_table.items())))
             pass
         pass
     else:
-        result.update (dict(filter(lambda t,sn=name:t[0].startswith (sn),
-                                   from_table.items())))
+        result.update(dict(filter(lambda t, sn=name: t[0].startswith(sn), from_table.items())))
         pass
     return result

@@ -37,36 +37,42 @@ NTR:
 '''
 
 import dawgie
-import logging; log = logging.getLogger (__name__)
+import logging
+
+log = logging.getLogger(__name__)
 import importlib
 import os
 
-def for_factories (ae, pkg):
-    factories = {e:[] for e in dawgie.Factories}
-    for pkg_name in filter (lambda fn:os.path.isdir (os.path.join (ae, fn)) and
-                            fn != '__pycache__', os.listdir (ae)):
-        fp = '.'.join ([pkg, pkg_name])
-        mod = importlib.import_module (fp)
+
+def for_factories(ae, pkg):
+    factories = {e: [] for e in dawgie.Factories}
+    for pkg_name in filter(lambda fn: os.path.isdir(os.path.join(ae, fn)) and fn != '__pycache__', os.listdir(ae)):
+        fp = '.'.join([pkg, pkg_name])
+        mod = importlib.import_module(fp)
         dm = dir(mod)
-        ignore = getattr(mod,'dawgie_ignore') if 'dawgie_ignore' in dm else False
+        ignore = getattr(mod, 'dawgie_ignore') if 'dawgie_ignore' in dm else False
 
         if ignore:
-            log.warning ('Ignoring package: %s', fp)
+            log.warning('Ignoring package: %s', fp)
             continue
 
-        log.info ('Working on module %s', fp)
+        log.info('Working on module %s', fp)
 
         if not any((e.name in dm for e in dawgie.Factories)):
-            log.error ('The directory %s %s %s %s',
-                       os.path.join (ae, pkg_name),
-                       'does not conform to the architecture and design.',
-                       'It must have at least one analysis, events,',
-                       'regression, or task factory. Ignoring the package.')
+            log.error(
+                'The directory %s %s %s %s',
+                os.path.join(ae, pkg_name),
+                'does not conform to the architecture and design.',
+                'It must have at least one analysis, events,',
+                'regression, or task factory. Ignoring the package.',
+            )
             continue
 
         for e in dawgie.Factories:
-            if e.name in dm: factories[e].append (getattr (mod, e.name))
+            if e.name in dm:
+                factories[e].append(getattr(mod, e.name))
             pass
         pass
-    for e in dawgie.Factories: log.info ('%s: %d', e.name, len (factories[e]))
+    for e in dawgie.Factories:
+        log.info('%s: %d', e.name, len(factories[e]))
     return factories

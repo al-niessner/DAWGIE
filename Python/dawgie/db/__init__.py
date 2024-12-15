@@ -52,28 +52,33 @@ import dawgie.context
 import dawgie.util
 import dawgie.util.metrics
 import importlib
-import logging; log = logging.getLogger(__name__)
+import logging
+
+log = logging.getLogger(__name__)
 
 ID = collections.namedtuple('ID', ['name', 'version'])  # version == dawgie.Version implementation
 REF = collections.namedtuple('REF', ['tid', 'aid', 'sid', 'vid'])
 
-METRIC_DATA = collections.namedtuple('METRIC_DATA', ['alg_name','alg_ver','sv',
-                                                     'run_id','target','task'])
+METRIC_DATA = collections.namedtuple('METRIC_DATA', ['alg_name', 'alg_ver', 'sv', 'run_id', 'target', 'task'])
+
 
 def _db_in_use():
     '''Internal function to select which database backend that is in use'''
-    m = importlib.import_module ('dawgie.db.' + dawgie.context.db_impl)
+    m = importlib.import_module('dawgie.db.' + dawgie.context.db_impl)
     return m
 
-def _prime_keys()->[str]:
+
+def _prime_keys() -> [str]:
     '''return all the kyes in the form runid.targetname.task.alg.sv.valname'''
     return _db_in_use()._prime_keys()
 
-def _prime_values()->[str]:
+
+def _prime_values() -> [str]:
     '''return all of the blob names'''
     return _db_in_use()._prime_values()
 
-def add (target_name:str)->bool:
+
+def add(target_name: str) -> bool:
     '''Add a new target to the known list
 
     target_name - the name of the target to add
@@ -81,15 +86,19 @@ def add (target_name:str)->bool:
     return True if the target already exists or was successfully added and
            False otherwise
     '''
-    return _db_in_use().add (target_name)
+    return _db_in_use().add(target_name)
 
-def archive (done): return _db_in_use().archive (done)
+
+def archive(done):
+    return _db_in_use().archive(done)
+
 
 def close():
     '''Close the database'''
     return _db_in_use().close()
 
-def connect (alg, bot, tn)->dawgie.Dataset:
+
+def connect(alg, bot, tn) -> dawgie.Dataset:
     '''Connect an dawgie.Dataset to the database backend
 
     Separates the user from the database implementation.
@@ -98,9 +107,10 @@ def connect (alg, bot, tn)->dawgie.Dataset:
     bot - the instance of dawgie.Task that will be calling alg
     tn  - the target name
     '''
-    return _db_in_use().connect (alg, bot, tn)
+    return _db_in_use().connect(alg, bot, tn)
 
-def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
+
+def consistent(inputs: [REF], outputs: [REF], target_name: str) -> ():
     '''Find self consistent inputs for the output returning base table entry
 
     REF - tid is Analysis/Regress/Task dawgie.db.ID (use None for version)
@@ -117,45 +127,53 @@ def consistent (inputs:[REF], outputs:[REF], target_name:str)->():
             were run given the inputs as it was already done. Returns an empty
             tuple or None if a consistent set of data could not be found.
     '''
-    return _db_in_use().consistent (inputs, outputs, target_name)
+    return _db_in_use().consistent(inputs, outputs, target_name)
 
-def copy (dst, method, gateway):
+
+def copy(dst, method, gateway):
     '''Copy database to destination.'''
     return _db_in_use().copy(dst, method, gateway)
 
-def gather (anz, ans)->dawgie.Aspect:
+
+def gather(anz, ans) -> dawgie.Aspect:
     '''Gather an dawgie.Aspect to the database backend
 
     anz : instance of dawgie.Analyzer that will be using the Aspect
     ans : instance of dawgie.Analysis that creates the anz
     '''
-    return _db_in_use().gather (anz, ans)
+    return _db_in_use().gather(anz, ans)
 
-def metrics()->[METRIC_DATA]:
+
+def metrics() -> [METRIC_DATA]:
     return _db_in_use().metrics()
+
 
 def next():
     '''Return the next run ID'''
     return _db_in_use().next()
 
+
 def open():
     '''Open the database'''
     return _db_in_use().open()
 
-def promote (juncture:(), runid:int):
+
+def promote(juncture: (), runid: int):
     '''Promote the junctures to the given runid
 
     juncture : a list of results from dawgie.db.consistent
 
     retuns the full value names promoted as
     runid.target name.task name.alg name.state vector name.value name'''
-    return _db_in_use().promote (juncture, runid)
+    return _db_in_use().promote(juncture, runid)
 
-def remove(runid:int, tn:str, taskn:str, algn:str, svn:str, vn:str):
+
+def remove(runid: int, tn: str, taskn: str, algn: str, svn: str, vn: str):
     '''Remove the specified key from the primary table'''
-    return _db_in_use().remove (runid, tn, taskn, algn, svn, vn)
+    return _db_in_use().remove(runid, tn, taskn, algn, svn, vn)
 
-def reopen()->bool:
+
+def reopen() -> bool:
     '''open an already open database
 
     Used by modules outside of the pipeline but still wish to access the
@@ -166,7 +184,8 @@ def reopen()->bool:
     '''
     return _db_in_use().reopen()
 
-def reset (runid:int, tn:str, tskn:str, alg:dawgie.Algorithm):
+
+def reset(runid: int, tn: str, tskn: str, alg: dawgie.Algorithm):
     '''Reset the algorithm version
 
     The version of the algorithm may be different than the one recorded for
@@ -179,29 +198,31 @@ def reset (runid:int, tn:str, tskn:str, alg:dawgie.Algorithm):
     Once the objects have the correct versions, the rest of the database calls
     can be used to look up their correct content.
     '''
-    return _db_in_use().reset (runid, tn, tskn, alg)
+    return _db_in_use().reset(runid, tn, tskn, alg)
 
-def retreat (reg, ret)->dawgie.Timeline:
+
+def retreat(reg, ret) -> dawgie.Timeline:
     '''Get a dawgie.Timeline from the database backend
 
     reg : instance of dawgie.Regression that will be using the Timeline
     ret : instance of dawgie.Regress that creates the ret
     '''
-    return _db_in_use().retreat (reg, ret)
+    return _db_in_use().retreat(reg, ret)
 
-def targets (fulllist:bool=False):
-    return list(filter (lambda s:fulllist or not
-                        (s.startswith ('__') and s.endswith ('__')),
-                        _db_in_use().targets()))
 
-def trace (task_alg_names:[str])->{str:{str:int}}:
+def targets(fulllist: bool = False):
+    return list(filter(lambda s: fulllist or not (s.startswith('__') and s.endswith('__')), _db_in_use().targets()))
+
+
+def trace(task_alg_names: [str]) -> {str: {str: int}}:
     '''trace the task_alg_names to find the lastest runid for each target
 
     returns {target_name:{task_alg_name:runid}}
     '''
-    return _db_in_use().trace (task_alg_names)
+    return _db_in_use().trace(task_alg_names)
 
-def update (tsk, alg, sv, vn, v):
+
+def update(tsk, alg, sv, vn, v):
     '''Update the database with version information
 
     updates all elements if current version is not in the database (slow)
@@ -212,7 +233,8 @@ def update (tsk, alg, sv, vn, v):
     vn  - value name
     v   - instance of dawgie.Value
     '''
-    return _db_in_use().update (tsk, alg, sv, vn, v)
+    return _db_in_use().update(tsk, alg, sv, vn, v)
+
 
 def versions():
     '''Collate all of the known versions
@@ -221,7 +243,8 @@ def versions():
     '''
     return _db_in_use().versions()
 
-def view (visitor:dawgie.Visitor, cid, runid, tn, tskn, algn, svn):
+
+def view(visitor: dawgie.Visitor, cid, runid, tn, tskn, algn, svn):
     '''Given a specific state vector, create a view for it
 
     visitor : instance of dawgie.Visitor
@@ -238,64 +261,62 @@ def view (visitor:dawgie.Visitor, cid, runid, tn, tskn, algn, svn):
     import matplotlib
     import matplotlib.pyplot
 
-    path = '.'.join ([str(runid), tn, tskn, algn, svn])
-    visitor.add_declaration ('View of ' + path, title=None)
-    visitor.add_declaration ('Viewing State Vector:', tag='h1')
-    visitor.add_declaration ('Run ID:    ' + str(runid), tag='h3')
-    visitor.add_declaration ('Target:    ' + str(tn), tag='h3')
-    visitor.add_declaration ('Task:      ' + str(tskn), tag='h3')
-    visitor.add_declaration ('Algorithm: ' + str(algn), tag='h3')
-    visitor.add_declaration ('State Vec: ' + str(svn), tag='h3')
+    path = '.'.join([str(runid), tn, tskn, algn, svn])
+    visitor.add_declaration('View of ' + path, title=None)
+    visitor.add_declaration('Viewing State Vector:', tag='h1')
+    visitor.add_declaration('Run ID:    ' + str(runid), tag='h3')
+    visitor.add_declaration('Target:    ' + str(tn), tag='h3')
+    visitor.add_declaration('Task:      ' + str(tskn), tag='h3')
+    visitor.add_declaration('Algorithm: ' + str(algn), tag='h3')
+    visitor.add_declaration('State Vec: ' + str(svn), tag='h3')
     try:
-        mod = importlib.import_module ('.'.join([dawgie.context.ae_base_package,
-                                                 tskn]).replace ('..', '.'))
-        bot = mod.regress (tskn, 1, tn) if runid == 0 else \
-              (mod.analysis (tskn, 1, runid) if tn == '__all__'
-               else mod.task (tskn, 1, runid, tn))
+        mod = importlib.import_module('.'.join([dawgie.context.ae_base_package, tskn]).replace('..', '.'))
+        bot = mod.regress(tskn, 1, tn) if runid == 0 else (mod.analysis(tskn, 1, runid) if tn == '__all__' else mod.task(tskn, 1, runid, tn))
     except ImportError:
         msg = 'Could not create the bot for task "' + tskn + '".'
-        log.error (msg)
-        visitor.add_declaration (msg)
+        log.error(msg)
+        visitor.add_declaration(msg)
         return
 
-    alg = list(filter (lambda x:x.name() == algn, bot.list()))
+    alg = list(filter(lambda x: x.name() == algn, bot.list()))
 
-    if len (alg) == 1: alg = alg[0]
+    if len(alg) == 1:
+        alg = alg[0]
     else:
-        msg = 'Could not find the algorithm "' + algn + \
-              '" for task "' + tskn + '".'
-        log.error (msg)
-        visitor.add_declaration (msg)
+        msg = 'Could not find the algorithm "' + algn + '" for task "' + tskn + '".'
+        log.error(msg)
+        visitor.add_declaration(msg)
         return
 
-    sv = list(filter (lambda x:x.name() == svn, alg.state_vectors()))
+    sv = list(filter(lambda x: x.name() == svn, alg.state_vectors()))
 
-    if len (sv) == 1: sv = sv[0]
+    if len(sv) == 1:
+        sv = sv[0]
     elif svn == '__metric__':
-        sv = dawgie.util.MetricStateVector(dawgie.util.metrics.filled(0),
-                                           dawgie.util.metrics.filled(0))
+        sv = dawgie.util.MetricStateVector(dawgie.util.metrics.filled(0), dawgie.util.metrics.filled(0))
     else:
-        msg = 'Could not find the state vector "' + svn + \
-              '" within algorithm "' + algn + '" for task "' + tskn + '".'
-        log.error (msg)
-        visitor.add_declaration (msg)
+        msg = 'Could not find the state vector "' + svn + '" within algorithm "' + algn + '" for task "' + tskn + '".'
+        log.error(msg)
+        visitor.add_declaration(msg)
         return
 
-    reset (runid, tn, tskn, alg)  # set the alg version
-    ds = connect (alg, bot, tn)
+    reset(runid, tn, tskn, alg)  # set the alg version
+    ds = connect(alg, bot, tn)
     ds.load()
 
-    if svn == '__metric__' and ds.msv: sv = ds.msv
+    if svn == '__metric__' and ds.msv:
+        sv = ds.msv
 
-    try: sv.view (cid, visitor)
+    try:
+        sv.view(cid, visitor)
     except NotImplementedError:
-        msg = 'view() is not implemented for the state vector "' + svn + \
-              '" within algorithm "' + algn + '" for task "' + tskn + '".'
-        log.error (msg)
-        visitor.add_declaration (msg)
+        msg = 'view() is not implemented for the state vector "' + svn + '" within algorithm "' + algn + '" for task "' + tskn + '".'
+        log.error(msg)
+        visitor.add_declaration(msg)
         pass
-    matplotlib.pyplot.close ('all')
+    matplotlib.pyplot.close('all')
     return
+
 
 def view_locks():
     return _db_in_use().view_locks()

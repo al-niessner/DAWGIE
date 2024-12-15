@@ -46,54 +46,56 @@ import tempfile
 import twisted.internet
 import unittest
 
+
 class Logger(unittest.TestCase):
-    def __init__ (self, *args):
+    def __init__(self, *args):
         unittest.TestCase.__init__(self, *args)
-        fid,self.log_path = tempfile.mkstemp()
+        fid, self.log_path = tempfile.mkstemp()
         os.close(fid)
-        with open (self.log_path, 'tw') as file: file.write ('yup\n')
+        with open(self.log_path, 'tw') as file:
+            file.write('yup\n')
         self.aborted = False
         pass
 
-    def _abort (self):
+    def _abort(self):
         self.aborted = True
         self._stop()
         return
 
-    def _log_msg (self):
-        self.mylog.warning ('some text %s', ', more text')
-        twisted.internet.reactor.callLater (1, self._stop)
+    def _log_msg(self):
+        self.mylog.warning('some text %s', ', more text')
+        twisted.internet.reactor.callLater(1, self._stop)
         return
 
-    def _start_logger (self):
-        dawgie.pl.logger.start (self.log_path, dawgie.context.log_port)
-        self.handler = dawgie.pl.logger.TwistedHandler\
-                       (host='localhost', port=dawgie.context.log_port)
-        logging.basicConfig (level=logging.INFO)
-        logging.captureWarnings (True)
-        self.mylog = logging.getLogger (__name__)
-        self.mylog.addHandler (self.handler)
+    def _start_logger(self):
+        dawgie.pl.logger.start(self.log_path, dawgie.context.log_port)
+        self.handler = dawgie.pl.logger.TwistedHandler(host='localhost', port=dawgie.context.log_port)
+        logging.basicConfig(level=logging.INFO)
+        logging.captureWarnings(True)
+        self.mylog = logging.getLogger(__name__)
+        self.mylog.addHandler(self.handler)
         return
 
-    def _stop (self):
+    def _stop(self):
         twisted.internet.reactor.stop()
         return
 
     def test_issue_45(self):
-        twisted.internet.reactor.callLater (0, self._start_logger)
-        twisted.internet.reactor.callLater (1, self._log_msg)
-        twisted.internet.reactor.callLater (11, self._abort)
+        twisted.internet.reactor.callLater(0, self._start_logger)
+        twisted.internet.reactor.callLater(1, self._log_msg)
+        twisted.internet.reactor.callLater(11, self._abort)
         twisted.internet.reactor.run()
-        self.assertFalse (self.aborted)
-        self.assertTrue (os.path.isfile (self.log_path))
-        with open (self.log_path, 'rt') as f: text = f.read()
-        self.assertTrue (text)
-        self.assertLess (text.find ('%s'), 0)
+        self.assertFalse(self.aborted)
+        self.assertTrue(os.path.isfile(self.log_path))
+        with open(self.log_path, 'rt') as f:
+            text = f.read()
+        self.assertTrue(text)
+        self.assertLess(text.find('%s'), 0)
         return
 
     def test_issue_236(self):
-        self.assertEqual (10, dawgie.util.args.log_level('10'))
-        self.assertEqual (logging.INFO,
-                          dawgie.util.args.log_level('logging.INFO'))
+        self.assertEqual(10, dawgie.util.args.log_level('10'))
+        self.assertEqual(logging.INFO, dawgie.util.args.log_level('logging.INFO'))
         return
+
     pass

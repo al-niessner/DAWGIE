@@ -49,37 +49,38 @@ _root = None
 
 # Importing libraries gets complicated so pylint: disable=import-outside-toplevel
 
+
 class LogFilter(logging.Filter):
     # pylint: disable=too-few-public-methods
-    def filter (self, record):
-        return not (record.name == 'gnupg' and
-                    record.levelno < logging.ERROR and not
-                    logging.getLogger().isEnabledFor (logging.DEBUG))
+    def filter(self, record):
+        return not (record.name == 'gnupg' and record.levelno < logging.ERROR and not logging.getLogger().isEnabledFor(logging.DEBUG))
+
     pass
 
+
 class LogSink(twisted.internet.protocol.Protocol):
-    def __init__ (self, actual, address):
+    def __init__(self, actual, address):
         import dawgie.security
 
         self.__actual = actual
         self.__buf = b''
-        self.__blen = len (struct.pack ('>L', 0))
+        self.__blen = len(struct.pack('>L', 0))
         self.__len = None
         if not dawgie.security.useTLS():
             # this is really used so pylint: disable=unused-private-member
             self.__handshake = dawgie.security.TwistedWrapper(self, address)
         return
 
-    def dataReceived (self, data):
+    def dataReceived(self, data):
         self.__buf += data
         length = self.__blen if self.__len is None else self.__len
-        while length <= len (self.__buf):
+        while length <= len(self.__buf):
             if self.__len is None:
-                self.__len = struct.unpack ('>L', self.__buf[:length])[0]
+                self.__len = struct.unpack('>L', self.__buf[:length])[0]
                 self.__buf = self.__buf[length:]
             else:
-                record = pickle.loads (self.__buf[:length])
-                self.__actual.handle (logging.makeLogRecord (record))
+                record = pickle.loads(self.__buf[:length])
+                self.__actual.handle(logging.makeLogRecord(record))
                 self.__actual.flush()
                 self.__buf = self.__buf[length:]
                 self.__len = None
@@ -88,51 +89,60 @@ class LogSink(twisted.internet.protocol.Protocol):
             length = self.__blen if self.__len is None else self.__len
             pass
         return
+
     pass
 
+
 class LogSinkFactory(twisted.internet.protocol.Factory):
-    def __init__ (self, path):
+    def __init__(self, path):
         # pylint: disable=protected-access
         import dawgie.security
 
         twisted.internet.protocol.Factory.__init__(self)
-        self.__actual = logging.handlers.StreamHandler() if path is None else \
-                        logging.handlers.TimedRotatingFileHandler\
-                        (path, backupCount=dawgie.context.log_backup,
-                         when='midnight', utc=True)
-        self.__actual.addFilter (LogFilter('gnupg'))
-        self.__actual.setFormatter(logging.Formatter('%(asctime)s :: ' +
-                                                     '%(name)s :: ' +
-                                                     '%(levelname)s :: ' +
-                                                     '%(message)s'))
+        self.__actual = (
+            logging.handlers.StreamHandler()
+            if path is None
+            else logging.handlers.TimedRotatingFileHandler(path, backupCount=dawgie.context.log_backup, when='midnight', utc=True)
+        )
+        self.__actual.addFilter(LogFilter('gnupg'))
+        self.__actual.setFormatter(logging.Formatter('%(asctime)s :: ' + '%(name)s :: ' + '%(levelname)s :: ' + '%(message)s'))
         self.__host = dawgie.security._my_ip()
         self.__pid = os.getpid()
         return
-    def actual (self): return self.__actual
-    def buildProtocol (self, addr): return LogSink(self.__actual, addr)
-    def isWithinReactor (self):
+
+    def actual(self):
+        return self.__actual
+
+    def buildProtocol(self, addr):
+        return LogSink(self.__actual, addr)
+
+    def isWithinReactor(self):
         import dawgie.security
+
         # pylint: disable=protected-access
-        return self.__host == dawgie.security._my_ip() and \
-               self.__pid == os.getpid()
+        return self.__host == dawgie.security._my_ip() and self.__pid == os.getpid()
+
     pass
 
+
 class TwistedHandler(logging.handlers.SocketHandler):
-    def __init__ (self, *args, **kwds):
+    def __init__(self, *args, **kwds):
         logging.handlers.SocketHandler.__init__(self, *args, **kwds)
         self.__shaking = False
         self.__q = []
         pass
 
-    def emit (self, record):
+    def emit(self, record):
         if _root is not None and _root.isWithinReactor():
-            _root.actual().handle (record)
+            _root.actual().handle(record)
         else:
-            if self.__shaking: self.__q.append (record)
+            if self.__shaking:
+                self.__q.append(record)
             else:
-                for r in self.__q: super().emit (r)
+                for r in self.__q:
+                    super().emit(r)
                 self.__q = []
-                super().emit (record)
+                super().emit(record)
                 pass
             pass
         return
@@ -141,25 +151,24 @@ class TwistedHandler(logging.handlers.SocketHandler):
         import dawgie.security
 
         self.__shaking = True
-        s = dawgie.security.connect (self.address)
+        s = dawgie.security.connect(self.address)
         self.__shaking = False
         return s
+
     pass
 
-def start(path:str, port:int)->None:
+
+def start(path: str, port: int) -> None:
     # pylint: disable=import-self,protected-access
     import dawgie.context
     import dawgie.pl.logger
+
     dawgie.pl.logger._root = LogSinkFactory(path)
     if dawgie.security.useTLS():
-        controller = dawgie.security.authority().options(
-            dawgie.security.certificate())
-        twisted.internet.reactor.listenSSL (port, dawgie.pl.logger._root,
-                                            controller,
-                                            dawgie.context.worker_backlog)
+        controller = dawgie.security.authority().options(dawgie.security.certificate())
+        twisted.internet.reactor.listenSSL(port, dawgie.pl.logger._root, controller, dawgie.context.worker_backlog)
     else:
         # cannot call logging from here because we are trying to start it
         print('PGP support is deprecated and will be removed')
-        twisted.internet.reactor.listenTCP (port, dawgie.pl.logger._root,
-                                            dawgie.context.worker_backlog)
+        twisted.internet.reactor.listenTCP(port, dawgie.pl.logger._root, dawgie.context.worker_backlog)
     return

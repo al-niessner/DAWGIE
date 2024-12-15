@@ -45,9 +45,13 @@ import ae.second.bot
 import dawgie
 import numpy.random
 
+
 class Actor(dawgie.Task):
-    def list(self): return [Engine()]
+    def list(self):
+        return [Engine()]
+
     pass
+
 
 class Engine(dawgie.Algorithm):
     def __init__(self):
@@ -55,31 +59,31 @@ class Engine(dawgie.Algorithm):
         self.__prime = ae.prime.bot.Engine()
         self.__second = ae.second.bot.Engine()
         self.__sv = ae.StateVector()
-        self.__sv['g'] = ae.Value (1.0, 0)
-        self._version_ = dawgie.VERSION(1,0,0)
+        self.__sv['g'] = ae.Value(1.0, 0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         return
 
-    def name(self): return 'engine'
-    def previous(self): return [dawgie.V_REF(factory=ae.prime.task,
-                                             impl=self.__prime,
-                                             item=self.__prime.state_vectors()[0],
-                                             feat='b'),
-                                dawgie.V_REF(factory=ae.prime.task,
-                                             impl=self.__prime,
-                                             item=self.__prime.state_vectors()[0],
-                                             feat='d'),
-                                dawgie.V_REF(factory=ae.second.task,
-                                             impl=self.__second,
-                                             item=self.__second.state_vectors()[0],
-                                             feat='e')]
+    def name(self):
+        return 'engine'
 
-    def run (self, ds, ps):
-        self.__sv['g'] = ae.Value (numpy.random.rand() *
-                                   sum([self.__prime.state_vectors()[0]['b'].value(),
-                                        self.__prime.state_vectors()[0]['d'].value()]) /
-                                   self.__second.state_vectors()[0]['e'].value(), 0x0021)
+    def previous(self):
+        return [
+            dawgie.V_REF(factory=ae.prime.task, impl=self.__prime, item=self.__prime.state_vectors()[0], feat='b'),
+            dawgie.V_REF(factory=ae.prime.task, impl=self.__prime, item=self.__prime.state_vectors()[0], feat='d'),
+            dawgie.V_REF(factory=ae.second.task, impl=self.__second, item=self.__second.state_vectors()[0], feat='e'),
+        ]
+
+    def run(self, ds, ps):
+        self.__sv['g'] = ae.Value(
+            numpy.random.rand()
+            * sum([self.__prime.state_vectors()[0]['b'].value(), self.__prime.state_vectors()[0]['d'].value()])
+            / self.__second.state_vectors()[0]['e'].value(),
+            0x0021,
+        )
         ds.update()
         return
 
-    def state_vectors (self): return [self.__sv]
+    def state_vectors(self):
+        return [self.__sv]
+
     pass

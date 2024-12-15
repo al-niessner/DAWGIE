@@ -42,27 +42,23 @@ import dawgie.tools.compliant
 import os
 import unittest
 
+
 class Compliant(unittest.TestCase):
     def test_ae(self):
-        dawgie.context.ae_base_path = os.path.join (os.path.abspath
-                                                    (os.path.dirname(__file__)),
-                                                    'ae')
+        dawgie.context.ae_base_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'ae')
         dawgie.context.ae_base_package = 'ae'
-        self.assertTrue (dawgie.tools.compliant._verify
-                         (dawgie.tools.compliant._scan(), False, True))
+        self.assertTrue(dawgie.tools.compliant._verify(dawgie.tools.compliant._scan(), False, True))
         return
 
     def test_bae(self):
-        dawgie.context.ae_base_path = os.path.join (os.path.abspath
-                                                    (os.path.dirname(__file__)),
-                                                    'bae')
+        dawgie.context.ae_base_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'bae')
         dawgie.context.ae_base_package = 'bae'
-        self.assertFalse (dawgie.tools.compliant._verify
-                          (dawgie.tools.compliant._scan(), False, True))
+        self.assertFalse(dawgie.tools.compliant._verify(dawgie.tools.compliant._scan(), False, True))
         return
 
     def test_rule_10(self):
-        self.assertTrue (dawgie.tools.compliant.rule_10 ('ae.network'))
-        self.assertFalse (dawgie.tools.compliant.rule_10 ('bae.network'))
+        self.assertTrue(dawgie.tools.compliant.rule_10('ae.network'))
+        self.assertFalse(dawgie.tools.compliant.rule_10('bae.network'))
         return
+
     pass

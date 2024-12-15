@@ -41,15 +41,18 @@ NTR: 49811
 import dawgie.context
 import logging  # needed for eval in log_level so, pylint: disable=unused-import
 
-def log_level (l):
-    """Allow log level to be symbolic or a plain integer
-    """
+
+def log_level(l):
+    """Allow log level to be symbolic or a plain integer"""
     # pylint: disable=bare-except,eval-used
-    try: ll = int(l)
-    except: ll = eval (l)
+    try:
+        ll = int(l)
+    except:
+        ll = eval(l)
     return ll
 
-def set_ports (fe_port:int)->None:
+
+def set_ports(fe_port: int) -> None:
     fep = int(fe_port)
     dawgie.context.cfe_port = fep + dawgie.context.PortOffset.certFE.value
     dawgie.context.cloud_port = fep + dawgie.context.PortOffset.cloud.value

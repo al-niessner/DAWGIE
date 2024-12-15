@@ -43,46 +43,56 @@ import ae
 import ae.disk
 import ae.disk.bot
 import dawgie
-import logging; log = logging.getLogger (__name__)
+import logging
+
+log = logging.getLogger(__name__)
 import numpy
 import scipy.optimize
 
+
 class Actor(dawgie.Task):
-    def list(self): return [Engine()]
+    def list(self):
+        return [Engine()]
+
     pass
+
 
 class Engine(dawgie.Algorithm):
     def __init__(self):
         dawgie.Algorithm.__init__(self)
         self.__base = ae.disk.bot.Engine()
         self.__clean = ae.StateVector()
-        self._version_ = dawgie.VERSION(1,0,0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         return
 
     @staticmethod
-    def _model (p, shape):
-        C,R = numpy.meshgrid (range(shape[1]), range(shape[0]))
-        return numpy.sin (R/p[0] + p[1]) * numpy.cos(C/p[2] + p[3])
+    def _model(p, shape):
+        C, R = numpy.meshgrid(range(shape[1]), range(shape[0]))
+        return numpy.sin(R / p[0] + p[1]) * numpy.cos(C / p[2] + p[3])
 
     @staticmethod
-    def _opt (p, known):
-        return numpy.abs (Engine._model (p, known.shape) - known).sum()
+    def _opt(p, known):
+        return numpy.abs(Engine._model(p, known.shape) - known).sum()
 
-    def name(self): return 'engine'
-    def previous(self): return [dawgie.ALG_REF(factory=ae.disk.task,
-                                               impl=self.__base)]
+    def name(self):
+        return 'engine'
 
-    def run (self, ds, ps):
+    def previous(self):
+        return [dawgie.ALG_REF(factory=ae.disk.task, impl=self.__base)]
+
+    def run(self, ds, ps):
         image = self.__base.sv_as_dict()['test']['image'].array()
         p = [750, 0, 500, 0]
-        res = scipy.optimize.minimize (Engine._opt, p, (image,),
-                                       bounds=[(100, 1000), (-3.2, 3.2),
-                                               (100, 1000), (-3.2, 3.2)])
-        log.critical ('Coefficients: %s', str (res.x))
-        self.__clean['image'] = ae.Value(Engine._model (res.x, image.shape))
+        res = scipy.optimize.minimize(Engine._opt, p, (image,), bounds=[(100, 1000), (-3.2, 3.2), (100, 1000), (-3.2, 3.2)])
+        log.critical('Coefficients: %s', str(res.x))
+        self.__clean['image'] = ae.Value(Engine._model(res.x, image.shape))
         ds.update()
         return
 
-    def state_vectors (self): return [self.__clean]
-    def where(self): return dawgie.Distribution.cloud
+    def state_vectors(self):
+        return [self.__clean]
+
+    def where(self):
+        return dawgie.Distribution.cloud
+
     pass

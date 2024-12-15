@@ -42,18 +42,10 @@ import pickle
 import socket
 import struct
 
-MSG = collections.namedtuple ('MSG', ['context',
-                                      'factory',
-                                      'incarnation',
-                                      'jobid',
-                                      'ps_hint',
-                                      'revision',
-                                      'runid',
-                                      'success',
-                                      'target',
-                                      'timing',
-                                      'type',
-                                      'values'])
+MSG = collections.namedtuple(
+    'MSG', ['context', 'factory', 'incarnation', 'jobid', 'ps_hint', 'revision', 'runid', 'success', 'target', 'timing', 'type', 'values']
+)
+
 
 @enum.unique
 class Type(enum.Enum):
@@ -65,42 +57,57 @@ class Type(enum.Enum):
     wait = 3
     pass
 
+
 # pylint: disable=too-many-arguments
-def make (ctxt:bytes=None,
-          fac=None,
-          inc:int=None,
-          jid:str=None,
-          psh:int=None,
-          rev:str=None,
-          rid:int=None,
-          suc:bool=None,
-          target:str=None,
-          tim:{}=None,
-          typ:Type=Type.wait,
-          val=None)->MSG: return MSG(context=ctxt,
-                                     factory=fac,
-                                     incarnation=inc,
-                                     jobid=jid,
-                                     ps_hint=psh,
-                                     revision=rev,
-                                     runid=rid,
-                                     success=suc,
-                                     target=target,
-                                     timing=tim,
-                                     type=typ,
-                                     values=val)
+def make(
+    ctxt: bytes = None,
+    fac=None,
+    inc: int = None,
+    jid: str = None,
+    psh: int = None,
+    rev: str = None,
+    rid: int = None,
+    suc: bool = None,
+    target: str = None,
+    tim: {} = None,
+    typ: Type = Type.wait,
+    val=None,
+) -> MSG:
+    return MSG(
+        context=ctxt,
+        factory=fac,
+        incarnation=inc,
+        jobid=jid,
+        ps_hint=psh,
+        revision=rev,
+        runid=rid,
+        success=suc,
+        target=target,
+        timing=tim,
+        type=typ,
+        values=val,
+    )
 
-def dumps (m:MSG)->bytes: return pickle.dumps (m, pickle.HIGHEST_PROTOCOL)
-def loads (b:bytes)->MSG: return pickle.loads (b)
 
-def receive (s:socket.socket)->MSG:
+def dumps(m: MSG) -> bytes:
+    return pickle.dumps(m, pickle.HIGHEST_PROTOCOL)
+
+
+def loads(b: bytes) -> MSG:
+    return pickle.loads(b)
+
+
+def receive(s: socket.socket) -> MSG:
     buf = b''
-    while len (buf) < 4: buf += s.recv (4 - len (buf))
-    l = struct.unpack ('>I', buf)[0]
+    while len(buf) < 4:
+        buf += s.recv(4 - len(buf))
+    l = struct.unpack('>I', buf)[0]
     buf = b''
-    while len (buf) < l: buf += s.recv (l - len (buf))
-    return loads (buf)
+    while len(buf) < l:
+        buf += s.recv(l - len(buf))
+    return loads(buf)
 
-def send (m:MSG, s:socket.socket)->None:
-    stream = dumps (m)
-    return s.sendall (struct.pack ('>I', len (stream)) + stream)
+
+def send(m: MSG, s: socket.socket) -> None:
+    stream = dumps(m)
+    return s.sendall(struct.pack('>I', len(stream)) + stream)

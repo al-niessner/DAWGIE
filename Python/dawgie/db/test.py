@@ -41,40 +41,78 @@ NTR: 49811
 
 from dawgie.db import REF
 
-def add (target_name:str)->bool: return False
 
-def archive (done): raise NotImplementedError()
+def add(target_name: str) -> bool:
+    return False
 
-def close(): return
 
-def connect (alg, bot, tn): raise NotImplementedError()
+def archive(done):
+    raise NotImplementedError()
 
-def consistent (inputs:[REF], outputs:[REF], target_name:str)->(): raise NotImplementedError()
 
-def copy (dst, method, gateway): raise NotImplementedError()
+def close():
+    return
 
-def gather (anz, ans): raise NotImplementedError()
 
-def metrics()->'[dawgie.db.METRIC_DATA]': raise NotImplementedError()
+def connect(alg, bot, tn):
+    raise NotImplementedError()
 
-def next(): raise NotImplementedError()
 
-def open(): raise NotImplementedError()
+def consistent(inputs: [REF], outputs: [REF], target_name: str) -> ():
+    raise NotImplementedError()
 
-def promote (juncture:(), runid:int): raise NotImplementedError()
 
-def remove(runid, tn, taskn, algn, svn, vn): raise NotImplementedError()
+def copy(dst, method, gateway):
+    raise NotImplementedError()
 
-def reopen(): raise NotImplementedError()
 
-def retreat (reg, ret): raise NotImplementedError()
+def gather(anz, ans):
+    raise NotImplementedError()
 
-def targets(): return ['a','b','c','d','e','f','g']
 
-def trace (task_alg_names): raise NotImplementedError()
+def metrics() -> '[dawgie.db.METRIC_DATA]':
+    raise NotImplementedError()
 
-def update (tsk, alg, sv, vn, v): raise NotImplementedError()
 
-def versions(): raise NotImplementedError()
+def next():
+    raise NotImplementedError()
 
-def view_locks(): raise NotImplementedError()
+
+def open():
+    raise NotImplementedError()
+
+
+def promote(juncture: (), runid: int):
+    raise NotImplementedError()
+
+
+def remove(runid, tn, taskn, algn, svn, vn):
+    raise NotImplementedError()
+
+
+def reopen():
+    raise NotImplementedError()
+
+
+def retreat(reg, ret):
+    raise NotImplementedError()
+
+
+def targets():
+    return ['a', 'b', 'c', 'd', 'e', 'f', 'g']
+
+
+def trace(task_alg_names):
+    raise NotImplementedError()
+
+
+def update(tsk, alg, sv, vn, v):
+    raise NotImplementedError()
+
+
+def versions():
+    raise NotImplementedError()
+
+
+def view_locks():
+    raise NotImplementedError()

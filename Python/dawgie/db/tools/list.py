@@ -43,73 +43,75 @@ import logging
 import os
 import sys
 
-def info (runid, tn, taskn, algn, svn):
+
+def info(runid, tn, taskn, algn, svn):
     # pylint: disable=protected-access
     dawgie.db.reopen()
-    svl = list ({'.'.join (k.split ('.')[:-1]) for k in dawgie.db._prime_keys()})
+    svl = list({'.'.join(k.split('.')[:-1]) for k in dawgie.db._prime_keys()})
     dawgie.db.close()
     dawgie.security.finalize()
     svl.sort()
     for sv in svl:
-        grunid,gtn,gtaskn,galgn,gsvn = sv.split ('.')
-        if all ([runid is None or runid == int(grunid),
-                 tn is None or tn == gtn,
-                 taskn is None or taskn == gtaskn,
-                 algn is None or algn == galgn,
-                 svn is None or svn == gsvn]): print (sv)
+        grunid, gtn, gtaskn, galgn, gsvn = sv.split('.')
+        if all(
+            [
+                runid is None or runid == int(grunid),
+                tn is None or tn == gtn,
+                taskn is None or taskn == gtaskn,
+                algn is None or algn == galgn,
+                svn is None or svn == gsvn,
+            ]
+        ):
+            print(sv)
         pass
     return
 
+
 if __name__ == '__main__':
     # main blocks always look the same; pylint: disable=duplicate-code
-    root = os.path.dirname (__file__)
-    for i in range(4): root = os.path.join (root, '..')
-    root = os.path.abspath (root)
-    sys.path.append (root)
+    root = os.path.dirname(__file__)
+    for i in range(4):
+        root = os.path.join(root, '..')
+    root = os.path.abspath(root)
+    sys.path.append(root)
 
     import dawgie.context
     import dawgie.db
     import dawgie.util
 
-    unique_fn = '.'.join (['list', getpass.getuser(), 'log'])
-    ap = argparse.ArgumentParser(description='List all available state vectors. Wihtout specifying anything, all state vectors are listed. The user can then further limit the list by adding bits and pieces.')
-    ap.add_argument ('-l', '--log-file', default=unique_fn, required=False,
-                     help='a filename to put all of the log messages into [%(default)s]')
-    ap.add_argument ('-L', '--log-level', default=logging.INFO, required=False,
-                     type=dawgie.util.log_level,
-                     help='set the verbosity that you want where a smaller number means more verbose [logging.INFO]')
-    ap.add_argument ('-r', '--run-id', default=None, required=False, type=int,
-                     help='The run ID to match where -1 means latest [Any]')
-    ap.add_argument ('-T', '--target-name', default=None, required=False, type=str,
-                     help='The target name to match [Any]')
-    ap.add_argument ('-t', '--task-name', default=None, required=False, type=str,
-                     help='The task name to match [Any]')
-    ap.add_argument ('-a', '--alg-name', default=None, required=False, type=str,
-                     help='The algorithm name to match [Any]')
-    ap.add_argument ('-s', '--state-vector-name', default=None, required=False, type=str,
-                     help='The state vector name to match [Any]')
-    dawgie.context.add_arguments (ap)
+    unique_fn = '.'.join(['list', getpass.getuser(), 'log'])
+    ap = argparse.ArgumentParser(
+        description='List all available state vectors. Wihtout specifying anything, all state vectors are listed. The user can then further limit the list by adding bits and pieces.'
+    )
+    ap.add_argument('-l', '--log-file', default=unique_fn, required=False, help='a filename to put all of the log messages into [%(default)s]')
+    ap.add_argument(
+        '-L',
+        '--log-level',
+        default=logging.INFO,
+        required=False,
+        type=dawgie.util.log_level,
+        help='set the verbosity that you want where a smaller number means more verbose [logging.INFO]',
+    )
+    ap.add_argument('-r', '--run-id', default=None, required=False, type=int, help='The run ID to match where -1 means latest [Any]')
+    ap.add_argument('-T', '--target-name', default=None, required=False, type=str, help='The target name to match [Any]')
+    ap.add_argument('-t', '--task-name', default=None, required=False, type=str, help='The task name to match [Any]')
+    ap.add_argument('-a', '--alg-name', default=None, required=False, type=str, help='The algorithm name to match [Any]')
+    ap.add_argument('-s', '--state-vector-name', default=None, required=False, type=str, help='The state vector name to match [Any]')
+    dawgie.context.add_arguments(ap)
     args = ap.parse_args()
-    dawgie.context.override (args)
-    logging.basicConfig (filename=os.path.join (dawgie.context.data_log,
-                                                args.log_file),
-                         level=args.log_level)
+    dawgie.context.override(args)
+    logging.basicConfig(filename=os.path.join(dawgie.context.data_log, args.log_file), level=args.log_level)
 
-    dawgie.security.initialize (path=os.path.expandvars
-                                (os.path.expanduser
-                                 (dawgie.context.guest_public_keys)),
-                                myname=dawgie.context.ssl_pem_myname,
-                                myself=os.path.expandvars
-                                (os.path.expanduser
-                                 (dawgie.context.ssl_pem_myself)))
-    info (args.run_id,
-          args.target_name,
-          args.task_name,
-          args.alg_name,
-          args.state_vector_name)
+    dawgie.security.initialize(
+        path=os.path.expandvars(os.path.expanduser(dawgie.context.guest_public_keys)),
+        myname=dawgie.context.ssl_pem_myname,
+        myself=os.path.expandvars(os.path.expanduser(dawgie.context.ssl_pem_myself)),
+    )
+    info(args.run_id, args.target_name, args.task_name, args.alg_name, args.state_vector_name)
     pass
 else:
     import dawgie.context
     import dawgie.db
     import dawgie.util
+
     pass

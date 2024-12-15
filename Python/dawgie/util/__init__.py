@@ -43,7 +43,7 @@ NTR: 49811
 # large and cumbersome. Moved it to a package with the old implementation
 # broken up into smaller modules. Therefore, pylint: disable=unused-import
 # allow the functions to be mapped to here were the legacy code expects it.
-from .args import log_level,set_ports
-from .metrics import MetricStateVector,MetricValue
-from .names import task_name,verify_name
-from .refs import algref2svref,as_vref,svref2vref,vref_as_name
+from .args import log_level, set_ports
+from .metrics import MetricStateVector, MetricValue
+from .names import task_name, verify_name
+from .refs import algref2svref, as_vref, svref2vref, vref_as_name

@@ -42,55 +42,43 @@ NTR:
 import argparse
 import dawgie.context
 import dawgie.pl.state
+
 dawgie.context.fsm = dawgie.pl.state.FSM()  # needs to be here for aws import
 import dawgie.pl.worker
 import dawgie.pl.worker.aws
 import dawgie.pl.worker.cluster
 import dawgie.security
-import matplotlib; matplotlib.use ('Agg')
+import matplotlib
+
+matplotlib.use('Agg')
 import os
 import sys
 
 ap = argparse.ArgumentParser(description='The main routine to run and individual worker.')
-ap.add_argument ('-a', '--ae-path', required=True, type=str,
-                 help='the path to the AE')
-ap.add_argument ('-b', '--ae-base-package', required=True, type=str,
-                 help='the AE base package like exo.spec.ae')
-ap.add_argument ('-c', '--cloud-provider', choices=['aws', 'cluster'],
-                 default='cluster', required=False,
-                 help='running on which cloud provider [%(default)s]')
-ap.add_argument ('-g', '--gpg-home', default='~/.gnupg', required=False,
-                 help='location to find the PGP keys [%(default)s]')
-ap.add_argument ('-i', '--incarnation', required=True, type=int,
-                 help='Number of times this worker has been asked to start')
-ap.add_argument ('-n', '--hostname', required=True, type=str,
-                 help='farm server hostname')
-ap.add_argument ('-p', '--port', required=True, type=int,
-                 help='farm server port')
-ap.add_argument ('-s', '--pool-size', default=4, required=False, type=int,
-                 help='suggested pool size for those that want to use multiprocessing')
+ap.add_argument('-a', '--ae-path', required=True, type=str, help='the path to the AE')
+ap.add_argument('-b', '--ae-base-package', required=True, type=str, help='the AE base package like exo.spec.ae')
+ap.add_argument('-c', '--cloud-provider', choices=['aws', 'cluster'], default='cluster', required=False, help='running on which cloud provider [%(default)s]')
+ap.add_argument('-g', '--gpg-home', default='~/.gnupg', required=False, help='location to find the PGP keys [%(default)s]')
+ap.add_argument('-i', '--incarnation', required=True, type=int, help='Number of times this worker has been asked to start')
+ap.add_argument('-n', '--hostname', required=True, type=str, help='farm server hostname')
+ap.add_argument('-p', '--port', required=True, type=int, help='farm server port')
+ap.add_argument('-s', '--pool-size', default=4, required=False, type=int, help='suggested pool size for those that want to use multiprocessing')
 args = ap.parse_args()
 dawgie.context.ae_base_path = args.ae_path
 dawgie.context.ae_base_package = args.ae_base_package
 python_path = dawgie.context.ae_base_path
-for junk in dawgie.context.ae_base_package.split ('.'):\
-    python_path = os.path.dirname (python_path)
-sys.path.insert (0, python_path)
-dawgie.security.initialize (path=os.path.expandvars
-                            (os.path.expanduser
-                             (dawgie.context.guest_public_keys)),
-                            myname=dawgie.context.ssl_pem_myname,
-                            myself=os.path.expandvars
-                            (os.path.expanduser(dawgie.context.ssl_pem_myself)))
+for junk in dawgie.context.ae_base_package.split('.'):
+    python_path = os.path.dirname(python_path)
+sys.path.insert(0, python_path)
+dawgie.security.initialize(
+    path=os.path.expandvars(os.path.expanduser(dawgie.context.guest_public_keys)),
+    myname=dawgie.context.ssl_pem_myname,
+    myself=os.path.expandvars(os.path.expanduser(dawgie.context.ssl_pem_myself)),
+)
 try:
-    if args.cloud_provider == 'aws': \
-       dawgie.pl.worker.aws.execute ((args.hostname, args.port),
-                                     args.incarnation,
-                                     args.pool_size,
-                                     dawgie.context._rev())
-    if args.cloud_provider == 'cluster': \
-       dawgie.pl.worker.cluster.execute ((args.hostname, args.port),
-                                         args.incarnation,
-                                         args.pool_size,
-                                         dawgie.context._rev())
-finally: dawgie.security.finalize()
+    if args.cloud_provider == 'aws':
+        dawgie.pl.worker.aws.execute((args.hostname, args.port), args.incarnation, args.pool_size, dawgie.context._rev())
+    if args.cloud_provider == 'cluster':
+        dawgie.pl.worker.cluster.execute((args.hostname, args.port), args.incarnation, args.pool_size, dawgie.context._rev())
+finally:
+    dawgie.security.finalize()

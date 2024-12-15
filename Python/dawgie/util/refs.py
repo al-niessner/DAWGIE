@@ -41,28 +41,32 @@ NTR: 49811
 import dawgie
 import dawgie.util.names
 
-def algref2svref (ref:dawgie.ALG_REF)->[dawgie.SV_REF]:
-    return [dawgie.SV_REF(factory=ref.factory, impl=ref.impl, item=sv)
-            for sv in ref.impl.state_vectors()]
 
-def as_vref (references:[dawgie.ALG_REF, dawgie.SV_REF, dawgie.V_REF]):
+def algref2svref(ref: dawgie.ALG_REF) -> [dawgie.SV_REF]:
+    return [dawgie.SV_REF(factory=ref.factory, impl=ref.impl, item=sv) for sv in ref.impl.state_vectors()]
+
+
+def as_vref(references: [dawgie.ALG_REF, dawgie.SV_REF, dawgie.V_REF]):
     for reference in references:
-        if isinstance (reference, dawgie.V_REF): yield reference
-        if isinstance (reference, dawgie.SV_REF):
-            for vref in svref2vref (reference): yield vref
+        if isinstance(reference, dawgie.V_REF):
+            yield reference
+        if isinstance(reference, dawgie.SV_REF):
+            for vref in svref2vref(reference):
+                yield vref
             pass
-        if isinstance (reference, dawgie.ALG_REF):
-            for svref in algref2svref (reference):
-                for vref in svref2vref (svref): yield vref
+        if isinstance(reference, dawgie.ALG_REF):
+            for svref in algref2svref(reference):
+                for vref in svref2vref(svref):
+                    yield vref
                 pass
             pass
         pass
     return
 
-def svref2vref (ref:dawgie.SV_REF)->[dawgie.V_REF]:
-    return [dawgie.V_REF(factory=ref.factory, impl=ref.impl, item=ref.item,
-                         feat=key) for key in ref.item]
 
-def vref_as_name (vref:dawgie.V_REF)->str:
-    return '.'.join ([dawgie.util.names.task_name (vref.factory),
-                      vref.impl.name(), vref.item.name(), vref.feat])
+def svref2vref(ref: dawgie.SV_REF) -> [dawgie.V_REF]:
+    return [dawgie.V_REF(factory=ref.factory, impl=ref.impl, item=ref.item, feat=key) for key in ref.item]
+
+
+def vref_as_name(vref: dawgie.V_REF) -> str:
+    return '.'.join([dawgie.util.names.task_name(vref.factory), vref.impl.name(), vref.item.name(), vref.feat])

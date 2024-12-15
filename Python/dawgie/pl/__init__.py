@@ -44,38 +44,50 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import logging; log = logging.getLogger(__name__)
+import logging
+
+log = logging.getLogger(__name__)
 import twisted.internet.defer
 import twisted.python.failure
 
+
 class LogFailure:
     # pylint: disable=too-few-public-methods
-    def __init__ (self, label, name):
+    def __init__(self, label, name):
         self.__label = f'co: {name} -- {label}'
         return
 
-    def log (self, err):
-        if isinstance (err, (Exception,twisted.python.failure.Failure)):
-            log.exception (self.__label, exc_info=err)
-        else: log.error (self.__label)
+    def log(self, err):
+        if isinstance(err, (Exception, twisted.python.failure.Failure)):
+            log.exception(self.__label, exc_info=err)
+        else:
+            log.error(self.__label)
         return
+
     pass
+
 
 class DeferWithLogOnError(LogFailure):
-    def __init__ (self, cb, label, name):
-        LogFailure.__init__ (self, label, name)
+    def __init__(self, cb, label, name):
+        LogFailure.__init__(self, label, name)
         self.__cb = cb
         self.__deferred = twisted.internet.defer.Deferred()
-        self.__deferred.addCallback (self.run).addErrback (self.log)
+        self.__deferred.addCallback(self.run).addErrback(self.log)
         return
 
     @property
-    def callback (self): return self.__deferred.callback
-    @property
-    def deferred (self): return self.__deferred
+    def callback(self):
+        return self.__deferred.callback
 
-    def run (self, *_args, **_kwds): return self.__cb()
+    @property
+    def deferred(self):
+        return self.__deferred
+
+    def run(self, *_args, **_kwds):
+        return self.__cb()
+
     pass
 
-def _merge (old:int, new:int, offset:int, req:int):
+
+def _merge(old: int, new: int, offset: int, req: int):
     return req if (old + offset) != req else (new + offset)

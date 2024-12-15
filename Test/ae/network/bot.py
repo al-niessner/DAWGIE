@@ -46,62 +46,80 @@ import os
 import tempfile
 import urllib.request
 
+
 class Actor(dawgie.Analysis):
-    def list(self)->[dawgie.Analyzer]: return [Analyzer()]
+    def list(self) -> [dawgie.Analyzer]:
+        return [Analyzer()]
+
     pass
 
+
 class Agent(dawgie.Task):
-    def list(self)->[dawgie.Task]: return [Engine()]
+    def list(self) -> [dawgie.Task]:
+        return [Engine()]
+
     pass
+
 
 class Analyzer(dawgie.Analyzer):
     def __init__(self):
         dawgie.Analyzer.__init__(self)
         self.__noise = ae.StateVector()
-        self._version_ = dawgie.VERSION(1,0,0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         return
 
-    def name(self): return 'analyzer'
+    def name(self):
+        return 'analyzer'
 
     def run(self, aspects):
         # pylint: disable=protected-access
-        self.__noise['image'] = ae.Value((numpy.random.rand (4000,4000)-.5)*.1)
-        fid,tn = tempfile.mkstemp()
-        os.close (fid)
-        os.unlink (tn)
-        dawgie.db.connect (Engine(), aspects.ds()._bot(), tn).load()
+        self.__noise['image'] = ae.Value((numpy.random.rand(4000, 4000) - 0.5) * 0.1)
+        fid, tn = tempfile.mkstemp()
+        os.close(fid)
+        os.unlink(tn)
+        dawgie.db.connect(Engine(), aspects.ds()._bot(), tn).load()
         aspects.ds().update()
         return
 
-    def state_vectors(self): return [self.__noise]
-    def traits(self): return []
+    def state_vectors(self):
+        return [self.__noise]
+
+    def traits(self):
+        return []
+
     pass
+
 
 class Engine(dawgie.Algorithm):
     def __init__(self):
         dawgie.Algorithm.__init__(self)
         self.__base = Analyzer()
         self.__image = ae.StateVector()
-        self._version_ = dawgie.VERSION(1,0,0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         return
 
-    def name(self): return 'engine'
-    def previous(self): return [dawgie.ALG_REF(factory=ae.network.analysis,
-                                               impl=self.__base)]
+    def name(self):
+        return 'engine'
 
-    def run (self, ds, ps):
+    def previous(self):
+        return [dawgie.ALG_REF(factory=ae.network.analysis, impl=self.__base)]
+
+    def run(self, ds, ps):
         shape = self.__base.sv_as_dict()['test']['image'].array().shape
-        image = numpy.empty (shape)
-        for r in range (shape[0]):
-            for c in range (shape[1]):
-                image[r,c] = numpy.sin(r/700) * numpy.cos(c/500 - numpy.pi/4)
+        image = numpy.empty(shape)
+        for r in range(shape[0]):
+            for c in range(shape[1]):
+                image[r, c] = numpy.sin(r / 700) * numpy.cos(c / 500 - numpy.pi / 4)
                 pass
             pass
         url = "https://github.com/OpenExoplanetCatalogue/oec_gzip/raw/master/systems.xml.gz"
-        with urllib.request.urlopen (url) as link: link.read()
+        with urllib.request.urlopen(url) as link:
+            link.read()
         self.__image['image'] = ae.Value(image)
         ds.update()
         return
 
-    def state_vectors(self): return [self.__image]
+    def state_vectors(self):
+        return [self.__image]
+
     pass

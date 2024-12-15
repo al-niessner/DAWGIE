@@ -36,18 +36,24 @@ POSSIBILITY OF SUCH DAMAGE.
 
 NTR:
 '''
+
 ignore = False  # forces the pipeline to ignore this package (aka task)
 
+
 # pylint: disable=redefined-builtin
-def analysis (prefix, ps_hint:int=0, runid:int=-1):
+def analysis(prefix, ps_hint: int = 0, runid: int = -1):
     import bae.network.bot
+
     return bae.network.bot.Actor(prefix, ps_hint, runid)
+
 
 def events():
     import dawgie
-    return [dawgie.EVENT (dawgie.ALG_REF(None, None),
-                          dawgie.MOMENT(True, True, None, None, None))]
 
-def task (prefix, ps_hint:int=0, runid:int=-1, target:str='__none__'):
+    return [dawgie.EVENT(dawgie.ALG_REF(None, None), dawgie.MOMENT(True, True, None, None, None))]
+
+
+def task(prefix, ps_hint: int = 0, runid: int = -1, target: str = '__none__'):
     import bae.network.bot
+
     return bae.network.bot.Agent(prefix, ps_hint, runid, target)

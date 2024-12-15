@@ -40,10 +40,11 @@ NTR: 49811
 
 import dawgie
 
+
 class MetricStateVector(dawgie.StateVector):
-    def __init__ (self, db:dawgie.METRIC, task:dawgie.METRIC):
+    def __init__(self, db: dawgie.METRIC, task: dawgie.METRIC):
         dawgie.StateVector.__init__(self)
-        self._version_ = dawgie.VERSION(1,1,1)
+        self._version_ = dawgie.VERSION(1, 1, 1)
         self['db_input'] = MetricValue(db.input)
         self['db_memory'] = MetricValue(db.mem)
         self['db_output'] = MetricValue(db.output)
@@ -59,31 +60,39 @@ class MetricStateVector(dawgie.StateVector):
         self['task_user'] = MetricValue(task.user)
         self['task_wall'] = MetricValue(task.wall)
         return
-    def name(self): return '__metric__'
-    def view (self, _caller, visitor:dawgie.Visitor)->None:
-        table = visitor.add_table (['', 'DB', 'Task'],
-                                   rows=len(self)//2, title='Process Metrics')
-        for r,k in enumerate (sorted (filter (lambda k:k.startswith ('db_'),
-                                              self))):
-            k = k.split ('_')[1]
-            table.get_cell (r,0).add_primitive (k)
-            table.get_cell (r,1).add_primitive (self['db_' + k].value())
-            table.get_cell (r,2).add_primitive (self['task_' + k].value())
+
+    def name(self):
+        return '__metric__'
+
+    def view(self, _caller, visitor: dawgie.Visitor) -> None:
+        table = visitor.add_table(['', 'DB', 'Task'], rows=len(self) // 2, title='Process Metrics')
+        for r, k in enumerate(sorted(filter(lambda k: k.startswith('db_'), self))):
+            k = k.split('_')[1]
+            table.get_cell(r, 0).add_primitive(k)
+            table.get_cell(r, 1).add_primitive(self['db_' + k].value())
+            table.get_cell(r, 2).add_primitive(self['task_' + k].value())
             pass
         return
+
     pass
+
 
 class MetricValue(dawgie.Value):
-    def __init__ (self, content=None):
-        dawgie.Value.__init__ (self)
+    def __init__(self, content=None):
+        dawgie.Value.__init__(self)
         self.__content = content
-        self._version_ = dawgie.VERSION(1,1,0)
+        self._version_ = dawgie.VERSION(1, 1, 0)
         return
-    def features(self)->[dawgie.Feature]: return []
-    def value(self): return self.__content
+
+    def features(self) -> [dawgie.Feature]:
+        return []
+
+    def value(self):
+        return self.__content
+
     pass
 
-def filled(value:int=0)->dawgie.METRIC:
+
+def filled(value: int = 0) -> dawgie.METRIC:
     '''create and fill a dawgie.METRIC with given value'''
-    return dawgie.METRIC(input=value, mem=value, output=value, pages=value,
-                         sys=value, user=value, wall=value)
+    return dawgie.METRIC(input=value, mem=value, output=value, pages=value, sys=value, user=value, wall=value)

@@ -38,6 +38,7 @@ NTR:
 
 import enum
 
+
 @enum.unique
 class State(enum.Enum):
     delayed = 0  # delayed until a certain time (periodic task)

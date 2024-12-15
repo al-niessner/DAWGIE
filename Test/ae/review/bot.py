@@ -43,52 +43,66 @@ import ae.network.bot
 import dawgie
 import dawgie.db
 
+
 class Actor(dawgie.Analysis):
-    def list(self)->[dawgie.Analyzer]: return [Analyzer()]
+    def list(self) -> [dawgie.Analyzer]:
+        return [Analyzer()]
+
     pass
 
+
 class Regress(dawgie.Regress):
-    def list(self)->[dawgie.Regression]: return [Regression()]
+    def list(self) -> [dawgie.Regression]:
+        return [Regression()]
+
     pass
+
 
 class Analyzer(dawgie.Analyzer):
     def __init__(self):
         dawgie.Analyzer.__init__(self)
         self.__base = ae.network.bot.Analyzer()
         self.__data = ae.StateVector()
-        self._version_ = dawgie.VERSION(1,0,0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         return
 
-    def name(self): return 'aspect'
+    def name(self):
+        return 'aspect'
 
     def run(self, aspects):
         self.__data['image'] = ae.Value('looks good')
         aspects.ds().update()
         return
 
-    def state_vectors(self): return [self.__data]
-    def traits(self): return [dawgie.SV_REF(factory=ae.network.analysis,
-                                            impl=self.__base,
-                                            item=self.__base.state_vectors()[0])]
+    def state_vectors(self):
+        return [self.__data]
+
+    def traits(self):
+        return [dawgie.SV_REF(factory=ae.network.analysis, impl=self.__base, item=self.__base.state_vectors()[0])]
+
     pass
+
 
 class Regression(dawgie.Regression):
     def __init__(self):
         dawgie.Regression.__init__(self)
         self.__base = ae.network.bot.Analyzer()
         self.__data = ae.StateVector()
-        self._version_ = dawgie.VERSION(1,0,0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         return
 
-    def name(self): return 'history'
-    def variables(self): return [dawgie.SV_REF(factory=ae.network.analysis,
-                                               impl=self.__base,
-                                               item=self.__base.state_vectors()[0])]
+    def name(self):
+        return 'history'
 
-    def run (self, ps, timeline):
+    def variables(self):
+        return [dawgie.SV_REF(factory=ae.network.analysis, impl=self.__base, item=self.__base.state_vectors()[0])]
+
+    def run(self, ps, timeline):
         self.__data['image'] = ae.Value('history is always forgotten')
         timeline.ds().update()
         return
 
-    def state_vectors(self): return [self.__data]
+    def state_vectors(self):
+        return [self.__data]
+
     pass

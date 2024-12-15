@@ -37,17 +37,14 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-def add_arguments (ap):
-    ap.add_argument ('-r', '--run-id', default=None,required=False,type=int,
-                     help='The run ID to match where None means any [%(default)s]')
-    ap.add_argument ('-T', '--target-name', default=None,required=False,type=str,
-                     help='The target name to match where None means any [%(default)s]')
-    ap.add_argument ('-t', '--task-name', default=None,required=False,type=str,
-                     help='The task name to match where None means any [%(default)s]')
-    ap.add_argument ('-a', '--alg-name', default=None,required=False,type=str,
-                     help='The algorithm name to match where None means any [%(default)s]')
-    ap.add_argument ('-s', '--state-vector-name', default=None, required=False,
-                     type=str, help='The state vector name to match where None means any [%(default)s]')
-    ap.add_argument ('-v', '--value-name',default=None,required=False,type=str,
-                     help='The value name to match where None means any [%(default)s]')
+
+def add_arguments(ap):
+    ap.add_argument('-r', '--run-id', default=None, required=False, type=int, help='The run ID to match where None means any [%(default)s]')
+    ap.add_argument('-T', '--target-name', default=None, required=False, type=str, help='The target name to match where None means any [%(default)s]')
+    ap.add_argument('-t', '--task-name', default=None, required=False, type=str, help='The task name to match where None means any [%(default)s]')
+    ap.add_argument('-a', '--alg-name', default=None, required=False, type=str, help='The algorithm name to match where None means any [%(default)s]')
+    ap.add_argument(
+        '-s', '--state-vector-name', default=None, required=False, type=str, help='The state vector name to match where None means any [%(default)s]'
+    )
+    ap.add_argument('-v', '--value-name', default=None, required=False, type=str, help='The value name to match where None means any [%(default)s]')
     return

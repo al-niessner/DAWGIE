@@ -43,21 +43,26 @@ import dawgie.context
 import dawgie.util
 import dawgie.util.fifo
 import enum
-import logging; log = logging.getLogger (__name__)
+import logging
+
+log = logging.getLogger(__name__)
 import os
 import pydot
 import xml.etree.ElementTree
+
 
 class Construct:
     # pylint: disable=too-many-instance-attributes
     def __getitem__(self, key):
         result = []
 
-        if key.count ('.') == 3: result.append (self._flat[key])
+        if key.count('.') == 3:
+            result.append(self._flat[key])
         else:
             key = key + '.'
-            for k,v in self._flat.items():
-                if k.startswith (key): result.append (v)
+            for k, v in self._flat.items():
+                if k.startswith(key):
+                    result.append(v)
                 pass
             pass
         return result
@@ -65,80 +70,69 @@ class Construct:
     def __init__(self, factories):
         self._flat = {}
         self._roots = set()
-        log.info ('Construct() - build aspect tree')
-        self._build_tree (factories[dawgie.Factories.analysis], Shape.rectangle,
-                          self._sub_analysis, 'traits')
-        log.info ('Construct() - build regression tree')
-        self._build_tree (factories[dawgie.Factories.regress], Shape.octagon,
-                          self._sub_regression, 'variables')
-        log.info ('Construct() - build task tree')
-        self._build_tree (factories[dawgie.Factories.task], Shape.ellipse,
-                          self._sub_task, 'previous')
+        log.info('Construct() - build aspect tree')
+        self._build_tree(factories[dawgie.Factories.analysis], Shape.rectangle, self._sub_analysis, 'traits')
+        log.info('Construct() - build regression tree')
+        self._build_tree(factories[dawgie.Factories.regress], Shape.octagon, self._sub_regression, 'variables')
+        log.info('Construct() - build task tree')
+        self._build_tree(factories[dawgie.Factories.task], Shape.ellipse, self._sub_task, 'previous')
         self._feedbacks = {}
         self._feedback()
-        log.info ('Construct() - build parents')
-        self._parents (self._roots, set())
-        log.info ('Construct() - build ancestry')
+        log.info('Construct() - build parents')
+        self._parents(self._roots, set())
+        log.info('Construct() - build ancestry')
         self._ancestry()
-        log.info ('Construct() - trim tree to algorithms')
-        self._at = self._trim_trees (2)
-        log.info ('Construct() - trim tree to state vectors')
-        self._svt = self._trim_trees (3)
-        log.info ('Construct() - trim tree to tasks')
-        self._tt = self._trim_trees (1)
+        log.info('Construct() - trim tree to algorithms')
+        self._at = self._trim_trees(2)
+        log.info('Construct() - trim tree to state vectors')
+        self._svt = self._trim_trees(3)
+        log.info('Construct() - trim tree to tasks')
+        self._tt = self._trim_trees(1)
         self._vt = self._roots
-        log.info ('Construct() - graph algorithm tree')
-        self._av = self.graph (pydot.Dot(graph_type='digraph', rank='same'),
-                               self._at, 'av.svg')
-        log.info ('Construct() - graph state vector tree')
-        self._svv = self.graph (pydot.Dot(graph_type='digraph', rank='same'),
-                                self._svt, 'svt.png')
-        log.info ('Construct() - graph task tree')
-        self._tv = self.graph (pydot.Dot(graph_type='digraph', rank='same'),
-                               self._tt, 'tv.svg')
-        log.info ('Construct() - graph value tree')
-        self._vv = self.graph (pydot.Dot(graph_type='digraph', rank='same'),
-                               self._vt, 'vv.svg')
+        log.info('Construct() - graph algorithm tree')
+        self._av = self.graph(pydot.Dot(graph_type='digraph', rank='same'), self._at, 'av.svg')
+        log.info('Construct() - graph state vector tree')
+        self._svv = self.graph(pydot.Dot(graph_type='digraph', rank='same'), self._svt, 'svt.png')
+        log.info('Construct() - graph task tree')
+        self._tv = self.graph(pydot.Dot(graph_type='digraph', rank='same'), self._tt, 'tv.svg')
+        log.info('Construct() - graph value tree')
+        self._vv = self.graph(pydot.Dot(graph_type='digraph', rank='same'), self._vt, 'vv.svg')
         return
 
-    def _ancestry (self):
-        for name,dct in self._flat.items():
-            heritage = dct.get ('parents').copy()
+    def _ancestry(self):
+        for name, dct in self._flat.items():
+            heritage = dct.get('parents').copy()
             parents = heritage.copy()
             while parents:
                 grands = set()
-                for p in filter (lambda p,n=name: p.tag != n, parents):
-                    heritage.update (self._flat[p.tag].get ('parents'))
-                    grands.update (self._flat[p.tag].get ('parents'))
+                for p in filter(lambda p, n=name: p.tag != n, parents):
+                    heritage.update(self._flat[p.tag].get('parents'))
+                    grands.update(self._flat[p.tag].get('parents'))
                     pass
                 parents = grands
                 pass
-            dct.get ('ancestry').update ([h.tag for h in heritage])
+            dct.get('ancestry').update([h.tag for h in heritage])
             pass
         return
 
-    def _build_tree (self, factories, shape, sub_algs, sub_dep):
+    def _build_tree(self, factories, shape, sub_algs, sub_dep):
         for factory in factories:
-            bot = factory (dawgie.util.task_name (factory), -1)
+            bot = factory(dawgie.util.task_name(factory), -1)
             for alg in bot.list():
                 for sv in alg.state_vectors():
                     for vn in sv:
-                        fn = '.'.join ([bot._name(), alg.name(), sv.name(), vn])
+                        fn = '.'.join([bot._name(), alg.name(), sv.name(), vn])
 
-                        if fn not in self._flat:\
-                           self._flat[fn] = Node(fn,
-                                                 attrib={'alg':alg,
-                                                         'ancestry':set(),
-                                                         'factory':factory,
-                                                         'feedback':set(),
-                                                         'parents':set()})
-                        else: self._flat[fn].set ('factory', factory)
+                        if fn not in self._flat:
+                            self._flat[fn] = Node(fn, attrib={'alg': alg, 'ancestry': set(), 'factory': factory, 'feedback': set(), 'parents': set()})
+                        else:
+                            self._flat[fn].set('factory', factory)
 
-                        if not getattr(alg,sub_dep)():\
-                           self._roots.add (self._flat[fn])
+                        if not getattr(alg, sub_dep)():
+                            self._roots.add(self._flat[fn])
 
-                        self._flat[fn].set ('shape', shape)
-                        sub_algs (alg, fn)
+                        self._flat[fn].set('shape', shape)
+                        sub_algs(alg, fn)
                         pass
                     pass
                 pass
@@ -147,174 +141,189 @@ class Construct:
 
     def _feedback(self):
         for node in self._flat.values():
-            for vref in dawgie.util.as_vref (node.get ('alg').feedback()):
-                fbn = dawgie.util.vref_as_name (vref)
-                node.get ('feedback').add (self._flat[fbn])
+            for vref in dawgie.util.as_vref(node.get('alg').feedback()):
+                fbn = dawgie.util.vref_as_name(vref)
+                node.get('feedback').add(self._flat[fbn])
                 self._feedbacks[fbn] = node.tag
                 pass
             pass
         return
 
-    def _parents (self, nodes:'[Node]', known):
+    def _parents(self, nodes: '[Node]', known):
         for node in nodes:
             children = []
-            known.add (node.tag)
+            known.add(node.tag)
             for child in node:
-                if self.trim (child.tag, 2) != self.trim (node.tag, 2):\
-                   children.append (child)
+                if self.trim(child.tag, 2) != self.trim(node.tag, 2):
+                    children.append(child)
                 pass
-            for child in children: child.get ('parents').add (node)
-            children = list(filter (lambda n,k=known:n.tag not in k, children))
-            self._parents (list(filter (lambda n,k=known:n.tag not in k,
-                                        children)), known)
+            for child in children:
+                child.get('parents').add(node)
+            children = list(filter(lambda n, k=known: n.tag not in k, children))
+            self._parents(list(filter(lambda n, k=known: n.tag not in k, children)), known)
             pass
         return
 
-    def _sub_analysis (self, a, fn):
-        for ref in dawgie.util.as_vref (a.traits()):
-            pf,pi = ref.factory,ref.impl
-            pn = '.'.join ([dawgie.util.task_name (pf), pi.name(),
-                            ref.item.name(), ref.feat])
+    def _sub_analysis(self, a, fn):
+        for ref in dawgie.util.as_vref(a.traits()):
+            pf, pi = ref.factory, ref.impl
+            pn = '.'.join([dawgie.util.task_name(pf), pi.name(), ref.item.name(), ref.feat])
 
-            if pn not in self._flat:\
-               self._flat[pn] = Node(pn, attrib={'alg':pi,
-                                                 'ancestry':set(),
-                                                 'factory':pf,
-                                                 'feedback':set(),
-                                                 'parents':set()})
-            self._flat[pn].add (self._flat[fn])
+            if pn not in self._flat:
+                self._flat[pn] = Node(pn, attrib={'alg': pi, 'ancestry': set(), 'factory': pf, 'feedback': set(), 'parents': set()})
+            self._flat[pn].add(self._flat[fn])
             pass
         return
 
-    def _sub_regression (self, a, fn):
-        for ref in dawgie.util.as_vref (a.variables()):
-            pf,pi, = ref.factory, ref.impl
-            pn = '.'.join ([dawgie.util.task_name (pf), pi.name(),
-                            ref.item.name(), ref.feat])
+    def _sub_regression(self, a, fn):
+        for ref in dawgie.util.as_vref(a.variables()):
+            (
+                pf,
+                pi,
+            ) = (
+                ref.factory,
+                ref.impl,
+            )
+            pn = '.'.join([dawgie.util.task_name(pf), pi.name(), ref.item.name(), ref.feat])
 
-            if pn not in self._flat:\
-               self._flat[pn] = Node(pn, attrib={'alg':pi,
-                                                 'ancestry':set(),
-                                                 'factory':pf,
-                                                 'feedback':set(),
-                                                 'parents':set()})
-            self._flat[pn].add (self._flat[fn])
+            if pn not in self._flat:
+                self._flat[pn] = Node(pn, attrib={'alg': pi, 'ancestry': set(), 'factory': pf, 'feedback': set(), 'parents': set()})
+            self._flat[pn].add(self._flat[fn])
             pass
         return
 
-    def _sub_task (self, a, fn):
-        for ref in dawgie.util.as_vref (a.previous()):
-            pf,pi, = ref.factory, ref.impl
-            pn = '.'.join ([dawgie.util.task_name (pf), pi.name(),
-                            ref.item.name(), ref.feat])
+    def _sub_task(self, a, fn):
+        for ref in dawgie.util.as_vref(a.previous()):
+            (
+                pf,
+                pi,
+            ) = (
+                ref.factory,
+                ref.impl,
+            )
+            pn = '.'.join([dawgie.util.task_name(pf), pi.name(), ref.item.name(), ref.feat])
 
-            if pn not in self._flat:\
-               self._flat[pn] = Node(pn, attrib={'alg':pi,
-                                                 'ancestry':set(),
-                                                 'factory':pf,
-                                                 'feedback':set(),
-                                                 'parents':set()})
-            self._flat[pn].add (self._flat[fn])
+            if pn not in self._flat:
+                self._flat[pn] = Node(pn, attrib={'alg': pi, 'ancestry': set(), 'factory': pf, 'feedback': set(), 'parents': set()})
+            self._flat[pn].add(self._flat[fn])
             pass
         return
 
-    def _trim_trees (self, length):
+    def _trim_trees(self, length):
         result = []
-        trimmed = {Construct.trim (leaf, length) for leaf in self._flat}
-        trimmed = {name:Node(name, attrib={'feedback':set(),
-                                           'shape':Shape.component,
-                                           'visitors':set()})
-                        for name in trimmed}
-        for root in self._roots: result.append (root.trim (trimmed, length))
+        trimmed = {Construct.trim(leaf, length) for leaf in self._flat}
+        trimmed = {name: Node(name, attrib={'feedback': set(), 'shape': Shape.component, 'visitors': set()}) for name in trimmed}
+        for root in self._roots:
+            result.append(root.trim(trimmed, length))
         return result
 
     @property
-    def at(self)->'[Node]': return self._at
-    @property
-    def av(self): return self._av
-    @property
-    def svt(self)->'[Node]': return self._svt
-    @property
-    def svv(self): return self._svv
-    @property
-    def tt(self)->'[Node]': return self._tt
-    @property
-    def tv(self): return self._tv
-    @property
-    def vt(self)->'[Node]': return self._vt
-    @property
-    def vv(self): return self._vv
+    def at(self) -> '[Node]':
+        return self._at
 
     @property
-    def feedbacks(self)->{str:str}: return self._feedbacks
+    def av(self):
+        return self._av
+
+    @property
+    def svt(self) -> '[Node]':
+        return self._svt
+
+    @property
+    def svv(self):
+        return self._svv
+
+    @property
+    def tt(self) -> '[Node]':
+        return self._tt
+
+    @property
+    def tv(self):
+        return self._tv
+
+    @property
+    def vt(self) -> '[Node]':
+        return self._vt
+
+    @property
+    def vv(self):
+        return self._vv
+
+    @property
+    def feedbacks(self) -> {str: str}:
+        return self._feedbacks
 
     @staticmethod
-    def graph (dot:pydot.Dot, roots:set, name:str):
-        for root in roots: root.graph (dot)
-        idir = os.path.abspath (os.path.join (dawgie.context.fe_path,
-                                              'images/svg'))
+    def graph(dot: pydot.Dot, roots: set, name: str):
+        for root in roots:
+            root.graph(dot)
+        idir = os.path.abspath(os.path.join(dawgie.context.fe_path, 'images/svg'))
 
-        if not os.path.isdir (idir): os.makedirs (idir)
+        if not os.path.isdir(idir):
+            os.makedirs(idir)
 
-        fn = os.path.join (idir, name)
-        dot.write_svg (fn)
-        with open (fn, 'rb') as f: data = f.read()
+        fn = os.path.join(idir, name)
+        dot.write_svg(fn)
+        with open(fn, 'rb') as f:
+            data = f.read()
         return data
 
     @staticmethod
-    def trim (tag, length): return '.'.join (tag.split('.')[:length])
+    def trim(tag, length):
+        return '.'.join(tag.split('.')[:length])
 
     pass
 
+
 class Node(xml.etree.ElementTree.Element):
     # pylint: disable=dangerous-default-value,protected-access
-    def __hash__ (self):
+    def __hash__(self):
         return self.tag.__hash__()
 
-    def __pydotify (self):
-        ready = all ((self.tag.find (c) < 0 for c in ['.', '(', ')']))
+    def __pydotify(self):
+        ready = all((self.tag.find(c) < 0 for c in ['.', '(', ')']))
         return self.tag if ready else (f'"{self.tag}"')
 
-    def __pydotnode (self, dot):
+    def __pydotnode(self, dot):
         name = self.__pydotify()
-        if not dot.get_node (name):
-            shape = self.get ('shape')
+        if not dot.get_node(name):
+            shape = self.get('shape')
             shape = shape.name if shape else 'diamond'
-            dot.add_node (pydot.Node(name,
-                                     id=name.replace ('.', '_'),
-                                     shape=shape))
+            dot.add_node(pydot.Node(name, id=name.replace('.', '_'), shape=shape))
             pass
-        return dot.get_node (name)[0]
+        return dot.get_node(name)[0]
 
-    def _reset (self):
-        if self.get ('been_here', True):
-            self.set ('been_here', False)
-            for c in self: c._reset()
+    def _reset(self):
+        if self.get('been_here', True):
+            self.set('been_here', False)
+            for c in self:
+                c._reset()
             pass
         pass
 
-    def add (self, item):
+    def add(self, item):
         names = [c.tag for c in self]
-        if item.tag not in names: self.append (item)
+        if item.tag not in names:
+            self.append(item)
         return
 
-    def graph (self, dot, level=0, cycle=False):
-        if cycle or not self.get ('been_here', False):
-            self.set ('been_here', True)
-            cl = self.get ('level')
-            self.set ('level', max (level, 0 if cl is None else cl))
-            src = self.__pydotnode (dot)
+    def graph(self, dot, level=0, cycle=False):
+        if cycle or not self.get('been_here', False):
+            self.set('been_here', True)
+            cl = self.get('level')
+            self.set('level', max(level, 0 if cl is None else cl))
+            src = self.__pydotnode(dot)
             for c in self:
-                dst = c.__pydotnode (dot)
-                if not dot.get_edge (self.__pydotify(), c.__pydotify()):
-                    dot.add_edge (pydot.Edge(src, dst))
+                dst = c.__pydotnode(dot)
+                if not dot.get_edge(self.__pydotify(), c.__pydotify()):
+                    dot.add_edge(pydot.Edge(src, dst))
                     pass
-                c.graph (dot, level + 1, cycle)
+                c.graph(dot, level + 1, cycle)
                 pass
-            for f in self.get ('feedback'):
-                dst = f.__pydotnode (dot)
-                if not dot.get_edge (f.__pydotify(), self.__pydotify()):
-                    dot.add_edge (pydot.Edge(dst, src, style='dashed'))
+            for f in self.get('feedback'):
+                dst = f.__pydotnode(dot)
+                if not dot.get_edge(f.__pydotify(), self.__pydotify()):
+                    dot.add_edge(pydot.Edge(dst, src, style='dashed'))
                     pass
                 pass
             pass
@@ -335,52 +344,56 @@ class Node(xml.etree.ElementTree.Element):
         Return an iterator containing all the matching elements.
 
         """
-        if tag == "*": tag = None
-        if tag is None or self.tag == tag: yield self
-        for e in filter (lambda c,me=self.tag:c.tag != me, self):
+        if tag == "*":
+            tag = None
+        if tag is None or self.tag == tag:
+            yield self
+        for e in filter(lambda c, me=self.tag: c.tag != me, self):
             yield from e.iter(tag)
             pass
         return
 
-    def locate (self, name):
+    def locate(self, name):
         result = [self] if name == self.tag else []
-        for child in filter (lambda c,n=self.tag: c.tag != n, self):
-            result.extend (child.locate (name))
+        for child in filter(lambda c, n=self.tag: c.tag != n, self):
+            result.extend(child.locate(name))
         return result
 
-    def trim (self, known, length):
-        short_name = Construct.trim (self.tag, length)
+    def trim(self, known, length):
+        short_name = Construct.trim(self.tag, length)
         short_node = known[short_name]
 
-        if 1 < length: short_node.set ('shape', self.get ('shape'))
-        if length == 2 and not short_node.get ('alg'):
-            short_node.set ('alg', self.get ('alg'))
-            short_node.set ('do', set())
-            short_node.set ('doing', set())
-            short_node.set ('factory', self.get ('factory'))
-            short_node.set ('status', State.initial)
-            short_node.set ('todo', dawgie.util.fifo.Unique())
+        if 1 < length:
+            short_node.set('shape', self.get('shape'))
+        if length == 2 and not short_node.get('alg'):
+            short_node.set('alg', self.get('alg'))
+            short_node.set('do', set())
+            short_node.set('doing', set())
+            short_node.set('factory', self.get('factory'))
+            short_node.set('status', State.initial)
+            short_node.set('todo', dawgie.util.fifo.Unique())
             pass
         if length == 2:
-            aset = short_node.get ('ancestry')
+            aset = short_node.get('ancestry')
             aset = aset if aset else set()
-            aset.update ([Construct.trim (a, length)
-                          for a in self.get ('ancestry')])
-            short_node.set ('ancestry', aset)
-            aset = short_node.get ('parents')
+            aset.update([Construct.trim(a, length) for a in self.get('ancestry')])
+            short_node.set('ancestry', aset)
+            aset = short_node.get('parents')
             aset = aset if aset else set()
-            aset.update ([known[Construct.trim (p.tag, length)]
-                          for p in self.get ('parents')])
-            short_node.set ('parents', aset)
+            aset.update([known[Construct.trim(p.tag, length)] for p in self.get('parents')])
+            short_node.set('parents', aset)
             pass
-        if self.tag not in short_node.get ('visitors'):
-            short_node.get ('visitors').add (self.tag)
-            for f in self.get ('feedback'):\
-                short_node.get ('feedback').add (f.trim (known, length))
-            for c in self: short_node.add (c.trim (known, length))
+        if self.tag not in short_node.get('visitors'):
+            short_node.get('visitors').add(self.tag)
+            for f in self.get('feedback'):
+                short_node.get('feedback').add(f.trim(known, length))
+            for c in self:
+                short_node.add(c.trim(known, length))
             pass
         return short_node
+
     pass
+
 
 @enum.unique
 class Shape(enum.Enum):
