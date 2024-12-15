@@ -2,7 +2,8 @@ name: Continuous Integration
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
-  Initialize-Environmen:
+  Initialize-Environment:
+    name: Initialize Environment
     runs-on: ubuntu-24.04
     outputs:
       RUNNER: ${{ runner.name }}
