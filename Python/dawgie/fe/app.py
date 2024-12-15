@@ -95,14 +95,16 @@ def schedule_events():
 def schedule_failure():
     return json.dumps (dawgie.pl.schedule.view_failure()).encode()
 
-def schedule_reset():
+def schedule_reset(archive:str='false'):
+    archive = archive.lower() in ['true','tru','tr','t','1','y','ye','yes','on']
     msg = {'alert_status':'danger',
            'alert_message':'Could not reset because the FSM is not defined.'}
     if 'fsm' in dir(dawgie.context):
         msg = {'alert_status':'success',
                'alert_message':'Triggered updating then load.'}
+        if archive: dawgie.context.fsm.archive()
         dawgie.context.fsm.wait_for_nothing()
-    return json.dumps (msg)
+    return json.dumps (msg).encode()
 
 def schedule_run (tasks:[str], targets:[str]):
     log.debug ('schedule_run: targets %s', str(targets))
