@@ -1,11 +1,11 @@
-name: GitHub Actions Demo
+name: Continuous Integration
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  CI-Actions:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout
+      - uses: actions/checkout@v4
       - name: Install Python
         uses: actions/setup-python
         with:
