@@ -3,7 +3,6 @@ run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
   Initialize-Environmen:
-    name: Initialize Environment
     runs-on: ubuntu-24.04
     outputs:
       RUNNER: ${{ runner.name }}
@@ -20,7 +19,7 @@ jobs:
           pip install -r .ci/requirements.txt
   Coding-Style:
     name: Code Style
-    needs: Initialize Environment
+    needs: Initialize-Environment
     runs-on: ${{needs.Initialize-Environment.outputs.RUNNER}}
     steps:
       - name: Black
