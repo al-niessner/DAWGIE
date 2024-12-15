@@ -5,16 +5,15 @@ jobs:
   CI-Actions:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - name: Install Python
-        uses: actions/setup-python
+      - name: Intialize Environment
+        uses: actions/checkout@v4
+        uses: actions/setup-python@v5
         with:
           architecture: 'x64'
           python-version: '3.12'
-      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r Python/requirements.txt
           pip install -r .ci/requirements.txt 
-      - name: Code Style
+      - name: Coding Style
         run: black --check -l 160 -s .
