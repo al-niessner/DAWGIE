@@ -77,7 +77,9 @@ def persistent():
 def record(task, only=None):
     '''Record this version of the software'''
     if isinstance(task, (dawgie.Task, dawgie.Analysis, dawgie.Regress)):
-        for alg in filter(lambda a: only is None or a.name() == only, task.list()):
+        for alg in filter(
+            lambda a: only is None or a.name() == only, task.list()
+        ):
             if not alg.state_vectors():
                 dawgie.db.update(task, alg, None, None, None)
             for sv in alg.state_vectors():

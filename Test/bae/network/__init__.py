@@ -50,7 +50,12 @@ def analysis(prefix, ps_hint: int = 0, runid: int = -1):
 def events():
     import dawgie
 
-    return [dawgie.EVENT(dawgie.ALG_REF(None, None), dawgie.MOMENT(True, True, None, None, None))]
+    return [
+        dawgie.EVENT(
+            dawgie.ALG_REF(None, None),
+            dawgie.MOMENT(True, True, None, None, None),
+        )
+    ]
 
 
 def task(prefix, ps_hint: int = 0, runid: int = -1, target: str = '__none__'):

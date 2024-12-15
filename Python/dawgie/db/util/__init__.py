@@ -48,7 +48,9 @@ import tempfile
 
 
 def _extract(response):
-    for pair in filter(lambda l: 0 < len(l), response.decode('utf-8').split('\n')):
+    for pair in filter(
+        lambda l: 0 < len(l), response.decode('utf-8').split('\n')
+    ):
         index = pair.find(' ')
         cksum = pair[:index]
         lc = cksum.strip()
@@ -64,7 +66,9 @@ def decode(entry):
 
 
 def encode(value):
-    fid, fn = tempfile.mkstemp(dir=dawgie.context.data_stg, prefix='shelve_', suffix='.pkl')
+    fid, fn = tempfile.mkstemp(
+        dir=dawgie.context.data_stg, prefix='shelve_', suffix='.pkl'
+    )
     os.close(fid)
     with open(fn, 'wb') as f:
         pickle.dump(value, f, pickle.HIGHEST_PROTOCOL)

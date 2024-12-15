@@ -103,7 +103,14 @@ class Engine(dawgie.Algorithm):
         return 'engine'
 
     def previous(self):
-        return [dawgie.V_REF(factory=ae.prime.analysis, impl=self.__initializer, item=self.__initializer.state_vectors()[0], feat='z')]
+        return [
+            dawgie.V_REF(
+                factory=ae.prime.analysis,
+                impl=self.__initializer,
+                item=self.__initializer.state_vectors()[0],
+                feat='z',
+            )
+        ]
 
     def run(self, ds, ps):
         self.__sv['a'] = ae.Value(numpy.random.rand(), 0x0001)

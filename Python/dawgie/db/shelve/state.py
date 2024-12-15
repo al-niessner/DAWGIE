@@ -62,7 +62,9 @@ class DBI:
 
     def __new__(cls):
         if not hasattr(cls, '_DBI__myself'):
-            cls.__names = [tab.name for tab in sorted(Table, key=lambda e: e.value)]
+            cls.__names = [
+                tab.name for tab in sorted(Table, key=lambda e: e.value)
+            ]
             cls.__Group = collections.namedtuple('Group', cls.__names)
             cls.__myself = super(DBI, cls).__new__(cls)
             pass
@@ -82,7 +84,10 @@ class DBI:
         return
 
     def copy(self) -> {}:
-        return {name: dict(table) for name, table in zip(self.__names, self.__tables)}
+        return {
+            name: dict(table)
+            for name, table in zip(self.__names, self.__tables)
+        }
 
     def open(self):
         '''open all the dictionary-files'''
@@ -117,7 +122,9 @@ class DBI:
     @property
     def is_open(self) -> bool:
         '''determine if we have access to the database'''
-        return self.__reopened or all(table is not None for table in self.__tables)
+        return self.__reopened or all(
+            table is not None for table in self.__tables
+        )
 
     @property
     def is_reopened(self) -> bool:

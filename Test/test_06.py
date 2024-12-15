@@ -53,7 +53,9 @@ import unittest
 class Schedule(unittest.TestCase):
     def __init__(self, *args):
         unittest.TestCase.__init__(self, *args)
-        self.__ae_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ae'))
+        self.__ae_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), 'ae')
+        )
         self.__ae_pkg = 'ae'
         sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
         dawgie.context.db_impl = 'test'
@@ -67,7 +69,9 @@ class Schedule(unittest.TestCase):
         for node in nodes:
             children = []
             for child in node:
-                if dawgie.pl.dag.Construct.trim(child.tag, 2) != dawgie.pl.dag.Construct.trim(node.tag, 2):
+                if dawgie.pl.dag.Construct.trim(
+                    child.tag, 2
+                ) != dawgie.pl.dag.Construct.trim(node.tag, 2):
                     children.append(child)
                 pass
             result.add(node)
@@ -79,11 +83,17 @@ class Schedule(unittest.TestCase):
         import ae.network
         import ae.network.bot
 
-        a = dawgie.schedule(ae.network.analysis, ae.network.bot.Analyzer(), True)
+        a = dawgie.schedule(
+            ae.network.analysis, ae.network.bot.Analyzer(), True
+        )
         b = dawgie.schedule(ae.network.task, ae.network.bot.Engine(), True)
         self.assertEqual(0, dawgie.pl.schedule._delay(a).total_seconds())
         self.assertEqual(0, dawgie.pl.schedule._delay(b).total_seconds())
-        self.assertRaises(dawgie.pl.schedule._DelayNotKnowableError, dawgie.pl.schedule._delay, a)
+        self.assertRaises(
+            dawgie.pl.schedule._DelayNotKnowableError,
+            dawgie.pl.schedule._delay,
+            a,
+        )
         return
 
     def test_complete(self):
@@ -95,12 +105,16 @@ class Schedule(unittest.TestCase):
             pass
         nodes[dei].get('doing').add('b')
         dawgie.pl.schedule.que.append(nodes[dei])
-        dawgie.pl.schedule.complete(nodes[dei], 3, 'b', {}, dawgie.pl.jobinfo.State.success)
+        dawgie.pl.schedule.complete(
+            nodes[dei], 3, 'b', {}, dawgie.pl.jobinfo.State.success
+        )
         self.assertEqual(0, len(dawgie.pl.schedule.que))
         nodes[dei].get('doing').add('d')
         nodes[dei].get('todo').add('f')
         dawgie.pl.schedule.que.append(nodes[dei])
-        dawgie.pl.schedule.complete(nodes[dei], 3, 'd', {}, dawgie.pl.jobinfo.State.success)
+        dawgie.pl.schedule.complete(
+            nodes[dei], 3, 'd', {}, dawgie.pl.jobinfo.State.success
+        )
         self.assertEqual(1, len(dawgie.pl.schedule.que))
         nodes[dei].get('doing').clear()
         nodes[dei].get('todo').clear()
@@ -125,8 +139,12 @@ class Schedule(unittest.TestCase):
             pass
         jobs = dawgie.pl.schedule.next_job_batch()
         self.assertEqual(1, len(jobs))
-        self.assertSetEqual(set(['a', 'c', 'e', 'b', 'f', 'd', 'g']), jobs[0].get('do'))
-        self.assertSetEqual(set(['a', 'c', 'e', 'b', 'f', 'd', 'g']), jobs[0].get('doing'))
+        self.assertSetEqual(
+            set(['a', 'c', 'e', 'b', 'f', 'd', 'g']), jobs[0].get('do')
+        )
+        self.assertSetEqual(
+            set(['a', 'c', 'e', 'b', 'f', 'd', 'g']), jobs[0].get('doing')
+        )
         self.assertSetEqual(set(), jobs[0].get('todo'))
         dawgie.pl.schedule.per.clear()
         dawgie.pl.schedule.que.clear()
@@ -198,7 +216,9 @@ class Schedule(unittest.TestCase):
                 self.assertEqual(3, len(node.get('todo')))
                 node.get('todo').clear()
             else:
-                self.assertEqual(0, (len(node.get('doing')) + len(node.get('todo'))))
+                self.assertEqual(
+                    0, (len(node.get('doing')) + len(node.get('todo')))
+                )
             pass
         self.assertEqual(1, len(dawgie.pl.schedule.que))
         dawgie.pl.schedule.que.clear()
@@ -240,14 +260,21 @@ class Schedule(unittest.TestCase):
         return
 
     def test_update(self):
-        root = [n for n in filter(lambda n: n.tag.startswith('network.'), dawgie.pl.schedule.ae.at)][0]
+        root = [
+            n
+            for n in filter(
+                lambda n: n.tag.startswith('network.'), dawgie.pl.schedule.ae.at
+            )
+        ][0]
         root.get('doing').add('fred')
         for c in root:
             if c.tag == 'disk.engine':
                 c.get('doing').add('fred')
             pass
         dawgie.pl.schedule.que.clear()
-        dawgie.pl.schedule.update([('12.fred.network.analyzer.test.image', True)], root, 12)
+        dawgie.pl.schedule.update(
+            [('12.fred.network.analyzer.test.image', True)], root, 12
+        )
         self.assertEqual(len(root), len(dawgie.pl.schedule.que))
         for n in dawgie.pl.schedule.que:
             self.assertEqual(12, n.get('runid'), n.tag)
@@ -279,8 +306,18 @@ def fake_events_defer():
 
     now = datetime.datetime.utcnow()
     return [
-        dawgie.schedule(ae.disk.task, ae.disk.bot.Engine(), dow=now.weekday(), time=now.time()),
-        dawgie.schedule(ae.network.analysis, ae.network.bot.Analyzer(), dow=(now.weekday() + 1) % 7, time=now.time()),
+        dawgie.schedule(
+            ae.disk.task,
+            ae.disk.bot.Engine(),
+            dow=now.weekday(),
+            time=now.time(),
+        ),
+        dawgie.schedule(
+            ae.network.analysis,
+            ae.network.bot.Analyzer(),
+            dow=(now.weekday() + 1) % 7,
+            time=now.time(),
+        ),
     ]
 
 
@@ -292,7 +329,19 @@ def fake_events_view():
 
     now = datetime.datetime.utcnow()
     return [
-        dawgie.schedule(ae.disk.task, ae.disk.bot.Engine(), dow=(now.weekday() + 1) % 7, time=now.time()),
-        dawgie.schedule(ae.disk.task, ae.disk.bot.Engine(), dow=(now.weekday() - 1) % 7, time=now.time()),
-        dawgie.schedule(ae.network.analysis, ae.network.bot.Analyzer(), boot=True),
+        dawgie.schedule(
+            ae.disk.task,
+            ae.disk.bot.Engine(),
+            dow=(now.weekday() + 1) % 7,
+            time=now.time(),
+        ),
+        dawgie.schedule(
+            ae.disk.task,
+            ae.disk.bot.Engine(),
+            dow=(now.weekday() - 1) % 7,
+            time=now.time(),
+        ),
+        dawgie.schedule(
+            ae.network.analysis, ae.network.bot.Analyzer(), boot=True
+        ),
     ]

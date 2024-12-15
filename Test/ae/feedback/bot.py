@@ -47,7 +47,14 @@ log = logging.getLogger(__name__)
 
 class Actor(dawgie.Task):
     def list(self):
-        return [Command(), Control(), Model(), Sensor(), SummingNode(), Output()]
+        return [
+            Command(),
+            Control(),
+            Model(),
+            Sensor(),
+            SummingNode(),
+            Output(),
+        ]
 
     pass
 
@@ -80,8 +87,13 @@ class Control(dawgie.Algorithm):
     def __init__(self):
         dawgie.Algorithm.__init__(self)
         self.__base = SummingNode()
-        self.__pid = StateVector('law', {'P': ae.Value(0.5, 2), 'I': ae.Value(0.3, 2), 'D': ae.Value(0, 2)})
-        self.__response = StateVector('response', {'accum': ae.Value(0, 13), 'voltage': ae.Value(0, 3)})
+        self.__pid = StateVector(
+            'law',
+            {'P': ae.Value(0.5, 2), 'I': ae.Value(0.3, 2), 'D': ae.Value(0, 2)},
+        )
+        self.__response = StateVector(
+            'response', {'accum': ae.Value(0, 13), 'voltage': ae.Value(0, 3)}
+        )
         self._version_ = dawgie.VERSION(1, 0, 0)
         return
 
@@ -91,7 +103,12 @@ class Control(dawgie.Algorithm):
     def previous(self):
         return [
             dawgie.ALG_REF(factory=ae.feedback.task, impl=self.__base),
-            dawgie.V_REF(factory=ae.feedback.task, impl=self, item=self.__response, feat='accum'),
+            dawgie.V_REF(
+                factory=ae.feedback.task,
+                impl=self,
+                item=self.__response,
+                feat='accum',
+            ),
         ]
 
     def run(self, ds, ps):
@@ -126,8 +143,18 @@ class Model(dawgie.Algorithm):
 
     def previous(self):
         return [
-            dawgie.V_REF(factory=ae.feedback.task, impl=self.__base, item=self.__base.sv_as_dict()['response'], feat='voltage'),
-            dawgie.V_REF(factory=ae.feedback.task, impl=self, item=self.__model, feat='value'),
+            dawgie.V_REF(
+                factory=ae.feedback.task,
+                impl=self.__base,
+                item=self.__base.sv_as_dict()['response'],
+                feat='voltage',
+            ),
+            dawgie.V_REF(
+                factory=ae.feedback.task,
+                impl=self,
+                item=self.__model,
+                feat='value',
+            ),
         ]
 
     def run(self, ds, ps):
@@ -187,13 +214,20 @@ class SummingNode(dawgie.Algorithm):
         return 'sum'
 
     def previous(self):
-        return [dawgie.ALG_REF(factory=ae.feedback.task, impl=self.__cmd), dawgie.ALG_REF(factory=ae.feedback.task, impl=self.__err)]
+        return [
+            dawgie.ALG_REF(factory=ae.feedback.task, impl=self.__cmd),
+            dawgie.ALG_REF(factory=ae.feedback.task, impl=self.__err),
+        ]
 
     def run(self, ds, ps):
         self.__sum['voltage'] = ae.Value(
-            self.__cmd.state_vectors()[0]['voltage'].array() + self.__err.state_vectors()[0]['voltage'].array(), self.__err.state_vectors()[0]['voltage'].uid()
+            self.__cmd.state_vectors()[0]['voltage'].array()
+            + self.__err.state_vectors()[0]['voltage'].array(),
+            self.__err.state_vectors()[0]['voltage'].uid(),
         )
-        log.critical('Sum of error and command: %f', self.__sum['voltage'].array())
+        log.critical(
+            'Sum of error and command: %f', self.__sum['voltage'].array()
+        )
         ds.update()
         return
 
@@ -218,7 +252,9 @@ class Output(dawgie.Algorithm):
         return [dawgie.ALG_REF(factory=ae.feedback.task, impl=self.__base)]
 
     def run(self, ds, ps):
-        self.__output['voltage'] = ae.Value(self.__base.state_vectors()[0]['value'].array(), 7)
+        self.__output['voltage'] = ae.Value(
+            self.__base.state_vectors()[0]['value'].array(), 7
+        )
         log.critical('final reaction %f', self.__output['voltage'].array())
         ds.update()
         return

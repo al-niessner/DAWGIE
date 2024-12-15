@@ -185,7 +185,11 @@ class RoutePoint(twisted.web.resource.Resource):
         return
 
     def getChild(self, path, request):
-        msg = request.uri.decode() if os.environ.get('DAWGIE_FE_DEBUG', '') else 'DAWGIE_FE_DEBUG'
+        msg = (
+            request.uri.decode()
+            if os.environ.get('DAWGIE_FE_DEBUG', '')
+            else 'DAWGIE_FE_DEBUG'
+        )
         try:
             dpath = path.decode()
         except UnicodeDecodeError:
@@ -223,7 +227,11 @@ def _is_active(fn):
     return is_active
 
 
-def _static(fn: str, bdir: str = os.path.dirname(os.path.abspath(__file__)), request=None) -> bytes:
+def _static(
+    fn: str,
+    bdir: str = os.path.dirname(os.path.abspath(__file__)),
+    request=None,
+) -> bytes:
     if -1 < fn.find('..'):
         return ('Error: path must be absolute and not relative.').encode()
 
@@ -260,10 +268,16 @@ def _static(fn: str, bdir: str = os.path.dirname(os.path.abspath(__file__)), req
                 ffn = os.path.join(bdir, fn)
                 with open(ffn, 'rt', encoding='utf-8') as f:
                     css = f.read()
-                html = html[:idx] + '<style>' + css + '</style>' + html[end + 1 :]
+                html = (
+                    html[:idx] + '<style>' + css + '</style>' + html[end + 1 :]
+                )
                 idx = html.find("<link href='/stylesheets")
                 pass
-            result = twisted.web.util.redirectTo(b'/pages/pipelines', request) if not is_ready else html.encode()
+            result = (
+                twisted.web.util.redirectTo(b'/pages/pipelines', request)
+                if not is_ready
+                else html.encode()
+            )
         else:
             if request is not None and ffn.endswith('.svg'):
                 request.setHeader(b'Content-Type', b'image/svg+xml')

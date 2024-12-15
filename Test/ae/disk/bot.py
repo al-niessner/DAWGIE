@@ -68,7 +68,10 @@ class Engine(dawgie.Algorithm):
         return 'engine'
 
     def previous(self):
-        return [dawgie.ALG_REF(factory=ae.network.analysis, impl=self.__noise), dawgie.ALG_REF(factory=ae.network.task, impl=self.__base)]
+        return [
+            dawgie.ALG_REF(factory=ae.network.analysis, impl=self.__noise),
+            dawgie.ALG_REF(factory=ae.network.task, impl=self.__base),
+        ]
 
     def run(self, ds, ps):
         base = self.__base.sv_as_dict()['test']['image'].array()

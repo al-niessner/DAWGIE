@@ -56,10 +56,14 @@ import logging
 
 log = logging.getLogger(__name__)
 
-ID = collections.namedtuple('ID', ['name', 'version'])  # version == dawgie.Version implementation
+ID = collections.namedtuple(
+    'ID', ['name', 'version']
+)  # version == dawgie.Version implementation
 REF = collections.namedtuple('REF', ['tid', 'aid', 'sid', 'vid'])
 
-METRIC_DATA = collections.namedtuple('METRIC_DATA', ['alg_name', 'alg_ver', 'sv', 'run_id', 'target', 'task'])
+METRIC_DATA = collections.namedtuple(
+    'METRIC_DATA', ['alg_name', 'alg_ver', 'sv', 'run_id', 'target', 'task']
+)
 
 
 def _db_in_use():
@@ -211,7 +215,12 @@ def retreat(reg, ret) -> dawgie.Timeline:
 
 
 def targets(fulllist: bool = False):
-    return list(filter(lambda s: fulllist or not (s.startswith('__') and s.endswith('__')), _db_in_use().targets()))
+    return list(
+        filter(
+            lambda s: fulllist or not (s.startswith('__') and s.endswith('__')),
+            _db_in_use().targets(),
+        )
+    )
 
 
 def trace(task_alg_names: [str]) -> {str: {str: int}}:
@@ -270,8 +279,18 @@ def view(visitor: dawgie.Visitor, cid, runid, tn, tskn, algn, svn):
     visitor.add_declaration('Algorithm: ' + str(algn), tag='h3')
     visitor.add_declaration('State Vec: ' + str(svn), tag='h3')
     try:
-        mod = importlib.import_module('.'.join([dawgie.context.ae_base_package, tskn]).replace('..', '.'))
-        bot = mod.regress(tskn, 1, tn) if runid == 0 else (mod.analysis(tskn, 1, runid) if tn == '__all__' else mod.task(tskn, 1, runid, tn))
+        mod = importlib.import_module(
+            '.'.join([dawgie.context.ae_base_package, tskn]).replace('..', '.')
+        )
+        bot = (
+            mod.regress(tskn, 1, tn)
+            if runid == 0
+            else (
+                mod.analysis(tskn, 1, runid)
+                if tn == '__all__'
+                else mod.task(tskn, 1, runid, tn)
+            )
+        )
     except ImportError:
         msg = 'Could not create the bot for task "' + tskn + '".'
         log.error(msg)
@@ -283,7 +302,13 @@ def view(visitor: dawgie.Visitor, cid, runid, tn, tskn, algn, svn):
     if len(alg) == 1:
         alg = alg[0]
     else:
-        msg = 'Could not find the algorithm "' + algn + '" for task "' + tskn + '".'
+        msg = (
+            'Could not find the algorithm "'
+            + algn
+            + '" for task "'
+            + tskn
+            + '".'
+        )
         log.error(msg)
         visitor.add_declaration(msg)
         return
@@ -293,9 +318,19 @@ def view(visitor: dawgie.Visitor, cid, runid, tn, tskn, algn, svn):
     if len(sv) == 1:
         sv = sv[0]
     elif svn == '__metric__':
-        sv = dawgie.util.MetricStateVector(dawgie.util.metrics.filled(0), dawgie.util.metrics.filled(0))
+        sv = dawgie.util.MetricStateVector(
+            dawgie.util.metrics.filled(0), dawgie.util.metrics.filled(0)
+        )
     else:
-        msg = 'Could not find the state vector "' + svn + '" within algorithm "' + algn + '" for task "' + tskn + '".'
+        msg = (
+            'Could not find the state vector "'
+            + svn
+            + '" within algorithm "'
+            + algn
+            + '" for task "'
+            + tskn
+            + '".'
+        )
         log.error(msg)
         visitor.add_declaration(msg)
         return
@@ -310,7 +345,15 @@ def view(visitor: dawgie.Visitor, cid, runid, tn, tskn, algn, svn):
     try:
         sv.view(cid, visitor)
     except NotImplementedError:
-        msg = 'view() is not implemented for the state vector "' + svn + '" within algorithm "' + algn + '" for task "' + tskn + '".'
+        msg = (
+            'view() is not implemented for the state vector "'
+            + svn
+            + '" within algorithm "'
+            + algn
+            + '" for task "'
+            + tskn
+            + '".'
+        )
         log.error(msg)
         visitor.add_declaration(msg)
         pass

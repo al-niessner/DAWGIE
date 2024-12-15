@@ -136,10 +136,22 @@ def lambda_handler(event, context):
     aws_bot_private_key = os.environ['AWSBOTPRIVATEKEY'].replace(';:;', '\n')
 
     if event['httpMethod'] == 'POST':
-        dawgie.security.initialize(myname=dawgie.context.myname, myself=dawgie.context.myself)
-        dawgie.security.extend([aws_bot_public_key, aws_bot_private_key, dawgie_bot_public_key])
-        data = event['body'] if isinstance(event['body'], dict) else json.loads(event['body'])
+        dawgie.security.initialize(
+            myname=dawgie.context.myname, myself=dawgie.context.myself
+        )
+        dawgie.security.extend(
+            [aws_bot_public_key, aws_bot_private_key, dawgie_bot_public_key]
+        )
+        data = (
+            event['body']
+            if isinstance(event['body'], dict)
+            else json.loads(event['body'])
+        )
         sc, body = 200, exchange(data['request'])
     else:
         sc, body = 400, 'invalid request'
-    return {'statusCode': sc, 'body': body, 'headers': {'Content-Type': 'application/json'}}
+    return {
+        'statusCode': sc,
+        'body': body,
+        'headers': {'Content-Type': 'application/json'},
+    }

@@ -70,7 +70,9 @@ def _clean(item):
 
 def _grab_context():
     if ':' in dawgie.context.db_path:
-        dbp = dawgie.context.db_path[: dawgie.context.db_path.find(':')] + ':****'
+        dbp = (
+            dawgie.context.db_path[: dawgie.context.db_path.find(':')] + ':****'
+        )
     else:
         dbp = dawgie.context.db_path
     return {
@@ -146,20 +148,42 @@ def _grab_memory():
         gc.collect()
         for obj in objs:
             refs = gc.get_referents(obj)
-            nodes.append({'obj': {'id': hex(id(obj)), 'size': sys.getsizeof(obj), 'type': str(type(obj))}, 'refs': [hex(id(ref)) for ref in refs]})
+            nodes.append(
+                {
+                    'obj': {
+                        'id': hex(id(obj)),
+                        'size': sys.getsizeof(obj),
+                        'type': str(type(obj)),
+                    },
+                    'refs': [hex(id(ref)) for ref in refs],
+                }
+            )
             pass
     finally:
         gc.enable()
-    return {'garbage': {'count': gcnt, 'size': gsize}, 'nodes': nodes, 'objs_id': objs_id}
+    return {
+        'garbage': {'count': gcnt, 'size': gsize},
+        'nodes': nodes,
+        'objs_id': objs_id,
+    }
 
 
 def _grab_res(who):
     ru = resource.getrusage(who)
-    return {attrname: getattr(ru, attrname) for attrname in filter(lambda s: s.startswith('ru_'), dir(ru))}
+    return {
+        attrname: getattr(ru, attrname)
+        for attrname in filter(lambda s: s.startswith('ru_'), dir(ru))
+    }
 
 
 def _grab_schedule():
-    return {'schedule': {'doing': dawgie.pl.schedule.view_doing(), 'events': dawgie.pl.schedule.view_events(), 'todo': dawgie.pl.schedule.view_todo()}}
+    return {
+        'schedule': {
+            'doing': dawgie.pl.schedule.view_doing(),
+            'events': dawgie.pl.schedule.view_events(),
+            'todo': dawgie.pl.schedule.view_todo(),
+        }
+    }
 
 
 def grab(which: str = 'all') -> {}:
@@ -173,7 +197,14 @@ def grab(which: str = 'all') -> {}:
     if 'all' in which or 'memory' in which:
         result.update(_grab_memory())
     if 'all' in which or 'resources' in which:
-        result.update({'resources': {'self': _grab_res(resource.RUSAGE_SELF), 'children': _grab_res(resource.RUSAGE_CHILDREN)}})
+        result.update(
+            {
+                'resources': {
+                    'self': _grab_res(resource.RUSAGE_SELF),
+                    'children': _grab_res(resource.RUSAGE_CHILDREN),
+                }
+            }
+        )
     if 'all' in which or 'schedule' in which:
         result.update(_grab_schedule())
     return result

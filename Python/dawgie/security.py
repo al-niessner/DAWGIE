@@ -66,7 +66,11 @@ import twisted.internet.ssl
 _certs = []
 _myself = {}
 _pgp = None
-gpgargname = 'gnupghome' if 'gnupghome' in inspect.signature(gnupg.GPG).parameters else 'homedir'
+gpgargname = (
+    'gnupghome'
+    if 'gnupghome' in inspect.signature(gnupg.GPG).parameters
+    else 'homedir'
+)
 
 
 class TwistedWrapper:
@@ -141,7 +145,11 @@ class TwistedWrapper:
             response.valid = reply.strip() == self.__msg.strip()
 
             if not response.valid:
-                log.warning('Did not echo my message. Expectation: "%s" but received this "%s".', self.__msg.strip(), reply.strip())
+                log.warning(
+                    'Did not echo my message. Expectation: "%s" but received this "%s".',
+                    self.__msg.strip(),
+                    reply.strip(),
+                )
                 pass
             pass
         if response.valid and self.__dr is not None:
@@ -168,7 +176,10 @@ class TwistedWrapper:
 
             if not self.__phase(data):
                 log.error(
-                    'failed to pass handshake at %s of %s. Killing the connection to %s.', self.__phase.__name__, str(type(self.__p)), str(self.__address)
+                    'failed to pass handshake at %s of %s. Killing the connection to %s.',
+                    self.__phase.__name__,
+                    str(type(self.__p)),
+                    str(self.__address),
                 )
                 self.__p.transport.loseConnection()
                 self.__len = len(self.__buf) + 1  # break out of the while loop
@@ -183,7 +194,9 @@ def _my_ip() -> str:
     # pylint: disable=bare-except
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s.connect(('8.8.8.8', 0))  # connecting to a UDP address doesn't send packets
+        s.connect(
+            ('8.8.8.8', 0)
+        )  # connecting to a UDP address doesn't send packets
         response = s.getsockname()[0]
     except:
         print('failed to get host name falling back to localhost')
@@ -202,7 +215,11 @@ def _send(s: socket.socket, message: str):
     signed = _pgp.sign(message, passphrase='1234567890', clearsign=True)
 
     if signed.data:
-        s.sendall(struct.pack('>I', 4) + struct.pack('>I', len(signed.data)) + signed.data)
+        s.sendall(
+            struct.pack('>I', 4)
+            + struct.pack('>I', len(signed.data))
+            + signed.data
+        )
     else:
         log.error(signed.status)
         s.shutdown(socket.SHUT_RDWR)
@@ -249,7 +266,9 @@ def finalize() -> None:
     return
 
 
-def initialize(path: str = None, myname: str = None, myself: str = None) -> None:
+def initialize(
+    path: str = None, myname: str = None, myself: str = None
+) -> None:
     '''initialie this library with the PGP keyring location and TLS certificates
 
     Load both PGP and TLS to be backward compatible.
@@ -279,7 +298,11 @@ def _pgp_initialize(path: str = None) -> None:
 
     if path and os.path.exists(path) and os.path.isdir(path):
         keys = []
-        for fn in filter(lambda fn: fn.startswith('dawgie.') and (fn.endswith('.pub') or fn.endswith('.sec')), os.listdir(path)):
+        for fn in filter(
+            lambda fn: fn.startswith('dawgie.')
+            and (fn.endswith('.pub') or fn.endswith('.sec')),
+            os.listdir(path),
+        ):
             with open(os.path.join(path, fn), 'rt', encoding="utf-8") as f:
                 keys.append(f.read())
             pass
@@ -287,12 +310,16 @@ def _pgp_initialize(path: str = None) -> None:
         if keys:
             keys = _pgp.import_keys('\n'.join(keys))
         else:
-            log.warning('No PGP keys found for secure handshake in %s', str(path))
+            log.warning(
+                'No PGP keys found for secure handshake in %s', str(path)
+            )
         pass
     return
 
 
-def _tls_initialize(path: str = None, myname: str = None, myself: str = None) -> None:
+def _tls_initialize(
+    path: str = None, myname: str = None, myself: str = None
+) -> None:
     '''initialize this library with the TLS certificates
 
     An empty or None path indicates that we should ignore TLS certificates.
@@ -308,7 +335,9 @@ def _tls_initialize(path: str = None, myname: str = None, myself: str = None) ->
     _myself.clear()
     certs = []
     if path and os.path.exists(path) and os.path.isdir(path):
-        for fn in filter(lambda fn: fn.startswith('dawgie.public.pem'), os.listdir(path)):
+        for fn in filter(
+            lambda fn: fn.startswith('dawgie.public.pem'), os.listdir(path)
+        ):
             log.info('Found public key file: %s', fn)
             with open(os.path.join(path, fn), 'rt', encoding='utf-8') as file:
                 cert = twisted.internet.ssl.Certificate.loadPEM(file.read())
@@ -325,7 +354,9 @@ def _tls_initialize(path: str = None, myname: str = None, myself: str = None) ->
         cxt = cxt[: cxt.find('-----END CERTIFICATE-----') + 25]
         pub = twisted.internet.ssl.Certificate.loadPEM(cxt)
         prv.options(pub)
-        _myself.update({'file': myself, 'name': myname, 'private': prv, 'public': pub})
+        _myself.update(
+            {'file': myself, 'name': myname, 'private': prv, 'public': pub}
+        )
     return
 
 
@@ -376,11 +407,16 @@ def identity(of_cert: twisted.internet.ssl.Certificate):
     try:
         return _lookup(dawgie.context.identity_override)(of_cert)
     except:  # all exceptions are equal, pylint: disable=bare-except
-        log.exception('Could not translate certificate to any response. ' 'Defaulting to anonymous.')
+        log.exception(
+            'Could not translate certificate to any response. '
+            'Defaulting to anonymous.'
+        )
     return ''
 
 
-def is_sanctioned(endpoint: str, cert: twisted.internet.ssl.Certificate) -> bool:
+def is_sanctioned(
+    endpoint: str, cert: twisted.internet.ssl.Certificate
+) -> bool:
     '''determine if access to the endpoint is sectioned
 
     endpoint : string representation of the endpoint being evoked
@@ -433,7 +469,10 @@ def sanctioned(endpoint: str, cert: twisted.internet.ssl.Certificate) -> bool:
     try:
         return _lookup(dawgie.context.sanction_override)(endpoint, cert)
     except:  # all exceptions are equal, pylint: disable=bare-except
-        log.exception('Could not determine if endpoint is sanctioned. ' 'Defaulting to False.')
+        log.exception(
+            'Could not determine if endpoint is sanctioned. '
+            'Defaulting to False.'
+        )
     return False
 
 
@@ -449,13 +488,32 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser(
         description='When run as a standalone tool, it used to generate keys for DAWGIE users. The public key generated here should be placed in the DAWGIE OPS gpg home directory and the secret key should go the DAWGIE user gpg home directory. In both cases, they should be -rw------- in that directory. If the DAWGIE loses control of private key, the public should be removed from the DAWGIE gpg home directory. The removal of the public key is equivalent to revoking the key.'
     )
-    ap.add_argument('-e', '--user-email', required=True, help='real email to contact the user')
-    ap.add_argument('-O', '--output-dir', required=True, help='deposit the new keys in the given directory')
-    ap.add_argument('-u', '--user-name', required=True, help='real name in the form "First Last"')
+    ap.add_argument(
+        '-e',
+        '--user-email',
+        required=True,
+        help='real email to contact the user',
+    )
+    ap.add_argument(
+        '-O',
+        '--output-dir',
+        required=True,
+        help='deposit the new keys in the given directory',
+    )
+    ap.add_argument(
+        '-u',
+        '--user-name',
+        required=True,
+        help='real name in the form "First Last"',
+    )
     args = ap.parse_args()
     homedir = tempfile.mkdtemp()
     pgp = gnupg.GPG(**{gpgargname: homedir})
-    k = pgp.gen_key(pgp.gen_key_input(key_type='DSA', name_email=args.user_email, name_real=args.user_name))
+    k = pgp.gen_key(
+        pgp.gen_key_input(
+            key_type='DSA', name_email=args.user_email, name_real=args.user_name
+        )
+    )
     bn = os.path.join(args.output_dir, 'dawgie.%s.%s')
     with open(bn % (args.user_name, 'pub'), 'tw', encoding="utf-8") as gf:
         gf.write(pgp.export_keys(k))

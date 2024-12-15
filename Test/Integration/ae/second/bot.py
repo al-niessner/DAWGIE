@@ -65,11 +65,24 @@ class Engine(dawgie.Algorithm):
         return 'engine'
 
     def previous(self):
-        return [dawgie.V_REF(factory=ae.prime.task, impl=self.__prime, item=self.__prime.state_vectors()[0], feat='c')]
+        return [
+            dawgie.V_REF(
+                factory=ae.prime.task,
+                impl=self.__prime,
+                item=self.__prime.state_vectors()[0],
+                feat='c',
+            )
+        ]
 
     def run(self, ds, ps):
-        self.__sv['e'] = ae.Value(numpy.random.rand() + self.__prime.state_vectors()[0]['c'].value(), 0x0011)
-        self.__sv['f'] = ae.Value(numpy.random.rand() * self.__prime.state_vectors()[0]['c'].value(), 0x0012)
+        self.__sv['e'] = ae.Value(
+            numpy.random.rand() + self.__prime.state_vectors()[0]['c'].value(),
+            0x0011,
+        )
+        self.__sv['f'] = ae.Value(
+            numpy.random.rand() * self.__prime.state_vectors()[0]['c'].value(),
+            0x0012,
+        )
         ds.update()
         return
 

@@ -59,7 +59,13 @@ class LocalVersion(dawgie.Version):
     pass
 
 
-def append(name: str, table: {}, index: [], parent: int = None, ver: dawgie.Version = None) -> (bool, int, str):
+def append(
+    name: str,
+    table: {},
+    index: [],
+    parent: int = None,
+    ver: dawgie.Version = None,
+) -> (bool, int, str):
     exists = False
     name = construct(name, parent, ver)
     if name not in table:
@@ -102,7 +108,14 @@ def mkStgDir():
     t = datetime.datetime.now()
     # too error prone to fix and probably not much more readable anyway so
     # pylint: disable=consider-using-f-string
-    tString = "%s/%d-%d-%dT%d:%d" % (dawgie.context.data_stg, t.year, t.month, t.day, t.hour, t.minute)
+    tString = "%s/%d-%d-%dT%d:%d" % (
+        dawgie.context.data_stg,
+        t.year,
+        t.month,
+        t.day,
+        t.hour,
+        t.minute,
+    )
     os.system(f'mkdir {tString}')
     return tString
 
@@ -142,10 +155,23 @@ def subset(from_table: {str: int}, name: str, parents: [int] = None) -> {}:
     if parents:
         for parent in parents:
             surname = construct(name, parent)
-            result.update(dict(filter(lambda t, sn=surname: t[0].startswith(sn), from_table.items())))
+            result.update(
+                dict(
+                    filter(
+                        lambda t, sn=surname: t[0].startswith(sn),
+                        from_table.items(),
+                    )
+                )
+            )
             pass
         pass
     else:
-        result.update(dict(filter(lambda t, sn=name: t[0].startswith(sn), from_table.items())))
+        result.update(
+            dict(
+                filter(
+                    lambda t, sn=name: t[0].startswith(sn), from_table.items()
+                )
+            )
+        )
         pass
     return result

@@ -46,7 +46,12 @@ log = logging.getLogger(__name__)
 
 
 class Engine:
-    def __call__(self, values: [(str, bool)] = None, original: dawgie.pl.dag.Node = None, rid: int = None):
+    def __call__(
+        self,
+        values: [(str, bool)] = None,
+        original: dawgie.pl.dag.Node = None,
+        rid: int = None,
+    ):
         arg_state = (values is not None, original is not None, rid is not None)
 
         if all(arg_state):  # new item to promote
@@ -95,7 +100,9 @@ class Engine:
             raise ValueError('Organizer is not set prior to data flow')
 
         if dawgie.context.allow_promotion and self.more():
-            values = sorted(self._todo.values(), key=lambda t: t[0].get('level'))
+            values = sorted(
+                self._todo.values(), key=lambda t: t[0].get('level')
+            )
             child, parents, runid, values = values.pop(0)
             targets = {v.split('.')[1] for v in values}
             vals = {'.'.join(v.split('.')[2:]) for v in values}
@@ -103,7 +110,9 @@ class Engine:
             if len(targets) == 1:
                 target_name = targets.copy().pop()
             else:
-                raise ValueError(f'Inconsistent targets for a single result {targets}')
+                raise ValueError(
+                    f'Inconsistent targets for a single result {targets}'
+                )
 
             inputs = set()
             outputs = self._ae[child.tag]
@@ -114,11 +123,24 @@ class Engine:
             dependents = []
             for parent in parents:
                 name = parent.tag + '.'
-                dependents.extend((d.tag for d in filter(lambda i, n=name: i.tag.startswith(n), inputs)))
+                dependents.extend(
+                    (
+                        d.tag
+                        for d in filter(
+                            lambda i, n=name: i.tag.startswith(n), inputs
+                        )
+                    )
+                )
                 pass
 
             if not set(dependents).issubset(vals):
-                self._organize([child.tag], runid, targets, 'promotion not possible because one or ' + 'more inputs is new value')
+                self._organize(
+                    [child.tag],
+                    runid,
+                    targets,
+                    'promotion not possible because one or '
+                    + 'more inputs is new value',
+                )
                 return
 
             # 2: is the dependent or ancestors are schduled to run already
@@ -129,17 +151,26 @@ class Engine:
 
             # 3: find the consistent set of previous inputs for each output
             #    in this child
-            juncture = dawgie.db.consistent(_translate(inputs), _translate(outputs), target_name)
+            juncture = dawgie.db.consistent(
+                _translate(inputs), _translate(outputs), target_name
+            )
 
             # 4: are all of the inputs to dependent the same
             #    if no, schedule dependent and break
             if not juncture or not all(juncture):
-                self._organize([child.tag], runid, targets, 'promotion not possible because ' + 'no juncture found')
+                self._organize(
+                    [child.tag],
+                    runid,
+                    targets,
+                    'promotion not possible because ' + 'no juncture found',
+                )
                 return
 
             # 5: promote decendent state vectors
             if not dawgie.db.promote(juncture, runid):
-                self._organize([child.tag], runid, targets, 'promotion failed to insert')
+                self._organize(
+                    [child.tag], runid, targets, 'promotion failed to insert'
+                )
                 return
 
             # 6: add decendent to todo list
@@ -166,9 +197,18 @@ class Engine:
         self._organize = organizer
         return
 
-    def todo(self, original: dawgie.pl.dag.Node = None, rid: int = None, values: [(str, bool)] = None):
+    def todo(
+        self,
+        original: dawgie.pl.dag.Node = None,
+        rid: int = None,
+        values: [(str, bool)] = None,
+    ):
         if not all((v[1] for v in values)):
-            self._append(original, rid, [value for value, _isnew in filter(lambda t: not t[1], values)])
+            self._append(
+                original,
+                rid,
+                [value for value, _isnew in filter(lambda t: not t[1], values)],
+            )
             pass
         return
 
@@ -177,7 +217,13 @@ class Engine:
 
 def _is_scheduled(node: dawgie.pl.dag.Node, targets: {str}) -> bool:
     # issubset works because do() reduces targets to length of 1
-    result = any([targets.issubset(node.get('do')), targets.issubset(node.get('doing')), targets.issubset(node.get('todo'))])
+    result = any(
+        [
+            targets.issubset(node.get('do')),
+            targets.issubset(node.get('doing')),
+            targets.issubset(node.get('todo')),
+        ]
+    )
 
     if not result:
         for parent in node.get('parents'):
@@ -198,6 +244,13 @@ def _translate(nodes: [dawgie.pl.dag.Node]) -> [dawgie.db.REF]:
         a = n.get('alg')
         s = a.sv_as_dict()[sn]
         v = s[vn]
-        result.append(dawgie.db.REF(tid=dawgie.db.ID(tn, None), aid=dawgie.db.ID(an, a), sid=dawgie.db.ID(sn, s), vid=dawgie.db.ID(vn, v)))
+        result.append(
+            dawgie.db.REF(
+                tid=dawgie.db.ID(tn, None),
+                aid=dawgie.db.ID(an, a),
+                sid=dawgie.db.ID(sn, s),
+                vid=dawgie.db.ID(vn, v),
+            )
+        )
         pass
     return result

@@ -73,7 +73,9 @@ class Analyzer(dawgie.Analyzer):
 
     def run(self, aspects):
         # pylint: disable=protected-access
-        self.__noise['image'] = ae.Value((numpy.random.rand(4000, 4000) - 0.5) * 0.1)
+        self.__noise['image'] = ae.Value(
+            (numpy.random.rand(4000, 4000) - 0.5) * 0.1
+        )
         fid, tn = tempfile.mkstemp()
         os.close(fid)
         os.unlink(tn)
@@ -109,7 +111,9 @@ class Engine(dawgie.Algorithm):
         image = numpy.empty(shape)
         for r in range(shape[0]):
             for c in range(shape[1]):
-                image[r, c] = numpy.sin(r / 700) * numpy.cos(c / 500 - numpy.pi / 4)
+                image[r, c] = numpy.sin(r / 700) * numpy.cos(
+                    c / 500 - numpy.pi / 4
+                )
                 pass
             pass
         url = "https://github.com/OpenExoplanetCatalogue/oec_gzip/raw/master/systems.xml.gz"

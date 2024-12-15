@@ -78,7 +78,14 @@ class DB:
         self.assertRaises(RuntimeError, dawgie.db._prime_keys)
         dawgie.db.open()
         keys = dawgie.db._prime_keys()
-        self.assertEqual((dawgie.db.testdata.TSK_CNT * dawgie.db.testdata.SVN_CNT * dawgie.db.testdata.VAL_CNT), len(keys))
+        self.assertEqual(
+            (
+                dawgie.db.testdata.TSK_CNT
+                * dawgie.db.testdata.SVN_CNT
+                * dawgie.db.testdata.VAL_CNT
+            ),
+            len(keys),
+        )
         return
 
     def test__prime_values(self):
@@ -86,12 +93,21 @@ class DB:
         self.assertRaises(RuntimeError, dawgie.db._prime_values)
         dawgie.db.open()
         values = dawgie.db._prime_keys()
-        self.assertEqual((dawgie.db.testdata.TSK_CNT * dawgie.db.testdata.SVN_CNT * dawgie.db.testdata.VAL_CNT), len(values))
+        self.assertEqual(
+            (
+                dawgie.db.testdata.TSK_CNT
+                * dawgie.db.testdata.SVN_CNT
+                * dawgie.db.testdata.VAL_CNT
+            ),
+            len(values),
+        )
         return
 
     def test_add(self):
         dawgie.db.close()
-        self.assertRaises(RuntimeError, dawgie.db.add, dawgie.db.testdata.TARGET)
+        self.assertRaises(
+            RuntimeError, dawgie.db.add, dawgie.db.testdata.TARGET
+        )
         # actual testing of adding is done in test_targets because no way
         # to delete added targets
         return
@@ -134,14 +150,28 @@ class DB:
         for tn, tsk, alg in dawgie.db.testdata.DATASETS[:2]:
             for sv in alg.sv:
                 for vn, v in sv.items():
-                    ins.append(dawgie.db.REF(dawgie.db.ID(tsk._name(), None), dawgie.db.ID(alg.name(), alg), dawgie.db.ID(sv.name(), sv), dawgie.db.ID(vn, v)))
+                    ins.append(
+                        dawgie.db.REF(
+                            dawgie.db.ID(tsk._name(), None),
+                            dawgie.db.ID(alg.name(), alg),
+                            dawgie.db.ID(sv.name(), sv),
+                            dawgie.db.ID(vn, v),
+                        )
+                    )
                     pass
                 pass
             pass
         tn, tsk, alg = dawgie.db.testdata.DATASETS[2]
         for sv in alg.sv:
             for vn, v in sv.items():
-                outs.append(dawgie.db.REF(dawgie.db.ID(tsk._name(), None), dawgie.db.ID(alg.name(), alg), dawgie.db.ID(sv.name(), sv), dawgie.db.ID(vn, v)))
+                outs.append(
+                    dawgie.db.REF(
+                        dawgie.db.ID(tsk._name(), None),
+                        dawgie.db.ID(alg.name(), alg),
+                        dawgie.db.ID(sv.name(), sv),
+                        dawgie.db.ID(vn, v),
+                    )
+                )
                 pass
             pass
         dawgie.db.close()
@@ -207,14 +237,28 @@ class DB:
         for tn, tsk, alg in dawgie.db.testdata.DATASETS[:2]:
             for sv in alg.sv:
                 for vn, v in sv.items():
-                    ins.append(dawgie.db.REF(dawgie.db.ID(tsk._name(), None), dawgie.db.ID(alg.name(), alg), dawgie.db.ID(sv.name(), sv), dawgie.db.ID(vn, v)))
+                    ins.append(
+                        dawgie.db.REF(
+                            dawgie.db.ID(tsk._name(), None),
+                            dawgie.db.ID(alg.name(), alg),
+                            dawgie.db.ID(sv.name(), sv),
+                            dawgie.db.ID(vn, v),
+                        )
+                    )
                     pass
                 pass
             pass
         tn, tsk, alg = dawgie.db.testdata.DATASETS[2]
         for sv in alg.sv:
             for vn, v in sv.items():
-                outs.append(dawgie.db.REF(dawgie.db.ID(tsk._name(), None), dawgie.db.ID(alg.name(), alg), dawgie.db.ID(sv.name(), sv), dawgie.db.ID(vn, v)))
+                outs.append(
+                    dawgie.db.REF(
+                        dawgie.db.ID(tsk._name(), None),
+                        dawgie.db.ID(alg.name(), alg),
+                        dawgie.db.ID(sv.name(), sv),
+                        dawgie.db.ID(vn, v),
+                    )
+                )
                 pass
             pass
         dawgie.db.close()
@@ -237,12 +281,21 @@ class DB:
         self.assertEqual(len(svs), len(alg.sv))
         self.assertEqual(len(vs), len(outs))
         self.assertFalse(dawgie.db.promote(juncture, dawgie.db.testdata.RUNID))
-        self.assertTrue(dawgie.db.promote(juncture, dawgie.db.testdata.RUNID + 12))
+        self.assertTrue(
+            dawgie.db.promote(juncture, dawgie.db.testdata.RUNID + 12)
+        )
         # clean up the promotion
         tgt, tsk, alg = dawgie.db.testdata.DATASETS[2]
         for sv in alg.state_vectors():
             for vn in sv.keys():
-                r = dawgie.db.remove(dawgie.db.testdata.RUNID + 12, tgt, tsk._name(), alg.name(), sv.name(), vn)
+                r = dawgie.db.remove(
+                    dawgie.db.testdata.RUNID + 12,
+                    tgt,
+                    tsk._name(),
+                    alg.name(),
+                    sv.name(),
+                    vn,
+                )
                 pass
             pass
         dawgie.db.close()
@@ -253,14 +306,38 @@ class DB:
         tgt, tsk, alg = dawgie.db.testdata.DATASETS[0]
         svn = alg.state_vectors()[0].name()
         vn = [k for k in alg.state_vectors()[0].keys()][0]
-        self.assertRaises(RuntimeError, dawgie.db.remove, tsk._runid(), tgt, tsk._name(), alg.name(), svn, vn)
+        self.assertRaises(
+            RuntimeError,
+            dawgie.db.remove,
+            tsk._runid(),
+            tgt,
+            tsk._name(),
+            alg.name(),
+            svn,
+            vn,
+        )
         dawgie.db.open()
         dawgie.db.remove(tsk._runid(), tgt, tsk._name(), alg.name(), svn, vn)
         keys = dawgie.db._prime_keys()
-        self.assertEqual((dawgie.db.testdata.TSK_CNT * dawgie.db.testdata.SVN_CNT * dawgie.db.testdata.VAL_CNT) - 1, len(keys))
+        self.assertEqual(
+            (
+                dawgie.db.testdata.TSK_CNT
+                * dawgie.db.testdata.SVN_CNT
+                * dawgie.db.testdata.VAL_CNT
+            )
+            - 1,
+            len(keys),
+        )
         dawgie.db.connect(alg, tsk, tgt).update()
         keys = dawgie.db._prime_keys()
-        self.assertEqual((dawgie.db.testdata.TSK_CNT * dawgie.db.testdata.SVN_CNT * dawgie.db.testdata.VAL_CNT), len(keys))
+        self.assertEqual(
+            (
+                dawgie.db.testdata.TSK_CNT
+                * dawgie.db.testdata.SVN_CNT
+                * dawgie.db.testdata.VAL_CNT
+            ),
+            len(keys),
+        )
         dawgie.db.close()
         return
 
@@ -280,7 +357,14 @@ class DB:
             pass
         print(type(alg.design()), alg.design())
         dawgie.db.close()
-        self.assertRaises(RuntimeError, dawgie.db.reset, dawgie.db.testdata.RUNID, tgt, tsk._name(), alg)
+        self.assertRaises(
+            RuntimeError,
+            dawgie.db.reset,
+            dawgie.db.testdata.RUNID,
+            tgt,
+            tsk._name(),
+            alg,
+        )
         dawgie.db.open()
         dawgie.db.reset(dawgie.db.testdata.RUNID, tgt, tsk._name(), alg)
         dawgie.db.close()
@@ -329,10 +413,16 @@ class DB:
         self.assertRaises(RuntimeError, dawgie.db.trace, ['a'])
         dawgie.db.open()
         last_alg = dawgie.db.testdata.ALG_CNT - 1
-        tans = ['Analysis_00.Analyzer_{:02d}'.format(last_alg), 'Regress_01.Regression_{:02d}'.format(last_alg), 'Task_02.Algorithm_{:02d}'.format(last_alg)]
+        tans = [
+            'Analysis_00.Analyzer_{:02d}'.format(last_alg),
+            'Regress_01.Regression_{:02d}'.format(last_alg),
+            'Task_02.Algorithm_{:02d}'.format(last_alg),
+        ]
         runids = dawgie.db.trace(tans)
         dawgie.db.close()
-        self.assertEqual(2 if dawgie.db.testdata.TARGET + '_a' in runids else 1, len(runids))
+        self.assertEqual(
+            2 if dawgie.db.testdata.TARGET + '_a' in runids else 1, len(runids)
+        )
         self.assertEqual(3, len(runids[dawgie.db.testdata.TARGET]))
         self.assertEqual(17, runids[dawgie.db.testdata.TARGET][tans[0]])
         self.assertEqual(0, runids[dawgie.db.testdata.TARGET][tans[1]])
@@ -344,14 +434,38 @@ class DB:
         tgt, tsk, alg = dawgie.db.testdata.DATASETS[0]
         svn = alg.state_vectors()[0].name()
         vn = [k for k in alg.state_vectors()[0].keys()][0]
-        self.assertRaises(RuntimeError, dawgie.db.remove, tsk._runid(), tgt, tsk._name(), alg.name(), svn, vn)
+        self.assertRaises(
+            RuntimeError,
+            dawgie.db.remove,
+            tsk._runid(),
+            tgt,
+            tsk._name(),
+            alg.name(),
+            svn,
+            vn,
+        )
         dawgie.db.open()
         dawgie.db.remove(tsk._runid(), tgt, tsk._name(), alg.name(), svn, vn)
         keys = dawgie.db._prime_keys()
-        self.assertEqual((dawgie.db.testdata.TSK_CNT * dawgie.db.testdata.SVN_CNT * dawgie.db.testdata.VAL_CNT) - 1, len(keys))
+        self.assertEqual(
+            (
+                dawgie.db.testdata.TSK_CNT
+                * dawgie.db.testdata.SVN_CNT
+                * dawgie.db.testdata.VAL_CNT
+            )
+            - 1,
+            len(keys),
+        )
         dawgie.db.connect(alg, tsk, tgt).update()
         keys = dawgie.db._prime_keys()
-        self.assertEqual((dawgie.db.testdata.TSK_CNT * dawgie.db.testdata.SVN_CNT * dawgie.db.testdata.VAL_CNT), len(keys))
+        self.assertEqual(
+            (
+                dawgie.db.testdata.TSK_CNT
+                * dawgie.db.testdata.SVN_CNT
+                * dawgie.db.testdata.VAL_CNT
+            ),
+            len(keys),
+        )
         dawgie.db.close()
         return
 
@@ -361,9 +475,26 @@ class DB:
         dawgie.db.open()
         tskv, algv, svv, vv = dawgie.db.versions()
         self.assertEqual(dawgie.db.testdata.TSK_CNT, len(tskv))
-        self.assertEqual((dawgie.db.testdata.TSK_CNT * dawgie.db.testdata.ALG_CNT), len(algv))
-        self.assertEqual((dawgie.db.testdata.TSK_CNT * dawgie.db.testdata.ALG_CNT * dawgie.db.testdata.SVN_CNT), len(svv))
-        self.assertEqual((dawgie.db.testdata.TSK_CNT * dawgie.db.testdata.ALG_CNT * dawgie.db.testdata.SVN_CNT * dawgie.db.testdata.VAL_CNT), len(vv))
+        self.assertEqual(
+            (dawgie.db.testdata.TSK_CNT * dawgie.db.testdata.ALG_CNT), len(algv)
+        )
+        self.assertEqual(
+            (
+                dawgie.db.testdata.TSK_CNT
+                * dawgie.db.testdata.ALG_CNT
+                * dawgie.db.testdata.SVN_CNT
+            ),
+            len(svv),
+        )
+        self.assertEqual(
+            (
+                dawgie.db.testdata.TSK_CNT
+                * dawgie.db.testdata.ALG_CNT
+                * dawgie.db.testdata.SVN_CNT
+                * dawgie.db.testdata.VAL_CNT
+            ),
+            len(vv),
+        )
         return
 
     def test_locks(self):
@@ -501,7 +632,9 @@ class Shelve(DB, unittest.TestCase):
         root = os.path.join(self.root, 'connector')
         os.makedirs(root)
         dawgie.db.open()
-        retval = dawgie.db.copy(root, dawgie.db.shelve.enums.Method.connector, 'localhost')
+        retval = dawgie.db.copy(
+            root, dawgie.db.shelve.enums.Method.connector, 'localhost'
+        )
         self.assertEqual(0, retval)
         dawgie.db.close()
         return

@@ -83,7 +83,12 @@ class Engine(dawgie.Algorithm):
     def run(self, ds, ps):
         image = self.__base.sv_as_dict()['test']['image'].array()
         p = [750, 0, 500, 0]
-        res = scipy.optimize.minimize(Engine._opt, p, (image,), bounds=[(100, 1000), (-3.2, 3.2), (100, 1000), (-3.2, 3.2)])
+        res = scipy.optimize.minimize(
+            Engine._opt,
+            p,
+            (image,),
+            bounds=[(100, 1000), (-3.2, 3.2), (100, 1000), (-3.2, 3.2)],
+        )
         log.critical('Coefficients: %s', str(res.x))
         self.__clean['image'] = ae.Value(Engine._model(res.x, image.shape))
         ds.update()

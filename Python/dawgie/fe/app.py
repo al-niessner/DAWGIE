@@ -72,7 +72,9 @@ def db_lockview():
 
 def db_prime():
     # pylint: disable=protected-access
-    return json.dumps(list({'.'.join(k.split('.')[:-1]) for k in dawgie.db._prime_keys()})).encode()
+    return json.dumps(
+        list({'.'.join(k.split('.')[:-1]) for k in dawgie.db._prime_keys()})
+    ).encode()
 
 
 def db_targets():
@@ -88,7 +90,9 @@ def log_messages():
 
 
 def pl_state():
-    return json.dumps({'name': dawgie.context.fsm.state, 'status': 'active'}).encode()
+    return json.dumps(
+        {'name': dawgie.context.fsm.state, 'status': 'active'}
+    ).encode()
 
 
 def schedule_crew():
@@ -108,10 +112,26 @@ def schedule_failure():
 
 
 def schedule_reset(archive: str = 'false'):
-    archive = archive.lower() in ['true', 'tru', 'tr', 't', '1', 'y', 'ye', 'yes', 'on']
-    msg = {'alert_status': 'danger', 'alert_message': 'Could not reset because the FSM is not defined.'}
+    archive = archive.lower() in [
+        'true',
+        'tru',
+        'tr',
+        't',
+        '1',
+        'y',
+        'ye',
+        'yes',
+        'on',
+    ]
+    msg = {
+        'alert_status': 'danger',
+        'alert_message': 'Could not reset because the FSM is not defined.',
+    }
     if 'fsm' in dir(dawgie.context):
-        msg = {'alert_status': 'success', 'alert_message': 'Triggered updating then load.'}
+        msg = {
+            'alert_status': 'success',
+            'alert_message': 'Triggered updating then load.',
+        }
         if archive:
             dawgie.context.fsm.archive()
         dawgie.context.fsm.wait_for_nothing()
@@ -121,8 +141,17 @@ def schedule_reset(archive: str = 'false'):
 def schedule_run(tasks: [str], targets: [str]):
     log.debug('schedule_run: targets %s', str(targets))
     log.debug('schedule_run: tasks %s', str(tasks))
-    dawgie.pl.schedule.organize(task_names=tasks, targets=set(targets), event='command-run requested by user')
-    return json.dumps({'alert_status': 'success', 'alert_message': 'All jobs scheduled to run.'}).encode()
+    dawgie.pl.schedule.organize(
+        task_names=tasks,
+        targets=set(targets),
+        event='command-run requested by user',
+    )
+    return json.dumps(
+        {
+            'alert_status': 'success',
+            'alert_message': 'All jobs scheduled to run.',
+        }
+    ).encode()
 
 
 def schedule_success():
@@ -169,13 +198,22 @@ def _search(axis, key):
         pass
 
     result = {'items': []}
-    keys = list({'.'.join(k.split('.')[:-1]) for k in filter(lambda k: -1 < prime(k).find(key), dawgie.db._prime_keys())})
+    keys = list(
+        {
+            '.'.join(k.split('.')[:-1])
+            for k in filter(
+                lambda k: -1 < prime(k).find(key), dawgie.db._prime_keys()
+            )
+        }
+    )
     keys.sort(key=prime)
     for lkey in sorted({prime(k) for k in keys}):
         result['items'].append({k1: lkey, k2: []})
         tnks = list(filter(lambda k: prime(k) == lkey, keys))
         for nn in sorted({second(k) for k in tnks}):
-            ids = sorted({third(k) for k in filter(lambda k: second(k) == nn, tnks)})
+            ids = sorted(
+                {third(k) for k in filter(lambda k: second(k) == nn, tnks)}
+            )
             result['items'][-1]['targets'].append({k3: nn, k4: ids})
             pass
         pass
@@ -185,10 +223,14 @@ def _search(axis, key):
 def _search_filter(fn: str, default: {}) -> bytes:
     if os.path.isfile(os.path.join(dawgie.context.fe_path, fn)):
         try:
-            with open(os.path.join(dawgie.context.fe_path, fn), 'rt', encoding="utf-8") as f:
+            with open(
+                os.path.join(dawgie.context.fe_path, fn), 'rt', encoding="utf-8"
+            ) as f:
                 default = json.load(f)
         except:
-            log.exception('Text file could not be parsed as JSON')  # pylint: disable=bare-except
+            log.exception(
+                'Text file could not be parsed as JSON'
+            )  # pylint: disable=bare-except
     else:
         log.debug('using DAWGIE default for %s', fn)
     return json.dumps(default).encode()
@@ -196,7 +238,9 @@ def _search_filter(fn: str, default: {}) -> bytes:
 
 def search_cmplt_svn():
     # pylint: disable=protected-access
-    return json.dumps(sorted({'.'.join(k.split('.')[2:-1]) for k in dawgie.db._prime_keys()})).encode()
+    return json.dumps(
+        sorted({'.'.join(k.split('.')[2:-1]) for k in dawgie.db._prime_keys()})
+    ).encode()
 
 
 def search_cmplt_tn():
@@ -233,12 +277,16 @@ def start_changeset():
 
 
 def start_state():
-    return json.dumps({'name': dawgie.context.fsm.state, 'status': 'active'}).encode()
+    return json.dumps(
+        {'name': dawgie.context.fsm.state, 'status': 'active'}
+    ).encode()
 
 
 def versions():
     # it is iterable so pylint: disable=not-an-iterable
-    dl = {p.key: p.parsed_version.base_version for p in pkg_resources.working_set}
+    dl = {
+        p.key: p.parsed_version.base_version for p in pkg_resources.working_set
+    }
     # pylint: enable=not-an-iterable
     fn = os.path.join(os.path.dirname(__file__), 'requirements.txt')
     vers = {'dawgie': dawgie.__version__, 'python': sys.version}

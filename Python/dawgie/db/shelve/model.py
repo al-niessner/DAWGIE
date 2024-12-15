@@ -61,10 +61,14 @@ class Interface(Connector, Container, Dataset, Timeline):
         self.__span = {}
         self.__null_metric = dawgie.util.metrics.filled(-1)
         self._log = log.getChild(self.__class__.__name__)
-        self.msv = dawgie.util.MetricStateVector(self.__null_metric, self.__null_metric)
+        self.msv = dawgie.util.MetricStateVector(
+            self.__null_metric, self.__null_metric
+        )
         return
 
-    def __refs2indices(self, refs: [(dawgie.SV_REF, dawgie.V_REF)]) -> {(int, int, int, int): (str, str)}:
+    def __refs2indices(
+        self, refs: [(dawgie.SV_REF, dawgie.V_REF)]
+    ) -> {(int, int, int, int): (str, str)}:
         '''convert references into tuple of index stored in the primary table
 
         return a dictionary of (tskid,algid,svid,vid):("tskn.algn.svn",vn)
@@ -77,22 +81,40 @@ class Interface(Connector, Container, Dataset, Timeline):
             vn = vref.feat
             # pylint: disable=protected-access
             tid = self._update_cmd(task, None, Table.task, None, None)[1]
-            aid = self._update_cmd(algn, tid, Table.alg, None, vref.impl._get_ver())[1]
-            sid = self._update_cmd(svn, aid, Table.state, None, vref.item._get_ver())[1]
-            vid = self._update_cmd(vn, sid, Table.value, None, vref.item[vn]._get_ver())[1]
+            aid = self._update_cmd(
+                algn, tid, Table.alg, None, vref.impl._get_ver()
+            )[1]
+            sid = self._update_cmd(
+                svn, aid, Table.state, None, vref.item._get_ver()
+            )[1]
+            vid = self._update_cmd(
+                vn, sid, Table.value, None, vref.item[vn]._get_ver()
+            )[1]
             # pylint: enable=protected-access
             reftable[(tid, aid, sid, vid)] = ('.'.join([task, algn, svn]), vn)
             pass
         return reftable
 
     # pylint: disable=protected-access,too-many-arguments
-    def __to_key(self, runid: int, tn: str, task: str, alg: dawgie.Algorithm, sv: dawgie.StateVector, vn: str):
+    def __to_key(
+        self,
+        runid: int,
+        tn: str,
+        task: str,
+        alg: dawgie.Algorithm,
+        sv: dawgie.StateVector,
+        vn: str,
+    ):
         if any(arg is None for arg in [runid, tn, task, alg, sv, vn]):
             raise ValueError('cannot be None')
         trgtid = self._update_cmd(tn, None, Table.target, None, None)[1]
         tid = self._update_cmd(task, None, Table.task, None, None)[1]
-        aid = self._update_cmd(alg.name(), tid, Table.alg, None, alg._get_ver())[1]
-        sid = self._update_cmd(sv.name(), aid, Table.state, None, sv._get_ver())[1]
+        aid = self._update_cmd(
+            alg.name(), tid, Table.alg, None, alg._get_ver()
+        )[1]
+        sid = self._update_cmd(
+            sv.name(), aid, Table.state, None, sv._get_ver()
+        )[1]
         vid = self._update_cmd(vn, sid, Table.value, None, sv[vn]._get_ver())[1]
         return (runid, trgtid, tid, aid, sid, vid)
 
@@ -101,7 +123,9 @@ class Interface(Connector, Container, Dataset, Timeline):
     def _collect(self, refs: [(dawgie.SV_REF, dawgie.V_REF)]) -> None:
         self.__span = {}
         refis = self.__refs2indices(refs)
-        tnis = {index: name for name, index in self._table(Table.target).items()}
+        tnis = {
+            index: name for name, index in self._table(Table.target).items()
+        }
         for pk in self._prime_keys():
             if pk[2:] in refis:
                 tn = tnis[pk[1]]
@@ -155,37 +179,72 @@ class Interface(Connector, Container, Dataset, Timeline):
                 # need to get some private information
                 # pylint: disable=protected-access
                 if ft == dawgie.Factories.analysis:
-                    args = (dawgie.util.task_name(algref.factory), self._bot()._ps_hint(), self._bot()._runid())
+                    args = (
+                        dawgie.util.task_name(algref.factory),
+                        self._bot()._ps_hint(),
+                        self._bot()._runid(),
+                    )
                     tn = '__all__'
                 elif ft == dawgie.Factories.regress:
-                    args = (dawgie.util.task_name(algref.factory), self._bot()._ps_hint(), tn)
+                    args = (
+                        dawgie.util.task_name(algref.factory),
+                        self._bot()._ps_hint(),
+                        tn,
+                    )
                 elif ft == dawgie.Factories.task:
-                    args = (dawgie.util.task_name(algref.factory), self._bot()._ps_hint(), self._bot()._runid(), tn)
+                    args = (
+                        dawgie.util.task_name(algref.factory),
+                        self._bot()._ps_hint(),
+                        self._bot()._runid(),
+                        tn,
+                    )
                 else:
-                    raise KeyError(f'Unknown factory type {algref.factory.__name__}')
+                    raise KeyError(
+                        f'Unknown factory type {algref.factory.__name__}'
+                    )
                 # pylint: enable=protected-access
 
                 child = Interface(algref.impl, algref.factory(*args), tn)
-                child._load(err=err, ver=ver, lok=lok)  # pylint: disable=protected-access
+                child._load(
+                    err=err, ver=ver, lok=lok
+                )  # pylint: disable=protected-access
                 pass
             else:
-                msv = dawgie.util.MetricStateVector(self.__null_metric, self.__null_metric)
+                msv = dawgie.util.MetricStateVector(
+                    self.__null_metric, self.__null_metric
+                )
                 pks = self._prime_keys()
                 for sv in self._alg().state_vectors() + [msv]:
                     for vn in sv:
                         # need to get some private information
                         # pylint: disable=protected-access
-                        pk = self.__to_key(self._bot()._runid(), self._tn(), self._task(), self._alg(), sv, vn)
+                        pk = self.__to_key(
+                            self._bot()._runid(),
+                            self._tn(),
+                            self._task(),
+                            self._alg(),
+                            sv,
+                            vn,
+                        )
                         # pylint: enable=protected-access
 
                         if pk not in pks:
-                            spks = list(filter(lambda k, K=pk: k[1:] == K[1:], pks))
+                            spks = list(
+                                filter(lambda k, K=pk: k[1:] == K[1:], pks)
+                            )
                             spks.sort(key=lambda t: t[0])
 
                             if spks:
                                 pk = spks[-1]
                             else:
-                                log.warning('No matches for: %s.%s.%s.%s.%s', self._tn(), self._task(), self._alg().name(), sv.name(), vn)
+                                log.warning(
+                                    'No matches for: %s.%s.%s.%s.%s',
+                                    self._tn(),
+                                    self._task(),
+                                    self._alg().name(),
+                                    sv.name(),
+                                    vn,
+                                )
                                 continue
                             pass
 
@@ -221,7 +280,9 @@ class Interface(Connector, Container, Dataset, Timeline):
             pass
         return
 
-    def _retarget(self, subname: str, upstream: [dawgie.ALG_REF]) -> dawgie.Dataset:
+    def _retarget(
+        self, subname: str, upstream: [dawgie.ALG_REF]
+    ) -> dawgie.Dataset:
         return Interface(self._alg(), self._bot(), subname)
 
     def _update(self):
@@ -236,7 +297,12 @@ class Interface(Connector, Container, Dataset, Timeline):
             for sv in self._alg().state_vectors():
                 for k in sv.keys():
                     if not dawgie.db.util.verify(sv[k]):
-                        self._log.critical('offending item is %s', '.'.join([self._task(), self._algn(), sv.name(), k]))
+                        self._log.critical(
+                            'offending item is %s',
+                            '.'.join(
+                                [self._task(), self._algn(), sv.name(), k]
+                            ),
+                        )
                         valid = False
                         continue
                     pass
@@ -244,7 +310,10 @@ class Interface(Connector, Container, Dataset, Timeline):
 
             if not valid:
                 # exceptions always look the same; pylint: disable=duplicate-code
-                raise dawgie.NotValidImplementationError('StateVector contains data that does not extend ' + 'dawgie.Value correctly. See log for details.')
+                raise dawgie.NotValidImplementationError(
+                    'StateVector contains data that does not extend '
+                    + 'dawgie.Value correctly. See log for details.'
+                )
 
             for sv in self._alg().state_vectors():
                 for k in sv.keys():
@@ -272,7 +341,10 @@ class Interface(Connector, Container, Dataset, Timeline):
         try:
             for k in msv.keys():
                 if not dawgie.db.util.verify(msv[k]):
-                    self._log.critical('offending item is %s', '.'.join([self._task(), self._algn(), msv.name(), k]))
+                    self._log.critical(
+                        'offending item is %s',
+                        '.'.join([self._task(), self._algn(), msv.name(), k]),
+                    )
                     valid = False
                     continue
                 pass
@@ -280,7 +352,8 @@ class Interface(Connector, Container, Dataset, Timeline):
             if not valid:
                 # exceptions always look the same; pylint: disable=duplicate-code
                 raise dawgie.NotValidImplementationError(
-                    'MetricStateVector contains data that does not extend ' + 'dawgie.Value correctly. See log for details.'
+                    'MetricStateVector contains data that does not extend '
+                    + 'dawgie.Value correctly. See log for details.'
                 )
 
             for k in msv.keys():

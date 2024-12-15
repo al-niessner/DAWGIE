@@ -50,15 +50,75 @@ def main():
     ap = argparse.ArgumentParser(
         description='Reduce a log file to something more meaningful using simple filtering defined at the command line. The entire pipeline system is built around the python logging facility. The problem with that is the logs get very large and contain lots of messages that are not very interesteding at this moment but will be at another momement. This tool allows the user to filter dowen the messages to just those that are of concern now.'
     )
-    ap.add_argument('-f', '--file-name', required=True, type=filename, help='full path to the log file to reduce')
-    ap.add_argument('-id', '--ignore-debug', action='store_true', default=False, required=False, help='ignore all debug messages')
-    ap.add_argument('-ii', '--ignore-info', action='store_true', default=False, required=False, help='ignore all info messages')
-    ap.add_argument('-iw', '--ignore-warning', action='store_true', default=False, required=False, help='ignore all warning messages')
-    ap.add_argument('-ie', '--ignore-error', action='store_true', default=False, required=False, help='ignore all error messages')
-    ap.add_argument('-ic', '--ignore-critical', action='store_true', default=False, required=False, help='ignore all critical messages')
-    ap.add_argument('-is', '--ignore-scrape', action='store_true', default=False, required=False, help='ignore the missing URI scrape errors')
-    ap.add_argument('-im', '--ignore-module', default=[], nargs='*', help='ignore packages like "dawgie.ae.deroo.fit"')
-    ap.add_argument('-it', '--ignore-text', default=[], nargs='*', help='ignore text in the message part of the log entry')
+    ap.add_argument(
+        '-f',
+        '--file-name',
+        required=True,
+        type=filename,
+        help='full path to the log file to reduce',
+    )
+    ap.add_argument(
+        '-id',
+        '--ignore-debug',
+        action='store_true',
+        default=False,
+        required=False,
+        help='ignore all debug messages',
+    )
+    ap.add_argument(
+        '-ii',
+        '--ignore-info',
+        action='store_true',
+        default=False,
+        required=False,
+        help='ignore all info messages',
+    )
+    ap.add_argument(
+        '-iw',
+        '--ignore-warning',
+        action='store_true',
+        default=False,
+        required=False,
+        help='ignore all warning messages',
+    )
+    ap.add_argument(
+        '-ie',
+        '--ignore-error',
+        action='store_true',
+        default=False,
+        required=False,
+        help='ignore all error messages',
+    )
+    ap.add_argument(
+        '-ic',
+        '--ignore-critical',
+        action='store_true',
+        default=False,
+        required=False,
+        help='ignore all critical messages',
+    )
+    ap.add_argument(
+        '-is',
+        '--ignore-scrape',
+        action='store_true',
+        default=False,
+        required=False,
+        help='ignore the missing URI scrape errors',
+    )
+    ap.add_argument(
+        '-im',
+        '--ignore-module',
+        default=[],
+        nargs='*',
+        help='ignore packages like "dawgie.ae.deroo.fit"',
+    )
+    ap.add_argument(
+        '-it',
+        '--ignore-text',
+        default=[],
+        nargs='*',
+        help='ignore text in the message part of the log entry',
+    )
     args = ap.parse_args()
     ignore = {
         'DEBUG': args.ignore_debug,
@@ -88,7 +148,9 @@ def reduce(fn, ignore):
                     yield m
 
                 lvl = l[: l.find(':')]
-                mod = l[len(lvl) + 1 : l[len(lvl) + 1 :].find(':') + len(lvl) + 1]
+                mod = l[
+                    len(lvl) + 1 : l[len(lvl) + 1 :].find(':') + len(lvl) + 1
+                ]
                 msg = l[len(lvl) + len(mod) + 2 :]
                 t = not ignore[lvl]
                 t &= l.find('scrape this URI:') < 0

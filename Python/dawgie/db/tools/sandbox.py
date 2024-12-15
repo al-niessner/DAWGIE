@@ -79,7 +79,13 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(
         description='Safely copies database to a specified location. This tool is necessary when creating a database sandbox.\n\nExample:\n    sandbox.py --context-db-copy-path=/tmp/mysandboxdb --context-db-port=9999'
     )
-    ap.add_argument('-l', '--log-file', default=unique_fn, required=False, help='a filename to put all of the log messages into [%(default)s]')
+    ap.add_argument(
+        '-l',
+        '--log-file',
+        default=unique_fn,
+        required=False,
+        help='a filename to put all of the log messages into [%(default)s]',
+    )
     ap.add_argument(
         '-L',
         '--log-level',
@@ -96,12 +102,21 @@ if __name__ == "__main__":
         help='method to copy database. Options are connector, rsync, scp, cp. Please use connector as a last resort. [%(default)s]',
     )
     dawgie.context.add_arguments(ap)
-    ap.add_argument('-g', '--gateway', default=dawgie.context.db_host, required=False, help='Database source machine. [%(default)s]')
+    ap.add_argument(
+        '-g',
+        '--gateway',
+        default=dawgie.context.db_host,
+        required=False,
+        help='Database source machine. [%(default)s]',
+    )
 
     args = ap.parse_args()
     dawgie.context.override(args)
 
-    logging.basicConfig(filename=os.path.join(dawgie.context.data_log, args.log_file), level=args.log_level)
+    logging.basicConfig(
+        filename=os.path.join(dawgie.context.data_log, args.log_file),
+        level=args.log_level,
+    )
 
     if args.method == "connector":
         args.method = Method.connector
@@ -112,7 +127,13 @@ if __name__ == "__main__":
     elif args.method == "cp":
         args.method = Method.cp
 
-    returnCode = dbcopy(args.context_db_host, int(args.context_db_port), args.context_db_copy_path, args.method, args.gateway)
+    returnCode = dbcopy(
+        args.context_db_host,
+        int(args.context_db_port),
+        args.context_db_copy_path,
+        args.method,
+        args.gateway,
+    )
     print(returnCode)
     sys.exit(returnCode)
     pass

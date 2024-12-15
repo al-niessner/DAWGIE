@@ -78,8 +78,16 @@ class Start(LogFailure):
     pass
 
 
-ap = argparse.ArgumentParser(description='The main routine to run the fully automated pipeline.')
-ap.add_argument('-l', '--log-file', default='dawgie.log', required=False, help='a filename to put all of the log messages into [%(default)s]')
+ap = argparse.ArgumentParser(
+    description='The main routine to run the fully automated pipeline.'
+)
+ap.add_argument(
+    '-l',
+    '--log-file',
+    default='dawgie.log',
+    required=False,
+    help='a filename to put all of the log messages into [%(default)s]',
+)
 ap.add_argument(
     '-L',
     '--log-level',
@@ -88,7 +96,14 @@ ap.add_argument(
     type=dawgie.util.log_level,
     help='set the verbosity that you want where a smaller number means more verbose [logging.WARN]',
 )
-ap.add_argument('-p', '--port', default=dawgie.context.fe_port, required=False, type=int, help='server port number for the display [%(default)s]')
+ap.add_argument(
+    '-p',
+    '--port',
+    default=dawgie.context.fe_port,
+    required=False,
+    type=int,
+    help='server port number for the display [%(default)s]',
+)
 ap.add_argument(
     '-r',
     '--repo-dir',
@@ -101,17 +116,46 @@ args = ap.parse_args()
 
 if args.port != dawgie.context.fe_port:
     gnew = args.port + dawgie.context.PortOffset.frontend.value
-    args.context_cfe_port = _merge(dawgie.context.fe_port, gnew, dawgie.context.PortOffset.certFE.value, args.context_cfe_port)
-    args.context_cloud_port = _merge(dawgie.context.fe_port, gnew, dawgie.context.PortOffset.cloud.value, args.context_cloud_port)
-    args.context_db_port = _merge(dawgie.context.fe_port, gnew, dawgie.context.PortOffset.shelve.value, args.context_db_port)
-    args.context_farm_port = _merge(dawgie.context.fe_port, gnew, dawgie.context.PortOffset.farm.value, args.context_farm_port)
-    args.context_log_port = _merge(dawgie.context.fe_port, gnew, dawgie.context.PortOffset.log.value, args.context_log_port)
-    dawgie.context.fe_port = args.port + dawgie.context.PortOffset.frontend.value
+    args.context_cfe_port = _merge(
+        dawgie.context.fe_port,
+        gnew,
+        dawgie.context.PortOffset.certFE.value,
+        args.context_cfe_port,
+    )
+    args.context_cloud_port = _merge(
+        dawgie.context.fe_port,
+        gnew,
+        dawgie.context.PortOffset.cloud.value,
+        args.context_cloud_port,
+    )
+    args.context_db_port = _merge(
+        dawgie.context.fe_port,
+        gnew,
+        dawgie.context.PortOffset.shelve.value,
+        args.context_db_port,
+    )
+    args.context_farm_port = _merge(
+        dawgie.context.fe_port,
+        gnew,
+        dawgie.context.PortOffset.farm.value,
+        args.context_farm_port,
+    )
+    args.context_log_port = _merge(
+        dawgie.context.fe_port,
+        gnew,
+        dawgie.context.PortOffset.log.value,
+        args.context_log_port,
+    )
+    dawgie.context.fe_port = (
+        args.port + dawgie.context.PortOffset.frontend.value
+    )
     pass
 
 dawgie.context.log_level = args.log_level
 dawgie.context.override(args)
-twisted.internet.reactor.callLater(0, Start(args, 'starting the pipeline', 'dawgie.pl').callback, 'main')
+twisted.internet.reactor.callLater(
+    0, Start(args, 'starting the pipeline', 'dawgie.pl').callback, 'main'
+)
 twisted.internet.reactor.run()
 print('calling system exit...')
 sys.exit()

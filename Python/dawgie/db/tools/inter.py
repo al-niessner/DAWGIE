@@ -100,7 +100,9 @@ def _ref(ident: str) -> str:
 
 
 def copy_blobs(blobs: [str], blobpath: str, outpath: str) -> None:
-    for bfn in progressbar(blobs, prefix='DBS:'):  # pylint: disable=not-callable
+    for bfn in progressbar(
+        blobs, prefix='DBS:'
+    ):  # pylint: disable=not-callable
         ifn = os.path.join(blobpath, bfn)
         ofn = os.path.join(os.path.join(outpath, 'dbs'), bfn)
 
@@ -129,10 +131,16 @@ def postgres(args: argparse.Namespace) -> [str]:
     blobs = []
     ifn = 'interred.' + os.path.basename(args.backup_file)
     seconds = postgres_extract_secondary_tables(args.backup_file)
-    with open(os.path.join(os.path.join(args.output_path, 'db'), ifn), 'tw', encoding="utf-8") as output_file:
+    with open(
+        os.path.join(os.path.join(args.output_path, 'db'), ifn),
+        'tw',
+        encoding="utf-8",
+    ) as output_file:
         key = ''
         with open(args.backup_file, 'rt', encoding="utf-8") as input_file:
-            for line in progressbar(input_file.readlines(), prefix='DB:'):  # pylint: disable=not-callable
+            for line in progressbar(
+                input_file.readlines(), prefix='DB:'
+            ):  # pylint: disable=not-callable
                 if line.startswith('\\.'):
                     key = ''
                 elif line.startswith('COPY public.prime'):
@@ -157,7 +165,13 @@ def postgres(args: argparse.Namespace) -> [str]:
 def postgres_extract_secondary_tables(filename: str) -> {}:
     '''build a lookup table from name to set of foriegn keys'''
     key = ''
-    tables = {'target': {}, 'task': {}, 'algorithm': {}, 'statevector': {}, 'value': {}}
+    tables = {
+        'target': {},
+        'task': {},
+        'algorithm': {},
+        'statevector': {},
+        'value': {},
+    }
     with open(filename, 'rt', encoding="utf-8") as file:
         for line in file.readlines():
             if line.startswith('\\.'):
@@ -179,17 +193,28 @@ def postgres_is_match(ref: str, items: [str]) -> bool:
     matches = []
     sref = ref.split('.')
     for item in items:
-        matches.append(all((_compare(r, i) for r, i in zip(sref, item.split('.')))))
+        matches.append(
+            all((_compare(r, i) for r, i in zip(sref, item.split('.'))))
+        )
         pass
     return any(matches)
 
 
 def postgres_translate(row: str, tables: {}) -> str:
     '''translate from a Prime table row to a simple string with . delimiting'''
-    _pk, run_id, task_id, tn_id, alg_id, sv_id, val_id, blob_name = row.strip().split()
+    _pk, run_id, task_id, tn_id, alg_id, sv_id, val_id, blob_name = (
+        row.strip().split()
+    )
     return (
         '.'.join(
-            [run_id, tables['target'][tn_id], tables['task'][task_id], tables['algorithm'][alg_id], tables['statevector'][sv_id], tables['value'][val_id]]
+            [
+                run_id,
+                tables['target'][tn_id],
+                tables['task'][task_id],
+                tables['algorithm'][alg_id],
+                tables['statevector'][sv_id],
+                tables['value'][val_id],
+            ]
         ),
         blob_name,
     )
@@ -199,11 +224,35 @@ if __name__ == '__main__':
     AP = argparse.ArgumentParser(description=__doc__)
     CMD = AP.add_subparsers(help='database to be interred', title='commands')
     PDB = CMD.add_parser('postgres', help='inter a set of postgresql data')
-    PDB.add_argument('-b', '--backup-file', default='', type=_file, help='postgresql backup file made with pgdump')
+    PDB.add_argument(
+        '-b',
+        '--backup-file',
+        default='',
+        type=_file,
+        help='postgresql backup file made with pgdump',
+    )
     PDB.set_defaults(func=postgres)
-    AP.add_argument('-B', '--blob-path', required=True, type=_path, help='path to the blob data that the database references')
-    AP.add_argument('-O', '--output-path', required=True, type=_path, help='path to output inter information')
-    AP.add_argument('-v', '--verbose', action='store_true', default=False, help='some helpful information about what is happening')
+    AP.add_argument(
+        '-B',
+        '--blob-path',
+        required=True,
+        type=_path,
+        help='path to the blob data that the database references',
+    )
+    AP.add_argument(
+        '-O',
+        '--output-path',
+        required=True,
+        type=_path,
+        help='path to output inter information',
+    )
+    AP.add_argument(
+        '-v',
+        '--verbose',
+        action='store_true',
+        default=False,
+        help='some helpful information about what is happening',
+    )
     AP.add_argument(
         'items',
         default=[sys.stdin],

@@ -62,7 +62,12 @@ class Hand(twisted.internet.protocol.Protocol):
     # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _res(msg):
-        done = msg.jobid + '[' + (msg.incarnation if msg.incarnation else '__all__') + ']'
+        done = (
+            msg.jobid
+            + '['
+            + (msg.incarnation if msg.incarnation else '__all__')
+            + ']'
+        )
         while 0 < _busy.count(done):
             _busy.remove(done)
             if done in _time:
@@ -96,7 +101,9 @@ class Hand(twisted.internet.protocol.Protocol):
 
     def __init__(self, address):
         twisted.internet.protocol.Protocol.__init__(self)
-        self._abort = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, suc=False)
+        self._abort = dawgie.pl.message.make(
+            typ=dawgie.pl.message.Type.response, suc=False
+        )
         self.__address = address
         self.__blen = len(struct.pack('>I', 0))
         self.__buf = b''
@@ -106,7 +113,9 @@ class Hand(twisted.internet.protocol.Protocol):
         if not dawgie.security.useTLS():
             # really is used so pylint: disable=unused-private-member
             self.__handshake = dawgie.security.TwistedWrapper(self, address)
-        self.__proceed = dawgie.pl.message.make(typ=dawgie.pl.message.Type.response, suc=True)
+        self.__proceed = dawgie.pl.message.make(
+            typ=dawgie.pl.message.Type.response, suc=True
+        )
         self.__wait = dawgie.pl.message.make()
         return
 
@@ -121,11 +130,15 @@ class Hand(twisted.internet.protocol.Protocol):
         elif msg.type == dawgie.pl.message.Type.response:
             Hand._res(msg)
         elif msg.type == dawgie.pl.message.Type.status:
-            if msg.revision != dawgie.context.git_rev or not dawgie.context.fsm.is_pipeline_active():
+            if (
+                msg.revision != dawgie.context.git_rev
+                or not dawgie.context.fsm.is_pipeline_active()
+            ):
                 dawgie.pl.message.send(self._abort, self)
                 # long msg more readable so pylint: disable=logging-not-lazy
                 log.warning(
-                    'Worker and pipeline revisions are not the same. ' + 'Sever version %s and worker version %s.',
+                    'Worker and pipeline revisions are not the same. '
+                    + 'Sever version %s and worker version %s.',
                     str(msg.revision),
                     str(dawgie.context.git_rev),
                 )
@@ -146,7 +159,9 @@ class Hand(twisted.internet.protocol.Protocol):
         else:
             _workers.append(self)
             self.__incarnation = msg.incarnation
-            log.debug('Registered a worker for its %d incarnation.', msg.incarnation)
+            log.debug(
+                'Registered a worker for its %d incarnation.', msg.incarnation
+            )
             pass
         return
 
@@ -175,7 +190,9 @@ class Hand(twisted.internet.protocol.Protocol):
         return
 
     def do(self, task):
-        _busy.append(task.jobid + '[' + (task.target if task.target else '__all__') + ']')
+        _busy.append(
+            task.jobid + '[' + (task.target if task.target else '__all__') + ']'
+        )
         _time[_busy[-1]] = datetime.datetime.now()
         return dawgie.pl.message.send(task, self)
 
@@ -225,7 +242,11 @@ def _move(job, try_again) -> None:
 def _put(job, runid: int, target: str, where: dawgie.Distribution):
     if where == dawgie.Distribution.auto:
         key = '.'.join([target if target else '__all__', job.tag])
-        where = insights[key].summary if key in insights else dawgie.Distribution.cluster
+        where = (
+            insights[key].summary
+            if key in insights
+            else dawgie.Distribution.cluster
+        )
         pass
 
     now = datetime.datetime.utcnow()
@@ -239,7 +260,9 @@ def _put(job, runid: int, target: str, where: dawgie.Distribution):
         tim={'scheduled': now},
         typ=dawgie.pl.message.Type.task,
     )
-    (_cloud if _agency and where == dawgie.Distribution.cloud else _cluster).append(msg)
+    (
+        _cloud if _agency and where == dawgie.Distribution.cloud else _cluster
+    ).append(msg)
     return
 
 
@@ -256,13 +279,25 @@ def clear():
 
 def crew():
     # string is complicated so pylint: disable=consider-using-f-string
-    return {'busy': [b + " duration: %s" % delta_time_to_string(datetime.datetime.now() - _time[b]) for b in _busy], 'idle': str(len(_workers))}
+    return {
+        'busy': [
+            b
+            + " duration: %s"
+            % delta_time_to_string(datetime.datetime.now() - _time[b])
+            for b in _busy
+        ],
+        'idle': str(len(_workers)),
+    }
 
 
 def delta_time_to_string(diff):
     mins = diff.seconds / 60
     # string is complicated so pylint: disable=consider-using-f-string
-    return "%02d:%02d:%02d" % (diff.days * 24 + math.floor(mins / 60), mins % 60, diff.seconds % 60)
+    return "%02d:%02d:%02d" % (
+        diff.days * 24 + math.floor(mins / 60),
+        mins % 60,
+        diff.seconds % 60,
+    )
 
 
 insights = {}
@@ -276,7 +311,11 @@ def dispatch():
 
     _jobs.extend(dawgie.pl.schedule.next_job_batch())
 
-    if archive and not dawgie.pl.schedule.promote.more() and not sum([len(_jobs), len(_busy), len(_cluster), len(_cloud)]):
+    if (
+        archive
+        and not dawgie.pl.schedule.promote.more()
+        and not sum([len(_jobs), len(_busy), len(_cluster), len(_cloud)])
+    ):
         dawgie.context.fsm.archiving_trigger()
         pass
 
@@ -319,7 +358,9 @@ def dispatch():
         _cloud.extend(_repeat)
         _repeat.clear()
         for cloud_job in _cloud:
-            _agency.do(cloud_job._replace(type=dawgie.pl.message.Type.cloud), _move)
+            _agency.do(
+                cloud_job._replace(type=dawgie.pl.message.Type.cloud), _move
+            )
             pass
         _cloud.clear()
         pass
@@ -352,12 +393,27 @@ def plow():
         pass
 
     if dawgie.security.useTLS():
-        controller = dawgie.security.authority().options(dawgie.security.certificate())
-        twisted.internet.reactor.listenSSL(int(dawgie.context.farm_port), Foreman(), controller, dawgie.context.worker_backlog)
+        controller = dawgie.security.authority().options(
+            dawgie.security.certificate()
+        )
+        twisted.internet.reactor.listenSSL(
+            int(dawgie.context.farm_port),
+            Foreman(),
+            controller,
+            dawgie.context.worker_backlog,
+        )
     else:
         log.critical('PGP support is deprecated and will be removed')
-        twisted.internet.reactor.listenTCP(int(dawgie.context.farm_port), Foreman(), dawgie.context.worker_backlog)
-    twisted.internet.task.LoopingCall(dispatch).start(5).addErrback(dawgie.pl.LogFailure('dispatching scheduled jobs to workers on the farm', __name__).log)
+        twisted.internet.reactor.listenTCP(
+            int(dawgie.context.farm_port),
+            Foreman(),
+            dawgie.context.worker_backlog,
+        )
+    twisted.internet.task.LoopingCall(dispatch).start(5).addErrback(
+        dawgie.pl.LogFailure(
+            'dispatching scheduled jobs to workers on the farm', __name__
+        ).log
+    )
     return
 
 
@@ -366,7 +422,12 @@ def rerunid(job):
 
     if runid is None:
         runid = dawgie.db.next()
-        log.critical('New run ID (%d) for algorithm %s trigger by the event: %s', runid, job.tag, job.get('event', 'Not Specified'))
+        log.critical(
+            'New run ID (%d) for algorithm %s trigger by the event: %s',
+            runid,
+            job.tag,
+            job.get('event', 'Not Specified'),
+        )
         pass
     return runid
 

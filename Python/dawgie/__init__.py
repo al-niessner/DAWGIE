@@ -62,7 +62,9 @@ EVENT = collections.namedtuple('EVENT', ['algref', 'moment'])
 # pages  : number of page faults serviced that required I/O     [ru_majflt]
 # sys    : total amount of time spent executing in kernel mode  [ru_stime]
 # user   : total amount of time spent executing in user mode    [ru_utime]
-METRIC = collections.namedtuple('METRIC', ['input', 'mem', 'output', 'pages', 'sys', 'user', 'wall'])
+METRIC = collections.namedtuple(
+    'METRIC', ['input', 'mem', 'output', 'pages', 'sys', 'user', 'wall']
+)
 # day : an instance of an object that describes a calendar date
 #       known working instances are:
 # dom : day-of-month or int from 1-31
@@ -73,11 +75,21 @@ METRIC = collections.namedtuple('METRIC', ['input', 'mem', 'output', 'pages', 's
 MOMENT = collections.namedtuple('MOMENT', ['boot', 'day', 'dom', 'dow', 'time'])
 
 
-def schedule(factory, impl, boot: bool = None, day: datetime.date = None, dom: int = None, dow: int = None, time: datetime.time = None):
+def schedule(
+    factory,
+    impl,
+    boot: bool = None,
+    day: datetime.date = None,
+    dom: int = None,
+    dow: int = None,
+    time: datetime.time = None,
+):
     not_defined = [boot is None, day is None, dom is None, dow is None]
 
     if sum(not_defined) != len(not_defined) - 1:
-        raise ValueError('One and only one of boot, day, dom, or dow ' + 'should be defined.')
+        raise ValueError(
+            'One and only one of boot, day, dom, or dow ' + 'should be defined.'
+        )
     if day and not isinstance(day, datetime.date):
         raise ValueError('day must be of datetime.date')
     if dom and not isinstance(dom, int):
@@ -200,7 +212,9 @@ class _Metric:
         c1 = resource.getrusage(resource.RUSAGE_CHILDREN)
         s1 = resource.getrusage(resource.RUSAGE_SELF)
         child = _Metric.diff(c1, c0, 0)
-        task = _Metric.diff(s1, s0, (datetime.datetime.utcnow() - t0).total_seconds())
+        task = _Metric.diff(
+            s1, s0, (datetime.datetime.utcnow() - t0).total_seconds()
+        )
         self.__history.append({'child': child, 'task': task})
 
         if ds is not None:
@@ -279,7 +293,13 @@ class Version:
     '''
 
     def __eq__(self, other):
-        return all([self.design() == other.design(), self.implementation() == other.implementation(), self.bugfix() == other.bugfix()])
+        return all(
+            [
+                self.design() == other.design(),
+                self.implementation() == other.implementation(),
+                self.bugfix() == other.bugfix(),
+            ]
+        )
 
     def __ge__(self, other):
         if self.design() > other.design():
@@ -308,7 +328,13 @@ class Version:
         return self.__le__(other) and self.__ne__(other)
 
     def __ne__(self, other):
-        return any([self.design() != other.design(), self.implementation() != other.implementation(), self.bugfix() != other.bugfix()])
+        return any(
+            [
+                self.design() != other.design(),
+                self.implementation() != other.implementation(),
+                self.bugfix() != other.bugfix(),
+            ]
+        )
 
     def _get_ver(self) -> VERSION:
         return self._version_
@@ -317,7 +343,9 @@ class Version:
         self._version_ = ver
 
     def asstring(self) -> str:
-        return '.'.join([str(self.design()), str(self.implementation()), str(self.bugfix())])
+        return '.'.join(
+            [str(self.design()), str(self.implementation()), str(self.bugfix())]
+        )
 
     def bugfix(self) -> int:
         return self._get_ver().bugfix
@@ -331,8 +359,15 @@ class Version:
     def newer(self, than: VERSION) -> bool:
         return (
             than.design < self.design()
-            or (than.design == self.design() and than.impl < self.implementation())
-            or (than.design == self.design() and than.impl == self.implementation() and than.bugfix < self.bugfix())
+            or (
+                than.design == self.design()
+                and than.impl < self.implementation()
+            )
+            or (
+                than.design == self.design()
+                and than.impl == self.implementation()
+                and than.bugfix < self.bugfix()
+            )
         )
 
     pass
@@ -457,7 +492,9 @@ class Analysis(_Metric):
         import dawgie.db
 
         log = logging.getLogger(__name__ + '.Analysis')
-        for step in filter(lambda s: goto is None or s.name() == goto, self.list()):
+        for step in filter(
+            lambda s: goto is None or s.name() == goto, self.list()
+        ):
             if self.abort():
                 raise AbortAEError()
 
@@ -705,7 +742,13 @@ class Dataset(_Metric):
             raise ValueError(f'"{subname}" contains an illegal character "(.)"')
 
         name = (
-            self._tn()[: self._tn().rfind('(')].strip() if subname == '..' else (f'{self._tn()} ({subname})' if is_not_subnamed else f'{self._tn()}({subname})')
+            self._tn()[: self._tn().rfind('(')].strip()
+            if subname == '..'
+            else (
+                f'{self._tn()} ({subname})'
+                if is_not_subnamed
+                else f'{self._tn()}({subname})'
+            )
         )
         return self._retarget(name, upstream)
 
@@ -773,7 +816,9 @@ class Regress(_Metric):
         import dawgie.db  # pylint: disable=import-outside-toplevel
 
         log = logging.getLogger(__name__ + '.Regress')
-        for step in filter(lambda s: goto is None or s.name() == goto, self.list()):
+        for step in filter(
+            lambda s: goto is None or s.name() == goto, self.list()
+        ):
             if self.abort():
                 raise AbortAEError()
 
@@ -786,7 +831,9 @@ class Regress(_Metric):
             timeline.recede(step.variables())
             self.__timing['start_' + self._name()] = datetime.datetime.utcnow()
             log.debug('Stepping into %s', step.name())
-            self.measure(step.run, args=(self._ps_hint(), timeline), ds=timeline.ds())
+            self.measure(
+                step.run, args=(self._ps_hint(), timeline), ds=timeline.ds()
+            )
             setattr(step, 'caller', None)
         return
 
@@ -984,7 +1031,9 @@ class Task(_Metric):
     def do(self, goto: str = None) -> None:
         log = logging.getLogger(__name__ + '.Task')
         log.debug('Starting %s for %s', self.__name, self._target())
-        for step in filter(lambda s: goto is None or s.name() == goto, self.list()):
+        for step in filter(
+            lambda s: goto is None or s.name() == goto, self.list()
+        ):
             if self.abort():
                 raise AbortAEError()
 
@@ -1117,7 +1166,9 @@ class Visitor:
     def add_primitive(self, value, label: str = None) -> None:
         raise NotImplementedError()
 
-    def add_table(self, clabels: [str], rows: int = 0, title: str = None) -> 'TableVisitor':
+    def add_table(
+        self, clabels: [str], rows: int = 0, title: str = None
+    ) -> 'TableVisitor':
         raise NotImplementedError()
 
     pass
@@ -1133,7 +1184,9 @@ class TableVisitor:
 
 def _version():
     result = '0.0.0'
-    v = os.path.basename(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+    v = os.path.basename(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    )
 
     if v.startswith('dawgie-') and v.endswith('.egg'):
         result = v[7 : v.find('-', 7)]
@@ -1154,5 +1207,9 @@ def resolve_username() -> str:
         elif 'USERNAME' in os.environ:
             name = os.environ['USERNAME']
         else:
-            raise KeyError('Neither getpass.getuser(), os.environ[USER], ' + 'nor os.environ[USERNAME] would resolve to a ' + 'users name.')
+            raise KeyError(
+                'Neither getpass.getuser(), os.environ[USER], '
+                + 'nor os.environ[USERNAME] would resolve to a '
+                + 'users name.'
+            )
     return name

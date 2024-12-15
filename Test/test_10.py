@@ -89,7 +89,12 @@ class Farm(unittest.TestCase):
             hand._process(msg)
             dawgie.context.fsm.state = 'starting'
             pass
-        self.assertEqual(['WARNING:dawgie.pl.farm:Worker and pipeline revisions are not the same. Sever version 123 and worker version 321.'], logbook.output)
+        self.assertEqual(
+            [
+                'WARNING:dawgie.pl.farm:Worker and pipeline revisions are not the same. Sever version 123 and worker version 321.'
+            ],
+            logbook.output,
+        )
         return
 
     def test_hand__res(self):
@@ -112,7 +117,11 @@ class Farm(unittest.TestCase):
         b.add(e)
         d.add(f)
         dawgie.pl.schedule.que.extend([a, b, c, d, e, f])
-        dawgie.pl.farm.Hand._res(dawgie.pl.message.make(inc='B', jid='b', rid=42, suc=None, tim={}, val=[]))
+        dawgie.pl.farm.Hand._res(
+            dawgie.pl.message.make(
+                inc='B', jid='b', rid=42, suc=None, tim={}, val=[]
+            )
+        )
         for l in ['do', 'doing', 'todo']:
             self.assertEqual(['A', 'B', 'C'], a.get(l))
             self.assertEqual(['A', 'C'], b.get(l))

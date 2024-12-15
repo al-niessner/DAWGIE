@@ -111,10 +111,25 @@ def convert_prime_db(conn, fn, data, all_vers: bool):
         'SELECT run_ID,tn_ID,task_ID,alg_ID,sv_ID,val_ID,blob_name '
         + 'FROM Prime WHERE tn_ID = ANY(%s) AND task_ID = ANY(%s) AND '
         + 'alg_ID = ANY(%s) AND sv_ID = ANY(%s) AND val_ID = ANY(%s);',
-        (list(data['target']), list(data['task']), list(data['alg']), list(data['state']), list(data['value'])),
+        (
+            list(data['target']),
+            list(data['task']),
+            list(data['alg']),
+            list(data['state']),
+            list(data['value']),
+        ),
     )
-    for rid, tnid, tid, aid, svid, vid, bn in sorted(cur.fetchall(), key=lambda t: t[0]):
-        k = (rid if all_vers else 1, data['target'][tnid], data['task'][tid], data['alg'][aid], data['state'][svid], data['value'][vid])
+    for rid, tnid, tid, aid, svid, vid, bn in sorted(
+        cur.fetchall(), key=lambda t: t[0]
+    ):
+        k = (
+            rid if all_vers else 1,
+            data['target'][tnid],
+            data['task'][tid],
+            data['alg'][aid],
+            data['state'][svid],
+            data['value'][vid],
+        )
         table[str(k)] = bn
         pass
     conn.commit()
@@ -127,7 +142,9 @@ def convert_prime_db(conn, fn, data, all_vers: bool):
 def convert_state_vector_db(conn, fn: str, trans: {int: int}, all_vers: bool):
     '''convert the postgres StateVector table to compatible shelve format'''
     cur = _cur(conn)
-    cur.execute("SELECT * from StateVector where alg_ID = ANY(%s);", (list(trans),))
+    cur.execute(
+        "SELECT * from StateVector where alg_ID = ANY(%s);", (list(trans),)
+    )
     rows = cur.fetchall()
     index = []
     table = shelve.open(fn)
@@ -222,9 +239,17 @@ def main(all_vers, dpath):
     log.info('-------------state-----------')
     state_k = convert_state_vector_db(conn, f'{basefn}.state', alg_k, all_vers)
     log.info('-------------value-----------')
-    value_k = convert_value_vector_db(conn, f'{basefn}.value', state_k, all_vers)
+    value_k = convert_value_vector_db(
+        conn, f'{basefn}.value', state_k, all_vers
+    )
     log.info('-------------prime-----------')
-    pk_translation = {'target': target_k, 'task': task_k, 'alg': alg_k, 'state': state_k, 'value': value_k}
+    pk_translation = {
+        'target': target_k,
+        'task': task_k,
+        'alg': alg_k,
+        'state': state_k,
+        'value': value_k,
+    }
     log.info('-------------convert-----------')
     convert_prime_db(conn, f'{basefn}.prime', pk_translation, all_vers)
     conn.close()
@@ -245,9 +270,23 @@ if __name__ == "__main__":
     import dawgie.util
     import dawgie.db.post
 
-    ap = argparse.ArgumentParser(description='Translates postgresql database to shelve database. This is a one-way translation, no way to go back.')
-    ap.add_argument('-a', '--all', action='store_true', default=False, help='translate all versions instead of just latest')
-    ap.add_argument('-l', '--log-file', default=None, required=False, help='a filename to put all of the log messages into [stdout]')
+    ap = argparse.ArgumentParser(
+        description='Translates postgresql database to shelve database. This is a one-way translation, no way to go back.'
+    )
+    ap.add_argument(
+        '-a',
+        '--all',
+        action='store_true',
+        default=False,
+        help='translate all versions instead of just latest',
+    )
+    ap.add_argument(
+        '-l',
+        '--log-file',
+        default=None,
+        required=False,
+        help='a filename to put all of the log messages into [stdout]',
+    )
     ap.add_argument(
         '-L',
         '--log-level',
@@ -256,7 +295,13 @@ if __name__ == "__main__":
         type=dawgie.util.log_level,
         help='set the verbosity that you want where a smaller number means more verbose [logging.WARNING]',
     )
-    ap.add_argument('-O', '--output-path', required=True, type=str, help='a path to place your converted shelve files into')
+    ap.add_argument(
+        '-O',
+        '--output-path',
+        required=True,
+        type=str,
+        help='a path to place your converted shelve files into',
+    )
     ap.add_argument(
         '-p',
         '--prefix',

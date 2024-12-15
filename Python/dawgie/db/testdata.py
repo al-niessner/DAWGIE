@@ -207,10 +207,18 @@ for a, r, t in zip(ASPECTS, TIMELINES, DATASETS):
     a[1].prev = [dawgie.SV_REF(None, r[1], sv) for sv in r[1].sv]
     r[1].prev = [dawgie.SV_REF(None, t[2], sv) for sv in t[2].sv]
     pass
-DATASETS[1][2].prev = [dawgie.SV_REF(None, DATASETS[0][2], sv) for sv in DATASETS[0][2].sv]
-DATASETS[2][2].prev = [dawgie.SV_REF(None, DATASETS[0][2], sv) for sv in DATASETS[0][2].sv] + [
+DATASETS[1][2].prev = [
+    dawgie.SV_REF(None, DATASETS[0][2], sv) for sv in DATASETS[0][2].sv
+]
+DATASETS[2][2].prev = [
+    dawgie.SV_REF(None, DATASETS[0][2], sv) for sv in DATASETS[0][2].sv
+] + [dawgie.SV_REF(None, DATASETS[1][2], sv) for sv in DATASETS[1][2].sv]
+DATASETS[3][2].prev = [
+    dawgie.SV_REF(None, DATASETS[0][2], sv) for sv in DATASETS[0][2].sv
+]
+DATASETS[4][2].prev = [
+    dawgie.SV_REF(None, DATASETS[2][2], sv) for sv in DATASETS[2][2].sv
+]
+DATASETS[5][2].prev = [
     dawgie.SV_REF(None, DATASETS[1][2], sv) for sv in DATASETS[1][2].sv
 ]
-DATASETS[3][2].prev = [dawgie.SV_REF(None, DATASETS[0][2], sv) for sv in DATASETS[0][2].sv]
-DATASETS[4][2].prev = [dawgie.SV_REF(None, DATASETS[2][2], sv) for sv in DATASETS[2][2].sv]
-DATASETS[5][2].prev = [dawgie.SV_REF(None, DATASETS[1][2], sv) for sv in DATASETS[1][2].sv]

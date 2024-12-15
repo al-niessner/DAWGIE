@@ -45,7 +45,9 @@ import logging
 log = logging.getLogger(__name__)
 import numpy
 
-HINT = collections.namedtuple('HINT', ['cpu', 'io', 'memory', 'pages', 'summary'])
+HINT = collections.namedtuple(
+    'HINT', ['cpu', 'io', 'memory', 'pages', 'summary']
+)
 
 
 def _latest(history: [dawgie.db.METRIC_DATA]) -> dawgie.db.METRIC_DATA:
@@ -71,16 +73,45 @@ def aspects(metric: [dawgie.db.METRIC_DATA]) -> {str: [dawgie.db.METRIC_DATA]}:
 
 
 def distribution(metric: [dawgie.db.METRIC_DATA]) -> {str: HINT}:
-    log.debug('distribution() - use metrics for automaated choice of distribution over %d', len(metric))
+    log.debug(
+        'distribution() - use metrics for automaated choice of distribution over %d',
+        len(metric),
+    )
     dst = {}
     reg = regress(metric)
     log.debug('distribution() - number of regressions %d', len(reg))
     for name in reg:
         if reg[name]:
-            cpu = numpy.median([m.sv['task_system'].value() + m.sv['task_user'].value() for m in reg[name]])
-            io = numpy.median([m.sv['task_input'].value() + m.sv['task_output'].value() for m in reg[name]])
-            memory = numpy.median([round((m.sv['db_memory'].value() + m.sv['task_memory'].value()) / 2**20) for m in reg[name]])
-            pages = numpy.median([m.sv['task_pages'].value() + m.sv['task_pages'].value() for m in reg[name]])
+            cpu = numpy.median(
+                [
+                    m.sv['task_system'].value() + m.sv['task_user'].value()
+                    for m in reg[name]
+                ]
+            )
+            io = numpy.median(
+                [
+                    m.sv['task_input'].value() + m.sv['task_output'].value()
+                    for m in reg[name]
+                ]
+            )
+            memory = numpy.median(
+                [
+                    round(
+                        (
+                            m.sv['db_memory'].value()
+                            + m.sv['task_memory'].value()
+                        )
+                        / 2**20
+                    )
+                    for m in reg[name]
+                ]
+            )
+            pages = numpy.median(
+                [
+                    m.sv['task_pages'].value() + m.sv['task_pages'].value()
+                    for m in reg[name]
+                ]
+            )
             summary = dawgie.context.cpu_threshold <= cpu
         else:
             cpu, io, memory, pages, summary = 0, 0, 0, 0, False

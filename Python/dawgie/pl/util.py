@@ -54,7 +54,8 @@ class SVGOHandler(twisted.internet.protocol.ProcessProtocol):
             # long statement to log so pylint: disable=logging-not-lazy
             # exceptions always look the same; pylint: disable=duplicate-code
             log.critical(
-                'Error in archiving of data.    EXIT CODE: %s' + '   SIGNAL: %s    STATUS: %s   COMMAND: "%s"',
+                'Error in archiving of data.    EXIT CODE: %s'
+                + '   SIGNAL: %s    STATUS: %s   COMMAND: "%s"',
                 str(reason.value.exitCode),
                 str(reason.value.signal),
                 str(reason.value.status),
@@ -67,7 +68,15 @@ class SVGOHandler(twisted.internet.protocol.ProcessProtocol):
 
 
 def svgo(ifn, ofn):
-    args = ['/usr/lib/node_modules/svgo/bin/svgo', ifn, ofn, '--disable=cleanupIDs', '--enable=removeStyleElement']
+    args = [
+        '/usr/lib/node_modules/svgo/bin/svgo',
+        ifn,
+        ofn,
+        '--disable=cleanupIDs',
+        '--enable=removeStyleElement',
+    ]
     handler = SVGOHandler(' '.join(args))
-    twisted.internet.reactor.spawnProcess(handler, args[0], args=args, env=os.environ)
+    twisted.internet.reactor.spawnProcess(
+        handler, args[0], args=args, env=os.environ
+    )
     return

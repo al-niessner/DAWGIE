@@ -65,8 +65,12 @@ class MetricStateVector(dawgie.StateVector):
         return '__metric__'
 
     def view(self, _caller, visitor: dawgie.Visitor) -> None:
-        table = visitor.add_table(['', 'DB', 'Task'], rows=len(self) // 2, title='Process Metrics')
-        for r, k in enumerate(sorted(filter(lambda k: k.startswith('db_'), self))):
+        table = visitor.add_table(
+            ['', 'DB', 'Task'], rows=len(self) // 2, title='Process Metrics'
+        )
+        for r, k in enumerate(
+            sorted(filter(lambda k: k.startswith('db_'), self))
+        ):
             k = k.split('_')[1]
             table.get_cell(r, 0).add_primitive(k)
             table.get_cell(r, 1).add_primitive(self['db_' + k].value())
@@ -95,4 +99,12 @@ class MetricValue(dawgie.Value):
 
 def filled(value: int = 0) -> dawgie.METRIC:
     '''create and fill a dawgie.METRIC with given value'''
-    return dawgie.METRIC(input=value, mem=value, output=value, pages=value, sys=value, user=value, wall=value)
+    return dawgie.METRIC(
+        input=value,
+        mem=value,
+        output=value,
+        pages=value,
+        sys=value,
+        user=value,
+        wall=value,
+    )

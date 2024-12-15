@@ -110,7 +110,9 @@ def main(fn: str = None, at=None):
     import matplotlib.pyplot
 
     if at is None:
-        factories = dawgie.pl.scan.for_factories(dawgie.context.ae_base_path, dawgie.context.ae_base_package)
+        factories = dawgie.pl.scan.for_factories(
+            dawgie.context.ae_base_path, dawgie.context.ae_base_package
+        )
         at = dawgie.pl.dag.Construct(factories).at
         pass
 
@@ -133,9 +135,19 @@ def main(fn: str = None, at=None):
         for tn in sorted(traces[key]):
             if not rank:
                 for tan in traces[key][tn].keys():
-                    rank[tan] = max([path.index(tan) if tan in path else 0 for path in route])
+                    rank[tan] = max(
+                        [
+                            path.index(tan) if tan in path else 0
+                            for path in route
+                        ]
+                    )
                     pass
-                rank = {tan: i for i, (tan, r) in enumerate(sorted(rank.items(), key=lambda x: x[1]))}
+                rank = {
+                    tan: i
+                    for i, (tan, r) in enumerate(
+                        sorted(rank.items(), key=lambda x: x[1])
+                    )
+                }
                 algs = [i[0] for i in sorted(rank.items(), key=lambda x: x[1])]
                 pass
 
@@ -148,8 +160,14 @@ def main(fn: str = None, at=None):
         charts[key] = matplotlib.pyplot.figure(figsize=(9, 6))
         sp = charts[key].add_subplot(111)
         sp.barh(numpy.arange(len(traces[key])), last)
-        matplotlib.pyplot.xticks(numpy.arange(len(rank)), [i[0] for i in sorted(rank.items(), key=lambda x: x[1])], rotation=90)
-        matplotlib.pyplot.yticks(numpy.arange(len(traces[key])), sorted(traces[key].keys()))
+        matplotlib.pyplot.xticks(
+            numpy.arange(len(rank)),
+            [i[0] for i in sorted(rank.items(), key=lambda x: x[1])],
+            rotation=90,
+        )
+        matplotlib.pyplot.yticks(
+            numpy.arange(len(traces[key])), sorted(traces[key].keys())
+        )
         pass
     fid, tfn = tempfile.mkstemp('.html', 'trace')
     os.close(fid)
@@ -181,10 +199,19 @@ def main(fn: str = None, at=None):
                 tree = fff.read()
             os.unlink(ttfn)
             images += _template_image.format(
-                chart=base64.encodebytes(br.getvalue()).decode(), title=key[0] + ' -> ' + key[1], tree=base64.encodebytes(tree).decode()
+                chart=base64.encodebytes(br.getvalue()).decode(),
+                title=key[0] + ' -> ' + key[1],
+                tree=base64.encodebytes(tree).decode(),
             )
             pass
-        ff.write(_template_page.format(images=images, npaths=sum([len(v) for v in routes.values()]), nroots=len(at), nroutes=len(routes)))
+        ff.write(
+            _template_page.format(
+                images=images,
+                npaths=sum([len(v) for v in routes.values()]),
+                nroots=len(at),
+                nroutes=len(routes),
+            )
+        )
         pass
 
     if fn:
@@ -213,7 +240,9 @@ if __name__ == '__main__':
     import dawgie.tools.trace
     import dawgie.util
 
-    ap = argparse.ArgumentParser(description='Follow targets through the pipeline and display the results.')
+    ap = argparse.ArgumentParser(
+        description='Follow targets through the pipeline and display the results.'
+    )
     ap.add_argument(
         '-f',
         '--file-name',
@@ -221,7 +250,13 @@ if __name__ == '__main__':
         required=False,
         help='file name to write the report -- a temp file will be used and displayed in your browser is none is given',
     )
-    ap.add_argument('-l', '--log-file', default='trace.log', required=False, help='a filename to put all of the log messages into [%(default)s]')
+    ap.add_argument(
+        '-l',
+        '--log-file',
+        default='trace.log',
+        required=False,
+        help='a filename to put all of the log messages into [%(default)s]',
+    )
     ap.add_argument(
         '-L',
         '--log-level',

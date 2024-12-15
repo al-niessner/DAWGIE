@@ -43,7 +43,10 @@ import dawgie.util.names
 
 
 def algref2svref(ref: dawgie.ALG_REF) -> [dawgie.SV_REF]:
-    return [dawgie.SV_REF(factory=ref.factory, impl=ref.impl, item=sv) for sv in ref.impl.state_vectors()]
+    return [
+        dawgie.SV_REF(factory=ref.factory, impl=ref.impl, item=sv)
+        for sv in ref.impl.state_vectors()
+    ]
 
 
 def as_vref(references: [dawgie.ALG_REF, dawgie.SV_REF, dawgie.V_REF]):
@@ -65,8 +68,20 @@ def as_vref(references: [dawgie.ALG_REF, dawgie.SV_REF, dawgie.V_REF]):
 
 
 def svref2vref(ref: dawgie.SV_REF) -> [dawgie.V_REF]:
-    return [dawgie.V_REF(factory=ref.factory, impl=ref.impl, item=ref.item, feat=key) for key in ref.item]
+    return [
+        dawgie.V_REF(
+            factory=ref.factory, impl=ref.impl, item=ref.item, feat=key
+        )
+        for key in ref.item
+    ]
 
 
 def vref_as_name(vref: dawgie.V_REF) -> str:
-    return '.'.join([dawgie.util.names.task_name(vref.factory), vref.impl.name(), vref.item.name(), vref.feat])
+    return '.'.join(
+        [
+            dawgie.util.names.task_name(vref.factory),
+            vref.impl.name(),
+            vref.item.name(),
+            vref.feat,
+        ]
+    )

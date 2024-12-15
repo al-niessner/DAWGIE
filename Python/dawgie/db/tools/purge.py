@@ -62,7 +62,13 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser(
         description='Removes all of the files (md5_sha1) in the store that no longer have a key that references it. There is no undo of this operation and it must be done to a database that is not active (the pipeline is not running.'
     )
-    ap.add_argument('-l', '--log-file', default=unique_fn, required=False, help='a filename to put all of the log messages into [%(default)s]')
+    ap.add_argument(
+        '-l',
+        '--log-file',
+        default=unique_fn,
+        required=False,
+        help='a filename to put all of the log messages into [%(default)s]',
+    )
     ap.add_argument(
         '-L',
         '--log-level',
@@ -74,7 +80,10 @@ if __name__ == '__main__':
     dawgie.context.add_arguments(ap)
     args = ap.parse_args()
     dawgie.context.override(args)
-    logging.basicConfig(filename=os.path.join(dawgie.context.data_log, args.log_file), level=args.log_level)
+    logging.basicConfig(
+        filename=os.path.join(dawgie.context.data_log, args.log_file),
+        level=args.log_level,
+    )
     dawgie.db.open()
     values = list(dawgie.db._prime_values())
 
@@ -84,8 +93,12 @@ if __name__ == '__main__':
         pass
 
     for fn in os.listdir(dawgie.context.data_dbs):
-        if fn not in values and os.path.isfile(os.path.join(dawgie.context.data_dbs, fn)):
+        if fn not in values and os.path.isfile(
+            os.path.join(dawgie.context.data_dbs, fn)
+        ):
             os.unlink(os.path.join(dawgie.context.data_dbs, fn))
-            logging.getLogger(__name__).warning('deleted the file %s from the store.', fn)
+            logging.getLogger(__name__).warning(
+                'deleted the file %s from the store.', fn
+            )
         pass
     pass

@@ -66,9 +66,16 @@ with open(os.path.join(os.path.dirname(__file__), dawgie), 'tw') as f:
 
 # first item in list must be README file name
 data_files_names = ["README.md", "LICENSE.txt"]
-data_files_locations = [('.', [f]) if os.path.exists(f) else ('.', ["../" + f]) for f in data_files_names]
+data_files_locations = [
+    ('.', [f]) if os.path.exists(f) else ('.', ["../" + f])
+    for f in data_files_names
+]
 
-read_me_file = data_files_names[0] if os.path.exists(data_files_names[0]) else f"../{data_files_names[0]}"
+read_me_file = (
+    data_files_names[0]
+    if os.path.exists(data_files_names[0])
+    else f"../{data_files_names[0]}"
+)
 with open(read_me_file, "rt") as f:
     description = f.read()
 

@@ -70,7 +70,11 @@ class Priority(enum.Enum):
                 result = a
             if a == Priority.CREW and result != Priority.NOW:
                 result = a
-            if a == Priority.DOING and result != Priority.CREW and result != Priority.NOW:
+            if (
+                a == Priority.DOING
+                and result != Priority.CREW
+                and result != Priority.NOW
+            ):
                 result = a
             pass
         return result
@@ -86,12 +90,18 @@ class State(enum.IntEnum):
 
 def _main(an_args):
     # 1. Run auto merge tool
-    status = dawgie.tools.submit.auto_merge_prepare(an_args.changeset, an_args.pre_ops, an_args.repo_dir, an_args.origin)
+    status = dawgie.tools.submit.auto_merge_prepare(
+        an_args.changeset, an_args.pre_ops, an_args.repo_dir, an_args.origin
+    )
 
     if status == State.SUCCESS:
-        status = dawgie.tools.submit.auto_merge_compliant(an_args.changeset, an_args.repo_dir, _spawn)
+        status = dawgie.tools.submit.auto_merge_compliant(
+            an_args.changeset, an_args.repo_dir, _spawn
+        )
     if status == State.SUCCESS:
-        status = dawgie.tools.submit.auto_merge_push(an_args.changeset, an_args.repo_dir)
+        status = dawgie.tools.submit.auto_merge_push(
+            an_args.changeset, an_args.repo_dir
+        )
 
     if status == State.SUCCESS:
         # 2. Update master
@@ -112,7 +122,9 @@ def already_applied(changeset, a_repo_dir):
     return -1 < l.find(changeset)
 
 
-def auto_merge_prepare(changeset, a_pre_ops=None, a_repo_dir=None, a_origin=None):
+def auto_merge_prepare(
+    changeset, a_pre_ops=None, a_repo_dir=None, a_origin=None
+):
     # pylint: disable=too-many-return-statements
     if not a_pre_ops or not a_repo_dir or not a_origin:
         mail_out("auto_merge parameters are not all defined.")
@@ -129,7 +141,9 @@ def auto_merge_prepare(changeset, a_pre_ops=None, a_repo_dir=None, a_origin=None
     # Check if commit exists
     status = git_execute(g, f'git cat-file -t {changeset}')
     if status == State.FAILED:
-        mail_out(f"You forgot to push your changes ({changeset}). Please, push them.")
+        mail_out(
+            f"You forgot to push your changes ({changeset}). Please, push them."
+        )
         return State.FAILED
 
     # Check-out pre_ops
@@ -177,7 +191,9 @@ def auto_merge_compliant(changeset, a_repo_dir, spawn):
     return State.SUCCESS
 
 
-def auto_merge_push(changeset, a_pre_ops=None, a_repo_dir=None, priority=Priority.TODO.value):
+def auto_merge_push(
+    changeset, a_pre_ops=None, a_repo_dir=None, priority=Priority.TODO.value
+):
     g = git.cmd.Git(a_repo_dir)
     status = git_execute(g, f"git checkout {a_pre_ops}")
     if status == State.FAILED:
@@ -227,7 +243,10 @@ def mail_out(msg):
     if dawgie.context.email_alerts_to:
         message = email.mime.text.MIMEText(msg)
         message['Subject'] = "DAWGIE Submit results"
-        message["From"] = "no-reply" + dawgie.context.email_alerts_to.split(',')[0].split('@')[1]
+        message["From"] = (
+            "no-reply"
+            + dawgie.context.email_alerts_to.split(',')[0].split('@')[1]
+        )
         message["To"] = dawgie.context.email_alerts_to
         try:
             s = smtplib.SMTP("localhost")
@@ -296,8 +315,16 @@ if __name__ == "__main__":
     import dawgie.tools.submit
     import dawgie.util
 
-    ap = argparse.ArgumentParser(description='Automatically merge changeset into pre_ops.')
-    ap.add_argument('-l', '--log-file', default=None, required=False, help='a filename to put all of the log messages into [%(default)s]')
+    ap = argparse.ArgumentParser(
+        description='Automatically merge changeset into pre_ops.'
+    )
+    ap.add_argument(
+        '-l',
+        '--log-file',
+        default=None,
+        required=False,
+        help='a filename to put all of the log messages into [%(default)s]',
+    )
     ap.add_argument(
         '-L',
         '--log-level',
@@ -314,12 +341,40 @@ if __name__ == "__main__":
         help='set the pre_ops repo directory where you want to do the merging [%(default)s]',
     )
     ap.add_argument(
-        '-m', '--ops-dir', default=dawgie.tools.submit.ops_dir, required=False, help='set the ops repo directory where you want to do the merging [%(default)s]'
+        '-m',
+        '--ops-dir',
+        default=dawgie.tools.submit.ops_dir,
+        required=False,
+        help='set the ops repo directory where you want to do the merging [%(default)s]',
     )
-    ap.add_argument('-o', '--origin', default="origin", required=False, help='The name of the origin. [%(default)s]')
-    ap.add_argument('-M', '--ops', default=dawgie.tools.submit.ops, required=False, help='The name of the ops branch. [%(default)s]')
-    ap.add_argument('-p', '--pre_ops', default=dawgie.tools.submit.pre_ops, required=False, help='The name of the pre_ops branch. [%(default)s]')
-    ap.add_argument('-c', '--changeset', default=None, required=True, help='The changeset hashtag to merge.')
+    ap.add_argument(
+        '-o',
+        '--origin',
+        default="origin",
+        required=False,
+        help='The name of the origin. [%(default)s]',
+    )
+    ap.add_argument(
+        '-M',
+        '--ops',
+        default=dawgie.tools.submit.ops,
+        required=False,
+        help='The name of the ops branch. [%(default)s]',
+    )
+    ap.add_argument(
+        '-p',
+        '--pre_ops',
+        default=dawgie.tools.submit.pre_ops,
+        required=False,
+        help='The name of the pre_ops branch. [%(default)s]',
+    )
+    ap.add_argument(
+        '-c',
+        '--changeset',
+        default=None,
+        required=True,
+        help='The changeset hashtag to merge.',
+    )
     dawgie.context.add_arguments(ap)
     args = ap.parse_args()
     dawgie.context.override(args)

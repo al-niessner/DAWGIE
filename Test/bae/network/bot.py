@@ -106,7 +106,9 @@ class Engine(dawgie.Algorithm):
         image = numpy.empty(shape)
         for r in range(shape[0]):
             for c in range(shape[1]):
-                image[r, c] = numpy.sin(r / 700) * numpy.cos(c / 500 - numpy.pi / 4)
+                image[r, c] = numpy.sin(r / 700) * numpy.cos(
+                    c / 500 - numpy.pi / 4
+                )
                 pass
             pass
         url = "https://github.com/OpenExoplanetCatalogue/oec_gzip/raw/master/systems.xml.gz"

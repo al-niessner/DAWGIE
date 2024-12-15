@@ -77,7 +77,9 @@ def verify_name(o, err=False):
         for name, state in [(k, k.find('.') < 0) for k in o.keys()]:
             result &= state
             if not state:
-                log.critical('The name "%s" contains the special character "."', name)
+                log.critical(
+                    'The name "%s" contains the special character "."', name
+                )
             pass
         pass
     if err and not result:

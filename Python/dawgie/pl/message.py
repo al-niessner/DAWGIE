@@ -43,7 +43,21 @@ import socket
 import struct
 
 MSG = collections.namedtuple(
-    'MSG', ['context', 'factory', 'incarnation', 'jobid', 'ps_hint', 'revision', 'runid', 'success', 'target', 'timing', 'type', 'values']
+    'MSG',
+    [
+        'context',
+        'factory',
+        'incarnation',
+        'jobid',
+        'ps_hint',
+        'revision',
+        'runid',
+        'success',
+        'target',
+        'timing',
+        'type',
+        'values',
+    ],
 )
 
 

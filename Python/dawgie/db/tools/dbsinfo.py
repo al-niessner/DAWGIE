@@ -71,17 +71,28 @@ def consumption():
     # this is a tool and printing efficiency is less import then being explicit
     # in what is being output so pylint: disable=consider-using-f-string
     print('\n\n\t\tFiles\tSize (GB)')
-    print('generated:\t{0:d}\t{1:5.1f}\t{2:3.1f}%'.format(len(db), sum(db) / 2**30, sum(db) / total * 100))
+    print(
+        'generated:\t{0:d}\t{1:5.1f}\t{2:3.1f}%'.format(
+            len(db), sum(db) / 2**30, sum(db) / total * 100
+        )
+    )
     for k in sorted(scrapes):
         known += sum(scrapes[k])
         lens += len(scrapes[k])
         print(
             '   {0:s}:\t{1:d}\t{2:5.1f}\t{3:3.1f}%'.format(
-                k if 5 < len(k) else ('  ' + k), len(scrapes[k]), sum(scrapes[k]) / 2**30, sum(scrapes[k]) / total * 100
+                k if 5 < len(k) else ('  ' + k),
+                len(scrapes[k]),
+                sum(scrapes[k]) / 2**30,
+                sum(scrapes[k]) / total * 100,
             )
         )
         pass
-    print('  unknown:\t{0:d}\t{1:5.1f}\t{2:3.1f}%'.format(len(dbs) - lens, (total - known) / 2**30, (1 - known / total) * 100))
+    print(
+        '  unknown:\t{0:d}\t{1:5.1f}\t{2:3.1f}%'.format(
+            len(dbs) - lens, (total - known) / 2**30, (1 - known / total) * 100
+        )
+    )
     print('------------------------------------------------')
     print('    total:\t\t{0:d}\t{1:5.1f}\n\n\n'.format(len(dbs), total / 2**30))
     return
@@ -101,8 +112,16 @@ if __name__ == '__main__':
     import dawgie.util
 
     unique_fn = '.'.join(['dbsinfo', getpass.getuser(), 'log'])
-    ap = argparse.ArgumentParser(description='Display interesting statistics about dbs.')
-    ap.add_argument('-l', '--log-file', default=unique_fn, required=False, help='a filename to put all of the log messages into [%(default)s]')
+    ap = argparse.ArgumentParser(
+        description='Display interesting statistics about dbs.'
+    )
+    ap.add_argument(
+        '-l',
+        '--log-file',
+        default=unique_fn,
+        required=False,
+        help='a filename to put all of the log messages into [%(default)s]',
+    )
     ap.add_argument(
         '-L',
         '--log-level',
@@ -114,7 +133,10 @@ if __name__ == '__main__':
     dawgie.context.add_arguments(ap)
     args = ap.parse_args()
     dawgie.context.override(args)
-    logging.basicConfig(filename=os.path.join(dawgie.context.data_log, args.log_file), level=args.log_level)
+    logging.basicConfig(
+        filename=os.path.join(dawgie.context.data_log, args.log_file),
+        level=args.log_level,
+    )
     dawgie.db.open()
     consumption()
     dawgie.db.close()

@@ -61,18 +61,40 @@ class AWS(unittest.TestCase):
         global _https_in, _https_out, _sqs_in, _sqs_out
         kdir = tempfile.mkdtemp()
         _pgp = gnupg.GPG(gnupghome=kdir)
-        ab = _pgp.gen_key(_pgp.gen_key_input(key_type='DSA', subkey_type='DSA', passphrase='1234567890', name_email='aws-bot@cloud.com', name_real='aws-bot'))
+        ab = _pgp.gen_key(
+            _pgp.gen_key_input(
+                key_type='DSA',
+                subkey_type='DSA',
+                passphrase='1234567890',
+                name_email='aws-bot@cloud.com',
+                name_real='aws-bot',
+            )
+        )
         db = _pgp.gen_key(
-            _pgp.gen_key_input(key_type='DSA', subkey_type='DSA', passphrase='1234567890', name_email='dawgie-bot@cloud.com', name_real='dawgie-bot')
+            _pgp.gen_key_input(
+                key_type='DSA',
+                subkey_type='DSA',
+                passphrase='1234567890',
+                name_email='dawgie-bot@cloud.com',
+                name_real='dawgie-bot',
+            )
         )
         with open(os.path.join(kdir, 'dawgie.aws.pub'), 'tw') as f:
             f.write(_pgp.export_keys([ab.fingerprint], passphrase='1234567890'))
         with open(os.path.join(kdir, 'dawgie.aws.sec'), 'tw') as f:
-            f.write(_pgp.export_keys([ab.fingerprint], secret=True, passphrase='1234567890'))
+            f.write(
+                _pgp.export_keys(
+                    [ab.fingerprint], secret=True, passphrase='1234567890'
+                )
+            )
         with open(os.path.join(kdir, 'dawgie.bot.pub'), 'tw') as f:
             f.write(_pgp.export_keys([db.fingerprint], passphrase='1234567890'))
         with open(os.path.join(kdir, 'dawgie.bot.sec'), 'tw') as f:
-            f.write(_pgp.export_keys([db.fingerprint], secret=True, passphrase='1234567890'))
+            f.write(
+                _pgp.export_keys(
+                    [db.fingerprint], secret=True, passphrase='1234567890'
+                )
+            )
         dawgie.security.initialize(kdir)
         _https_in, _https_out = multiprocessing.Queue(), multiprocessing.Queue()
         originals = (
@@ -84,10 +106,14 @@ class AWS(unittest.TestCase):
             dawgie.pl.worker.aws._sqs_push,
         )
         _sqs_in, _sqs_out = multiprocessing.Queue(), multiprocessing.Queue()
-        task = multiprocessing.Process(target=_aws, args=(_https_out, _https_in, _sqs_out, _sqs_in, kdir))
+        task = multiprocessing.Process(
+            target=_aws, args=(_https_out, _https_in, _sqs_out, _sqs_in, kdir)
+        )
         task.start()
         _subs()
-        do = dawgie.pl.worker.aws.Connect(dawgie.pl.message.make(val=kdir), _respond, _callLater)
+        do = dawgie.pl.worker.aws.Connect(
+            dawgie.pl.message.make(val=kdir), _respond, _callLater
+        )
         do.advertise()
         self.assertFalse(AWS.failed)
         task.join()
@@ -158,7 +184,9 @@ def _sqs_push(msg):
     return _sqs_out.put(msg)
 
 
-def _subs(funcs=(_advertise, _interview, _hire, _https_push, _sqs_pop, _sqs_push)):
+def _subs(
+    funcs=(_advertise, _interview, _hire, _https_push, _sqs_pop, _sqs_push)
+):
     dawgie.pl.worker.aws._advertise = funcs[0]
     dawgie.pl.worker.aws._interview = funcs[1]
     dawgie.pl.worker.aws._hire = funcs[2]

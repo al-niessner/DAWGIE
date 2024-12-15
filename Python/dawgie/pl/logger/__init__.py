@@ -53,7 +53,11 @@ _root = None
 class LogFilter(logging.Filter):
     # pylint: disable=too-few-public-methods
     def filter(self, record):
-        return not (record.name == 'gnupg' and record.levelno < logging.ERROR and not logging.getLogger().isEnabledFor(logging.DEBUG))
+        return not (
+            record.name == 'gnupg'
+            and record.levelno < logging.ERROR
+            and not logging.getLogger().isEnabledFor(logging.DEBUG)
+        )
 
     pass
 
@@ -102,10 +106,22 @@ class LogSinkFactory(twisted.internet.protocol.Factory):
         self.__actual = (
             logging.handlers.StreamHandler()
             if path is None
-            else logging.handlers.TimedRotatingFileHandler(path, backupCount=dawgie.context.log_backup, when='midnight', utc=True)
+            else logging.handlers.TimedRotatingFileHandler(
+                path,
+                backupCount=dawgie.context.log_backup,
+                when='midnight',
+                utc=True,
+            )
         )
         self.__actual.addFilter(LogFilter('gnupg'))
-        self.__actual.setFormatter(logging.Formatter('%(asctime)s :: ' + '%(name)s :: ' + '%(levelname)s :: ' + '%(message)s'))
+        self.__actual.setFormatter(
+            logging.Formatter(
+                '%(asctime)s :: '
+                + '%(name)s :: '
+                + '%(levelname)s :: '
+                + '%(message)s'
+            )
+        )
         self.__host = dawgie.security._my_ip()
         self.__pid = os.getpid()
         return
@@ -120,7 +136,10 @@ class LogSinkFactory(twisted.internet.protocol.Factory):
         import dawgie.security
 
         # pylint: disable=protected-access
-        return self.__host == dawgie.security._my_ip() and self.__pid == os.getpid()
+        return (
+            self.__host == dawgie.security._my_ip()
+            and self.__pid == os.getpid()
+        )
 
     pass
 
@@ -165,10 +184,19 @@ def start(path: str, port: int) -> None:
 
     dawgie.pl.logger._root = LogSinkFactory(path)
     if dawgie.security.useTLS():
-        controller = dawgie.security.authority().options(dawgie.security.certificate())
-        twisted.internet.reactor.listenSSL(port, dawgie.pl.logger._root, controller, dawgie.context.worker_backlog)
+        controller = dawgie.security.authority().options(
+            dawgie.security.certificate()
+        )
+        twisted.internet.reactor.listenSSL(
+            port,
+            dawgie.pl.logger._root,
+            controller,
+            dawgie.context.worker_backlog,
+        )
     else:
         # cannot call logging from here because we are trying to start it
         print('PGP support is deprecated and will be removed')
-        twisted.internet.reactor.listenTCP(port, dawgie.pl.logger._root, dawgie.context.worker_backlog)
+        twisted.internet.reactor.listenTCP(
+            port, dawgie.pl.logger._root, dawgie.context.worker_backlog
+        )
     return

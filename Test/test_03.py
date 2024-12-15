@@ -69,7 +69,9 @@ class Logger(unittest.TestCase):
 
     def _start_logger(self):
         dawgie.pl.logger.start(self.log_path, dawgie.context.log_port)
-        self.handler = dawgie.pl.logger.TwistedHandler(host='localhost', port=dawgie.context.log_port)
+        self.handler = dawgie.pl.logger.TwistedHandler(
+            host='localhost', port=dawgie.context.log_port
+        )
         logging.basicConfig(level=logging.INFO)
         logging.captureWarnings(True)
         self.mylog = logging.getLogger(__name__)
@@ -95,7 +97,9 @@ class Logger(unittest.TestCase):
 
     def test_issue_236(self):
         self.assertEqual(10, dawgie.util.args.log_level('10'))
-        self.assertEqual(logging.INFO, dawgie.util.args.log_level('logging.INFO'))
+        self.assertEqual(
+            logging.INFO, dawgie.util.args.log_level('logging.INFO')
+        )
         return
 
     pass

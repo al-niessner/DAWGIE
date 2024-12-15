@@ -74,7 +74,11 @@ class Cell(dawgie.Visitor):
 
     def add_image(self, alternate: str, label: str, img: bytes) -> None:
         content = ('<h3>' + label + '</h3>') if label else ''
-        content += '<img alt="' + html.escape(alternate) + '" src="data:image/png;base64,'
+        content += (
+            '<img alt="'
+            + html.escape(alternate)
+            + '" src="data:image/png;base64,'
+        )
         content += base64.encodebytes(img).decode()
         content += '">'
         self._content.append(AsIsText(content))
@@ -86,7 +90,9 @@ class Cell(dawgie.Visitor):
         self._content.append(AsIsText('<p>' + html.escape(content) + '</p>'))
         return
 
-    def add_table(self, clabels: [str], rows: int = 0, title: str = None) -> 'dawgie.TableVisitor':
+    def add_table(
+        self, clabels: [str], rows: int = 0, title: str = None
+    ) -> 'dawgie.TableVisitor':
         self._content.append(Table(clabels, rows, title))
         return self._content[-1]
 
@@ -98,7 +104,9 @@ class Table(dawgie.TableVisitor):
     def __init__(self, clabels: [str], rows=0, title=None) -> None:
         dawgie.TableVisitor.__init__(self)
         self.__clabels = clabels
-        self.__table = [[Cell() for c in range(len(clabels))] for r in range(rows)]
+        self.__table = [
+            [Cell() for c in range(len(clabels))] for r in range(rows)
+        ]
         self.__title = title
         return
 
@@ -106,17 +114,30 @@ class Table(dawgie.TableVisitor):
         if not self.__table:
             return
 
-        buf.write('<table style="border: 5px solid black; border-collapse: collapse">')
+        buf.write(
+            '<table style="border: 5px solid black; border-collapse: collapse">'
+        )
 
         if self.__title:
-            buf.write('<caption style="text-align:left">' + self.__title + '</caption>')
+            buf.write(
+                '<caption style="text-align:left">'
+                + self.__title
+                + '</caption>'
+            )
         if len(self.__clabels) < len(self.__table[0]):
-            self.__clabels.extend(['??' for c in range(len(self.__table[0]) - len(self.__clabels))])
+            self.__clabels.extend(
+                [
+                    '??'
+                    for c in range(len(self.__table[0]) - len(self.__clabels))
+                ]
+            )
             pass
 
         buf.write('<tr>')
         for h in self.__clabels[: len(self.__table[0])]:
-            buf.write('<th style="border: 2px solid black; border-collapse: collapse; padding: 5px;">')
+            buf.write(
+                '<th style="border: 2px solid black; border-collapse: collapse; padding: 5px;">'
+            )
             buf.write(html.escape(h))
             buf.write('</th>')
             pass
@@ -124,7 +145,9 @@ class Table(dawgie.TableVisitor):
         for r in self.__table:
             buf.write('<tr>')
             for c in r:
-                buf.write('<td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;">')
+                buf.write(
+                    '<td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;">'
+                )
                 c._render(buf)
                 buf.write('</td>')
                 pass
@@ -134,7 +157,12 @@ class Table(dawgie.TableVisitor):
 
     def get_cell(self, r: int, c: int) -> dawgie.Visitor:
         if len(self.__table) <= r:
-            self.__table.extend([[Cell() for c in range(len(self.__clabels))] for i in range(r - len(self.__table) + 1)])
+            self.__table.extend(
+                [
+                    [Cell() for c in range(len(self.__clabels))]
+                    for i in range(r - len(self.__table) + 1)
+                ]
+            )
 
         col = self.__table[r]
 
@@ -148,7 +176,22 @@ class Table(dawgie.TableVisitor):
 
 
 class Visitor(Cell):
-    void_elements = ["area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"]
+    void_elements = [
+        "area",
+        "base",
+        "br",
+        "col",
+        "embed",
+        "hr",
+        "img",
+        "input",
+        "link",
+        "meta",
+        "param",
+        "source",
+        "track",
+        "wbr",
+    ]
 
     def __init__(self):
         Cell.__init__(self)
@@ -195,7 +238,11 @@ class Visitor(Cell):
         # attributes that apply to presentation
         # class allows application of predefined css within preloaded
         #     stylesheets files -- if file isn't preloaded there is no effect
-        claz = f" class=\"{html.escape(str(kwds['class']))}\" " if 'class' in kwds else ""
+        claz = (
+            f" class=\"{html.escape(str(kwds['class']))}\" "
+            if 'class' in kwds
+            else ""
+        )
         # id allows reference via scripting and link references
         idd = f" id=\"{html.escape(str(kwds['id']))}\" " if 'id' in kwds else ""
         # style allows direct application of raw css to enclosed content
@@ -203,7 +250,9 @@ class Visitor(Cell):
         # html.escape() rules out certain advanced constructs but they can
         # be inserted via a stylesheet
         if 'style' in kwds:
-            attrib_value = html.escape(str(kwds['style']), quote=False).replace("\"", "&quot;")
+            attrib_value = html.escape(str(kwds['style']), quote=False).replace(
+                "\"", "&quot;"
+            )
             style = f" style=\"{attrib_value}\" "
         else:
             style = ""
@@ -237,7 +286,9 @@ class Visitor(Cell):
         if 'js' in kwds:
             # clean potential closing tags / limit malicious code
             tag_value = re.sub(r"<\s*/\s*script\s*>", "", str(kwds['js']))
-            tag_value = f"        <script type=\"text/javascript\">{tag_value}</script>"
+            tag_value = (
+                f"        <script type=\"text/javascript\">{tag_value}</script>"
+            )
             self.__js.append(tag_value)
         # title composed from text, value ignored -- maintain for backwards comp
         if 'title' in kwds:
@@ -260,8 +311,12 @@ class Visitor(Cell):
             tag = str(kwds['tag']) if 'tag' in kwds else "p"
             tag = tag if tag.strip() else "p"
             tag_open = f"<{tag}{idd}{claz}{style}>"
-            tag_close = f"</{tag}>" if tag.strip() not in self.void_elements else ""
-            self._content.append(AsIsText(tag_open + html.escape(text) + tag_close))
+            tag_close = (
+                f"</{tag}>" if tag.strip() not in self.void_elements else ""
+            )
+            self._content.append(
+                AsIsText(tag_open + html.escape(text) + tag_close)
+            )
         # NOTE that list and pre are placed below text to allow a compound
         #     add_declaration statement that includes text, tag, pre and/or
         #     list that places a paragraph above the formatted content to
@@ -291,9 +346,15 @@ class Visitor(Cell):
         buf.write("    <head>")
         buf.write("        <meta charset=\"UTF-8\">")
         buf.write(f"        <title>{self.__title}</title>")
-        buf.write(f"        <script type=\"text/javascript\" src=\"https://cdn.pydata.org/bokeh/release/bokeh-{bokeh.__version__}.min.js\"></script>")
-        buf.write(f"        <script type=\"text/javascript\" src=\"https://cdn.pydata.org/bokeh/release/bokeh-widgets-{bokeh.__version__}.min.js\"></script>")
-        buf.write(f"        <script type=\"text/javascript\" src=\"https://cdn.pydata.org/bokeh/release/bokeh-tables-{bokeh.__version__}.min.js\"></script>")
+        buf.write(
+            f"        <script type=\"text/javascript\" src=\"https://cdn.pydata.org/bokeh/release/bokeh-{bokeh.__version__}.min.js\"></script>"
+        )
+        buf.write(
+            f"        <script type=\"text/javascript\" src=\"https://cdn.pydata.org/bokeh/release/bokeh-widgets-{bokeh.__version__}.min.js\"></script>"
+        )
+        buf.write(
+            f"        <script type=\"text/javascript\" src=\"https://cdn.pydata.org/bokeh/release/bokeh-tables-{bokeh.__version__}.min.js\"></script>"
+        )
         for js in self.__js:
             buf.write(js)
         for css in self.__css:

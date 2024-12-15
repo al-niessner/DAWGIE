@@ -106,7 +106,13 @@ class RollbackImporter:
         # avoid circular dependencies so pylint: disable=import-outside-toplevel
         import dawgie.context
 
-        for modname in filter(lambda n: (n not in self.staticModules and n.startswith(dawgie.context.ae_base_package)), self.dynamicModules.copy()):
+        for modname in filter(
+            lambda n: (
+                n not in self.staticModules
+                and n.startswith(dawgie.context.ae_base_package)
+            ),
+            self.dynamicModules.copy(),
+        ):
             if modname in sys.modules:
                 importlib.reload(sys.modules[modname])
             pass
@@ -126,13 +132,22 @@ class Status(enum.Enum):
 class FSM:
     # pylint: disable=no-self-use,too-many-instance-attributes,too-many-public-methods
     args = None
-    states = ['archiving', 'gitting', 'loading', 'running', 'starting', 'updating']
+    states = [
+        'archiving',
+        'gitting',
+        'loading',
+        'running',
+        'starting',
+        'updating',
+    ]
 
     def __init__(self, initial_state='starting', doctest_=False):
         # avoid circular dependencies so pylint: disable=import-outside-toplevel
         import dawgie.context
 
-        self.machine = transitions.Machine(model=self, states=FSM.states, initial=initial_state)
+        self.machine = transitions.Machine(
+            model=self, states=FSM.states, initial=initial_state
+        )
         self.open_again = False
         self.changeset = None
         self.__doctest = doctest_
@@ -152,8 +167,14 @@ class FSM:
         self.reset()
         self.wait_timeout = 0.001
         self.nodes = {}
-        self.graph = pydot.graph_from_dot_file(os.path.join(os.path.abspath(os.path.dirname(__file__)), self.dot_file_name))
-        idir = os.path.abspath(os.path.join(dawgie.context.fe_path, 'images/svg'))
+        self.graph = pydot.graph_from_dot_file(
+            os.path.join(
+                os.path.abspath(os.path.dirname(__file__)), self.dot_file_name
+            )
+        )
+        idir = os.path.abspath(
+            os.path.join(dawgie.context.fe_path, 'images/svg')
+        )
 
         if not os.path.isdir(idir):
             os.makedirs(idir)
@@ -161,7 +182,9 @@ class FSM:
         fn = os.path.join(idir, 'state.svg')
         self.graph.write_svg(fn)
         for edge in self.graph.get_edges():
-            self.machine.add_transition(**self.construct_attributes(edge.get_attributes()))
+            self.machine.add_transition(
+                **self.construct_attributes(edge.get_attributes())
+            )
             pass
         for node in self.graph.get_nodes():
             node.set_style("filled")
@@ -178,7 +201,9 @@ class FSM:
         import dawgie.tools.trace
 
         log.info('entering state archive')
-        basedir = os.path.abspath(os.path.join(dawgie.context.fe_path, 'pages/database'))
+        basedir = os.path.abspath(
+            os.path.join(dawgie.context.fe_path, 'pages/database')
+        )
         os.makedirs(basedir, exist_ok=True)
         self.open_again = dawgie.db.reopen()
         # disable trace until issue 237 is addressed
@@ -215,16 +240,26 @@ class FSM:
 
             if dawgie.context.ssl_pem_file:
                 if os.path.isfile(dawgie.context.ssl_pem_file):
-                    with open(dawgie.context.ssl_pem_file, 'rt', encoding='UTF-8') as f:
+                    with open(
+                        dawgie.context.ssl_pem_file, 'rt', encoding='UTF-8'
+                    ) as f:
                         cert = f.read()
                     cert = twisted.internet.ssl.PrivateCertificate.loadPEM(cert)
-                    twisted.internet.reactor.listenSSL(dawgie.context.fe_port, factory, cert.options())
+                    twisted.internet.reactor.listenSSL(
+                        dawgie.context.fe_port, factory, cert.options()
+                    )
                     if dawgie.security.clients():
-                        twisted.internet.reactor.listenSSL(dawgie.context.cfe_port, factory, cert.options(*dawgie.security.clients()))
+                        twisted.internet.reactor.listenSSL(
+                            dawgie.context.cfe_port,
+                            factory,
+                            cert.options(*dawgie.security.clients()),
+                        )
                 else:
                     raise FileNotFoundError(dawgie.context.ssl_pem_file)
             else:
-                twisted.internet.reactor.listenTCP(dawgie.context.fe_port, factory)
+                twisted.internet.reactor.listenTCP(
+                    dawgie.context.fe_port, factory
+                )
             pass
         return
 
@@ -238,11 +273,23 @@ class FSM:
             print('self._logging()')
         else:
             dawgie.pl.logger.start(
-                path=os.path.expanduser(os.path.expandvars(os.path.join(dawgie.context.data_log, self.args.log_file))), port=dawgie.context.log_port
+                path=os.path.expanduser(
+                    os.path.expandvars(
+                        os.path.join(
+                            dawgie.context.data_log, self.args.log_file
+                        )
+                    )
+                ),
+                port=dawgie.context.log_port,
             )
             dawgie.pl.logger.fe.instance = dawgie.pl.logger.fe.Handler()
-            twisted_handler = dawgie.pl.logger.TwistedHandler(host=dawgie.context.db_host, port=dawgie.context.log_port)
-            logging.basicConfig(handlers=[dawgie.pl.logger.fe.instance, twisted_handler], level=self.args.log_level)
+            twisted_handler = dawgie.pl.logger.TwistedHandler(
+                host=dawgie.context.db_host, port=dawgie.context.log_port
+            )
+            logging.basicConfig(
+                handlers=[dawgie.pl.logger.fe.instance, twisted_handler],
+                level=self.args.log_level,
+            )
             logging.captureWarnings(True)
             pass
         return
@@ -254,7 +301,9 @@ class FSM:
         import dawgie.pl.resources
 
         log.info('entering state navel gaze')
-        dawgie.pl.farm.insights = dawgie.pl.resources.distribution(dawgie.db.metrics())
+        dawgie.pl.farm.insights = dawgie.pl.resources.distribution(
+            dawgie.db.metrics()
+        )
         log.info('exiting state navel gaze')
         return
 
@@ -270,11 +319,17 @@ class FSM:
         if self.__doctest:
             print('self._pipeline()')
         else:
-            facs = dawgie.pl.scan.for_factories(dawgie.context.ae_base_path, dawgie.context.ae_base_package)
+            facs = dawgie.pl.scan.for_factories(
+                dawgie.context.ae_base_path, dawgie.context.ae_base_package
+            )
             dawgie.db.open()
             dawgie.pl.schedule.build(
                 facs,
-                dawgie.pl.version.current(facs[dawgie.Factories.analysis] + facs[dawgie.Factories.regress] + facs[dawgie.Factories.task]),
+                dawgie.pl.version.current(
+                    facs[dawgie.Factories.analysis]
+                    + facs[dawgie.Factories.regress]
+                    + facs[dawgie.Factories.task]
+                ),
                 dawgie.pl.version.persistent(),
             )
             dawgie.pl.schedule.periodics(facs[dawgie.Factories.events])
@@ -310,9 +365,13 @@ class FSM:
             print('self._security()')
         else:
             dawgie.security.initialize(
-                path=os.path.expandvars(os.path.expanduser(dawgie.context.guest_public_keys)),
+                path=os.path.expandvars(
+                    os.path.expanduser(dawgie.context.guest_public_keys)
+                ),
                 myname=dawgie.context.ssl_pem_myname,
-                myself=os.path.expandvars(os.path.expanduser(dawgie.context.ssl_pem_myself)),
+                myself=os.path.expandvars(
+                    os.path.expanduser(dawgie.context.ssl_pem_myself)
+                ),
             )
         return
 
@@ -325,7 +384,11 @@ class FSM:
             self._archive_done()
         elif dawgie.pl.farm.archive:
             d = twisted.internet.threads.deferToThread(self._archive, 2)
-            d.addErrback(dawgie.pl.LogFailure('while archiving the pipeline', __name__).log)
+            d.addErrback(
+                dawgie.pl.LogFailure(
+                    'while archiving the pipeline', __name__
+                ).log
+            )
         else:
             self._archive_done()
         return
@@ -390,7 +453,12 @@ class FSM:
             dawgie.pl.farm.notifyAll()
             dawgie.pl.farm.clear()
             d = twisted.internet.threads.deferToThread(self._pipeline, 2)
-            d.addCallbacks(done, dawgie.pl.LogFailure('while loading the pipeline', __name__).log)
+            d.addCallbacks(
+                done,
+                dawgie.pl.LogFailure(
+                    'while loading the pipeline', __name__
+                ).log,
+            )
             pass
 
         log.info('exiting state loading')
@@ -418,7 +486,12 @@ class FSM:
         else:
             log.info('Reload the pipeline')
             d = twisted.internet.threads.deferToThread(self._reload, 2)
-            d.addCallbacks(done, dawgie.pl.LogFailure('while reloading the pipeline', __name__).log)
+            d.addCallbacks(
+                done,
+                dawgie.pl.LogFailure(
+                    'while reloading the pipeline', __name__
+                ).log,
+            )
             pass
         return
 
@@ -441,10 +514,15 @@ class FSM:
         try:
             priority = dawgie.tools.submit.Priority(priority)
         except:
-            log.error('Could not convert "%s" to a meaningful priority defaulting to ToDo is empty', str(priority))
+            log.error(
+                'Could not convert "%s" to a meaningful priority defaulting to ToDo is empty',
+                str(priority),
+            )
             priority = dawgie.tools.submit.Priority.TODO
             pass
-        self.priority = dawgie.tools.submit.Priority.max(self.priority, priority)
+        self.priority = dawgie.tools.submit.Priority.max(
+            self.priority, priority
+        )
         self.changeset = changeset
         return
 
@@ -484,7 +562,9 @@ class FSM:
         # Check if we are in the correct state
         log.info("At the submit crossroads.")
         if not self.is_pipeline_active():
-            log.warning("Pipeline is not active while we are at the submit crossroad.")
+            log.warning(
+                "Pipeline is not active while we are at the submit crossroad."
+            )
         else:
             if self.priority is None:
                 pass
@@ -517,8 +597,15 @@ class FSM:
         self.wait_on_todo.set()
 
         if self.crew_thread is None:
-            self.crew_thread = twisted.internet.threads.deferToThread(self.is_crew_done)
-            self.crew_thread.addCallbacks(done, dawgie.pl.LogFailure('while signaling crew is done', __name__).log)
+            self.crew_thread = twisted.internet.threads.deferToThread(
+                self.is_crew_done
+            )
+            self.crew_thread.addCallbacks(
+                done,
+                dawgie.pl.LogFailure(
+                    'while signaling crew is done', __name__
+                ).log,
+            )
             pass
         return
 
@@ -538,8 +625,15 @@ class FSM:
         self.wait_on_todo.set()
 
         if self.doing_thread is None:
-            self.doing_thread = twisted.internet.threads.deferToThread(self.is_doing_done)
-            self.doing_thread.addCallbacks(done, dawgie.pl.LogFailure('while signaling doing is done', __name__).log)
+            self.doing_thread = twisted.internet.threads.deferToThread(
+                self.is_doing_done
+            )
+            self.doing_thread.addCallbacks(
+                done,
+                dawgie.pl.LogFailure(
+                    'while signaling doing is done', __name__
+                ).log,
+            )
             pass
         return
 
@@ -566,8 +660,15 @@ class FSM:
         self.wait_on_todo.clear()
 
         if self.todo_thread is None:
-            self.todo_thread = twisted.internet.threads.deferToThread(self.is_todo_done)
-            self.todo_thread.addCallbacks(done, dawgie.pl.LogFailure('while signaling todo is done', __name__).log)
+            self.todo_thread = twisted.internet.threads.deferToThread(
+                self.is_todo_done
+            )
+            self.todo_thread.addCallbacks(
+                done,
+                dawgie.pl.LogFailure(
+                    'while signaling todo is done', __name__
+                ).log,
+            )
             pass
         return
 

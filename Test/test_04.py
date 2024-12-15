@@ -47,7 +47,9 @@ import unittest
 class Scan(unittest.TestCase):
     def __init__(self, *args):
         unittest.TestCase.__init__(self, *args)
-        self.__ae_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ae'))
+        self.__ae_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), 'ae')
+        )
         self.__ae_pkg = 'ae'
         sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
         return

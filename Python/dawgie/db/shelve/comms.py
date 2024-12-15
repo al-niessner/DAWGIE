@@ -60,7 +60,9 @@ from .enums import Mutex
 from .enums import Table
 from .state import DBI
 
-COMMAND = collections.namedtuple('COMMAND', ['func', 'keyset', 'table', 'value'])
+COMMAND = collections.namedtuple(
+    'COMMAND', ['func', 'keyset', 'table', 'value']
+)
 KEYSET = collections.namedtuple('KEYSET', ['name', 'parent', 'ver'])
 
 
@@ -71,7 +73,9 @@ class Connector:  # pylint: disable=too-few-public-methods
 
     @staticmethod
     def __do(request):
-        s = dawgie.security.connect((dawgie.context.db_host, dawgie.context.db_port))
+        s = dawgie.security.connect(
+            (dawgie.context.db_host, dawgie.context.db_port)
+        )
         msg = pickle.dumps(request, pickle.HIGHEST_PROTOCOL)
         s.sendall(struct.pack('>I', len(msg)) + msg)
         buf = b''
@@ -95,7 +99,9 @@ class Connector:  # pylint: disable=too-few-public-methods
         log.debug('Connector._prime_keys() - get prime keys')
         return util.prime_keys(self._table(Table.prime))
 
-    def _set_prime(self, key: (int, int, int, int, int, int), value: dawgie.Value):
+    def _set_prime(
+        self, key: (int, int, int, int, int, int), value: dawgie.Value
+    ):
         value = dawgie.db.util.encode(value)
         return self.__do(COMMAND(Func.set, key, Table.prime, value))
 
@@ -128,11 +134,22 @@ class DBSerializer(twisted.internet.protocol.Factory):
     def open():
         try:
             if dawgie.security.useTLS():
-                controller = dawgie.security.authority().options(dawgie.security.certificate())
-                twisted.internet.reactor.listenSSL(int(dawgie.context.db_port), DBSerializer(), controller, dawgie.context.worker_backlog)
+                controller = dawgie.security.authority().options(
+                    dawgie.security.certificate()
+                )
+                twisted.internet.reactor.listenSSL(
+                    int(dawgie.context.db_port),
+                    DBSerializer(),
+                    controller,
+                    dawgie.context.worker_backlog,
+                )
             else:
                 log.critical('PGP support is deprecated and will be removed')
-                twisted.internet.reactor.listenTCP(int(dawgie.context.db_port), DBSerializer(), dawgie.context.worker_backlog)
+                twisted.internet.reactor.listenTCP(
+                    int(dawgie.context.db_port),
+                    DBSerializer(),
+                    dawgie.context.worker_backlog,
+                )
         except twisted.internet.error.CannotListenError:
             log.warning("Address already in use.")
         return
@@ -143,13 +160,19 @@ class DBSerializer(twisted.internet.protocol.Factory):
 class Worker(twisted.internet.protocol.Protocol):
     def __init__(self, address):
         twisted.internet.protocol.Protocol.__init__(self)
-        self.__buf = {'actual': len(struct.pack('>I', 0)), 'data': b'', 'expected': None}
+        self.__buf = {
+            'actual': len(struct.pack('>I', 0)),
+            'data': b'',
+            'expected': None,
+        }
         if not dawgie.security.useTLS():
             # really is used so pylint: disable=unused-private-member
             self.__handshake = dawgie.security.TwistedWrapper(self, address)
         self.__has_lock = False
         self.__id_name = 'unknown'
-        self.__looping_call = twisted.internet.task.LoopingCall(self._do_acquire)
+        self.__looping_call = twisted.internet.task.LoopingCall(
+            self._do_acquire
+        )
         self.__looping_call_stopped = False
         self.__connection_lost = False
         return
@@ -177,10 +200,16 @@ class Worker(twisted.internet.protocol.Protocol):
 
     def dataReceived(self, data):
         self.__buf['data'] += data
-        length = self.__buf['actual'] if self.__buf['expected'] is None else self.__buf['expected']
+        length = (
+            self.__buf['actual']
+            if self.__buf['expected'] is None
+            else self.__buf['expected']
+        )
         while length <= len(self.__buf['data']):
             if self.__buf['expected'] is None:
-                self.__buf['expected'] = struct.unpack('>I', self.__buf['data'][:length])[0]
+                self.__buf['expected'] = struct.unpack(
+                    '>I', self.__buf['data'][:length]
+                )[0]
                 self.__buf['data'] = self.__buf['data'][length:]
             else:
                 request = pickle.loads(self.__buf['data'][:length])
@@ -191,20 +220,28 @@ class Worker(twisted.internet.protocol.Protocol):
                     try:
                         self.do(request)
                     except ImportError:
-                        log.excpetion('Had a problem unpickling an input so aborting connection and moving forward.')
+                        log.excpetion(
+                            'Had a problem unpickling an input so aborting connection and moving forward.'
+                        )
                     finally:
                         self.transport.loseConnection()
                 else:
                     try:
                         self.do(request)
                     except ImportError:
-                        log.excpetion('Had a problem unpickling an input so aborting connection and moving forward.')
+                        log.excpetion(
+                            'Had a problem unpickling an input so aborting connection and moving forward.'
+                        )
                         self.transport.loseConnection()
                         pass
                     pass
                 pass
 
-            length = self.__buf['actual'] if self.__buf['expected'] is None else self.__buf['expected']
+            length = (
+                self.__buf['actual']
+                if self.__buf['expected'] is None
+                else self.__buf['expected']
+            )
             pass
         return
 
@@ -214,7 +251,9 @@ class Worker(twisted.internet.protocol.Protocol):
             self.__id_name = request.value
             log.debug("Inside worker(%s): Acquire", self.__id_name)
             # Lock Request Begin
-            DBI().task_engine.add_task(self.__id_name, dawgie.db.lockview.LockRequest.lrqb)
+            DBI().task_engine.add_task(
+                self.__id_name, dawgie.db.lockview.LockRequest.lrqb
+            )
             self.__looping_call.start(3)
         elif request.func == Func.dbcopy:
             self._delay_copy(request.value)
@@ -239,7 +278,10 @@ class Worker(twisted.internet.protocol.Protocol):
         elif request.func == Func.table:
             log.debug('Worker.do() - received request for table')
             log.debug('Worker.do() - table %s', request.table.name)
-            log.debug('Worker.do() - table size %d', len(DBI().tables[request.table.value]))
+            log.debug(
+                'Worker.do() - table size %d',
+                len(DBI().tables[request.table.value]),
+            )
             self._send(dict(DBI().tables[request.table.value]))
         elif request.func == Func.upd:
             if request.table.value == Table.prime:
@@ -249,7 +291,11 @@ class Worker(twisted.internet.protocol.Protocol):
             kwds = request.keyset._asdict()
             if kwds['ver']:
                 kwds['ver'] = util.LocalVersion(kwds['ver'])
-            response = util.append(table=DBI().tables[request.table.value], index=DBI().indices[request.table.value], **kwds)
+            response = util.append(
+                table=DBI().tables[request.table.value],
+                index=DBI().indices[request.table.value],
+                **kwds,
+            )
             self._send(response)
         else:
             log.error('Did not understand %s', str(request))
@@ -259,7 +305,10 @@ class Worker(twisted.internet.protocol.Protocol):
         if self.__looping_call_stopped:
             return
         if self.__connection_lost:
-            log.debug("_do_acquire(%s): connection has already been lost", self.__id_name)
+            log.debug(
+                "_do_acquire(%s): connection has already been lost",
+                self.__id_name,
+            )
             return
 
         log.debug("_do_acquire(%s): checking lock status...", self.__id_name)
@@ -273,10 +322,14 @@ class Worker(twisted.internet.protocol.Protocol):
             twisted.internet.reactor.callLater(1, self.__looping_call.stop)
             self.__looping_call_stopped = True
             # Lock Request End
-            DBI().task_engine.add_task(self.__id_name, dawgie.db.lockview.LockRequest.lrqe)
+            DBI().task_engine.add_task(
+                self.__id_name, dawgie.db.lockview.LockRequest.lrqe
+            )
 
             # Lock Acquire Begin
-            DBI().task_engine.add_task(self.__id_name, dawgie.db.lockview.LockRequest.laqb)
+            DBI().task_engine.add_task(
+                self.__id_name, dawgie.db.lockview.LockRequest.laqb
+            )
             pass
         self._send(s)
         return
@@ -328,14 +381,20 @@ class Worker(twisted.internet.protocol.Protocol):
         log.debug("_do_release: has_lock => %d", self.__has_lock)
         if self.__has_lock:
             # Lock Acquire End
-            DBI().task_engine.add_task(self.__id_name, dawgie.db.lockview.LockRequest.laqe)
+            DBI().task_engine.add_task(
+                self.__id_name, dawgie.db.lockview.LockRequest.laqe
+            )
             # Lock Release Begin
-            DBI().task_engine.add_task(self.__id_name, dawgie.db.lockview.LockRequest.lrlb)
+            DBI().task_engine.add_task(
+                self.__id_name, dawgie.db.lockview.LockRequest.lrlb
+            )
 
             self._unlock_db()
             self._send(True)
             # Lock Release End
-            DBI().task_engine.add_task(self.__id_name, dawgie.db.lockview.LockRequest.lrle)
+            DBI().task_engine.add_task(
+                self.__id_name, dawgie.db.lockview.LockRequest.lrle
+            )
         else:
             self._send(False)
         return
@@ -367,7 +426,9 @@ class Worker(twisted.internet.protocol.Protocol):
 
 
 def acquire(name):
-    s = dawgie.security.connect((dawgie.context.db_host, dawgie.context.db_port))
+    s = dawgie.security.connect(
+        (dawgie.context.db_host, dawgie.context.db_port)
+    )
     request = COMMAND(Func.acquire, None, None, name)
     msg = pickle.dumps(request, pickle.HIGHEST_PROTOCOL)
     s.sendall(struct.pack('>I', len(msg)) + msg)

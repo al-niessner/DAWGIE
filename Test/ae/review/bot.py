@@ -78,7 +78,13 @@ class Analyzer(dawgie.Analyzer):
         return [self.__data]
 
     def traits(self):
-        return [dawgie.SV_REF(factory=ae.network.analysis, impl=self.__base, item=self.__base.state_vectors()[0])]
+        return [
+            dawgie.SV_REF(
+                factory=ae.network.analysis,
+                impl=self.__base,
+                item=self.__base.state_vectors()[0],
+            )
+        ]
 
     pass
 
@@ -95,7 +101,13 @@ class Regression(dawgie.Regression):
         return 'history'
 
     def variables(self):
-        return [dawgie.SV_REF(factory=ae.network.analysis, impl=self.__base, item=self.__base.state_vectors()[0])]
+        return [
+            dawgie.SV_REF(
+                factory=ae.network.analysis,
+                impl=self.__base,
+                item=self.__base.state_vectors()[0],
+            )
+        ]
 
     def run(self, ps, timeline):
         self.__data['image'] = ae.Value('history is always forgotten')

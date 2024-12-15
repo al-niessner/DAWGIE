@@ -69,9 +69,16 @@ ae_base_package = os.environ.get('DAWGIE_AE_BASE_PACKAGE', 'ae')
 
 allow_promotion = os.environ.get('DAWGIE_PROMOTION', 'false').lower() in 'true'
 
-cfe_port = int(os.environ.get('DAWGIE_CFE_PORT', 8080 + PortOffset.certFE.value))
-cloud_data = os.environ.get('DAWGIE_CLOUD_DATA', 'apikey@url@SQS_Name@AutoScalingGroupName@ClusterName@TaskDefinition')
-cloud_port = int(os.environ.get('DAWGIE_CLOUD_PORT', 8080 + PortOffset.cloud.value))
+cfe_port = int(
+    os.environ.get('DAWGIE_CFE_PORT', 8080 + PortOffset.certFE.value)
+)
+cloud_data = os.environ.get(
+    'DAWGIE_CLOUD_DATA',
+    'apikey@url@SQS_Name@AutoScalingGroupName@ClusterName@TaskDefinition',
+)
+cloud_port = int(
+    os.environ.get('DAWGIE_CLOUD_PORT', 8080 + PortOffset.cloud.value)
+)
 cloud_provider = CloudProvider.none
 
 cpu_threshold = int(os.environ.get('DAWGIE_CPU_THRESH', 30))
@@ -84,7 +91,9 @@ db_host = os.environ.get('DAWGIE_DB_HOST', 'localhost')
 db_impl = os.environ.get('DAWGIE_DB_IMPL', 'shelve')
 db_name = os.environ.get('DAWGIE_DB_NAME', 'undefined')
 db_path = os.environ.get('DAWGIE_DB_PATH', '/proj/data/db')
-db_post2shelve_prefix = os.environ.get('DAWGIE_DB_POST2SHELVE_PREFIX', 'undefined')
+db_post2shelve_prefix = os.environ.get(
+    'DAWGIE_DB_POST2SHELVE_PREFIX', 'undefined'
+)
 db_rotate_path = os.environ.get('DAWGIE_DB_ROTATE_PATH', '/proj/data/db')
 db_copy_path = os.environ.get('DAWGIE_DB_COPY_PATH', '/tmp')
 db_port = int(os.environ.get('DAWGIE_DB_PORT', 8080 + PortOffset.shelve.value))
@@ -94,17 +103,27 @@ db_lock = False
 display = os.environ.get('DAWGIE_DISPLAY_TYPE', 'html')
 email_alerts_to = os.environ.get('DAWGIE_EMAIL_ALERTS_TO', '')
 email_signature = dawgie.resolve_username()
-farm_port = int(os.environ.get('DAWGIE_FARM_PORT', 8080 + PortOffset.farm.value))
+farm_port = int(
+    os.environ.get('DAWGIE_FARM_PORT', 8080 + PortOffset.farm.value)
+)
 fe_path = '/tmp/' + os.environ.get('USERNAME', 'unknown') + '/fe'
-fe_port = int(os.environ.get('DAWGIE_FE_PORT', 8080 + PortOffset.frontend.value))
+fe_port = int(
+    os.environ.get('DAWGIE_FE_PORT', 8080 + PortOffset.frontend.value)
+)
 git_rev = None
-guest_public_keys = os.environ.get('DAWGIE_GUEST_PUBLIC_KEYS', '/proj/data/certs')
-identity_override = os.environ.get('DAWGIE_SECURITY_FETCH_IDENTITY', 'dawgie.security.fetch_identity')
+guest_public_keys = os.environ.get(
+    'DAWGIE_GUEST_PUBLIC_KEYS', '/proj/data/certs'
+)
+identity_override = os.environ.get(
+    'DAWGIE_SECURITY_FETCH_IDENTITY', 'dawgie.security.fetch_identity'
+)
 log_backup = 10
 log_capacity = 100
 log_level = logging.WARN
 log_port = int(os.environ.get('DAWGIE_LOG_PORT', 8080 + PortOffset.log.value))
-sanction_override = os.environ.get('DAWGIE_SECURITY_IS_SANCTIONED', 'dawgie.security.is_sanctioned')
+sanction_override = os.environ.get(
+    'DAWGIE_SECURITY_IS_SANCTIONED', 'dawgie.security.is_sanctioned'
+)
 ssl_pem_file = os.environ.get('DAWGIE_SSL_PEM_FILE', '')
 ssl_pem_myname = os.environ.get('DAWGIE_SSL_PEM_MYNAME', 'dawgie')
 ssl_pem_myself = os.environ.get('DAWGIE_SSL_PEM_MYSELF', '')
@@ -117,7 +136,11 @@ def _rev():
     if not rev:
         cdir = os.path.abspath(os.curdir)
         os.chdir(os.path.abspath(ae_base_path))
-        rev = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode().strip()
+        rev = (
+            subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+            .decode()
+            .strip()
+        )
         os.chdir(cdir)
         pass
     return rev
@@ -128,13 +151,50 @@ def add_arguments(ap):
 
     ap - an instance of argparse.ArgumentParser that is being used
     '''
-    ap.add_argument('--context', default=None, required=False, help='a Python dictionary to load into context first')
-    ap.add_argument('--context-ae-dir', default=ae_base_path, required=False, help='the complete path to the AE directory [%(default)s]')
-    ap.add_argument('--context-ae-pkg', default=ae_base_package, required=False, help='the package prefix for the AE [%(default)s]')
-    ap.add_argument('--context-allow-promotion', action='store_true', required=False, help='allow the dawgie to promote state vectors')
-    ap.add_argument('--context-cloud-data', default=cloud_data, required=False, help='data used to communicate with the cloud provider')
-    ap.add_argument('--context-cfe-port', default=cfe_port, required=False, type=int, help='the port to the client certified frontend [%(default)s]')
-    ap.add_argument('--context-cloud-port', default=cloud_port, required=False, type=int, help='the port to the cloud foreman [%(default)s]')
+    ap.add_argument(
+        '--context',
+        default=None,
+        required=False,
+        help='a Python dictionary to load into context first',
+    )
+    ap.add_argument(
+        '--context-ae-dir',
+        default=ae_base_path,
+        required=False,
+        help='the complete path to the AE directory [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-ae-pkg',
+        default=ae_base_package,
+        required=False,
+        help='the package prefix for the AE [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-allow-promotion',
+        action='store_true',
+        required=False,
+        help='allow the dawgie to promote state vectors',
+    )
+    ap.add_argument(
+        '--context-cloud-data',
+        default=cloud_data,
+        required=False,
+        help='data used to communicate with the cloud provider',
+    )
+    ap.add_argument(
+        '--context-cfe-port',
+        default=cfe_port,
+        required=False,
+        type=int,
+        help='the port to the client certified frontend [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-cloud-port',
+        default=cloud_port,
+        required=False,
+        type=int,
+        help='the port to the cloud foreman [%(default)s]',
+    )
     ap.add_argument(
         '--context-cloud-provider',
         choices=[cp.name for cp in CloudProvider],
@@ -149,29 +209,107 @@ def add_arguments(ap):
         type=int,
         help='the number of seconds of compute time to be cloud worthy [%(default)s]',
     )
-    ap.add_argument('--context-data-dbs', default=data_dbs, required=False, help='location of the DB data store [%(default)s]')
-    ap.add_argument('--context-data-log', default=data_log, required=False, help='location of the log files [%(default)s]')
-    ap.add_argument('--context-data-stg', default=data_stg, required=False, help='location of the staging store [%(default)s]')
-    ap.add_argument('--context-db-copy-path', default=db_copy_path, required=False, help='where to copy the database [%(default)s]')
-    ap.add_argument('--context-db-host', default=db_host, required=False, help='the host of the database [%(default)s]')
-    ap.add_argument('--context-db-impl', default=db_impl, required=False, help='ehich database implementation to use [%(default)s]')
-    ap.add_argument('--context-db-name', default=db_name, required=False, help='the name of the database [%(default)s]')
-    ap.add_argument('--context-db-path', default=db_path, required=False, help='where to find the database [%(default)s]')
-    ap.add_argument('--context-db-port', default=db_port, required=False, type=int, help='the port to the database [%(default)s]')
     ap.add_argument(
-        '--context-db-rotate', default=db_rotate, required=False, type=db_rotate_type, help='the max number of data rotations allowed [%(default)s]'
-    )
-    ap.add_argument('--context-db-rotate-path', default=db_rotate_path, required=False, help='the path of where the rotated db will be located [%(default)s]')
-    ap.add_argument(
-        '--context-display-type', choices=[d.name for d in dawgie.de.Type], default='html', required=False, help='what type of display [%(default)s]'
-    )
-    ap.add_argument('--context-farm-port', default=farm_port, required=False, type=int, help='the port to the farm foreman [%(default)s]')
-    ap.add_argument('--context-fe-path', default=fe_path, required=False, type=str, help='AE specific directory for the front-end [%(default)s]')
-    ap.add_argument(
-        '--context-guest-public-keys', default=guest_public_keys, required=False, help='location to find the public keys for all guests [%(default)s]'
+        '--context-data-dbs',
+        default=data_dbs,
+        required=False,
+        help='location of the DB data store [%(default)s]',
     )
     ap.add_argument(
-        '--context-log-backup', default=log_backup, required=False, type=int, help='the number of log files to accumulate in the log directory [%(default)s]'
+        '--context-data-log',
+        default=data_log,
+        required=False,
+        help='location of the log files [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-data-stg',
+        default=data_stg,
+        required=False,
+        help='location of the staging store [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-db-copy-path',
+        default=db_copy_path,
+        required=False,
+        help='where to copy the database [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-db-host',
+        default=db_host,
+        required=False,
+        help='the host of the database [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-db-impl',
+        default=db_impl,
+        required=False,
+        help='ehich database implementation to use [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-db-name',
+        default=db_name,
+        required=False,
+        help='the name of the database [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-db-path',
+        default=db_path,
+        required=False,
+        help='where to find the database [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-db-port',
+        default=db_port,
+        required=False,
+        type=int,
+        help='the port to the database [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-db-rotate',
+        default=db_rotate,
+        required=False,
+        type=db_rotate_type,
+        help='the max number of data rotations allowed [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-db-rotate-path',
+        default=db_rotate_path,
+        required=False,
+        help='the path of where the rotated db will be located [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-display-type',
+        choices=[d.name for d in dawgie.de.Type],
+        default='html',
+        required=False,
+        help='what type of display [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-farm-port',
+        default=farm_port,
+        required=False,
+        type=int,
+        help='the port to the farm foreman [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-fe-path',
+        default=fe_path,
+        required=False,
+        type=str,
+        help='AE specific directory for the front-end [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-guest-public-keys',
+        default=guest_public_keys,
+        required=False,
+        help='location to find the public keys for all guests [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-log-backup',
+        default=log_backup,
+        required=False,
+        type=int,
+        help='the number of log files to accumulate in the log directory [%(default)s]',
     )
     ap.add_argument(
         '--context-log-capacity',
@@ -180,14 +318,25 @@ def add_arguments(ap):
         type=int,
         help='the number of log messages to save for the front-end lists [%(default)s]',
     )
-    ap.add_argument('--context-log-port', default=log_port, required=False, type=int, help='the port to the log server [%(default)s]')
+    ap.add_argument(
+        '--context-log-port',
+        default=log_port,
+        required=False,
+        type=int,
+        help='the port to the log server [%(default)s]',
+    )
     ap.add_argument(
         '--context-email-alerts-to',
         default=email_alerts_to,
         required=False,
         help='email address(es) to send alerts to using a , to separate them when more than one. [%(default)s]',
     )
-    ap.add_argument('--context-email-signature', default=email_signature, required=False, help='Sign e-mail summary reports with this signature. [%(default)s]')
+    ap.add_argument(
+        '--context-email-signature',
+        default=email_signature,
+        required=False,
+        help='Sign e-mail summary reports with this signature. [%(default)s]',
+    )
     ap.add_argument(
         '--context-security-fetch-identity',
         default=identity_override,
@@ -195,7 +344,10 @@ def add_arguments(ap):
         help='fetch a meaningful identity from the client certificate [%(default)s]',
     )
     ap.add_argument(
-        '--context-security-is-sanctioned', default=sanction_override, required=False, help='determine if a client has access to the endpoint [%(default)s]'
+        '--context-security-is-sanctioned',
+        default=sanction_override,
+        required=False,
+        help='determine if a client has access to the endpoint [%(default)s]',
     )
     ap.add_argument(
         '--context-ssl-pem-file',
@@ -203,7 +355,12 @@ def add_arguments(ap):
         required=False,
         help='when pointing at an existing file, it will be used to initiate an https service [%(default)s]',
     )
-    ap.add_argument('--context-ssl-pem-myname', default=ssl_pem_myname, required=False, help='host name for the "myself" certificate [%(default)s]')
+    ap.add_argument(
+        '--context-ssl-pem-myname',
+        default=ssl_pem_myname,
+        required=False,
+        help='host name for the "myself" certificate [%(default)s]',
+    )
     ap.add_argument(
         '--context-ssl-pem-myself',
         default=ssl_pem_myself,
@@ -322,8 +479,12 @@ def override(args):
     dawgie.context.ssl_pem_myself = args.context_ssl_pem_myself
     dawgie.context.worker_backlog = args.context_worker_backlog
 
-    if not dawgie.context.ae_base_path.endswith(os.path.sep + dawgie.context.ae_base_package.replace('.', os.path.sep)):
-        raise ValueError(f'context-ae-dir ({0}) does not end with context-ae-pkg ({dawgie.context.ae_base_path,dawgie.context.ae_base_package})')
+    if not dawgie.context.ae_base_path.endswith(
+        os.path.sep + dawgie.context.ae_base_package.replace('.', os.path.sep)
+    ):
+        raise ValueError(
+            f'context-ae-dir ({0}) does not end with context-ae-pkg ({dawgie.context.ae_base_path,dawgie.context.ae_base_package})'
+        )
     return
 
 

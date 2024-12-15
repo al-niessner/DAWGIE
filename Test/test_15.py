@@ -156,86 +156,143 @@ class ScheduleRules(unittest.TestCase):
         return
 
     def test_issue_194(self):
-        dawgie.pl.schedule.organize(['test_15.root'], event='test for issue 194', targets=['__all__'])
+        dawgie.pl.schedule.organize(
+            ['test_15.root'], event='test for issue 194', targets=['__all__']
+        )
         self.assertEqual(
             dawgie.pl.schedule.view_todo(),
             [
                 {
                     'name': 'test_15.root',
-                    'targets': ['Target_0', 'Target_1', 'Target_2', 'Target_3', 'Target_4', 'Target_5', 'Target_6', 'Target_7', 'Target_8', 'Target_9'],
+                    'targets': [
+                        'Target_0',
+                        'Target_1',
+                        'Target_2',
+                        'Target_3',
+                        'Target_4',
+                        'Target_5',
+                        'Target_6',
+                        'Target_7',
+                        'Target_8',
+                        'Target_9',
+                    ],
                 }
             ],
         )
         jobs = dawgie.pl.schedule.next_job_batch()
         self.assertEqual(len(jobs), 1)
-        self.assertEqual(jobs[0].get('status'), dawgie.pl.schedule.State.waiting)
+        self.assertEqual(
+            jobs[0].get('status'), dawgie.pl.schedule.State.waiting
+        )
         jobs[0].set('status', dawgie.pl.schedule.State.running)
         jobs[0].get('do').clear()
-        dawgie.pl.schedule.complete(jobs[0], 1, 'Target_3', {}, dawgie.pl.schedule.State.success)
+        dawgie.pl.schedule.complete(
+            jobs[0], 1, 'Target_3', {}, dawgie.pl.schedule.State.success
+        )
         self.assertNotIn('Target_3', jobs[0].get('doing'))
-        dawgie.pl.schedule.update([('1.Target_3.test_15.root.sv.goat', True)], jobs[0], 1)
+        dawgie.pl.schedule.update(
+            [('1.Target_3.test_15.root.sv.goat', True)], jobs[0], 1
+        )
         jobs.extend(dawgie.pl.schedule.next_job_batch())
         self.assertEqual(len(jobs), 3)
         jobs[1].set('status', dawgie.pl.schedule.State.running)
         jobs[1].get('do').clear()
-        dawgie.pl.schedule.complete(jobs[1], 1, 'Target_3', {}, dawgie.pl.schedule.State.success)
+        dawgie.pl.schedule.complete(
+            jobs[1], 1, 'Target_3', {}, dawgie.pl.schedule.State.success
+        )
         self.assertNotIn('Target_3', jobs[1].get('doing'))
         self.assertEqual(0, len(jobs[1].get('doing')))
-        dawgie.pl.schedule.update([('1.Target_3.test_15.A.sv.goat', True)], jobs[1], 1)
+        dawgie.pl.schedule.update(
+            [('1.Target_3.test_15.A.sv.goat', True)], jobs[1], 1
+        )
         jobs[2].set('status', dawgie.pl.schedule.State.running)
         jobs[2].get('do').clear()
-        dawgie.pl.schedule.complete(jobs[2], 1, 'Target_3', {}, dawgie.pl.schedule.State.success)
+        dawgie.pl.schedule.complete(
+            jobs[2], 1, 'Target_3', {}, dawgie.pl.schedule.State.success
+        )
         self.assertNotIn('Target_3', jobs[2].get('doing'))
         self.assertEqual(0, len(jobs[1].get('doing')))
-        dawgie.pl.schedule.update([('1.Target_3.test_15.B.sv.goat', True)], jobs[2], 1)
+        dawgie.pl.schedule.update(
+            [('1.Target_3.test_15.B.sv.goat', True)], jobs[2], 1
+        )
         _clean(jobs)
         self.assertEqual(len(jobs), 1)
         jobs.extend(dawgie.pl.schedule.next_job_batch())
         self.assertEqual(len(jobs), 2)
         jobs[1].set('status', dawgie.pl.schedule.State.running)
         jobs[1].get('do').clear()
-        dawgie.pl.schedule.complete(jobs[1], 1, 'Target_3', {}, dawgie.pl.schedule.State.success)
+        dawgie.pl.schedule.complete(
+            jobs[1], 1, 'Target_3', {}, dawgie.pl.schedule.State.success
+        )
         self.assertNotIn('Target_3', jobs[1].get('doing'))
         self.assertEqual(0, len(jobs[1].get('doing')))
-        dawgie.pl.schedule.update([('1.Target_3.test_15.C.sv.goat', True)], jobs[1], 1)
+        dawgie.pl.schedule.update(
+            [('1.Target_3.test_15.C.sv.goat', True)], jobs[1], 1
+        )
         _clean(jobs)
         self.assertEqual(len(jobs), 1)
         jobs.extend(dawgie.pl.schedule.next_job_batch())
         self.assertEqual(len(jobs), 2)
         jobs[1].set('status', dawgie.pl.schedule.State.running)
         jobs[1].get('do').clear()
-        dawgie.pl.schedule.complete(jobs[1], 1, 'Target_3', {}, dawgie.pl.schedule.State.success)
+        dawgie.pl.schedule.complete(
+            jobs[1], 1, 'Target_3', {}, dawgie.pl.schedule.State.success
+        )
         self.assertNotIn('Target_3', jobs[1].get('doing'))
         self.assertEqual(0, len(jobs[1].get('doing')))
-        dawgie.pl.schedule.update([('1.Target_3.test_15.A.sv.goat', False)], jobs[1], 1)
+        dawgie.pl.schedule.update(
+            [('1.Target_3.test_15.A.sv.goat', False)], jobs[1], 1
+        )
         _clean(jobs)
         self.assertEqual(len(jobs), 1)
         jobs.extend(dawgie.pl.schedule.next_job_batch())
         self.assertEqual(len(jobs), 2)
         jobs[1].set('status', dawgie.pl.schedule.State.running)
         jobs[1].get('do').clear()
-        dawgie.pl.schedule.complete(jobs[1], 1, 'Target_3', {}, dawgie.pl.schedule.State.success)
+        dawgie.pl.schedule.complete(
+            jobs[1], 1, 'Target_3', {}, dawgie.pl.schedule.State.success
+        )
         self.assertNotIn('Target_3', jobs[1].get('doing'))
         self.assertEqual(0, len(jobs[1].get('doing')))
-        dawgie.pl.schedule.update([('1.Target_3.test_15.D.sv.goat', True)], jobs[1], 1)
+        dawgie.pl.schedule.update(
+            [('1.Target_3.test_15.D.sv.goat', True)], jobs[1], 1
+        )
         _clean(jobs)
         self.assertEqual(len(jobs), 1)
         jobs.extend(dawgie.pl.schedule.next_job_batch())
         self.assertEqual(len(jobs), 1)
-        for target in ['Target_0', 'Target_1', 'Target_2', 'Target_4', 'Target_5', 'Target_6', 'Target_7', 'Target_8', 'Target_9']:
+        for target in [
+            'Target_0',
+            'Target_1',
+            'Target_2',
+            'Target_4',
+            'Target_5',
+            'Target_6',
+            'Target_7',
+            'Target_8',
+            'Target_9',
+        ]:
             print('target:', target)
-            dawgie.pl.schedule.complete(jobs[0], 1, target, {}, dawgie.pl.schedule.State.success)
+            dawgie.pl.schedule.complete(
+                jobs[0], 1, target, {}, dawgie.pl.schedule.State.success
+            )
             self.assertNotIn('Target_3', jobs[0].get('doing'))
-            dawgie.pl.schedule.update([(f'1.{target}.test_15.root.sv.goat', False)], jobs[0], 1)
+            dawgie.pl.schedule.update(
+                [(f'1.{target}.test_15.root.sv.goat', False)], jobs[0], 1
+            )
             jobs.extend(dawgie.pl.schedule.next_job_batch())
             _clean(jobs)
             self.assertEqual(len(jobs), 1)
             pass
         jobs[0].set('status', dawgie.pl.schedule.State.running)
         jobs[0].get('do').clear()
-        dawgie.pl.schedule.complete(jobs[0], 1, '__all__', {}, dawgie.pl.schedule.State.success)
+        dawgie.pl.schedule.complete(
+            jobs[0], 1, '__all__', {}, dawgie.pl.schedule.State.success
+        )
         self.assertNotIn('__all__', jobs[0].get('doing'))
-        dawgie.pl.schedule.update([('1.__all__.test_15.E.goat', True)], jobs[0], 1)
+        dawgie.pl.schedule.update(
+            [('1.__all__.test_15.E.goat', True)], jobs[0], 1
+        )
         jobs.extend(dawgie.pl.schedule.next_job_batch())
         _clean(jobs)
         self.assertEqual(len(jobs), 0)
@@ -278,7 +335,9 @@ def regress(prefix: str, ps_hint: int = 0, target: str = '__none__'):
     return Regress(prefix, ps_hint, target, _rl)
 
 
-def task(prefix: str, ps_hint: int = 0, runid: int = -1, target: str = '__none__'):
+def task(
+    prefix: str, ps_hint: int = 0, runid: int = -1, target: str = '__none__'
+):
     return Task(prefix, ps_hint, runid, target, _tl)
 
 

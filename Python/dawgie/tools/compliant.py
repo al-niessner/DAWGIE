@@ -52,7 +52,9 @@ import sys
 
 
 def _get_rules():
-    for r in filter(lambda k: k.startswith('rule_'), sorted(dir(dawgie.tools.compliant))):
+    for r in filter(
+        lambda k: k.startswith('rule_'), sorted(dir(dawgie.tools.compliant))
+    ):
         yield r
     return
 
@@ -68,7 +70,9 @@ def _rules():
 
 
 def _scan():
-    factories = dawgie.pl.scan.for_factories(dawgie.context.ae_base_path, dawgie.context.ae_base_package)
+    factories = dawgie.pl.scan.for_factories(
+        dawgie.context.ae_base_path, dawgie.context.ae_base_package
+    )
     all_factories = []
     for v in factories.values():
         all_factories.extend(v)
@@ -113,7 +117,19 @@ def _verify(tasks, silent, verbose):
     return passed
 
 
-def _walk(task, ifbot=_t, ifalg=_t, ifsv=_t, ifv=_t, ifanl=_t, ifanz=_t, ifret=_t, ifrec=_t, ifref=_t, ifmom=_t):
+def _walk(
+    task,
+    ifbot=_t,
+    ifalg=_t,
+    ifsv=_t,
+    ifv=_t,
+    ifanl=_t,
+    ifanz=_t,
+    ifret=_t,
+    ifrec=_t,
+    ifref=_t,
+    ifmom=_t,
+):
     fargs = {
         dawgie.Factories.analysis: ('test', 1, -1),
         dawgie.Factories.task: ('test', 1, -1, 'TEST'),
@@ -181,9 +197,19 @@ def main():
     ap = argparse.ArgumentParser(
         description='Encode rules that the architecture requires but I cannot enforce because the language does not allow for enforcement. Use -r or --rules to see the current rules that  are being enforced.'
     )
-    ap.add_argument('--ae-dir', required=True, help='the complete path to the AE directory')
-    ap.add_argument('--ae-pkg', required=True, help='the package prefix for the AE')
-    ap.add_argument('-l', '--log-file', default=None, required=False, help='a filename to put all of the log messages into [%(default)s]')
+    ap.add_argument(
+        '--ae-dir', required=True, help='the complete path to the AE directory'
+    )
+    ap.add_argument(
+        '--ae-pkg', required=True, help='the package prefix for the AE'
+    )
+    ap.add_argument(
+        '-l',
+        '--log-file',
+        default=None,
+        required=False,
+        help='a filename to put all of the log messages into [%(default)s]',
+    )
     ap.add_argument(
         '-L',
         '--log-level',
@@ -192,8 +218,20 @@ def main():
         type=dawgie.util.log_level,
         help='set the verbosity that you want where a smaller number means more verbose [logging.INFO]',
     )
-    ap.add_argument('-r', '--rules', action='store_true', default=False, help='display all of the rules and then exit')
-    ap.add_argument('-s', '--silent', action='store_true', default=False, help='turn off the text indicating success or failure')
+    ap.add_argument(
+        '-r',
+        '--rules',
+        action='store_true',
+        default=False,
+        help='display all of the rules and then exit',
+    )
+    ap.add_argument(
+        '-s',
+        '--silent',
+        action='store_true',
+        default=False,
+        help='turn off the text indicating success or failure',
+    )
     ap.add_argument(
         '-t',
         '--task-list',
@@ -201,20 +239,34 @@ def main():
         nargs='*',
         help='list specific tasks to verify compliance (like "dawgie.ae.deroo") or if none are given search for all available and verify their compliance',
     )
-    ap.add_argument('-v', '--verbose', action='store_true', default=False, help='display verbose information of verification')
+    ap.add_argument(
+        '-v',
+        '--verbose',
+        action='store_true',
+        default=False,
+        help='display verbose information of verification',
+    )
     args = ap.parse_args()
     dawgie.context.ae_base_path = args.ae_dir
     dawgie.context.ae_base_package = args.ae_pkg
-    sys.path.insert(0, '/'.join(args.ae_dir.split('/')[: -len(args.ae_pkg.split('.'))]))
+    sys.path.insert(
+        0, '/'.join(args.ae_dir.split('/')[: -len(args.ae_pkg.split('.'))])
+    )
     yes = True
 
-    if args.log_file and args.log_file.startswith('::') and args.log_file.endswith('::'):
+    if (
+        args.log_file
+        and args.log_file.startswith('::')
+        and args.log_file.endswith('::')
+    ):
         host, port, gpghome = args.log_file.split('::')[1:-1]
         print(args.log_file, host, port, gpghome)
         dawgie.security.initialize(
             path=os.path.expandvars(os.path.expanduser(gpghome)),
             myname=dawgie.context.ssl_pem_myname,
-            myself=os.path.expandvars(os.path.expanduser(dawgie.context.ssl_pem_myself)),
+            myself=os.path.expandvars(
+                os.path.expanduser(dawgie.context.ssl_pem_myself)
+            ),
         )
         print('dawgie.security.initialize')
         handler = dawgie.pl.logger.TwistedHandler(host=host, port=int(port))
@@ -229,7 +281,11 @@ def main():
     if args.rules:
         _rules()
     else:
-        yes = _verify(_scan() if not args.task_list else args.task_list, args.silent, args.verbose)
+        yes = _verify(
+            _scan() if not args.task_list else args.task_list,
+            args.silent,
+            args.verbose,
+        )
 
     print('returning', yes)
     return yes
@@ -255,10 +311,22 @@ def rule_01(task):
         target is the name to be used for look up and should default to __none__
     '''
     fargs = {
-        dawgie.Factories.analysis: (3, [inspect.Parameter.empty, 0, -1], [str, int, int]),
+        dawgie.Factories.analysis: (
+            3,
+            [inspect.Parameter.empty, 0, -1],
+            [str, int, int],
+        ),
         dawgie.Factories.events: (0, [], []),
-        dawgie.Factories.regress: (3, [inspect.Parameter.empty, 0, '__none__'], [str, int, str]),
-        dawgie.Factories.task: (4, [inspect.Parameter.empty, 0, -1, '__none__'], [str, int, int, str]),
+        dawgie.Factories.regress: (
+            3,
+            [inspect.Parameter.empty, 0, '__none__'],
+            [str, int, str],
+        ),
+        dawgie.Factories.task: (
+            4,
+            [inspect.Parameter.empty, 0, -1, '__none__'],
+            [str, int, int, str],
+        ),
     }
     findings = []
     mod = importlib.import_module(task)
@@ -270,26 +338,41 @@ def rule_01(task):
 
     for e in filter(lambda e: e.name in names, dawgie.Factories):
         f = getattr(mod, e.name)
-        findings.append(inspect.isfunction(f) and len(inspect.signature(f).parameters.keys()) == fargs[e][0])
+        findings.append(
+            inspect.isfunction(f)
+            and len(inspect.signature(f).parameters.keys()) == fargs[e][0]
+        )
 
         if findings[-1]:
             findings.append(True)
-            for d, v in zip(fargs[e][1], inspect.signature(f).parameters.values()):
+            for d, v in zip(
+                fargs[e][1], inspect.signature(f).parameters.values()
+            ):
                 findings[-1] &= v.default == d
                 pass
 
             if findings[-1]:
                 findings.append(True)
-                for a, v in zip(fargs[e][2], inspect.signature(f).parameters.values()):
+                for a, v in zip(
+                    fargs[e][2], inspect.signature(f).parameters.values()
+                ):
                     findings[-1] &= v.annotation == a
                     pass
                 if not findings[-1]:
-                    logging.error('Args not typed of factory %s in package %s', e.name, task)
+                    logging.error(
+                        'Args not typed of factory %s in package %s',
+                        e.name,
+                        task,
+                    )
                     pass
             else:
-                logging.error('Missing defaults of factory %s in package %s', e.name, task)
+                logging.error(
+                    'Missing defaults of factory %s in package %s', e.name, task
+                )
         else:
-            logging.error('Number of arguments for factory %s in package %s', e.name, task)
+            logging.error(
+                'Number of arguments for factory %s in package %s', e.name, task
+            )
         pass
     return all(findings)
 
@@ -308,7 +391,14 @@ def rule_02(task):
         findings.append(state)
 
         if not state:
-            logging.error('failed to inherit correctly within package ' + task + ' because item ' + name + ' is does not inherit from dawgie.' + t)
+            logging.error(
+                'failed to inherit correctly within package '
+                + task
+                + ' because item '
+                + name
+                + ' is does not inherit from dawgie.'
+                + t
+            )
         return
 
     findings = []
@@ -316,14 +406,21 @@ def rule_02(task):
         task,
         ifbot=lambda b: _signal(isinstance(b, dawgie.Task), 'Task'),
         ifalg=lambda a: _signal(isinstance(a, dawgie.Algorithm), 'Algorithm'),
-        ifsv=lambda sv: _signal(isinstance(sv, dawgie.StateVector), 'StateVector'),
+        ifsv=lambda sv: _signal(
+            isinstance(sv, dawgie.StateVector), 'StateVector'
+        ),
         ifv=lambda i: _signal(isinstance(i[1], dawgie.Value), 'Value', i[0]),
         ifanl=lambda a: _signal(isinstance(a, dawgie.Analysis), 'Analysis'),
         ifanz=lambda a: _signal(isinstance(a, dawgie.Analyzer), 'Analyzer'),
         ifret=lambda a: _signal(isinstance(a, dawgie.Regress), 'Regress'),
         ifrec=lambda a: _signal(isinstance(a, dawgie.Regression), 'Regression'),
-        ifref=lambda ref: _signal(isinstance(ref, (dawgie.ALG_REF, dawgie.SV_REF, dawgie.V_REF)), 'Aspect Reference'),
-        ifmom=lambda mom: _signal(isinstance(mom, dawgie.EVENT), 'Periodic Event'),
+        ifref=lambda ref: _signal(
+            isinstance(ref, (dawgie.ALG_REF, dawgie.SV_REF, dawgie.V_REF)),
+            'Aspect Reference',
+        ),
+        ifmom=lambda mom: _signal(
+            isinstance(mom, dawgie.EVENT), 'Periodic Event'
+        ),
     )
     return all(findings)
 
@@ -343,59 +440,122 @@ def rule_03(task):
             findings.append(False)
 
         if not findings[-1]:
-            logging.error('Item %s does not override all of the elements it needs to or does not return the correct types.', name)
+            logging.error(
+                'Item %s does not override all of the elements it needs to or does not return the correct types.',
+                name,
+            )
         return
 
     def _verify_analysis(a):
-        return all((isinstance(az, dawgie.Analyzer) for az in a.list())) if a.list() else False
+        return (
+            all((isinstance(az, dawgie.Analyzer) for az in a.list()))
+            if a.list()
+            else False
+        )
 
     def _verify_analyzer(a):
         if a.traits():
-            tl = all((isinstance(p, (dawgie.SV_REF, dawgie.V_REF)) for p in a.traits()))
+            tl = all(
+                (
+                    isinstance(p, (dawgie.SV_REF, dawgie.V_REF))
+                    for p in a.traits()
+                )
+            )
         else:
             tl = True
 
         if a.state_vectors():
-            svl = all((isinstance(sv, dawgie.StateVector) for sv in a.state_vectors()))
+            svl = all(
+                (isinstance(sv, dawgie.StateVector) for sv in a.state_vectors())
+            )
             pass
         else:
             svl = True
-        return all([svl, tl, _verify_version(a), isinstance(a.name(), str), isinstance(a.traits(), list), isinstance(a.state_vectors(), list)])
+        return all(
+            [
+                svl,
+                tl,
+                _verify_version(a),
+                isinstance(a.name(), str),
+                isinstance(a.traits(), list),
+                isinstance(a.state_vectors(), list),
+            ]
+        )
 
     def _verify_alg(a):
         if a.previous():
-            pl = all((isinstance(p, (dawgie.ALG_REF, dawgie.SV_REF, dawgie.V_REF)) for p in a.previous()))
+            pl = all(
+                (
+                    isinstance(p, (dawgie.ALG_REF, dawgie.SV_REF, dawgie.V_REF))
+                    for p in a.previous()
+                )
+            )
         else:
             pl = True
 
         if a.state_vectors():
-            svl = all((isinstance(sv, dawgie.StateVector) for sv in a.state_vectors()))
+            svl = all(
+                (isinstance(sv, dawgie.StateVector) for sv in a.state_vectors())
+            )
             pass
         else:
             svl = True
-        return all([pl, svl, _verify_version(a), isinstance(a.name(), str), isinstance(a.previous(), list), isinstance(a.state_vectors(), list)])
+        return all(
+            [
+                pl,
+                svl,
+                _verify_version(a),
+                isinstance(a.name(), str),
+                isinstance(a.previous(), list),
+                isinstance(a.state_vectors(), list),
+            ]
+        )
 
     def _verify_regress(r):
-        return all((isinstance(reg, dawgie.Regression) for reg in r.list())) if r.list() else False
+        return (
+            all((isinstance(reg, dawgie.Regression) for reg in r.list()))
+            if r.list()
+            else False
+        )
 
     def _verify_regression(r):
         if r.variables():
-            tl = all((isinstance(v, (dawgie.SV_REF, dawgie.V_REF)) for v in r.variables()))
+            tl = all(
+                (
+                    isinstance(v, (dawgie.SV_REF, dawgie.V_REF))
+                    for v in r.variables()
+                )
+            )
         else:
             tl = True
 
         if r.state_vectors():
-            svl = all((isinstance(sv, dawgie.StateVector) for sv in r.state_vectors()))
+            svl = all(
+                (isinstance(sv, dawgie.StateVector) for sv in r.state_vectors())
+            )
             pass
         else:
             svl = True
-        return all([svl, tl, _verify_version(r), isinstance(r.name(), str), isinstance(r.variables(), list), isinstance(r.state_vectors(), list)])
+        return all(
+            [
+                svl,
+                tl,
+                _verify_version(r),
+                isinstance(r.name(), str),
+                isinstance(r.variables(), list),
+                isinstance(r.state_vectors(), list),
+            ]
+        )
 
     def _verify_state_vector(sv):
         return _verify_version(sv)
 
     def _verify_task(t):
-        return all((isinstance(a, dawgie.Algorithm) for a in t.list())) if t.list() else False
+        return (
+            all((isinstance(a, dawgie.Algorithm) for a in t.list()))
+            if t.list()
+            else False
+        )
 
     def _verify_value(v):
         return all([_verify_version(v)])
@@ -403,7 +563,12 @@ def rule_03(task):
     def _verify_version(item):
         result = isinstance(item._get_ver(), dawgie.VERSION)
         item._set_ver(dawgie.VERSION(-1, -2, -3))
-        return result and item.design() == -1 and item.implementation() == -2 and item.bugfix() == -3
+        return (
+            result
+            and item.design() == -1
+            and item.implementation() == -2
+            and item.bugfix() == -3
+        )
 
     findings = []
     _walk(
@@ -434,7 +599,12 @@ def rule_04(task):
         findings.append(state)
 
         if not state:
-            logging.error('the package ' + task + ' contains a name with the special character ".": ' + name)
+            logging.error(
+                'the package '
+                + task
+                + ' contains a name with the special character ".": '
+                + name
+            )
         return
 
     findings = []
@@ -464,7 +634,11 @@ def rule_05(task):
         findings.append(0 < len(sv))
 
         if not findings[-1]:
-            logging.error('the package %s contains state vector %s with no predefined keys', task, sv.name())
+            logging.error(
+                'the package %s contains state vector %s with no predefined keys',
+                task,
+                sv.name(),
+            )
         return
 
     findings = []
@@ -484,10 +658,16 @@ def rule_06(task):
         bot = f('test', -1, 1, 'TEST')
         for step in bot.list():
             for prev in step.previous():
-                findings.append(prev.impl.__module__.startswith(prev.factory.__module__))
+                findings.append(
+                    prev.impl.__module__.startswith(prev.factory.__module__)
+                )
 
                 if not findings[-1]:
-                    logging.error('the previous implementation %s does not start with the factory package %s', prev.impl.__module__, prev.factory.__module__)
+                    logging.error(
+                        'the previous implementation %s does not start with the factory package %s',
+                        prev.impl.__module__,
+                        prev.factory.__module__,
+                    )
                 pass
             pass
         pass
@@ -514,7 +694,9 @@ def rule_07(task):
             findings.append(True)
         except:
             findings.append(False)
-            logging.error('dawgie.Value subclass named "%s" cannot be pickled.', vn)
+            logging.error(
+                'dawgie.Value subclass named "%s" cannot be pickled.', vn
+            )
             pass
         return
 
@@ -534,13 +716,21 @@ def rule_08(task):
     '''
 
     def _check_ref_types(ref):
-        findings.append(inspect.isfunction(ref.factory) or inspect.ismethod(ref.factory))
+        findings.append(
+            inspect.isfunction(ref.factory) or inspect.ismethod(ref.factory)
+        )
         if not findings[-1]:
             logging.error('ref.factory is not a function')
 
-        findings.append(isinstance(ref.impl, (dawgie.Algorithm, dawgie.Analyzer, dawgie.Regression)))
+        findings.append(
+            isinstance(
+                ref.impl, (dawgie.Algorithm, dawgie.Analyzer, dawgie.Regression)
+            )
+        )
         if not findings[-1]:
-            logging.error('ref.impl not an instance of Algorithm, Analyzer, or Ressions')
+            logging.error(
+                'ref.impl not an instance of Algorithm, Analyzer, or Ressions'
+            )
 
         if isinstance(ref, (dawgie.SV_REF, dawgie.V_REF)):
             findings.append(isinstance(ref.item, dawgie.StateVector))
@@ -588,11 +778,22 @@ def rule_10(task):
 
     if 'events' in dir(mod):
         for e in mod.events():
-            not_defined = [e.moment.boot is None, e.moment.day is None, e.moment.dom is None, e.moment.dow is None]
+            not_defined = [
+                e.moment.boot is None,
+                e.moment.day is None,
+                e.moment.dom is None,
+                e.moment.dow is None,
+            ]
             findings.append(sum(not_defined) == len(not_defined) - 1)
-            findings.append(e.moment.day is None or isinstance(e.moment.day, datetime.date))
-            findings.append(e.moment.dom is None or isinstance(e.moment.dom, int))
-            findings.append(e.moment.dow is None or isinstance(e.moment.dow, int))
+            findings.append(
+                e.moment.day is None or isinstance(e.moment.day, datetime.date)
+            )
+            findings.append(
+                e.moment.dom is None or isinstance(e.moment.dom, int)
+            )
+            findings.append(
+                e.moment.dow is None or isinstance(e.moment.dow, int)
+            )
 
             if e.moment.boot is None:
                 findings.append(isinstance(e.moment.time, datetime.time))
@@ -629,9 +830,15 @@ def verify(repo: str, silent: bool, verbose: bool, spawn):
         'python3',
         '-m',
         'dawgie.tools.compliant',
-        '--ae-dir={0}/{1}'.format(repo, dawgie.context.ae_base_package.replace('.', '/')),
+        '--ae-dir={0}/{1}'.format(
+            repo, dawgie.context.ae_base_package.replace('.', '/')
+        ),
         '--ae-pkg={0}'.format(dawgie.context.ae_base_package),
-        '--log-file=::{0}::{1}::{2}::'.format(dawgie.context.db_host, dawgie.context.log_port, dawgie.context.guest_public_keys),
+        '--log-file=::{0}::{1}::{2}::'.format(
+            dawgie.context.db_host,
+            dawgie.context.log_port,
+            dawgie.context.guest_public_keys,
+        ),
         '--log-level={}'.format(dawgie.context.log_level),
     ]
     # pylint: enable=consider-using-f-string

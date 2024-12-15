@@ -48,7 +48,9 @@ import sys
 def consume(runid, tn, taskn, algn, svn, vn):
     req = [runid, tn, taskn, algn, svn, vn]
     if all((x is None for x in req)):
-        print('All parameters are None which means it would be simpler to delete and restart the database. Cowardly doing nothing.')
+        print(
+            'All parameters are None which means it would be simpler to delete and restart the database. Cowardly doing nothing.'
+        )
         logging.getLogger(__name__).warning('Cowardly doing nothing.')
         return
 
@@ -81,7 +83,13 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser(
         description='Crawls through the database and removes all the matching keys from the primary table. It does not remove the referenced data in the store. There is no undo of this operation and it must be done to a database that is not active (the pipeline is not running.'
     )
-    ap.add_argument('-l', '--log-file', default=unique_fn, required=False, help='a filename to put all of the log messages into [%(default)s]')
+    ap.add_argument(
+        '-l',
+        '--log-file',
+        default=unique_fn,
+        required=False,
+        help='a filename to put all of the log messages into [%(default)s]',
+    )
     ap.add_argument(
         '-L',
         '--log-level',
@@ -94,8 +102,18 @@ if __name__ == '__main__':
     dawgie.context.add_arguments(ap)
     args = ap.parse_args()
     dawgie.context.override(args)
-    logging.basicConfig(filename=os.path.join(dawgie.context.data_log, args.log_file), level=args.log_level)
-    consume(args.run_id, args.target_name, args.task_name, args.alg_name, args.state_vector_name, args.value_name)
+    logging.basicConfig(
+        filename=os.path.join(dawgie.context.data_log, args.log_file),
+        level=args.log_level,
+    )
+    consume(
+        args.run_id,
+        args.target_name,
+        args.task_name,
+        args.alg_name,
+        args.state_vector_name,
+        args.value_name,
+    )
     pass
 else:
     import dawgie.context

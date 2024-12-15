@@ -45,8 +45,17 @@ instance = None
 
 class Handler(logging.handlers.BufferingHandler):
     def __init__(self):
-        logging.handlers.BufferingHandler.__init__(self, dawgie.context.log_capacity)
-        self.setFormatter(logging.Formatter('%(asctime)s;\n;' + '%(name)s;\n;' + '%(levelname)s;\n;' + '%(message)s'))
+        logging.handlers.BufferingHandler.__init__(
+            self, dawgie.context.log_capacity
+        )
+        self.setFormatter(
+            logging.Formatter(
+                '%(asctime)s;\n;'
+                + '%(name)s;\n;'
+                + '%(levelname)s;\n;'
+                + '%(message)s'
+            )
+        )
         return
 
     def emit(self, record):
@@ -65,6 +74,13 @@ def remembered():
     history = []
     for r in instance.buffer:
         details = instance.format(r).split(';\n;')
-        history.append({'timeStamp': details[0], 'name': details[1], 'level': details[2], 'message': '\n\n'.join(details[3:])})
+        history.append(
+            {
+                'timeStamp': details[0],
+                'name': details[1],
+                'level': details[2],
+                'message': '\n\n'.join(details[3:]),
+            }
+        )
         pass
     return history

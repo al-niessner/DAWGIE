@@ -91,7 +91,9 @@ def add(target_name: str) -> bool:
     if DBI().is_reopened:
         result = Connector().set(target_name, None, Table.target, None, None)
     elif DBI().is_open:
-        result = util.append(target_name, DBI().tables.target, DBI().indices.target)
+        result = util.append(
+            target_name, DBI().tables.target, DBI().indices.target
+        )
     else:
         raise RuntimeError('called add before open')
     return result[0]
@@ -100,11 +102,16 @@ def add(target_name: str) -> bool:
 def archive(done):
     '''Archive the current state of the database'''
     if DBI().is_reopened:
-        raise RuntimeError('archive should only be called from the ' + 'pipeline Foreman context')
+        raise RuntimeError(
+            'archive should only be called from the '
+            + 'pipeline Foreman context'
+        )
 
     path = dawgie.context.db_rotate_path
     if not (os.path.exists(path) and os.path.isdir(path)):
-        raise ValueError('The path "' + path + '" does not exist or is not a directory')
+        raise ValueError(
+            'The path "' + path + '" does not exist or is not a directory'
+        )
 
     if DBI().is_open:
         reconnect = True
@@ -151,7 +158,9 @@ def connect(alg, bot, tn) -> dawgie.Dataset:
     return Interface(alg, bot, tn)
 
 
-def consistent(inputs: [dawgie.db.REF], outputs: [dawgie.db.REF], target_name: str) -> ():
+def consistent(
+    inputs: [dawgie.db.REF], outputs: [dawgie.db.REF], target_name: str
+) -> ():
     '''Find self consistent inputs for the output returning base table entry
 
     REF - tid is Analysis/Regress/Task dawgie.db.ID (use None for version)
@@ -220,7 +229,10 @@ def metrics() -> [dawgie.db.METRIC_DATA]:
             mkeys[name] = []
         mkeys[name].append(k)
         pass
-    mkeys = [sorted(mk, key=lambda k: util.dissect(k)[2])[-1] for mk in mkeys.values()]
+    mkeys = [
+        sorted(mk, key=lambda k: util.dissect(k)[2])[-1]
+        for mk in mkeys.values()
+    ]
     akeys = {}
     for k in mkeys:
         k = DBI().indices.alg[util.dissect(k)[0]]
@@ -229,8 +241,14 @@ def metrics() -> [dawgie.db.METRIC_DATA]:
             akeys[name] = []
         akeys[name].append(k)
         pass
-    akeys = [DBI().tables.alg[sorted(ak, key=lambda k: util.dissect(k)[2])[-1]] for ak in akeys.values()]
-    mkeys = [DBI().tables.state[mk] for mk in filter(lambda k, K=akeys: util.dissect(k)[0] in K, mkeys)]
+    akeys = [
+        DBI().tables.alg[sorted(ak, key=lambda k: util.dissect(k)[2])[-1]]
+        for ak in akeys.values()
+    ]
+    mkeys = [
+        DBI().tables.state[mk]
+        for mk in filter(lambda k, K=akeys: util.dissect(k)[0] in K, mkeys)
+    ]
     keys = list(filter(lambda k, K=mkeys: k[4] in K, keys))
     log.debug('metrics() - total __metric__ in prime keys %d', len(keys))
     for m in sorted(keys):
@@ -253,8 +271,19 @@ def metrics() -> [dawgie.db.METRIC_DATA]:
             ]
         ):
             log.debug('metrics() - make new reuslt')
-            msv = dawgie.util.MetricStateVector(dawgie.util.metrics.filled(-2), dawgie.util.metrics.filled(-2))
-            result.append(dawgie.db.METRIC_DATA(alg_name=alg[0], alg_ver=alg[1].version, run_id=runid, sv=msv, target=target, task=task))
+            msv = dawgie.util.MetricStateVector(
+                dawgie.util.metrics.filled(-2), dawgie.util.metrics.filled(-2)
+            )
+            result.append(
+                dawgie.db.METRIC_DATA(
+                    alg_name=alg[0],
+                    alg_ver=alg[1].version,
+                    run_id=runid,
+                    sv=msv,
+                    target=target,
+                    task=task,
+                )
+            )
             log.debug('metrics() - result length %d', len(result))
             pass
 
@@ -281,7 +310,10 @@ def next():  # pylint: disable=redefined-builtin
 def open():  # pylint: disable=redefined-builtin
     '''Open the database'''
     if not os.path.isdir(dawgie.context.db_path):
-        raise ValueError(f'The path "{dawgie.context.db_path}" ' + 'does not exist or is not a directory')
+        raise ValueError(
+            f'The path "{dawgie.context.db_path}" '
+            + 'does not exist or is not a directory'
+        )
 
     DBI().open()
     DBSerializer.open()
@@ -350,7 +382,9 @@ def reset(runid: int, tn: str, tskn, alg) -> None:
     pk = [runid, DBI().tables.target[tn], DBI().tables.task[tskn]]
     ptab = util.subset(DBI().tables.prime, str(tuple(pk)).replace(')', ','))
     for algi in util.subset(DBI().tables.alg, alg.name(), [pk[-1]]).values():
-        tab = util.subset(DBI().tables.prime, str(tuple(pk + [algi])).replace(')', ','))
+        tab = util.subset(
+            DBI().tables.prime, str(tuple(pk + [algi])).replace(')', ',')
+        )
         if tab:
             ptab = tab
             break
@@ -374,13 +408,19 @@ def retreat(reg, ret) -> dawgie.Timeline:
     '''
     if not DBI().is_open:
         raise RuntimeError('called connect before open')
-    return Interface(reg, ret, ret._target())  # pylint: disable=protected-access
+    return Interface(
+        reg, ret, ret._target()
+    )  # pylint: disable=protected-access
 
 
 def targets():
     if not DBI().is_open:
         raise RuntimeError('called next before open')
-    return Connector().keys(Table.target) if DBI().is_reopened else list(DBI().tables.target)
+    return (
+        Connector().keys(Table.target)
+        if DBI().is_reopened
+        else list(DBI().tables.target)
+    )
 
 
 def trace(task_alg_names: [str]) -> {str: {str: int}}:
@@ -395,7 +435,9 @@ def trace(task_alg_names: [str]) -> {str: {str: int}}:
 
     result = {}
     subprime = {}
-    for runid, tid, tskid, algid, _svid, _vid in util.prime_keys(DBI().tables.prime):
+    for runid, tid, tskid, algid, _svid, _vid in util.prime_keys(
+        DBI().tables.prime
+    ):
         subkey = (tid, tskid, algid)
         if subkey in subprime:
             subprime[subkey].append(runid)
@@ -410,7 +452,12 @@ def trace(task_alg_names: [str]) -> {str: {str: int}}:
         for tan in task_alg_names:
             taskn, algn = tan.split('.')
             tskid = DBI().tables.task[taskn]
-            algid = DBI().tables.alg[sorted(list(util.subset(DBI().tables.alg, algn, [tskid])), key=lambda id: util.dissect(id)[2])[-1]]
+            algid = DBI().tables.alg[
+                sorted(
+                    list(util.subset(DBI().tables.alg, algn, [tskid])),
+                    key=lambda id: util.dissect(id)[2],
+                )[-1]
+            ]
             subkey = (tid, tskid, algid)
             if subkey in subprime:
                 result[tn][tan] = subprime[subkey]
@@ -440,9 +487,15 @@ def update(tsk, alg, sv, vn, v):
     if DBI().is_reopened:
         raise RuntimeError('called outside of Foreman context')
 
-    tskid = util.append(tsk._name(), DBI().tables.task, DBI().indices.task)[1]  # pylint: disable=protected-access
-    algid = util.append(alg.name(), DBI().tables.alg, DBI().indices.alg, tskid, alg)[1]
-    svid = util.append(sv.name(), DBI().tables.state, DBI().indices.state, algid, sv)[1]
+    tskid = util.append(tsk._name(), DBI().tables.task, DBI().indices.task)[
+        1
+    ]  # pylint: disable=protected-access
+    algid = util.append(
+        alg.name(), DBI().tables.alg, DBI().indices.alg, tskid, alg
+    )[1]
+    svid = util.append(
+        sv.name(), DBI().tables.state, DBI().indices.state, algid, sv
+    )[1]
     util.append(vn, DBI().tables.value, DBI().indices.value, svid, v)
     return
 

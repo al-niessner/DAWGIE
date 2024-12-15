@@ -55,13 +55,21 @@ class Defer(absDefer):
         if changeset[0].lower() != '':
             if not self.__busy:
                 self.__busy = True
-                process = Process(changeset[0], self.clear, self.request, submission[0])
+                process = Process(
+                    changeset[0], self.clear, self.request, submission[0]
+                )
                 process.step_0()
                 return twisted.web.server.NOT_DONE_YET
 
-            result = {'alert_status': 'danger', 'alert_message': 'Submission already in progress'}
+            result = {
+                'alert_status': 'danger',
+                'alert_message': 'Submission already in progress',
+            }
         else:
-            result = {'alert_status': 'danger', 'alert_message': 'Cannot submit a blank changeset'}
+            result = {
+                'alert_status': 'danger',
+                'alert_message': 'Cannot submit a blank changeset',
+            }
         return json.dumps(result).encode()
 
     def __init__(self):
@@ -94,13 +102,19 @@ class Process:
             if dawgie.context.fsm.state == 'gitting':
                 dawgie.context.fsm.running_trigger()
             else:
-                log.debug('Process.failure() state is not gitting: %s', str(dawgie.context.fsm.state))
+                log.debug(
+                    'Process.failure() state is not gitting: %s',
+                    str(dawgie.context.fsm.state),
+                )
 
             self.__request.write(json.dumps(self.__msg).encode())
             try:
                 self.__request.finish()
             except:  # pylint: disable=bare-except
-                log.exception('Failed to complete an error message: %s', str(self.__msg['alert_message']))
+                log.exception(
+                    'Failed to complete an error message: %s',
+                    str(self.__msg['alert_message']),
+                )
                 pass
             self.__clear()
             self.__request = None
@@ -122,12 +136,20 @@ class Process:
         '''transition pipeline state to gitting'''
         if not dawgie.context.fsm.is_pipeline_active():
             log.warning("submit: pipeline is not active, cannot submit.")
-            self.__msg = {'alert_status': 'danger', 'alert_message': 'The pipeline is not active so cannot submit.'}
+            self.__msg = {
+                'alert_status': 'danger',
+                'alert_message': 'The pipeline is not active so cannot submit.',
+            }
             return twisted.python.failure.Failure(Exception())
 
-        if dawgie.tools.submit.already_applied(self.__changeset, dawgie.tools.submit.repo_dir):
+        if dawgie.tools.submit.already_applied(
+            self.__changeset, dawgie.tools.submit.repo_dir
+        ):
             log.warning("submit: changeset already in history")
-            self.__msg = {'alert_status': 'danger', 'alert_message': 'The changeset is already in history.'}
+            self.__msg = {
+                'alert_status': 'danger',
+                'alert_message': 'The changeset is already in history.',
+            }
             return twisted.python.failure.Failure(Exception())
 
         # Go To: gitting state
@@ -136,36 +158,74 @@ class Process:
 
     def step_2(self, _result):
         '''prepare_pre_ops'''
-        self.__msg = {'alert_status': 'danger', 'alert_message': 'The submit tool could not prepare pre_ops.'}
-        status = dawgie.tools.submit.auto_merge_prepare(self.__changeset, dawgie.tools.submit.pre_ops, dawgie.tools.submit.repo_dir, dawgie.tools.submit.origin)
-        result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure(Exception())
+        self.__msg = {
+            'alert_status': 'danger',
+            'alert_message': 'The submit tool could not prepare pre_ops.',
+        }
+        status = dawgie.tools.submit.auto_merge_prepare(
+            self.__changeset,
+            dawgie.tools.submit.pre_ops,
+            dawgie.tools.submit.repo_dir,
+            dawgie.tools.submit.origin,
+        )
+        result = (
+            None
+            if status == dawgie.tools.submit.State.SUCCESS
+            else twisted.python.failure.Failure(Exception())
+        )
         return result
 
     def step_3(self, _result):
         '''dawgie compliant'''
-        self.__msg = {'alert_status': 'danger', 'alert_message': 'DAWGIE compliant checks failed.'}
+        self.__msg = {
+            'alert_status': 'danger',
+            'alert_message': 'DAWGIE compliant checks failed.',
+        }
         handler = VerifyHandler(self)
-        status = dawgie.tools.submit.auto_merge_compliant(self.__changeset, dawgie.tools.submit.repo_dir, handler.spawn_off)
-        result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure(Exception())
+        status = dawgie.tools.submit.auto_merge_compliant(
+            self.__changeset, dawgie.tools.submit.repo_dir, handler.spawn_off
+        )
+        result = (
+            None
+            if status == dawgie.tools.submit.State.SUCCESS
+            else twisted.python.failure.Failure(Exception())
+        )
         return result
 
     def step_4(self, _result):
         '''push results'''
-        self.__msg = {'alert_status': 'danger', 'alert_message': 'Could not pull pre_ops into master.'}
-        status = dawgie.tools.submit.auto_merge_push(self.__changeset, dawgie.tools.submit.pre_ops, dawgie.tools.submit.repo_dir, self.__submission)
-        result = None if status == dawgie.tools.submit.State.SUCCESS else twisted.python.failure.Failure(Exception())
+        self.__msg = {
+            'alert_status': 'danger',
+            'alert_message': 'Could not pull pre_ops into master.',
+        }
+        status = dawgie.tools.submit.auto_merge_push(
+            self.__changeset,
+            dawgie.tools.submit.pre_ops,
+            dawgie.tools.submit.repo_dir,
+            self.__submission,
+        )
+        result = (
+            None
+            if status == dawgie.tools.submit.State.SUCCESS
+            else twisted.python.failure.Failure(Exception())
+        )
         return result
 
     def step_5(self, _result):
         '''go back to running and respond with status'''
         dawgie.context.fsm.running_trigger()
-        result = {'alert_status': 'success', 'alert_message': 'Submission successful scheduling update.'}
+        result = {
+            'alert_status': 'success',
+            'alert_message': 'Submission successful scheduling update.',
+        }
         log.debug("Going to the crossroads.")
         self.__request.write(json.dumps(result).encode())
         try:
             self.__request.finish()
         except:  # pylint: disable=bare-except
-            log.exception('Failed to complete a successful message: %s', str(result))
+            log.exception(
+                'Failed to complete a successful message: %s', str(result)
+            )
             pass
         self.__clear()
         dawgie.context.fsm.set_submit_info(self.__changeset, self.__submission)
@@ -206,7 +266,9 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
     def spawn_off(self, cmd: [str]):
         self.__command = ' '.join(cmd)
         log.debug('VerifyHandler.spawn_off (%s)', self.__command)
-        twisted.internet.reactor.spawnProcess(self, cmd[0], args=cmd, env=os.environ, usePTY=True)
+        twisted.internet.reactor.spawnProcess(
+            self, cmd[0], args=cmd, env=os.environ, usePTY=True
+        )
         return True
 
     pass

@@ -46,11 +46,16 @@ import os
 
 def for_factories(ae, pkg):
     factories = {e: [] for e in dawgie.Factories}
-    for pkg_name in filter(lambda fn: os.path.isdir(os.path.join(ae, fn)) and fn != '__pycache__', os.listdir(ae)):
+    for pkg_name in filter(
+        lambda fn: os.path.isdir(os.path.join(ae, fn)) and fn != '__pycache__',
+        os.listdir(ae),
+    ):
         fp = '.'.join([pkg, pkg_name])
         mod = importlib.import_module(fp)
         dm = dir(mod)
-        ignore = getattr(mod, 'dawgie_ignore') if 'dawgie_ignore' in dm else False
+        ignore = (
+            getattr(mod, 'dawgie_ignore') if 'dawgie_ignore' in dm else False
+        )
 
         if ignore:
             log.warning('Ignoring package: %s', fp)

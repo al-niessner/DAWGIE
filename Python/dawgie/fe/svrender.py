@@ -55,7 +55,9 @@ class Defer(absDefer):
 
     def __call__(self, path: str):
         display = dawgie.de.factory()
-        d = twisted.internet.threads.deferToThread(self._db_item, display=display, identity=self.identity, path=path)
+        d = twisted.internet.threads.deferToThread(
+            self._db_item, display=display, identity=self.identity, path=path
+        )
         h = Renderer(display, self.request)
         d.addCallbacks(h.success, h.failure)
         return twisted.web.server.NOT_DONE_YET
@@ -72,7 +74,11 @@ class Renderer:
 
     def failure(self, result):
         # pylint: disable=bare-except
-        self.__request.write(b'<h1>Dynamic Content Generation Failed</h1><p>' + str(result).replace('\n', '<br/>').encode() + b'</p>')
+        self.__request.write(
+            b'<h1>Dynamic Content Generation Failed</h1><p>'
+            + str(result).replace('\n', '<br/>').encode()
+            + b'</p>'
+        )
         try:
             self.__request.finish()
         except:
@@ -85,7 +91,9 @@ class Renderer:
         try:
             self.__request.finish()
         except:
-            log.exception('Failed to complete a successful page: %s', str(result))
+            log.exception(
+                'Failed to complete a successful page: %s', str(result)
+            )
         return
 
     pass

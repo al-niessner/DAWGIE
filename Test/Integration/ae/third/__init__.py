@@ -40,7 +40,9 @@ NTR:
 ignore = False  # forces the pipeline to ignore this package (aka task)
 
 
-def task(prefix: str, ps_hint: int = 0, runid: int = -1, target: str = '__none__'):
+def task(
+    prefix: str, ps_hint: int = 0, runid: int = -1, target: str = '__none__'
+):
     # avoid circular dependencies so pylint: disable=import-outside-toplevel
     import ae.third.bot
 

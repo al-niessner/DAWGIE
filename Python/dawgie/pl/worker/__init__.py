@@ -62,7 +62,11 @@ class Context:
         return m
 
     def abort(self) -> bool:
-        m = self._communicate(dawgie.pl.message.make(typ=dawgie.pl.message.Type.status, rev=self.__revision))
+        m = self._communicate(
+            dawgie.pl.message.make(
+                typ=dawgie.pl.message.Type.status, rev=self.__revision
+            )
+        )
         return m.type == dawgie.pl.message.Type.response and not m.success
 
     # pylint: disable=too-many-arguments
@@ -70,7 +74,11 @@ class Context:
         task = (
             factory(dawgie.util.task_name(factory), ps_hint, runid, target)
             if runid and target
-            else (factory(dawgie.util.task_name(factory), ps_hint, runid) if runid else factory(dawgie.util.task_name(factory), ps_hint, target))
+            else (
+                factory(dawgie.util.task_name(factory), ps_hint, runid)
+                if runid
+                else factory(dawgie.util.task_name(factory), ps_hint, target)
+            )
         )
         setattr(task, 'abort', self.abort)
         dawgie.pl.version.record(task, only=jobid.split('.')[1])

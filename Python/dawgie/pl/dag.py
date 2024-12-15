@@ -71,11 +71,26 @@ class Construct:
         self._flat = {}
         self._roots = set()
         log.info('Construct() - build aspect tree')
-        self._build_tree(factories[dawgie.Factories.analysis], Shape.rectangle, self._sub_analysis, 'traits')
+        self._build_tree(
+            factories[dawgie.Factories.analysis],
+            Shape.rectangle,
+            self._sub_analysis,
+            'traits',
+        )
         log.info('Construct() - build regression tree')
-        self._build_tree(factories[dawgie.Factories.regress], Shape.octagon, self._sub_regression, 'variables')
+        self._build_tree(
+            factories[dawgie.Factories.regress],
+            Shape.octagon,
+            self._sub_regression,
+            'variables',
+        )
         log.info('Construct() - build task tree')
-        self._build_tree(factories[dawgie.Factories.task], Shape.ellipse, self._sub_task, 'previous')
+        self._build_tree(
+            factories[dawgie.Factories.task],
+            Shape.ellipse,
+            self._sub_task,
+            'previous',
+        )
         self._feedbacks = {}
         self._feedback()
         log.info('Construct() - build parents')
@@ -90,13 +105,21 @@ class Construct:
         self._tt = self._trim_trees(1)
         self._vt = self._roots
         log.info('Construct() - graph algorithm tree')
-        self._av = self.graph(pydot.Dot(graph_type='digraph', rank='same'), self._at, 'av.svg')
+        self._av = self.graph(
+            pydot.Dot(graph_type='digraph', rank='same'), self._at, 'av.svg'
+        )
         log.info('Construct() - graph state vector tree')
-        self._svv = self.graph(pydot.Dot(graph_type='digraph', rank='same'), self._svt, 'svt.png')
+        self._svv = self.graph(
+            pydot.Dot(graph_type='digraph', rank='same'), self._svt, 'svt.png'
+        )
         log.info('Construct() - graph task tree')
-        self._tv = self.graph(pydot.Dot(graph_type='digraph', rank='same'), self._tt, 'tv.svg')
+        self._tv = self.graph(
+            pydot.Dot(graph_type='digraph', rank='same'), self._tt, 'tv.svg'
+        )
         log.info('Construct() - graph value tree')
-        self._vv = self.graph(pydot.Dot(graph_type='digraph', rank='same'), self._vt, 'vv.svg')
+        self._vv = self.graph(
+            pydot.Dot(graph_type='digraph', rank='same'), self._vt, 'vv.svg'
+        )
         return
 
     def _ancestry(self):
@@ -124,7 +147,16 @@ class Construct:
                         fn = '.'.join([bot._name(), alg.name(), sv.name(), vn])
 
                         if fn not in self._flat:
-                            self._flat[fn] = Node(fn, attrib={'alg': alg, 'ancestry': set(), 'factory': factory, 'feedback': set(), 'parents': set()})
+                            self._flat[fn] = Node(
+                                fn,
+                                attrib={
+                                    'alg': alg,
+                                    'ancestry': set(),
+                                    'factory': factory,
+                                    'feedback': set(),
+                                    'parents': set(),
+                                },
+                            )
                         else:
                             self._flat[fn].set('factory', factory)
 
@@ -160,17 +192,35 @@ class Construct:
             for child in children:
                 child.get('parents').add(node)
             children = list(filter(lambda n, k=known: n.tag not in k, children))
-            self._parents(list(filter(lambda n, k=known: n.tag not in k, children)), known)
+            self._parents(
+                list(filter(lambda n, k=known: n.tag not in k, children)), known
+            )
             pass
         return
 
     def _sub_analysis(self, a, fn):
         for ref in dawgie.util.as_vref(a.traits()):
             pf, pi = ref.factory, ref.impl
-            pn = '.'.join([dawgie.util.task_name(pf), pi.name(), ref.item.name(), ref.feat])
+            pn = '.'.join(
+                [
+                    dawgie.util.task_name(pf),
+                    pi.name(),
+                    ref.item.name(),
+                    ref.feat,
+                ]
+            )
 
             if pn not in self._flat:
-                self._flat[pn] = Node(pn, attrib={'alg': pi, 'ancestry': set(), 'factory': pf, 'feedback': set(), 'parents': set()})
+                self._flat[pn] = Node(
+                    pn,
+                    attrib={
+                        'alg': pi,
+                        'ancestry': set(),
+                        'factory': pf,
+                        'feedback': set(),
+                        'parents': set(),
+                    },
+                )
             self._flat[pn].add(self._flat[fn])
             pass
         return
@@ -184,10 +234,26 @@ class Construct:
                 ref.factory,
                 ref.impl,
             )
-            pn = '.'.join([dawgie.util.task_name(pf), pi.name(), ref.item.name(), ref.feat])
+            pn = '.'.join(
+                [
+                    dawgie.util.task_name(pf),
+                    pi.name(),
+                    ref.item.name(),
+                    ref.feat,
+                ]
+            )
 
             if pn not in self._flat:
-                self._flat[pn] = Node(pn, attrib={'alg': pi, 'ancestry': set(), 'factory': pf, 'feedback': set(), 'parents': set()})
+                self._flat[pn] = Node(
+                    pn,
+                    attrib={
+                        'alg': pi,
+                        'ancestry': set(),
+                        'factory': pf,
+                        'feedback': set(),
+                        'parents': set(),
+                    },
+                )
             self._flat[pn].add(self._flat[fn])
             pass
         return
@@ -201,10 +267,26 @@ class Construct:
                 ref.factory,
                 ref.impl,
             )
-            pn = '.'.join([dawgie.util.task_name(pf), pi.name(), ref.item.name(), ref.feat])
+            pn = '.'.join(
+                [
+                    dawgie.util.task_name(pf),
+                    pi.name(),
+                    ref.item.name(),
+                    ref.feat,
+                ]
+            )
 
             if pn not in self._flat:
-                self._flat[pn] = Node(pn, attrib={'alg': pi, 'ancestry': set(), 'factory': pf, 'feedback': set(), 'parents': set()})
+                self._flat[pn] = Node(
+                    pn,
+                    attrib={
+                        'alg': pi,
+                        'ancestry': set(),
+                        'factory': pf,
+                        'feedback': set(),
+                        'parents': set(),
+                    },
+                )
             self._flat[pn].add(self._flat[fn])
             pass
         return
@@ -212,7 +294,17 @@ class Construct:
     def _trim_trees(self, length):
         result = []
         trimmed = {Construct.trim(leaf, length) for leaf in self._flat}
-        trimmed = {name: Node(name, attrib={'feedback': set(), 'shape': Shape.component, 'visitors': set()}) for name in trimmed}
+        trimmed = {
+            name: Node(
+                name,
+                attrib={
+                    'feedback': set(),
+                    'shape': Shape.component,
+                    'visitors': set(),
+                },
+            )
+            for name in trimmed
+        }
         for root in self._roots:
             result.append(root.trim(trimmed, length))
         return result
@@ -257,7 +349,9 @@ class Construct:
     def graph(dot: pydot.Dot, roots: set, name: str):
         for root in roots:
             root.graph(dot)
-        idir = os.path.abspath(os.path.join(dawgie.context.fe_path, 'images/svg'))
+        idir = os.path.abspath(
+            os.path.join(dawgie.context.fe_path, 'images/svg')
+        )
 
         if not os.path.isdir(idir):
             os.makedirs(idir)
@@ -289,7 +383,9 @@ class Node(xml.etree.ElementTree.Element):
         if not dot.get_node(name):
             shape = self.get('shape')
             shape = shape.name if shape else 'diamond'
-            dot.add_node(pydot.Node(name, id=name.replace('.', '_'), shape=shape))
+            dot.add_node(
+                pydot.Node(name, id=name.replace('.', '_'), shape=shape)
+            )
             pass
         return dot.get_node(name)[0]
 
@@ -376,11 +472,18 @@ class Node(xml.etree.ElementTree.Element):
         if length == 2:
             aset = short_node.get('ancestry')
             aset = aset if aset else set()
-            aset.update([Construct.trim(a, length) for a in self.get('ancestry')])
+            aset.update(
+                [Construct.trim(a, length) for a in self.get('ancestry')]
+            )
             short_node.set('ancestry', aset)
             aset = short_node.get('parents')
             aset = aset if aset else set()
-            aset.update([known[Construct.trim(p.tag, length)] for p in self.get('parents')])
+            aset.update(
+                [
+                    known[Construct.trim(p.tag, length)]
+                    for p in self.get('parents')
+                ]
+            )
             short_node.set('parents', aset)
             pass
         if self.tag not in short_node.get('visitors'):

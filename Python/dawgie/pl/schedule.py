@@ -155,10 +155,21 @@ def _delay(when: dawgie.EVENT) -> datetime.timedelta:
             pass
 
         if when.moment.dow is not None:
-            dd = datetime.timedelta(days=(7 + when.moment.dow - today) if when.moment.dow < today else (when.moment.dow - today))
+            dd = datetime.timedelta(
+                days=(
+                    (7 + when.moment.dow - today)
+                    if when.moment.dow < today
+                    else (when.moment.dow - today)
+                )
+            )
             then = (
                 datetime.datetime(
-                    year=now.year, month=now.month, day=now.day, hour=when.moment.time.hour, minute=when.moment.time.minute, second=when.moment.time.second
+                    year=now.year,
+                    month=now.month,
+                    day=now.day,
+                    hour=when.moment.time.hour,
+                    minute=when.moment.time.minute,
+                    second=when.moment.time.second,
                 )
                 + dd
             )
@@ -226,7 +237,12 @@ def build(factories, latest, previous):
     for tn in ans:
         for t in dawgie.pl.schedule.ae.at:
             for n in t.locate(tn):
-                n.set('todo', dawgie.util.fifo.Unique(['__all__'] if _is_asp(n) else trglist))
+                n.set(
+                    'todo',
+                    dawgie.util.fifo.Unique(
+                        ['__all__'] if _is_asp(n) else trglist
+                    ),
+                )
             pass
         pass
     log.info('build() - calling organize with new versions')
@@ -250,17 +266,29 @@ def complete(job, runid, target, timing, status):
         job.set('status', State.waiting)
         pass
 
-    history.append({'timing': timing, 'runid': runid, 'target': target, 'task': job.tag})
+    history.append(
+        {'timing': timing, 'runid': runid, 'target': target, 'task': job.tag}
+    )
     return
 
 
 def defer():
     if dawgie.pl.schedule.is_paused():
-        twisted.internet.reactor.callLater(10, dawgie.pl.DeferWithLogOnError(defer, 'handling error while scheduling periodic event', __name__).callback, None)
+        twisted.internet.reactor.callLater(
+            10,
+            dawgie.pl.DeferWithLogOnError(
+                defer,
+                'handling error while scheduling periodic event',
+                __name__,
+            ).callback,
+            None,
+        )
         return
 
     delay = []
-    for t in filter(lambda j: j.get('status') not in [State.running, State.waiting], per):
+    for t in filter(
+        lambda j: j.get('status') not in [State.running, State.waiting], per
+    ):
         t.set('status', State.delayed)
         for p in t.get('period'):
             try:
@@ -277,7 +305,9 @@ def defer():
                     else:
                         t.get('todo').update(dawgie.db.targets())
 
-                    log.debug('defer() - moving task %s to the job queue', t.tag)
+                    log.debug(
+                        'defer() - moving task %s to the job queue', t.tag
+                    )
                 else:
                     delay.append(ts)
             except _DelayNotKnowableError:
@@ -289,7 +319,13 @@ def defer():
         wait = min(delay)
         log.debug('defer() - next wake up time in %s seconds', str(round(wait)))
         twisted.internet.reactor.callLater(
-            round(wait), dawgie.pl.DeferWithLogOnError(defer, 'handling error while scheduling periodic events', __name__).callback, None
+            round(wait),
+            dawgie.pl.DeferWithLogOnError(
+                defer,
+                'handling error while scheduling periodic events',
+                __name__,
+            ).callback,
+            None,
         )
         pass
     return
@@ -315,9 +351,16 @@ def next_job_batch():
                 for target in job.get('todo'):
                     dependency = find(dep)
 
-                    if target == '__all__' or '__all__' in dependency.get('todo') or '__all__' in dependency.get('doing'):
+                    if (
+                        target == '__all__'
+                        or '__all__' in dependency.get('todo')
+                        or '__all__' in dependency.get('doing')
+                    ):
                         available.clear()
-                    if (target in dependency.get('todo') or target in dependency.get('doing')) and target in available:
+                    if (
+                        target in dependency.get('todo')
+                        or target in dependency.get('doing')
+                    ) and target in available:
                         available.remove(target)
                     pass
                 pass
@@ -334,7 +377,12 @@ def next_job_batch():
     return todo
 
 
-def organize(task_names: [str], runid: int = None, targets: [str] = None, event: str = None):
+def organize(
+    task_names: [str],
+    runid: int = None,
+    targets: [str] = None,
+    event: str = None,
+):
     '''organize a schedule based on the calling event and what is already known
 
     Adds new targets to the todo list if it is not already there. If the job is
@@ -348,7 +396,14 @@ def organize(task_names: [str], runid: int = None, targets: [str] = None, event:
             for n in t.locate(tn):
                 jobs[n.tag] = n
                 n.set('runid', runid)
-                n.set('status', State.waiting if n.get('status') is not State.running else State.running)
+                n.set(
+                    'status',
+                    (
+                        State.waiting
+                        if n.get('status') is not State.running
+                        else State.running
+                    ),
+                )
 
                 if event:
                     n.set('event', event)
@@ -374,7 +429,12 @@ def pause():
 def periodics(factories):
     for p in factories:
         for event in p():
-            an = '.'.join([dawgie.util.task_name(event.algref.factory), event.algref.impl.name()])
+            an = '.'.join(
+                [
+                    dawgie.util.task_name(event.algref.factory),
+                    event.algref.impl.name(),
+                ]
+            )
             for rta in dawgie.pl.schedule.ae.at:
                 for n in rta.locate(an):
                     per.append(n)
@@ -459,7 +519,11 @@ def update(values: [(str, bool)], original: dawgie.pl.dag.Node, rid: int):
         if rid:
             promote(values, original, rid)
     else:
-        log.error('Node %s for run ID %d did not update its state vector', original.tag, rid)
+        log.error(
+            'Node %s for run ID %d did not update its state vector',
+            original.tag,
+            rid,
+        )
     return
 
 
@@ -493,6 +557,18 @@ def view_success() -> [dict]:
 
 
 def view_todo() -> [dict]:
-    wait = list(filter(lambda t: all([t.get('status') in [State.waiting, State.running], len(t.get('todo'))]), que))  # prevents undefined
+    wait = list(
+        filter(
+            lambda t: all(
+                [
+                    t.get('status') in [State.waiting, State.running],
+                    len(t.get('todo')),
+                ]
+            ),
+            que,
+        )
+    )  # prevents undefined
     wait.sort(key=lambda t: t.get('level'))
-    return [{'name': w.tag, 'targets': sorted(list(w.get('todo')))} for w in wait]
+    return [
+        {'name': w.tag, 'targets': sorted(list(w.get('todo')))} for w in wait
+    ]
