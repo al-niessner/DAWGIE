@@ -4,6 +4,8 @@ on: [push]
 jobs:
   Initialize-Environment:
     runs-on: ubuntu-24.04
+    outputs:
+      RUNNER: ${{ runner.name }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
