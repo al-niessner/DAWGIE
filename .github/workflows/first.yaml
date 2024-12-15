@@ -16,4 +16,4 @@ jobs:
           pip install -r Python/requirements.txt
           pip install -r .ci/requirements.txt 
       - name: Coding Style
-        run: black --check --diff -l 160 -s Python
+        run: black --check --diff -l 160 --skip-string-normalization Python
