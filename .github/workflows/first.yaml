@@ -19,7 +19,7 @@ jobs:
           pip install -r Python/requirements.txt
           pip install -r .ci/requirements.txt
       - name: Black
-        run: black --check --diff -l 160 --skip-string-normalization Python Test
+        run: black --check --diff -l 100 --skip-string-normalization Python Test
   Linters:
     name: Code Quality (linters)
     runs-on: ubuntu-24.04
@@ -37,6 +37,6 @@ jobs:
           pip install -r Python/requirements.txt
           pip install -r .ci/requirements.txt
       - name: pylint
-        run:
+        run: pylint --rcfile .github/workflows/pylint.rc Python/dawgie
       - name: flake8
-        run:
+        run: flake8 --ignore E501,W503 Python/dawgie
