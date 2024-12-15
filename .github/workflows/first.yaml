@@ -2,7 +2,7 @@ name: Continuous Integration
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
-  CI-Process:
+  Coding-Style:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -15,5 +15,5 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r Python/requirements.txt
           pip install -r .ci/requirements.txt
-      - name: Coding Style
+      - name: Black
         run: black --check --diff -l 160 --skip-string-normalization Python Test
