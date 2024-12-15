@@ -20,8 +20,8 @@ jobs:
           pip install -r .ci/requirements.txt
   Coding-Style:
     name: Code Style
-    needs: Initialize-Environment
-    runs-on: ${{needs.Initialize-Environment.outputs.RUNNER}}
+    needs: Initialize Environment
+    runs-on: ${{needs.Initialize Environment.outputs.RUNNER}}
     steps:
       - name: Black
         run: black --check --diff -l 160 --skip-string-normalization Python Test
