@@ -15,7 +15,5 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r Python/requirements.txt
           pip install -r .ci/requirements.txt
-  CI-Coding-Style:
-    steps:
-      - name: black
+       - name: Coding Style
         run: black --check --diff -l 160 --skip-string-normalization Python Test
