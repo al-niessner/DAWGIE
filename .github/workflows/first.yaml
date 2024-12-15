@@ -2,8 +2,8 @@ name: Continuous Integration
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
-  Initialize-Environment:
-    name: Initialize Environment
+  Coding-Style:
+    name: Coding Style
     runs-on: ubuntu-24.04
     outputs:
       RUNNER: ${{ runner.name }}
@@ -18,10 +18,5 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r Python/requirements.txt
           pip install -r .ci/requirements.txt
-  Coding-Style:
-    name: Code Style
-    needs: Initialize-Environment
-    runs-on: ${{needs.Initialize-Environment.outputs.RUNNER}}
-    steps:
       - name: Black
         run: black --check --diff -l 160 --skip-string-normalization Python Test
