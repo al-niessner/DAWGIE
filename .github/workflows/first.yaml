@@ -83,4 +83,4 @@ jobs:
           pip install -r Python/requirements.txt
           pip install -r .ci/requirements.txt
       - name: pyroma
-        run: pyroma Python
+        run: pyroma --min 10 Python
