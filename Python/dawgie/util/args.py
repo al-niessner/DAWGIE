@@ -39,16 +39,16 @@ NTR: 49811
 '''
 
 import dawgie.context
-import logging  # needed for eval in log_level so, pylint: disable=unused-import
+import logging  # needed for eval in log_level(); pylint: disable=unused-import
 
 
-def log_level(l):
+def log_level(level):
     """Allow log level to be symbolic or a plain integer"""
     # pylint: disable=bare-except,eval-used
     try:
-        ll = int(l)
-    except:
-        ll = eval(l)
+        ll = int(level)
+    except:  # noqa: E722
+        ll = eval(level)
     return ll
 
 
