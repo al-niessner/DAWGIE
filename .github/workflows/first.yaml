@@ -2,11 +2,9 @@ name: Continuous Integration
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
-  Coding-Style:
+  Style:
     name: Coding Style
     runs-on: ubuntu-24.04
-    outputs:
-      RUNNER: ${{ runner.name }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -18,13 +16,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r Python/requirements.txt
           pip install -r .ci/requirements.txt
-      - name: Black
-        run: black --check --diff -l 100 --skip-string-normalization Python Test
+      - name: black
+        run: black --check --diff -l 80 --skip-string-normalization Python Test
   Linters:
-    name: Code Quality (linters)
+    name: Code Quality
     runs-on: ubuntu-24.04
-    outputs:
-      RUNNER: ${{ runner.name }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -40,3 +36,51 @@ jobs:
         run: pylint --rcfile .github/workflows/pylint.rc Python/dawgie
       - name: flake8
         run: flake8 --ignore E501,W503 Python/dawgie
+  Security:
+    name: Code Security
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          architecture: 'x64'
+          python-version: '3.12'
+      - name: Prepare Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r Python/requirements.txt
+          pip install -r .ci/requirements.txt
+      - name: bandit
+        run: bandit -r Python/dawgie
+  Test:
+    name: Self Diagnostics
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          architecture: 'x64'
+          python-version: '3.12'
+      - name: Prepare Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r Python/requirements.txt
+          pip install -r .ci/requirements.txt
+      - name: pytest
+        run: pytest --cov=dawgie --cov-branch --cov-report term-missing -v Test
+  Delivery:
+    name: PyPi Compliance
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          architecture: 'x64'
+          python-version: '3.12'
+      - name: Prepare Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r Python/requirements.txt
+          pip install -r .ci/requirements.txt
+      - name: pyroma
+        run: pyroma Python
