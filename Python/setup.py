@@ -145,6 +145,8 @@ setuptools.setup(
     author_email='Al.Niessner@jpl.nasa.gov',
     classifiers=[
         "Programming Language :: Python :: 3",
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.12',
         "Operating System :: OS Independent",
         'License :: Free To Use But Restricted',
         'Development Status :: 5 - Production/Stable',
@@ -155,5 +157,6 @@ setuptools.setup(
     long_description=description,
     long_description_content_type="text/markdown",
     keywords='adaptive pipeline',
+    python_requires='>=3.10',
     url='https://github.com/al-niessner/DAWGIE',
 )
