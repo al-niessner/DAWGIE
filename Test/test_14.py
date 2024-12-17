@@ -36,103 +36,107 @@ POSSIBILITY OF SUCH DAMAGE.
 
 NTR:
 '''
+
 import dawgie
 import dawgie.db.shelve.util
 import unittest
 
+
 class Version(unittest.TestCase):
     def test_asstring(self):
-        v1 = dawgie.db.shelve.util.LocalVersion ('1.1.2')
-        self.assertEqual ('1.1.2', v1.asstring())
+        v1 = dawgie.db.shelve.util.LocalVersion('1.1.2')
+        self.assertEqual('1.1.2', v1.asstring())
         return
 
     def test_eq(self):
-        v1 = dawgie.db.shelve.util.LocalVersion ('1.1.2')
-        v2 = dawgie.db.shelve.util.LocalVersion ('1.1.10')
-        self.assertEqual (v1,v1)
-        self.assertFalse (v1 == v2)
+        v1 = dawgie.db.shelve.util.LocalVersion('1.1.2')
+        v2 = dawgie.db.shelve.util.LocalVersion('1.1.10')
+        self.assertEqual(v1, v1)
+        self.assertFalse(v1 == v2)
         return
 
     def test_ge(self):
-        v1 = dawgie.db.shelve.util.LocalVersion ('2.1.1')
-        v2 = dawgie.db.shelve.util.LocalVersion ('10.1.1')
-        self.assertGreaterEqual (v2,v2)
-        self.assertGreaterEqual (v2,v1)
-        v1 = dawgie.db.shelve.util.LocalVersion ('1.2.1')
-        v2 = dawgie.db.shelve.util.LocalVersion ('1.10.1')
-        self.assertGreaterEqual (v2,v2)
-        self.assertGreaterEqual (v2,v1)
-        v1 = dawgie.db.shelve.util.LocalVersion ('1.1.2')
-        v2 = dawgie.db.shelve.util.LocalVersion ('1.1.10')
-        self.assertGreaterEqual (v2,v2)
-        self.assertGreaterEqual (v2,v1)
+        v1 = dawgie.db.shelve.util.LocalVersion('2.1.1')
+        v2 = dawgie.db.shelve.util.LocalVersion('10.1.1')
+        self.assertGreaterEqual(v2, v2)
+        self.assertGreaterEqual(v2, v1)
+        v1 = dawgie.db.shelve.util.LocalVersion('1.2.1')
+        v2 = dawgie.db.shelve.util.LocalVersion('1.10.1')
+        self.assertGreaterEqual(v2, v2)
+        self.assertGreaterEqual(v2, v1)
+        v1 = dawgie.db.shelve.util.LocalVersion('1.1.2')
+        v2 = dawgie.db.shelve.util.LocalVersion('1.1.10')
+        self.assertGreaterEqual(v2, v2)
+        self.assertGreaterEqual(v2, v1)
         return
 
     def test_gt(self):
-        v1 = dawgie.db.shelve.util.LocalVersion ('2.1.1')
-        v2 = dawgie.db.shelve.util.LocalVersion ('10.1.1')
-        self.assertGreater (v2,v1)
-        v1 = dawgie.db.shelve.util.LocalVersion ('1.2.1')
-        v2 = dawgie.db.shelve.util.LocalVersion ('1.10.1')
-        self.assertGreater (v2,v1)
-        v1 = dawgie.db.shelve.util.LocalVersion ('1.1.2')
-        v2 = dawgie.db.shelve.util.LocalVersion ('1.1.10')
-        self.assertGreater (v2,v1)
+        v1 = dawgie.db.shelve.util.LocalVersion('2.1.1')
+        v2 = dawgie.db.shelve.util.LocalVersion('10.1.1')
+        self.assertGreater(v2, v1)
+        v1 = dawgie.db.shelve.util.LocalVersion('1.2.1')
+        v2 = dawgie.db.shelve.util.LocalVersion('1.10.1')
+        self.assertGreater(v2, v1)
+        v1 = dawgie.db.shelve.util.LocalVersion('1.1.2')
+        v2 = dawgie.db.shelve.util.LocalVersion('1.1.10')
+        self.assertGreater(v2, v1)
         return
 
     def test_le(self):
-        v1 = dawgie.db.shelve.util.LocalVersion ('2.1.1')
-        v2 = dawgie.db.shelve.util.LocalVersion ('10.1.1')
-        self.assertLessEqual (v1,v1)
-        self.assertLessEqual (v1,v2)
-        v1 = dawgie.db.shelve.util.LocalVersion ('1.2.1')
-        v2 = dawgie.db.shelve.util.LocalVersion ('1.10.1')
-        self.assertLessEqual (v1,v1)
-        self.assertLessEqual (v1,v2)
-        v1 = dawgie.db.shelve.util.LocalVersion ('1.1.2')
-        v2 = dawgie.db.shelve.util.LocalVersion ('1.1.10')
-        self.assertLessEqual (v1,v1)
-        self.assertLessEqual (v1,v2)
+        v1 = dawgie.db.shelve.util.LocalVersion('2.1.1')
+        v2 = dawgie.db.shelve.util.LocalVersion('10.1.1')
+        self.assertLessEqual(v1, v1)
+        self.assertLessEqual(v1, v2)
+        v1 = dawgie.db.shelve.util.LocalVersion('1.2.1')
+        v2 = dawgie.db.shelve.util.LocalVersion('1.10.1')
+        self.assertLessEqual(v1, v1)
+        self.assertLessEqual(v1, v2)
+        v1 = dawgie.db.shelve.util.LocalVersion('1.1.2')
+        v2 = dawgie.db.shelve.util.LocalVersion('1.1.10')
+        self.assertLessEqual(v1, v1)
+        self.assertLessEqual(v1, v2)
         return
 
     def test_lt(self):
-        v1 = dawgie.db.shelve.util.LocalVersion ('2.1.1')
-        v2 = dawgie.db.shelve.util.LocalVersion ('10.1.1')
-        self.assertLess (v1,v2)
-        v1 = dawgie.db.shelve.util.LocalVersion ('1.2.1')
-        v2 = dawgie.db.shelve.util.LocalVersion ('1.10.1')
-        self.assertLess (v1,v2)
-        v1 = dawgie.db.shelve.util.LocalVersion ('1.1.2')
-        v2 = dawgie.db.shelve.util.LocalVersion ('1.1.10')
-        self.assertLess (v1,v2)
+        v1 = dawgie.db.shelve.util.LocalVersion('2.1.1')
+        v2 = dawgie.db.shelve.util.LocalVersion('10.1.1')
+        self.assertLess(v1, v2)
+        v1 = dawgie.db.shelve.util.LocalVersion('1.2.1')
+        v2 = dawgie.db.shelve.util.LocalVersion('1.10.1')
+        self.assertLess(v1, v2)
+        v1 = dawgie.db.shelve.util.LocalVersion('1.1.2')
+        v2 = dawgie.db.shelve.util.LocalVersion('1.1.10')
+        self.assertLess(v1, v2)
         return
 
     def test_ne(self):
-        v1 = dawgie.db.shelve.util.LocalVersion ('1.1.2')
-        v2 = dawgie.db.shelve.util.LocalVersion ('1.1.10')
-        self.assertNotEqual (v1,v2)
+        v1 = dawgie.db.shelve.util.LocalVersion('1.1.2')
+        v2 = dawgie.db.shelve.util.LocalVersion('1.1.10')
+        self.assertNotEqual(v1, v2)
         return
 
     def test_newer(self):
-        v1 = dawgie.db.shelve.util.LocalVersion ('1.1.2')
-        v2 = dawgie.db.shelve.util.LocalVersion ('1.1.10')
-        self.assertLess ('1.1.10', '1.1.2')  # show strings do not behave
-        self.assertFalse (v1.newer (v1._get_ver()))
-        self.assertFalse (v1.newer (v2._get_ver()))
+        v1 = dawgie.db.shelve.util.LocalVersion('1.1.2')
+        v2 = dawgie.db.shelve.util.LocalVersion('1.1.10')
+        self.assertLess('1.1.10', '1.1.2')  # show strings do not behave
+        self.assertFalse(v1.newer(v1._get_ver()))
+        self.assertFalse(v1.newer(v2._get_ver()))
         return
 
     def test_sort(self):
-        v1 = dawgie.db.shelve.util.LocalVersion ('1.1.1')
-        v2 = dawgie.db.shelve.util.LocalVersion ('1.1.2')
-        v3 = dawgie.db.shelve.util.LocalVersion ('1.1.7')
-        v4 = dawgie.db.shelve.util.LocalVersion ('1.1.8')
-        v5 = dawgie.db.shelve.util.LocalVersion ('1.1.10')
-        ordered = sorted ([v3,v1,v2,v5,v4])
-        for ver in ordered: print ('ver:', ver.asstring())
-        self.assertEqual (v1, ordered[0])
-        self.assertEqual (v2, ordered[1])
-        self.assertEqual (v3, ordered[2])
-        self.assertEqual (v4, ordered[3])
-        self.assertEqual (v5, ordered[4])
+        v1 = dawgie.db.shelve.util.LocalVersion('1.1.1')
+        v2 = dawgie.db.shelve.util.LocalVersion('1.1.2')
+        v3 = dawgie.db.shelve.util.LocalVersion('1.1.7')
+        v4 = dawgie.db.shelve.util.LocalVersion('1.1.8')
+        v5 = dawgie.db.shelve.util.LocalVersion('1.1.10')
+        ordered = sorted([v3, v1, v2, v5, v4])
+        for ver in ordered:
+            print('ver:', ver.asstring())
+        self.assertEqual(v1, ordered[0])
+        self.assertEqual(v2, ordered[1])
+        self.assertEqual(v3, ordered[2])
+        self.assertEqual(v4, ordered[3])
+        self.assertEqual(v5, ordered[4])
         return
+
     pass

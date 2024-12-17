@@ -40,6 +40,7 @@ NTR:
 
 import enum
 
+
 class Func(enum.IntEnum):
     acquire = 0  # acquire a lock to the database
     dbcopy = 1  # copy the database to a new location (backup)
@@ -50,6 +51,7 @@ class Func(enum.IntEnum):
     upd = 6  # update the table[key], returning True if it exists else False
     pass
 
+
 class Method(enum.Enum):
     connector = "connector"
     rsync = "rsync"
@@ -57,10 +59,12 @@ class Method(enum.Enum):
     cp = "cp"
     pass
 
+
 class Mutex(enum.IntEnum):
     lock = 0
     unlock = 1
     pass
+
 
 class Table(enum.IntEnum):
     alg = 0

@@ -40,19 +40,26 @@ NTR: 49811
 
 import collections.abc
 
+
 class Unique(collections.abc.MutableSet):
-    def __init__(self, it:collections.abc.Iterable=None):
+    def __init__(self, it: collections.abc.Iterable = None):
         self.__order = []
         self.__unique = set()
-        if it: self |= it
+        if it:
+            self |= it
         pass
 
-    def __contains__(self, value): return value in self.__unique
-    def __iter__(self): return self.__order.copy().__iter__()
-    def __len__(self): return len(self.__unique)
+    def __contains__(self, value):
+        return value in self.__unique
+
+    def __iter__(self):
+        return self.__order.copy().__iter__()
+
+    def __len__(self):
+        return len(self.__unique)
 
     def __eq__(self, other):
-        if isinstance(other, (list,Unique)):
+        if isinstance(other, (list, Unique)):
             return self.__order == list(other)
         return set(self) == set(other)
 
@@ -61,20 +68,24 @@ class Unique(collections.abc.MutableSet):
             return f'{self.__class__.__name__}()'
         return f'{self.__class__.__name__}({self.__order})'
 
-    def add (self, value):
+    def add(self, value):
         if value not in self.__unique:
-            self.__unique.add (value)
-            self.__order.append (value)
+            self.__unique.add(value)
+            self.__order.append(value)
 
-    def copy(self): return Unique(self.__order)
+    def copy(self):
+        return Unique(self.__order)
 
-    def difference(self, other): return self.__unique.difference (other)
+    def difference(self, other):
+        return self.__unique.difference(other)
 
-    def discard (self, value):
+    def discard(self, value):
         if value in self.__unique:
-            self.__order.remove (value)
-            self.__unique.remove (value)
+            self.__order.remove(value)
+            self.__unique.remove(value)
 
-    def update (self, it:collections.abc.Iterable):
-        for value in it if it else []: self.add (value)
+    def update(self, it: collections.abc.Iterable):
+        for value in it if it else []:
+            self.add(value)
+
     pass

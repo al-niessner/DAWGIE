@@ -40,9 +40,11 @@ NTR:
 import dawgie.context
 import unittest
 
+
 class Context(unittest.TestCase):
     def test_dumps(self):
         b = dawgie.context.dumps()
-        self.assertTrue (0 < len (b))
+        self.assertTrue(0 < len(b))
         return
+
     pass
