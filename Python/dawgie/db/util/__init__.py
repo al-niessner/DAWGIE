@@ -37,9 +37,7 @@ NTR:
 '''
 
 import dawgie.context
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import os
 import pickle
 import shutil
@@ -49,7 +47,7 @@ import tempfile
 
 def _extract(response):
     for pair in filter(
-        lambda l: 0 < len(l), response.decode('utf-8').split('\n')
+        lambda s: 0 < len(s), response.decode('utf-8').split('\n')
     ):
         index = pair.find(' ')
         cksum = pair[:index]
@@ -115,7 +113,7 @@ def rotate(path, orig, backup):
             t = stack.pop()
             for v in backup[t]:
                 ext = v.split(".")[-1]
-                shutil.move(v, f'{path}/{t+1:d}.{dawgie.context.db_name}.{ext}')
+                shutil.move(v, f'{path}/{t+1:d}.{dawgie.context.db_name}.{ext}')  # fmt: skip # noqa: E226
         for v in orig:
             ext = v.split(".")[-1]
             shutil.copy(v, f'{path}/0.{dawgie.context.db_name}.{ext}')
@@ -131,6 +129,6 @@ def verify(value):
         result[1] = isinstance(value.bugfix(), int)
         result[2] = isinstance(value.design(), int)
         result[3] = isinstance(value.implementation(), int)
-    except:
+    except:  # noqa: E722
         pass
     return all(result)

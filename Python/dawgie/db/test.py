@@ -70,7 +70,7 @@ def gather(anz, ans):
     raise NotImplementedError()
 
 
-def metrics() -> '[dawgie.db.METRIC_DATA]':
+def metrics() -> '[dawgie.db.METRIC_DATA]':  # noqa: F821
     raise NotImplementedError()
 
 

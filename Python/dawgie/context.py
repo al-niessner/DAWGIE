@@ -483,7 +483,7 @@ def override(args):
         os.path.sep + dawgie.context.ae_base_package.replace('.', os.path.sep)
     ):
         raise ValueError(
-            f'context-ae-dir ({0}) does not end with context-ae-pkg ({dawgie.context.ae_base_path,dawgie.context.ae_base_package})'
+            f'context-ae-dir ({0}) does not end with context-ae-pkg ({dawgie.context.ae_base_path}, {dawgie.context.ae_base_package})'
         )
     return
 

@@ -51,9 +51,7 @@ import dawgie.pl.schedule
 import dawgie.pl.snapshot
 import enum
 import json
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import pkg_resources
 import os
 import sys
@@ -227,7 +225,7 @@ def _search_filter(fn: str, default: {}) -> bytes:
                 os.path.join(dawgie.context.fe_path, fn), 'rt', encoding="utf-8"
             ) as f:
                 default = json.load(f)
-        except:
+        except:  # noqa: E722
             log.exception(
                 'Text file could not be parsed as JSON'
             )  # pylint: disable=bare-except

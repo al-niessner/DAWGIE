@@ -37,9 +37,7 @@ NTR:
 '''
 
 import dawgie
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import importlib
 import os
 

@@ -50,9 +50,7 @@ import dawgie.db.util
 import dawgie.db.util.aspect
 import dawgie.util
 import dawgie.util.metrics
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import os
 import pickle
 import psycopg
@@ -1022,7 +1020,7 @@ def _cur(conn, real_dict=False):
 def _fetchone(cur, text):
     try:
         result = cur.fetchone()[0]
-    except:
+    except:  # noqa: E722
         # error msg should be text so pylint: disable=raise-missing-from
         raise RuntimeError(text)
     return result

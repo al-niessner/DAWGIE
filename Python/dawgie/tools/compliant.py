@@ -99,7 +99,7 @@ def _verify(tasks, silent, verbose):
             status = False
             try:
                 status = getattr(dawgie.tools.compliant, r)(t)
-            except:
+            except:  # noqa: E722
                 logging.exception('Could not process %s', r)
             result.append(status)
             logging.info('%s:%s', r, str(result[-1]))
@@ -690,9 +690,9 @@ def rule_07(task):
         vn, v = val
         try:
             s = pickle.dumps(v)
-            vp = pickle.loads(s)
+            vp = pickle.loads(s)  # noqa: F841
             findings.append(True)
-        except:
+        except:  # noqa: E722
             findings.append(False)
             logging.error(
                 'dawgie.Value subclass named "%s" cannot be pickled.', vn

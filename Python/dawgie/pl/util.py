@@ -36,9 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import os
 import twisted.internet.error
 import twisted.internet.protocol

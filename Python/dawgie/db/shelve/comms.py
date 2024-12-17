@@ -42,9 +42,7 @@ import collections
 import dawgie.db.lockview
 import dawgie.context
 import dawgie.security
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import os
 import pickle
 import struct
@@ -82,11 +80,11 @@ class Connector:  # pylint: disable=too-few-public-methods
         log.debug('Connector.__do() - sending command')
         while len(buf) < 4:
             buf += s.recv(4 - len(buf))
-        l = struct.unpack('>I', buf)[0]
+        length = struct.unpack('>I', buf)[0]
         buf = b''
         log.debug('Connector.__do() - receiving command')
-        while len(buf) < l:
-            buf += s.recv(l - len(buf))
+        while len(buf) < length:
+            buf += s.recv(length - len(buf))
         s.close()
         return pickle.loads(buf)
 
@@ -438,10 +436,10 @@ def acquire(name):
         buf = b''
         while len(buf) < 4:
             buf += s.recv(4 - len(buf))
-        l = struct.unpack('>I', buf)[0]
+        length = struct.unpack('>I', buf)[0]
         buf = b''
-        while len(buf) < l:
-            buf += s.recv(l - len(buf))
+        while len(buf) < length:
+            buf += s.recv(length - len(buf))
         buf = pickle.loads(buf)
         pass
     return s
@@ -454,9 +452,9 @@ def release(s):
     buf = b''
     while len(buf) < 4:
         buf += s.recv(4 - len(buf))
-    l = struct.unpack('>I', buf)[0]
+    length = struct.unpack('>I', buf)[0]
     buf = b''
-    while len(buf) < l:
-        buf += s.recv(l - len(buf))
+    while len(buf) < length:
+        buf += s.recv(length - len(buf))
     s.close()
     return pickle.loads(buf)

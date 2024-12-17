@@ -118,8 +118,8 @@ def _spawn(cmd: [str]):
 
 def already_applied(changeset, a_repo_dir):
     g = git.cmd.Git(a_repo_dir)
-    l = g.execute('git log'.split())
-    return -1 < l.find(changeset)
+    gl = g.execute('git log'.split())
+    return -1 < gl.find(changeset)
 
 
 def auto_merge_prepare(

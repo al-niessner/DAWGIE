@@ -47,9 +47,7 @@ import dawgie.pl.schedule
 import dawgie.security
 import dawgie.util
 import importlib
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import math
 import struct
 import twisted.internet.task
@@ -350,7 +348,7 @@ def dispatch():
 
             j.get('do').clear()
             _jobs.remove(j)
-    except:
+    except:  # noqa: E722
         log.exception("Error processing from next_job_batch()")
     # pylint: enable=bare-except
 

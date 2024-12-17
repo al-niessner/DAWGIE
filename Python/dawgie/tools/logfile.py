@@ -142,25 +142,25 @@ def reduce(fn, ignore):
     with open(fn, 'rt', encoding="utf-8") as f:
         m = []
         t = False
-        for l in f.readlines():
-            if any((l.startswith(lvl) for lvl in LEVELS)):
+        for line in f.readlines():
+            if any((line.startswith(lvl) for lvl in LEVELS)):
                 if m and t:
                     yield m
 
-                lvl = l[: l.find(':')]
-                mod = l[
-                    len(lvl) + 1 : l[len(lvl) + 1 :].find(':') + len(lvl) + 1
+                lvl = line[: line.find(':')]
+                mod = line[
+                    len(lvl) + 1 : line[len(lvl) + 1 :].find(':') + len(lvl) + 1
                 ]
-                msg = l[len(lvl) + len(mod) + 2 :]
+                msg = line[len(lvl) + len(mod) + 2 :]
                 t = not ignore[lvl]
-                t &= l.find('scrape this URI:') < 0
+                t &= line.find('scrape this URI:') < 0
                 t &= all((im != mod for im in ignore['module']))
                 t &= all((msg.find(it) < 0 for it in ignore['text']))
                 m.clear()
-                m.append(l)
+                m.append(line)
                 pass
             else:
-                m.append(l)
+                m.append(line)
             pass
         pass
     return

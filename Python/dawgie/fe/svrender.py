@@ -40,9 +40,7 @@ NTR:
 from dawgie.fe import Defer as absDefer
 
 import dawgie
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import twisted.internet.threads
 
 
@@ -81,7 +79,7 @@ class Renderer:
         )
         try:
             self.__request.finish()
-        except:
+        except:  # noqa: E722
             log.exception('Failed to complete an error page: %s', str(result))
         return
 
@@ -90,7 +88,7 @@ class Renderer:
         self.__request.write(self.__display.render().encode())
         try:
             self.__request.finish()
-        except:
+        except:  # noqa: E722
             log.exception(
                 'Failed to complete a successful page: %s', str(result)
             )

@@ -40,9 +40,7 @@ import collections
 import dawgie
 import dawgie.context
 import dawgie.db
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import numpy
 
 HINT = collections.namedtuple(

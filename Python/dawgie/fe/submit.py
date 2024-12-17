@@ -42,9 +42,7 @@ from dawgie.fe import Defer as absDefer
 import dawgie.context
 import dawgie.tools.submit
 import json
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import os
 import twisted.internet.reactor
 import twisted.web.server
@@ -110,7 +108,7 @@ class Process:
             self.__request.write(json.dumps(self.__msg).encode())
             try:
                 self.__request.finish()
-            except:  # pylint: disable=bare-except
+            except:  # pylint: disable=bare-except # noqa: E722
                 log.exception(
                     'Failed to complete an error message: %s',
                     str(self.__msg['alert_message']),
@@ -222,7 +220,7 @@ class Process:
         self.__request.write(json.dumps(result).encode())
         try:
             self.__request.finish()
-        except:  # pylint: disable=bare-except
+        except:  # pylint: disable=bare-except # noqa: E722
             log.exception(
                 'Failed to complete a successful message: %s', str(result)
             )

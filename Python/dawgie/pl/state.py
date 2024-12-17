@@ -72,9 +72,7 @@ import builtins
 import doctest
 import enum
 import importlib
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import os
 import pydot
 import sys
@@ -513,7 +511,7 @@ class FSM:
         # pylint: disable=bare-except
         try:
             priority = dawgie.tools.submit.Priority(priority)
-        except:
+        except:  # noqa: E722
             log.error(
                 'Could not convert "%s" to a meaningful priority defaulting to ToDo is empty',
                 str(priority),

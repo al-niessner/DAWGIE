@@ -50,7 +50,7 @@ import dawgie.pl.message
 import dawgie.pl.worker
 import importlib
 import json
-import logging
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import os
 import pickle
 import requests
@@ -294,12 +294,12 @@ def _interview():
     ecs = boto3.client('ecs')
     sn, cn = dawgie.context.cloud_data.split('@')[3:5]
     g = asg.describe_auto_scaling_groups(AutoScalingGroupNames=[sn])
-    c, h, l, iid, cs = 0, 'none', 'none', '', False
+    c, h, lc, iid, cs = 0, 'none', 'none', '', False
 
     if g['AutoScalingGroups'][0]['Instances']:
         c = len(g['AutoScalingGroups'][0]['Instances'])
         h = g['AutoScalingGroups'][0]['Instances'][0]['HealthStatus']
-        l = g['AutoScalingGroups'][0]['Instances'][0]['LifecycleState']
+        lc = g['AutoScalingGroups'][0]['Instances'][0]['LifecycleState']
         iid = g['AutoScalingGroups'][0]['Instances'][0]['InstanceId']
         r = {'nextToken': ''}
         while 'nextToken' in r and not cs:
@@ -317,7 +317,7 @@ def _interview():
                 pass
             pass
         pass
-    return c, h, l, iid, cs
+    return c, h, lc, iid, cs
 
 
 def _hire(iid):
@@ -538,7 +538,7 @@ def execute(address: (str, int), inc: int, ps_hint: int, rev: str):
                     suc=None,
                     tim=m.timing,
                 )
-            except:
+            except:  # noqa: E722
                 logging.getLogger(__name__).exception(
                     'Job "%s" failed to execute successfully for run id %s and target "%s"',
                     str(job.jobid),

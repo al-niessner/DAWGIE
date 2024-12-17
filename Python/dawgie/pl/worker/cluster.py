@@ -40,9 +40,7 @@ NTR:
 import dawgie
 import dawgie.pl.worker
 import importlib
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import signal
 
 
@@ -109,7 +107,7 @@ def execute(address: (str, int), inc: int, ps_hint: int, rev: str):
                 suc=None,
                 tim=m.timing,
             )
-        except:
+        except:  # noqa: E722
             logging.getLogger(__name__).exception(
                 'Job "%s" failed to execute successfully for run id %s and target "%s"',
                 str(m.jobid),

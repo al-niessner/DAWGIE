@@ -43,9 +43,7 @@ import dawgie.pl.state
 import dawgie.tools.submit
 import dawgie.util
 import logging
-import matplotlib
-
-matplotlib.use("Agg")
+import matplotlib; matplotlib.use("Agg")  # fmt: skip # noqa: E702
 import twisted.internet
 import sys
 

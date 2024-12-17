@@ -39,7 +39,11 @@ NTR: 49811
 '''
 
 import dawgie.context
-import logging  # needed for eval in log_level(); pylint: disable=unused-import
+
+# needed for eval in log_level(); pylint: disable=unused-import
+import logging  # noqa: F401
+
+# pylint: enable=unused-import
 
 
 def log_level(level):

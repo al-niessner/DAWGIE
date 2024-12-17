@@ -42,9 +42,7 @@ import dawgie.context
 import dawgie.db
 import dawgie.db.util
 import dawgie.util.metrics
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import os
 
 from . import util

@@ -43,9 +43,7 @@ import dawgie.security
 import enum
 import inspect
 import json
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import os
 import twisted.web.resource
 import twisted.web.util
@@ -307,4 +305,4 @@ def root() -> RoutePoint:
 
 
 # pylint: disable=ungrouped-imports
-import dawgie.fe.app  # build all of the dynamic hooks now
+import dawgie.fe.app  # build all of the dynamic hooks now # noqa: E402

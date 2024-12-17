@@ -115,10 +115,10 @@ def receive(s: socket.socket) -> MSG:
     buf = b''
     while len(buf) < 4:
         buf += s.recv(4 - len(buf))
-    l = struct.unpack('>I', buf)[0]
+    length = struct.unpack('>I', buf)[0]
     buf = b''
-    while len(buf) < l:
-        buf += s.recv(l - len(buf))
+    while len(buf) < length:
+        buf += s.recv(length - len(buf))
     return loads(buf)
 
 

@@ -1,5 +1,5 @@
 name: Continuous Integration
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: ${{ github.actor }} is verifying code for merge compliance
 on: [push]
 jobs:
   Style:
@@ -35,7 +35,7 @@ jobs:
       - name: pylint
         run: pylint --rcfile .github/workflows/pylint.rc Python/dawgie
       - name: flake8
-        run: flake8 --ignore E501,W503 Python/dawgie
+        run: flake8 --ignore E501,E203,W503 Python/dawgie
   Security:
     name: Code Security
     runs-on: ubuntu-24.04

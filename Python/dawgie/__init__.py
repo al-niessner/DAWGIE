@@ -626,13 +626,13 @@ class Aspect:
     def ds(self) -> 'Dataset':
         raise NotImplementedError()
 
-    def items(self) -> [(str, {str: {str: 'dagie.Value'}})]:
+    def items(self) -> [(str, {str: {str: 'dawgie.Value'}})]:  # noqa: F821
         raise NotImplementedError()
 
     def keys(self) -> [str]:
         raise NotImplementedError()
 
-    def values(self) -> [{str: {str: 'dawgie.Value'}}]:
+    def values(self) -> [{str: {str: 'dawgie.Value'}}]:  # noqa: F821
         raise NotImplementedError()
 
     pass
@@ -670,13 +670,13 @@ class Dataset(_Metric):
     def _bot(self) -> 'Task':
         return self.__bot
 
-    def _compare_insensitive(self, l, r) -> bool:
+    def _compare_insensitive(self, left, right) -> bool:
         '''Compare two target names ignoring case'''
-        return l.lower() == r.lower()
+        return left.lower() == right.lower()
 
-    def _compare_sensitive(self, l, r) -> bool:
+    def _compare_sensitive(self, left, right) -> bool:
         '''Compare two target names using case as a discriminator'''
-        return l == r
+        return left == right
 
     def _load(self, algref=None, err=True, ver=None) -> None:
         '''see load() of this class'''
@@ -1104,7 +1104,7 @@ class Timeline:
     def ds(self) -> 'Dataset':
         raise NotImplementedError()
 
-    def items(self) -> [(str, {str: {str: 'dagie.Value'}})]:
+    def items(self) -> [(str, {str: {str: 'dawgie.Value'}})]:  # noqa: F821
         raise NotImplementedError()
 
     def keys(self) -> [str]:
@@ -1114,7 +1114,7 @@ class Timeline:
         self.ds().measure(self._recede, (refs,))
         return
 
-    def values(self) -> [{str: {str: 'dawgie.Value'}}]:
+    def values(self) -> [{str: {str: 'dawgie.Value'}}]:  # noqa: F821
         raise NotImplementedError()
 
     pass

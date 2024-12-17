@@ -50,9 +50,7 @@ import getpass
 import gnupg
 import importlib
 import inspect
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import os
 import random
 import shutil
@@ -131,10 +129,10 @@ class TwistedWrapper:
 
     def _p4(self, data: bytes) -> bool:
         log.debug('p4: %s', str(self.__address))
-        l = struct.unpack('>II', data)
-        self.__len = l[1]
+        lens = struct.unpack('>II', data)
+        self.__len = lens[1]
         self.__phase = self._p5
-        return l[0] == 4
+        return lens[0] == 4
 
     def _p5(self, reply: bytes) -> bool:
         log.debug('p5: %s', str(self.__address))
@@ -198,7 +196,7 @@ def _my_ip() -> str:
             ('8.8.8.8', 0)
         )  # connecting to a UDP address doesn't send packets
         response = s.getsockname()[0]
-    except:
+    except:  # noqa: E722
         print('failed to get host name falling back to localhost')
         traceback.print_exc()
         response = 'localhost'
@@ -207,8 +205,8 @@ def _my_ip() -> str:
 
 
 def _recv(s: socket.socket) -> str:
-    l = struct.unpack('>I', s.recv(4))[0]
-    return s.recv(l)
+    length = struct.unpack('>I', s.recv(4))[0]
+    return s.recv(length)
 
 
 def _send(s: socket.socket, message: str):
@@ -406,7 +404,7 @@ def identity(of_cert: twisted.internet.ssl.Certificate):
 
     try:
         return _lookup(dawgie.context.identity_override)(of_cert)
-    except:  # all exceptions are equal, pylint: disable=bare-except
+    except:  # all exceptions are equal, pylint: disable=bare-except # noqa: E722
         log.exception(
             'Could not translate certificate to any response. '
             'Defaulting to anonymous.'
@@ -468,7 +466,7 @@ def sanctioned(endpoint: str, cert: twisted.internet.ssl.Certificate) -> bool:
 
     try:
         return _lookup(dawgie.context.sanction_override)(endpoint, cert)
-    except:  # all exceptions are equal, pylint: disable=bare-except
+    except:  # all exceptions are equal, pylint: disable=bare-except # noqa: E722
         log.exception(
             'Could not determine if endpoint is sanctioned. '
             'Defaulting to False.'
@@ -508,17 +506,17 @@ if __name__ == '__main__':
     )
     args = ap.parse_args()
     homedir = tempfile.mkdtemp()
-    pgp = gnupg.GPG(**{gpgargname: homedir})
-    k = pgp.gen_key(
-        pgp.gen_key_input(
+    gpg = gnupg.GPG(**{gpgargname: homedir})
+    k = gpg.gen_key(
+        gpg.gen_key_input(
             key_type='DSA', name_email=args.user_email, name_real=args.user_name
         )
     )
     bn = os.path.join(args.output_dir, 'dawgie.%s.%s')
     with open(bn % (args.user_name, 'pub'), 'tw', encoding="utf-8") as gf:
-        gf.write(pgp.export_keys(k))
+        gf.write(gpg.export_keys(k))
     with open(bn % (args.user_name, 'sec'), 'tw', encoding="utf-8") as gf:
-        gf.write(pgp.export_keys(k, True))
+        gf.write(gpg.export_keys(k, True))
     os.chmod(bn % (args.user_name, 'pub'), 0o600)
     os.chmod(bn % (args.user_name, 'sec'), 0o600)
     shutil.rmtree(homedir)

@@ -40,9 +40,7 @@ NTR:
 
 import dawgie.util
 import dawgie.util.metrics
-import logging
-
-log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 
 from dawgie import Dataset, Timeline
 from dawgie.db.util.aspect import Container

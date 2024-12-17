@@ -185,7 +185,7 @@ for runnable in args.runnables:
 
         if instance is None:
             logging.warning('Could not locate runnable %s', runnable)
-    except ImportError as ie:
+    except ImportError:
         logging.exception("Could not import runnable's module %s", runnable)
     pass
 

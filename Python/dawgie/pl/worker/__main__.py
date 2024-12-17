@@ -41,16 +41,12 @@ NTR:
 
 import argparse
 import dawgie.context
-import dawgie.pl.state
-
-dawgie.context.fsm = dawgie.pl.state.FSM()  # needs to be here for aws import
+import dawgie.pl.state; dawgie.context.fsm = dawgie.pl.state.FSM()  # needs to be here for aws import # fmt: skip # noqa: E702
 import dawgie.pl.worker
 import dawgie.pl.worker.aws
 import dawgie.pl.worker.cluster
 import dawgie.security
-import matplotlib
-
-matplotlib.use('Agg')
+import matplotlib; matplotlib.use('Agg')  # fmt: skip # noqa: E702
 import os
 import sys
 
