@@ -172,7 +172,7 @@ class Interface(Connector, Container, Dataset, Timeline):
         try:
             # post uses same code but not easily shareable
             # pylint: disable=duplicate-code
-             if algref:
+            if algref:
                 ft = dawgie.Factories.resolve(algref)
                 tn = self._tn()
 
@@ -192,7 +192,7 @@ class Interface(Connector, Container, Dataset, Timeline):
                         tn,
                     )
                 elif ft == dawgie.Factories.task:
-                   args = (
+                    args = (
                         dawgie.util.task_name(algref.factory),
                         self._bot()._ps_hint(),
                         self._bot()._runid(),
