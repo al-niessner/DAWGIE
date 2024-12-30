@@ -42,6 +42,7 @@ import dawgie.context
 import dawgie.types
 import importlib
 
+
 def factory(dt: dawgie.types.DisplayType = None) -> dawgie.Visitor:
     if dt is None:
         dt = dawgie.context.display

@@ -44,12 +44,14 @@ import json
 import os
 import twisted.web.resources
 
+
 class HttpMethod(enum.Enum):
     GET = 0
     POST = 1
     PUT = 2
     DEL = 3
     pass
+
 
 class Defer:
     def __init__(self):

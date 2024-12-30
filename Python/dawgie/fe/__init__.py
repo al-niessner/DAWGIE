@@ -149,8 +149,6 @@ def _static(
     return result
 
 
-
-
 def root() -> dawgie.fe.basis.RoutePoint:
     # shared private variable
     # pylint: disable=protected-access

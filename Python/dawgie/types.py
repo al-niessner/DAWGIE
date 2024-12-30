@@ -39,8 +39,7 @@ NTR:
 
 import enum
 
+
 class DisplayType(enum.Enum):
     html = 0
     pass
-
-
