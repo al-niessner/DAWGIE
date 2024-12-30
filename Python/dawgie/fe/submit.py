@@ -37,7 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-from dawgie.fe import Defer as absDefer
+from dawgie.fe.basis import Defer as absDefer
 
 import dawgie.context
 import dawgie.tools.submit

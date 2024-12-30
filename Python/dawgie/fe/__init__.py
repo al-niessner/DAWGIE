@@ -39,124 +39,13 @@ NTR:
 
 import dawgie.context
 import dawgie.de
+import dawgie.fe.app
+import dawgie.fe.basis
 import dawgie.security
-import enum
-import inspect
-import json
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import os
 import twisted.web.resource
 import twisted.web.util
-
-
-class HttpMethod(enum.Enum):
-    GET = 0
-    POST = 1
-    PUT = 2
-    DEL = 3
-    pass
-
-
-class Defer:
-    def __init__(self):
-        self.identity = None
-        self.request = None
-
-    @property
-    def identity(self):
-        return self.__identity
-
-    @identity.setter
-    def identity(self, ident):
-        self.__identity = ident
-
-    @property
-    def request(self):
-        return self.__request
-
-    @request.setter
-    def request(self, req):
-        self.__request = req
-
-    pass
-
-
-class DynamicContent(twisted.web.resource.Resource):
-    # pylint: disable=dangerous-default-value
-    isLeaf = True
-
-    def __init__(self, fnc, uri: str, methods: [HttpMethod] = [HttpMethod.GET]):
-        twisted.web.resource.Resource.__init__(self)
-        self.__fnc = fnc
-        self.__methods = methods
-        self.__uri = uri
-        while uri.startswith('/'):
-            uri = uri[1:]
-        point = _root
-        for node in uri.split('/')[:-1]:
-            if node.encode() not in point.children:
-                point.putChild(node.encode(), RoutePoint(node))
-                pass
-
-            point = point.children[node.encode()]
-            pass
-        node = uri.split('/')[-1].encode()
-
-        if node not in point.children:
-            point.putChild(node, self)
-        return
-
-    def __err(self, method: HttpMethod):
-        return (
-            '<h1>Dynamic Content Lookup Failed</h1><p>The uri "%(uri)s" is not mapped to HTTP method %(method)s</p>'
-            % {'method': str(method), 'uri': self.__uri}
-        ).encode()
-
-    def __render(self, request, method: HttpMethod):
-        sig = inspect.signature(self.__fnc)
-        kwds = {}
-        if 'getPeerCertificate' in dir(request.transport):
-            cert = request.transport.getPeerCertificate()
-        else:
-            cert = None
-
-        if not dawgie.security.sanctioned(self.__uri, cert):
-            return json.dumps(
-                {
-                    'alert_status': 'danger',
-                    'alert_message': f'The endpoint {self.__uri} requires a client certficate to be provided and that certificate be known to this service.',
-                }
-            ).encode()
-
-        for ak in request.args.keys():
-            if ak.decode() in sig.parameters:
-                kwds[ak.decode()] = [a.decode() for a in request.args[ak]]
-                pass
-            pass
-
-        if isinstance(self.__fnc, Defer):
-            self.__fnc.identity = dawgie.security.identity(cert)
-            self.__fnc.request = request
-        if 0 < self.__methods.count(method):
-            resp = self.__fnc(**kwds)
-        else:
-            resp = self.__err(method)
-
-        return resp
-
-    def render_GET(self, req):
-        return self.__render(req, HttpMethod.GET)
-
-    def render_POST(self, req):
-        return self.__render(req, HttpMethod.POST)
-
-    def render_PUT(self, req):
-        return self.__render(req, HttpMethod.PUT)
-
-    def render_DELETE(self, req):
-        return self.__render(req, HttpMethod.DEL)
-
-    pass
 
 
 class RedirectContent(twisted.web.resource.Resource):
@@ -170,34 +59,6 @@ class RedirectContent(twisted.web.resource.Resource):
 
     def render_GET(self, request):
         return twisted.web.util.redirectTo(self.__url.encode(), request)
-
-    pass
-
-
-class RoutePoint(twisted.web.resource.Resource):
-    isLeaf = False
-
-    def __init__(self, name):
-        twisted.web.resource.Resource.__init__(self)
-        self.__name = name
-        return
-
-    def getChild(self, path, request):
-        msg = (
-            request.uri.decode()
-            if os.environ.get('DAWGIE_FE_DEBUG', '')
-            else 'DAWGIE_FE_DEBUG'
-        )
-        try:
-            dpath = path.decode()
-        except UnicodeDecodeError:
-            dpath = 'cannot decode "path"'
-        return twisted.web.resource.ErrorPage(
-            404,
-            'Could not locate requested URI',
-            '<p>%(my_name)s.getChild().name:         %(name)s<br>%(my_name)s.getChild().request.uri:  %(uri)s</p>'
-            % {'my_name': self.__name, 'name': dpath, 'uri': msg},
-        )
 
     pass
 
@@ -288,21 +149,18 @@ def _static(
     return result
 
 
-_root = RoutePoint('root')
 
 
-def root() -> RoutePoint:
-    _root.putChild(b'', RedirectContent('/pages/index.html'))
-    _root.putChild(b'fonts', StaticContent())
-    _root.putChild(b'images', StaticContent())
-    _root.putChild(b'javascripts', StaticContent())
-    _root.putChild(b'markdown', StaticContent())
-    _root.putChild(b'pages', StaticContent())
-    _root.putChild(b'partials', StaticContent())
-    _root.putChild(b'scripts', StaticContent())
-    _root.putChild(b'stylesheets', StaticContent())
-    return _root
-
-
-# pylint: disable=ungrouped-imports
-import dawgie.fe.app  # build all of the dynamic hooks now # noqa: E402
+def root() -> dawgie.fe.basis.RoutePoint:
+    # shared private variable
+    # pylint: disable=protected-access
+    dawgie.fe.basis._root.putChild(b'', RedirectContent('/pages/index.html'))
+    dawgie.fe.basis._root.putChild(b'fonts', StaticContent())
+    dawgie.fe.basis._root.putChild(b'images', StaticContent())
+    dawgie.fe.basis._root.putChild(b'javascripts', StaticContent())
+    dawgie.fe.basis._root.putChild(b'markdown', StaticContent())
+    dawgie.fe.basis._root.putChild(b'pages', StaticContent())
+    dawgie.fe.basis._root.putChild(b'partials', StaticContent())
+    dawgie.fe.basis._root.putChild(b'scripts', StaticContent())
+    dawgie.fe.basis._root.putChild(b'stylesheets', StaticContent())
+    return dawgie.fe.basis._root

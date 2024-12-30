@@ -37,7 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-from dawgie.fe import Defer as absDefer
+from dawgie.fe.basis import Defer as absDefer
 
 import dawgie
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702

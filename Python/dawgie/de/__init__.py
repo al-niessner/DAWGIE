@@ -45,7 +45,7 @@ import importlib
 def factory(dt: dawgie.types.DisplayType = None) -> dawgie.Visitor:
     if dt is None:
         dt = dawgie.context.display
-    if isinstance(dt, Type):
+    if isinstance(dt, dawgie.types.DisplayType):
         dt = dt.name
     if not isinstance(dt, str):
         dt = str(dt)

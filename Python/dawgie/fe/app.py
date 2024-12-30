@@ -37,7 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-from dawgie.fe import DynamicContent, HttpMethod
+from dawgie.fe.basis import DynamicContent, HttpMethod
 from . import submit
 from . import svrender
 

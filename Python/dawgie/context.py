@@ -39,7 +39,7 @@ NTR: 49811
 
 import argparse
 import enum
-import dawgie.de
+import dawgie.types
 import importlib
 import inspect
 import logging
@@ -279,7 +279,7 @@ def add_arguments(ap):
     )
     ap.add_argument(
         '--context-display-type',
-        choices=[d.name for d in dawgie.de.Type],
+        choices=[d.name for d in dawgie.types.DisplayType],
         default='html',
         required=False,
         help='what type of display [%(default)s]',
@@ -460,7 +460,7 @@ def override(args):
     dawgie.context.db_port = args.context_db_port
     dawgie.context.db_rotate = args.context_db_rotate
     dawgie.context.db_rotate_path = args.context_db_rotate_path
-    dawgie.context.display = dawgie.de.Type[args.context_display_type]
+    dawgie.context.display = dawgie.types.DiplayType[args.context_display_type]
     dawgie.context.email_alerts_to = args.context_email_alerts_to
     dawgie.context.email_signature = args.context_email_signature
     dawgie.context.farm_port = args.context_farm_port
