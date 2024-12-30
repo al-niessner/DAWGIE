@@ -379,16 +379,14 @@ def add_arguments(ap):
 
 def dumps() -> bytes:
     def isattribute(member):
-        # pylint: disable=import-outside-toplevel,redefined-outer-name
-        import dawgie.pl.state
-
         return not (
             (member[0].startswith('__') and member[0].endswith('__'))
             or inspect.isbuiltin(member[1])
             or inspect.isfunction(member[1])
             or inspect.ismodule(member[1])
             or inspect.isroutine(member[1])
-            or isinstance(member[1], dawgie.pl.state.FSM)
+            # avoid cicular dependencies by checking the string of the type
+            or str(type(member[1])) == "<class 'dawgie.pl.state.FSM'>"
         )
 
     attributes = list(filter(isattribute, inspect.getmembers(dawgie.context)))
