@@ -37,21 +37,10 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import dawgie
-import dawgie.context
-import dawgie.types
-import importlib
+import enum
 
-def factory(dt: dawgie.types.DisplayType = None) -> dawgie.Visitor:
-    if dt is None:
-        dt = dawgie.context.display
-    if isinstance(dt, Type):
-        dt = dt.name
-    if not isinstance(dt, str):
-        dt = str(dt)
+class DisplayType(enum.Enum):
+    html = 0
+    pass
 
-    if not dt.count('.'):
-        dt = 'dawgie.de.' + dt
 
-    mod = importlib.import_module(dt)
-    return mod.Visitor()
