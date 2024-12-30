@@ -37,7 +37,8 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-# pylint: disable=import-self,protected-access
+# main modules usually have very similar lines to other mains or inits so
+# pylint: disable=duplicate-code,import-self,protected-access
 
 import argparse
 import dawgie.context

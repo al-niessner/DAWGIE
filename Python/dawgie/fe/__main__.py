@@ -37,6 +37,9 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+# main modules usually have very similar lines to other mains or inits so
+# pylint: disable=duplicate-code
+
 import dawgie.context
 import dawgie.pl.state
 import dawgie.fe

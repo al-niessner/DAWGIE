@@ -73,7 +73,7 @@ ignored-modules=
 # Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
 # number of processors available to use, and will cap the count on Windows to
 # avoid hangs.
-jobs=1
+jobs=0
 
 # Control the amount of potential inferred values when inferring a single
 # object. This can help the performance when dealing with large functions or
@@ -136,8 +136,12 @@ attr-naming-style=snake_case
 
 # Bad variable names which should always be refused, separated by a comma.
 bad-names=foo,
+          foobar,
+          fu,
+          fubar,
           bar,
           baz,
+          snafu,
           toto,
           tutu,
           tata
@@ -190,7 +194,8 @@ function-naming-style=snake_case
 #function-rgx=
 
 # Good variable names which should always be accepted, separated by a comma.
-good-names=i,
+good-names=f,
+           i,
            j,
            k,
            ex,
@@ -431,14 +436,17 @@ confidence=HIGH,
 # --disable=W".
 disable=raw-checker-failed,
         bad-inline-option,
+        deprecated-pragma,
+        line-too-long,
         locally-disabled,
         file-ignored,
         suppressed-message,
-        useless-suppression,
-        deprecated-pragma,
-        use-symbolic-message-instead,
+        unnecessary-pass,
         use-implicit-booleaness-not-comparison-to-string,
-        use-implicit-booleaness-not-comparison-to-zero
+        use-implicit-booleaness-not-comparison-to-zero,
+        use-symbolic-message-instead,
+        useless-return,
+        useless-suppression
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

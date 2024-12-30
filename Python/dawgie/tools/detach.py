@@ -89,10 +89,6 @@ def _copy(references):
 
                     if os.path.isfile(ofn) and not os.path.isfile(nfn):
                         shutil.copy(ofn, nfn)
-                    pass
-                pass
-            pass
-        pass
     return
 
 
@@ -116,6 +112,8 @@ def _shelve(fn):
 ap = argparse.ArgumentParser(
     description='Replicate a small part of the DAWGIE data stored by DAWGIE into --output-dir. The output can then be used by private pipelines detached from the original DAWGIE system.'
 )
+# ignore tools that use similar arguments
+# pylint: disable=duplicate-code
 ap.add_argument(
     '-DB',
     '--private-database',
@@ -150,6 +148,8 @@ ap.add_argument(
 ap.add_argument(
     '-t', '--target', required=True, type=str, help='specific known target'
 )
+# pylint: enable=duplicate-code
+
 load = {
     dawgie.Factories.analysis: _analyzer,
     dawgie.Factories.regress: _regression,

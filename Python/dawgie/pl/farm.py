@@ -170,6 +170,8 @@ class Hand(twisted.internet.protocol.Protocol):
         return
 
     def dataReceived(self, data):
+        # protocols are independent even if similar today
+        # pylint: disable=duplicate-code
         self.__buf += data
         length = self.__blen if self.__len is None else self.__len
         while length <= len(self.__buf):
@@ -401,6 +403,8 @@ def plow():
             dawgie.context.worker_backlog,
         )
     else:
+        # protocols are independent even if similar today
+        # pylint: disable=duplicate-code
         log.critical('PGP support is deprecated and will be removed')
         twisted.internet.reactor.listenTCP(
             int(dawgie.context.farm_port),

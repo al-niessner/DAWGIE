@@ -41,6 +41,7 @@ NTR:
 import collections
 import dawgie.db.lockview
 import dawgie.context
+import dawgie.pl.message
 import dawgie.security
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
 import os
@@ -142,6 +143,8 @@ class DBSerializer(twisted.internet.protocol.Factory):
                     dawgie.context.worker_backlog,
                 )
             else:
+                # protocols are independent even if similar today
+                # pylint: disable=duplicate-code
                 log.critical('PGP support is deprecated and will be removed')
                 twisted.internet.reactor.listenTCP(
                     int(dawgie.context.db_port),
@@ -433,15 +436,7 @@ def acquire(name):
     buf = b''
 
     while buf != Mutex.unlock:
-        buf = b''
-        while len(buf) < 4:
-            buf += s.recv(4 - len(buf))
-        length = struct.unpack('>I', buf)[0]
-        buf = b''
-        while len(buf) < length:
-            buf += s.recv(length - len(buf))
-        buf = pickle.loads(buf)
-        pass
+        buf = dawgie.pl.message.receive(s)
     return s
 
 
@@ -449,12 +444,6 @@ def release(s):
     request = COMMAND(Func.release, None, None, None)
     msg = pickle.dumps(request, pickle.HIGHEST_PROTOCOL)
     s.sendall(struct.pack('>I', len(msg)) + msg)
-    buf = b''
-    while len(buf) < 4:
-        buf += s.recv(4 - len(buf))
-    length = struct.unpack('>I', buf)[0]
-    buf = b''
-    while len(buf) < length:
-        buf += s.recv(length - len(buf))
+    buf = dawgie.pl.message.receive(s)
     s.close()
-    return pickle.loads(buf)
+    return buf

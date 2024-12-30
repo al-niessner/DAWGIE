@@ -76,6 +76,8 @@ class LogSink(twisted.internet.protocol.Protocol):
         return
 
     def dataReceived(self, data):
+        # protocols are independent even if similar today
+        # pylint: disable=duplicate-code
         self.__buf += data
         length = self.__blen if self.__len is None else self.__len
         while length <= len(self.__buf):

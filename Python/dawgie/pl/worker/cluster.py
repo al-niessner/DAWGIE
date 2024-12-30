@@ -83,6 +83,8 @@ def execute(address: (str, int), inc: int, ps_hint: int, rev: str):
             nv = ctxt.run(
                 factory, ps_hint, m.jobid, m.runid, m.target, m.timing
             )
+            # protocols are independent even if similar today
+            # pylint: disable=duplicate-code
             m = dawgie.pl.message.make(
                 typ=dawgie.pl.message.Type.response,
                 inc=m.target,

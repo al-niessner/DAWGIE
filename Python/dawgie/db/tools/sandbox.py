@@ -79,6 +79,8 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(
         description='Safely copies database to a specified location. This tool is necessary when creating a database sandbox.\n\nExample:\n    sandbox.py --context-db-copy-path=/tmp/mysandboxdb --context-db-port=9999'
     )
+    # ignore tools that use similar arguments
+    # pylint: disable=duplicate-code
     ap.add_argument(
         '-l',
         '--log-file',
@@ -109,6 +111,7 @@ if __name__ == "__main__":
         required=False,
         help='Database source machine. [%(default)s]',
     )
+    # pylint: enable=duplicate-code
 
     args = ap.parse_args()
     dawgie.context.override(args)

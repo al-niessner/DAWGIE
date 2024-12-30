@@ -197,6 +197,8 @@ def main():
     ap = argparse.ArgumentParser(
         description='Encode rules that the architecture requires but I cannot enforce because the language does not allow for enforcement. Use -r or --rules to see the current rules that  are being enforced.'
     )
+    # ignore tools that use similar arguments
+    # pylint: disable=duplicate-code
     ap.add_argument(
         '--ae-dir', required=True, help='the complete path to the AE directory'
     )
@@ -246,6 +248,8 @@ def main():
         default=False,
         help='display verbose information of verification',
     )
+    # pylint: enable=duplicate-code
+
     args = ap.parse_args()
     dawgie.context.ae_base_path = args.ae_dir
     dawgie.context.ae_base_package = args.ae_pkg

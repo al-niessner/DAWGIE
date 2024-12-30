@@ -170,7 +170,9 @@ class Interface(Connector, Container, Dataset, Timeline):
             pass
 
         try:
-            if algref:
+            # post uses same code but not easily shareable
+            # pylint: disable=duplicate-code
+             if algref:
                 ft = dawgie.Factories.resolve(algref)
                 tn = self._tn()
 
@@ -190,7 +192,7 @@ class Interface(Connector, Container, Dataset, Timeline):
                         tn,
                     )
                 elif ft == dawgie.Factories.task:
-                    args = (
+                   args = (
                         dawgie.util.task_name(algref.factory),
                         self._bot()._ps_hint(),
                         self._bot()._runid(),
@@ -235,6 +237,8 @@ class Interface(Connector, Container, Dataset, Timeline):
                             if spks:
                                 pk = spks[-1]
                             else:
+                                # post uses same args for different needs
+                                # pylint: disable=duplicate-code
                                 log.warning(
                                     'No matches for: %s.%s.%s.%s.%s',
                                     self._tn(),

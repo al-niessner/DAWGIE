@@ -37,7 +37,8 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR: 49811
 '''
 
-# pylint: disable=redefined-builtin,too-many-arguments,unused-argument
+# this module is to support testing and is exempt from most of QA checks
+# pylint: disable=duplicate-code,redefined-builtin,too-many-arguments,unused-argument
 
 from dawgie.db import REF
 

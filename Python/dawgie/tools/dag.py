@@ -67,6 +67,8 @@ def pt(task, text=''):
 ap = argparse.ArgumentParser(
     description='Build the task, algorithm, state vector, and value trees for the AE and write them to --output-dir.'
 )
+# ignore tools that use similar arguments
+# pylint: disable=duplicate-code
 ap.add_argument(
     '-O',
     '--output-dir',
@@ -81,6 +83,7 @@ ap.add_argument(
     default=False,
     help='display processing information',
 )
+# pylint: enable=duplicate-code
 dawgie.context.add_arguments(ap)
 args = ap.parse_args()
 

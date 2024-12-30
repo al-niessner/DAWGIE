@@ -530,6 +530,8 @@ def execute(address: (str, int), inc: int, ps_hint: int, rev: str):
                     str(m.runid),
                     str(m.target),
                 )
+                # protocols are independent even if similar today
+                # pylint: disable=duplicate-code
                 m = dawgie.pl.message.make(
                     typ=dawgie.pl.message.Type.response,
                     inc=m.target,
