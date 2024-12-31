@@ -50,7 +50,7 @@ import dawgie.pl.message
 import dawgie.pl.worker
 import importlib
 import json
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging
 import os
 import pickle
 import requests
@@ -169,9 +169,9 @@ class Company(twisted.internet.protocol.Factory):
 
 class Connect:
     def __init__(
-        self, job, respond, callLater=twisted.internet.reactor.callLater
+        self, job, respond, call_later=twisted.internet.reactor.callLater
     ):
-        self._callLater = callLater
+        self._call_later = call_later
         self._did = tempfile.mkdtemp()
         self._job = job
         self._kid = None
@@ -200,13 +200,13 @@ class Connect:
             keyid=self._kid,
             passphrase='1234567890',
         )
-        response = _https_push(signed.data)
+        response = _https_push(signed.data)  # pylint: disable=no-member
         self._log.debug('advertise: %s', response)
 
         if response != 'position posted':
             self._respond(self._job, False)
         else:
-            self._callLater(
+            self._call_later(
                 0,
                 dawgie.pl.DeferWithLogOnError(
                     self.interview, 'while interviewing requester', __name__
@@ -227,7 +227,7 @@ class Connect:
             keyid=self._kid,
             passphrase='1234567890',
         )
-        response = _https_push(signed.data)
+        response = _https_push(signed.data)  # pylint: disable=no-member
         self._log.debug('interview: %s', response)
 
         if response == 'False':
@@ -236,7 +236,7 @@ class Connect:
             c, h, l, _i, s = json.loads(response)
 
             if c and h == 'Healthy' and l == 'InService' and s:
-                self._callLater(
+                self._call_later(
                     0,
                     dawgie.pl.DeferWithLogOnError(
                         self.hire, 'while hiring requestor', __name__
@@ -244,7 +244,7 @@ class Connect:
                     None,
                 )
             else:
-                self._callLater(
+                self._call_later(
                     15,
                     dawgie.pl.DeferWithLogOnError(
                         self.interview, 'while interviewing requester', __name__
@@ -266,8 +266,9 @@ class Connect:
             keyid=self._kid,
             passphrase='1234567890',
         )
-        response = _https_push(signed.data)
+        response = _https_push(signed.data)  # pylint: disable=no-member
         self._log.debug('hired')
+        started = False
 
         if response and response not in [b'False', 'False']:
             started = self._pgp.verify(response).valid
@@ -346,7 +347,7 @@ def _hire(iid):
 def _https_push(msg):
     log = logging.getLogger(__name__)
     api_key, url = dawgie.context.cloud_data.split('@')[0:2]
-    response = requests.post(
+    response = requests.post(  # pylint: disable=missing-timeout
         url, json={'request': msg.decode()}, headers={'x-api-key': api_key}
     )
 
@@ -364,6 +365,7 @@ def _sqs_pop():
     resource = boto3.resource('sqs')
     sqs = resource.get_queue_by_name(QueueName=name)
     message = []
+    msg = ''
     while not message:
         message = sqs.receive_messages(MaxNumberOfMessages=1)
 
@@ -421,6 +423,7 @@ def exchange(message):  # AWS lambda function
                 if step == 'interview':
                     response = json.dumps(_interview())
                 if step == 'hire':
+                    keys = {}
                     payload = base64.b64encode(message['payload']).decode()
                     for k in _pgp.list_keys():
                         for u in k['uids']:

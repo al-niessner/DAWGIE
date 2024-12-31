@@ -39,7 +39,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR: 49811
 '''
 
-# pylint: disable=import-self,protected-access,too-many-arguments,too-many-branches,too-many-locals,unused-argument
+# pylint: disable=import-self,protected-access,too-many-arguments,too-many-branches,too-many-locals,too-many-positional-arguments,unused-argument
 
 import argparse
 import datetime
@@ -52,10 +52,9 @@ import sys
 
 
 def _get_rules():
-    for r in filter(
+    yield from filter(
         lambda k: k.startswith('rule_'), sorted(dir(dawgie.tools.compliant))
-    ):
-        yield r
+    )
     return
 
 
@@ -873,9 +872,9 @@ if __name__ == '__main__':
     import dawgie.tools.compliant
     import dawgie.util
 
-    gpassed = main()
+    PASSED = main()
 
-    if gpassed:
+    if PASSED:
         sys.exit(0)
     else:
         sys.exit(-1)

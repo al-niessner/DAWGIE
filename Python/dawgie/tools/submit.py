@@ -49,11 +49,11 @@ import logging
 import smtplib
 import subprocess
 
-ops = "master"
-pre_ops = "pre_ops"
-repo_dir = "/proj/src/ws"
-origin = "origin"
-ops_dir = "/proj/src/ae"
+OPS = "main"
+PRE_OPS = "pre_ops"
+REPO_DIR = "/proj/src/ws"
+ORIGIN = "origin"
+OPS_DIR = "/proj/src/ae"
 
 
 class Priority(enum.Enum):
@@ -62,7 +62,7 @@ class Priority(enum.Enum):
     DOING = "doing_empty"
     TODO = "todo_empty"
 
-    # pylint: disable=no-method-argument
+    @staticmethod
     def max(*largs):
         result = Priority.TODO
         for a in filter(lambda a: a is not None, largs):
@@ -89,18 +89,19 @@ class State(enum.IntEnum):
 
 
 def _main(an_args):
+    # being a main, imports are later so pylint: disable=used-before-assignment
     # 1. Run auto merge tool
     status = dawgie.tools.submit.auto_merge_prepare(
-        an_args.changeset, an_args.pre_ops, an_args.repo_dir, an_args.origin
+        an_args.changeset, an_args.PRE_OPS, an_args.REPO_DIR, an_args.ORIGIN
     )
 
     if status == State.SUCCESS:
         status = dawgie.tools.submit.auto_merge_compliant(
-            an_args.changeset, an_args.repo_dir, _spawn
+            an_args.changeset, an_args.REPO_DIR, _spawn
         )
     if status == State.SUCCESS:
         status = dawgie.tools.submit.auto_merge_push(
-            an_args.changeset, an_args.repo_dir
+            an_args.changeset, an_args.REPO_DIR
         )
 
     if status == State.SUCCESS:
@@ -146,14 +147,14 @@ def auto_merge_prepare(
         )
         return State.FAILED
 
-    # Check-out pre_ops
+    # Check-out PRE_OPS
     status = git_execute(g, f"git checkout {a_pre_ops}")
     if status == State.FAILED:
         mail_out(f"Failed to checkout {a_pre_ops}")
         return State.FAILED
 
     # Make sure checkout is clean.
-    status = git_execute(g, f"git pull origin {a_pre_ops}")
+    status = git_execute(g, f"git pull ORIGIN {a_pre_ops}")
     if status == State.FAILED:
         mail_out(f"Failed to pull in {a_pre_ops}")
         return State.FAILED
@@ -201,7 +202,7 @@ def auto_merge_push(
         return State.FAILED
 
     # Push changes
-    status = git_execute(g, f"git push origin {a_pre_ops}")
+    status = git_execute(g, f"git push ORIGIN {a_pre_ops}")
     if status == State.FAILED:
         mail_out(f"Failed to push changes to {a_pre_ops}")
         return State.FAILED
@@ -261,7 +262,7 @@ def mail_out(msg):
 
 
 def merge_into(g, src, dst):
-    status = git_execute(g, f"git merge origin/{src}")
+    status = git_execute(g, f"git merge ORIGIN/{src}")
     if status == State.FAILED:
         msg = f"Failed to merge {src} into {dst}."
 
@@ -273,37 +274,37 @@ def merge_into(g, src, dst):
 
 
 def update_ops():
-    g = git.cmd.Git(repo_dir)
+    g = git.cmd.Git(REPO_DIR)
 
     # Up to date
     status = git_execute(g, "git fetch")
     if status == State.FAILED:
-        logging.info("update_ops: Failed to fetch on %s", repo_dir)
+        logging.info("update_ops: Failed to fetch on %s", REPO_DIR)
         return State.FAILED
 
-    # merge ops into pre_ops
-    if merge_into(g, ops, pre_ops) == State.FAILED:
+    # merge OPS into PRE_OPS
+    if merge_into(g, OPS, PRE_OPS) == State.FAILED:
         return State.FAILED
 
-    # push pre_ops
-    status = git_execute(g, f"git push origin {pre_ops}")
+    # push PRE_OPS
+    status = git_execute(g, f"git push ORIGIN {PRE_OPS}")
 
     # Now update the real thing
-    g = git.cmd.Git(ops_dir)
+    g = git.cmd.Git(OPS_DIR)
 
     # Up to date
     status = git_execute(g, "git fetch")
     if status == State.FAILED:
-        logging.info("update_ops: Failed to fetch on %s", ops_dir)
+        logging.info("update_ops: Failed to fetch on %s", OPS_DIR)
         return State.FAILED
 
-    # merge pre_ops into ops
-    if merge_into(g, pre_ops, ops) == State.FAILED:
+    # merge PRE_OPS into OPS
+    if merge_into(g, PRE_OPS, OPS) == State.FAILED:
         return State.FAILED
 
-    # push ops
-    if git_execute(g, f"git push origin {ops}") == State.FAILED:
-        mail_out(f"update_ops: Failed to push to {ops}")
+    # push OPS
+    if git_execute(g, f"git push ORIGIN {OPS}") == State.FAILED:
+        mail_out(f"update_ops: Failed to push to {OPS}")
         return State.FAILED
 
     return State.SUCCESS
@@ -316,7 +317,7 @@ if __name__ == "__main__":
     import dawgie.util
 
     ap = argparse.ArgumentParser(
-        description='Automatically merge changeset into pre_ops.'
+        description='Automatically merge changeset into PRE_OPS.'
     )
     ap.add_argument(
         '-l',
@@ -336,37 +337,37 @@ if __name__ == "__main__":
     ap.add_argument(
         '-r',
         '--repo-dir',
-        default=dawgie.tools.submit.repo_dir,
+        default=dawgie.tools.submit.REPO_DIR,
         required=False,
-        help='set the pre_ops repo directory where you want to do the merging [%(default)s]',
+        help='set the PRE_OPS repo directory where you want to do the merging [%(default)s]',
     )
     ap.add_argument(
         '-m',
         '--ops-dir',
-        default=dawgie.tools.submit.ops_dir,
+        default=dawgie.tools.submit.OPS_DIR,
         required=False,
-        help='set the ops repo directory where you want to do the merging [%(default)s]',
+        help='set the OPS repo directory where you want to do the merging [%(default)s]',
     )
     ap.add_argument(
         '-o',
         '--origin',
-        default="origin",
+        default=dawgie.tools.submit.ORIGIN,
         required=False,
-        help='The name of the origin. [%(default)s]',
+        help='The name of the ORIGIN. [%(default)s]',
     )
     ap.add_argument(
         '-M',
         '--ops',
-        default=dawgie.tools.submit.ops,
+        default=dawgie.tools.submit.OPS,
         required=False,
-        help='The name of the ops branch. [%(default)s]',
+        help='The name of the OPS branch. [%(default)s]',
     )
     ap.add_argument(
         '-p',
-        '--pre_ops',
-        default=dawgie.tools.submit.pre_ops,
+        '--pre-ops',
+        default=dawgie.tools.submit.PRE_OPS,
         required=False,
-        help='The name of the pre_ops branch. [%(default)s]',
+        help='The name of the PRE_OPS branch. [%(default)s]',
     )
     ap.add_argument(
         '-c',
@@ -378,11 +379,11 @@ if __name__ == "__main__":
     dawgie.context.add_arguments(ap)
     args = ap.parse_args()
     dawgie.context.override(args)
-    dawgie.tools.submit.repo_dir = args.repo_dir
-    dawgie.tools.submit.origin = args.origin
-    dawgie.tools.submit.pre_ops = args.pre_ops
-    dawgie.tools.submit.ops = args.ops
-    dawgie.tools.submit.ops_dir = args.ops_dir
+    dawgie.tools.submit.REPO_DIR = args.repo_dir
+    dawgie.tools.submit.ORIGIN = args.origin
+    dawgie.tools.submit.PRE_OPS = args.pre_ops
+    dawgie.tools.submit.OPS = args.ops
+    dawgie.tools.submit.OPS_DIR = args.ops_dir
 
     logging.basicConfig(filename=args.log_file, level=args.log_level)
     _main(args)

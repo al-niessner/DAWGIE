@@ -44,6 +44,7 @@ import importlib
 
 
 def factory(dt: dawgie.types.DisplayType = None) -> dawgie.Visitor:
+    '''concrete factory to construct the correct engine for type'''
     if dt is None:
         dt = dawgie.context.display
     if isinstance(dt, dawgie.types.DisplayType):

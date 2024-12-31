@@ -41,6 +41,7 @@ import sys
 
 
 def do():
+    # being a main imports are last so pylint: disable=used-before-assignment
     h = dawgie.pl.resources.HINT(0, 0, 0, 0, False)
     return h
 

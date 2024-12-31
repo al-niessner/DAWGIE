@@ -42,7 +42,7 @@ import dawgie.de
 import dawgie.fe.app
 import dawgie.fe.basis
 import dawgie.security
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import twisted.web.resource
 import twisted.web.util
@@ -57,7 +57,7 @@ class RedirectContent(twisted.web.resource.Resource):
         self.__url = url
         pass
 
-    def render_GET(self, request):
+    def render_GET(self, request):  # pylint: disable=invalid-name
         return twisted.web.util.redirectTo(self.__url.encode(), request)
 
     pass
@@ -71,7 +71,7 @@ class StaticContent(twisted.web.resource.Resource):
         self.__bdir = bdir
         pass
 
-    def render_GET(self, request):
+    def render_GET(self, request):  # pylint: disable=invalid-name
         return _static(request.uri.decode(), self.__bdir, request)
 
     pass

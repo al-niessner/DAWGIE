@@ -50,14 +50,14 @@ import sys
 import tempfile
 import webbrowser
 
-_template_image = '''
+_TEMPLATE_IMAGE = '''
 <div>
 <h3>{title:s}</h3>
 <img src="data:image/svg+xml;base64,{tree:s}">
 <img src="data:image/png;base64,{chart:s}">
 </div>
 '''
-_template_page = """
+_TEMPLATE_PAGE = """
 <!DOCTYPE html>
 <html>
   <head>
@@ -89,7 +89,7 @@ def _trace(t, path=[], routes={}):
         for c in filter(lambda n, this=t.tag: n.tag != this, t):
             _trace(c, path.copy(), routes)
         pass
-    elif t.get('shape') != dawgie.pl.dag.Shape.rectangle:
+    elif t.get('shape') != dawgie.pl.dag.Shape.rectangle:  # fmt: skip # pylint: disable=used-before-assignment
         key = (path[0], path[-1])
         if key not in routes:
             routes[key] = []
@@ -136,10 +136,10 @@ def main(fn: str = None, at=None):
             if not rank:
                 for tan in traces[key][tn].keys():
                     rank[tan] = max(
-                        [
+                        (
                             path.index(tan) if tan in path else 0
                             for path in route
-                        ]
+                        )
                     )
                     pass
                 rank = {
@@ -194,20 +194,20 @@ def main(fn: str = None, at=None):
                 pass
             fid, ttfn = tempfile.mkstemp()
             os.close(fid)
-            av.write_svg(ttfn)
+            av.write_svg(ttfn)  # pylint: disable=no-member
             with open(ttfn, 'br') as fff:
                 tree = fff.read()
             os.unlink(ttfn)
-            images += _template_image.format(
+            images += _TEMPLATE_IMAGE.format(
                 chart=base64.encodebytes(br.getvalue()).decode(),
                 title=key[0] + ' -> ' + key[1],
                 tree=base64.encodebytes(tree).decode(),
             )
             pass
         ff.write(
-            _template_page.format(
+            _TEMPLATE_PAGE.format(
                 images=images,
-                npaths=sum([len(v) for v in routes.values()]),
+                npaths=sum((len(v) for v in routes.values())),
                 nroots=len(at),
                 nroutes=len(routes),
             )

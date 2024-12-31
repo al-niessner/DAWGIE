@@ -45,7 +45,7 @@ import struct
 import twisted.internet.reactor
 import twisted.internet.threads
 
-_root = None
+_ROOT = None
 
 # Importing libraries gets complicated so pylint: disable=import-outside-toplevel
 
@@ -134,7 +134,7 @@ class LogSinkFactory(twisted.internet.protocol.Factory):
     def buildProtocol(self, addr):
         return LogSink(self.__actual, addr)
 
-    def isWithinReactor(self):
+    def isWithinReactor(self):  # pylint: disable=invalid-name
         import dawgie.security
 
         # pylint: disable=protected-access
@@ -154,8 +154,8 @@ class TwistedHandler(logging.handlers.SocketHandler):
         pass
 
     def emit(self, record):
-        if _root is not None and _root.isWithinReactor():
-            _root.actual().handle(record)
+        if _ROOT is not None and _ROOT.isWithinReactor():
+            _ROOT.actual().handle(record)
         else:
             if self.__shaking:
                 self.__q.append(record)
@@ -184,14 +184,14 @@ def start(path: str, port: int) -> None:
     import dawgie.context
     import dawgie.pl.logger
 
-    dawgie.pl.logger._root = LogSinkFactory(path)
+    dawgie.pl.logger._ROOT = LogSinkFactory(path)
     if dawgie.security.useTLS():
         controller = dawgie.security.authority().options(
             dawgie.security.certificate()
         )
         twisted.internet.reactor.listenSSL(
             port,
-            dawgie.pl.logger._root,
+            dawgie.pl.logger._ROOT,
             controller,
             dawgie.context.worker_backlog,
         )
@@ -199,6 +199,6 @@ def start(path: str, port: int) -> None:
         # cannot call logging from here because we are trying to start it
         print('PGP support is deprecated and will be removed')
         twisted.internet.reactor.listenTCP(
-            port, dawgie.pl.logger._root, dawgie.context.worker_backlog
+            port, dawgie.pl.logger._ROOT, dawgie.context.worker_backlog
         )
     return

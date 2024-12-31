@@ -42,7 +42,7 @@ from dawgie.fe.basis import Defer as absDefer
 import dawgie.context
 import dawgie.tools.submit
 import json
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import twisted.internet.reactor
 import twisted.web.server
@@ -141,7 +141,7 @@ class Process:
             return twisted.python.failure.Failure(Exception())
 
         if dawgie.tools.submit.already_applied(
-            self.__changeset, dawgie.tools.submit.repo_dir
+            self.__changeset, dawgie.tools.submit.REPO_DIR
         ):
             log.warning("submit: changeset already in history")
             self.__msg = {
@@ -162,9 +162,9 @@ class Process:
         }
         status = dawgie.tools.submit.auto_merge_prepare(
             self.__changeset,
-            dawgie.tools.submit.pre_ops,
-            dawgie.tools.submit.repo_dir,
-            dawgie.tools.submit.origin,
+            dawgie.tools.submit.PRE_OPS,
+            dawgie.tools.submit.REPO_DIR,
+            dawgie.tools.submit.ORIGIN,
         )
         result = (
             None
@@ -181,7 +181,7 @@ class Process:
         }
         handler = VerifyHandler(self)
         status = dawgie.tools.submit.auto_merge_compliant(
-            self.__changeset, dawgie.tools.submit.repo_dir, handler.spawn_off
+            self.__changeset, dawgie.tools.submit.REPO_DIR, handler.spawn_off
         )
         result = (
             None
@@ -198,8 +198,8 @@ class Process:
         }
         status = dawgie.tools.submit.auto_merge_push(
             self.__changeset,
-            dawgie.tools.submit.pre_ops,
-            dawgie.tools.submit.repo_dir,
+            dawgie.tools.submit.PRE_OPS,
+            dawgie.tools.submit.REPO_DIR,
             self.__submission,
         )
         result = (

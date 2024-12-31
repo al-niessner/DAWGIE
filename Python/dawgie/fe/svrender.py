@@ -40,7 +40,7 @@ NTR:
 from dawgie.fe.basis import Defer as absDefer
 
 import dawgie
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import twisted.internet.threads
 
 

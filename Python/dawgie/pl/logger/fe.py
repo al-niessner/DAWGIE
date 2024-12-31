@@ -40,7 +40,7 @@ NTR: 49811
 import dawgie.context
 import logging.handlers
 
-instance = None
+INSTANCE = None
 
 
 class Handler(logging.handlers.BufferingHandler):
@@ -72,8 +72,8 @@ class Handler(logging.handlers.BufferingHandler):
 
 def remembered():
     history = []
-    for r in instance.buffer:
-        details = instance.format(r).split(';\n;')
+    for r in INSTANCE.buffer:
+        details = INSTANCE.format(r).split(';\n;')
         history.append(
             {
                 'timeStamp': details[0],

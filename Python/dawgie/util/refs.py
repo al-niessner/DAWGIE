@@ -54,14 +54,10 @@ def as_vref(references: [dawgie.ALG_REF, dawgie.SV_REF, dawgie.V_REF]):
         if isinstance(reference, dawgie.V_REF):
             yield reference
         if isinstance(reference, dawgie.SV_REF):
-            for vref in svref2vref(reference):
-                yield vref
-            pass
+            yield from svref2vref(reference)
         if isinstance(reference, dawgie.ALG_REF):
             for svref in algref2svref(reference):
-                for vref in svref2vref(svref):
-                    yield vref
-                pass
+                yield from svref2vref(svref)
             pass
         pass
     return

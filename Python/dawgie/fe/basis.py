@@ -42,7 +42,7 @@ import enum
 import inspect
 import json
 import os
-import twisted.web.resources
+import twisted.web.resource
 
 
 class HttpMethod(enum.Enum):
@@ -140,16 +140,16 @@ class DynamicContent(twisted.web.resource.Resource):
 
         return resp
 
-    def render_GET(self, req):
+    def render_GET(self, req):  # pylint: disable=invalid-name
         return self.__render(req, HttpMethod.GET)
 
-    def render_POST(self, req):
+    def render_POST(self, req):  # pylint: disable=invalid-name
         return self.__render(req, HttpMethod.POST)
 
-    def render_PUT(self, req):
+    def render_PUT(self, req):  # pylint: disable=invalid-name
         return self.__render(req, HttpMethod.PUT)
 
-    def render_DELETE(self, req):
+    def render_DELETE(self, req):  # pylint: disable=invalid-name
         return self.__render(req, HttpMethod.DEL)
 
     pass

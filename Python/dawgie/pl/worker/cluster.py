@@ -40,7 +40,7 @@ NTR:
 import dawgie
 import dawgie.pl.worker
 import importlib
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import signal
 
 

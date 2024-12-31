@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: Static Analysis
 run-name: ${{ github.actor }} is verifying code for merge compliance
 on: [push]
 jobs:

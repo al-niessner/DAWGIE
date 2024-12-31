@@ -69,7 +69,7 @@ class Context:
         )
         return m.type == dawgie.pl.message.Type.response and not m.success
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def run(self, factory, ps_hint, jobid, runid, target, timing) -> [str]:
         task = (
             factory(dawgie.util.task_name(factory), ps_hint, runid, target)

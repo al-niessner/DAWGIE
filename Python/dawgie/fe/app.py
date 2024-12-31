@@ -51,13 +51,14 @@ import dawgie.pl.schedule
 import dawgie.pl.snapshot
 import enum
 import json
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import pkg_resources
 import os
 import sys
 
 
 class Axis(enum.Enum):
+    # enums need not scream at you, so pylint: disable=invalid-name
     runid = 0
     svn = 1
     tn = 2
@@ -182,6 +183,7 @@ def _s2(k):
 
 def _search(axis, key):
     # pylint: disable=cell-var-from-loop,protected-access
+    k1,k2,k3,k4,prime = '','','','',{}
     if axis == Axis.runid:
         k1, k2, k3, k4 = 'run_id', 'targets', 'target_name', 'state_vectors'
         prime, second, third = _s0, _s1, _s2
@@ -225,10 +227,10 @@ def _search_filter(fn: str, default: {}) -> bytes:
                 os.path.join(dawgie.context.fe_path, fn), 'rt', encoding="utf-8"
             ) as f:
                 default = json.load(f)
-        except:  # noqa: E722
+        except:  # noqa: E722 # pylint: disable=bare-except
             log.exception(
                 'Text file could not be parsed as JSON'
-            )  # pylint: disable=bare-except
+            )
     else:
         log.debug('using DAWGIE default for %s', fn)
     return json.dumps(default).encode()

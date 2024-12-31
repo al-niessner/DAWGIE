@@ -437,9 +437,11 @@ confidence=HIGH,
 disable=raw-checker-failed,
         bad-inline-option,
         deprecated-pragma,
+        file-ignored,
         line-too-long,
         locally-disabled,
-        file-ignored,
+        missing-class-docstring,
+        missing-function-docstring,
         suppressed-message,
         unnecessary-pass,
         use-implicit-booleaness-not-comparison-to-string,
@@ -447,7 +449,8 @@ disable=raw-checker-failed,
         use-symbolic-message-instead,
         useless-return,
         useless-suppression,
-        wrong-import-order
+        wrong-import-order,
+        wrong-import-position
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -580,7 +583,13 @@ contextmanager-decorators=contextlib.contextmanager
 # List of members which are set dynamically and missed by pylint inference
 # system, and so shouldn't trigger E1101 when accessed. Python regular
 # expressions are accepted.
-generated-members=
+generated-members=dawgie.context.fsm,
+                  logging.handlers.StreamHandler,
+                  twisted.internet.reactor.callLater,
+                  twisted.internet.reactor.listenSSL,
+                  twisted.internet.reactor.listenTCP,
+                  twisted.internet.reactor.run,
+                  twisted.internet.reactor.spawnProcess
 
 # Tells whether to warn about missing members when the owner of the attribute
 # is inferred to be None.
