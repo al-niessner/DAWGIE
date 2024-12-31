@@ -41,11 +41,11 @@ import collections
 import datetime
 import enum
 import getpass
+import importlib
 import logging
 import os
 import resource
 
-# pylint: disable=attribute-defined-outside-init,no-self-use,protected-access,too-many-arguments
 
 # factory : the task factory that would normally create this algorithm
 # impl : an instance of the algorithm
@@ -218,14 +218,11 @@ class _Metric:
         self.__history.append({'child': child, 'task': task})
 
         if ds is not None:
-            # need to break circular dependancy so
-            # pylint: disable=import-outside-toplevel
-            import dawgie.db
-            import dawgie.util
+            dawgie_util = importlib.import_module ('dawgie.util')
 
             db = ds.sum()
             task = self.sum()
-            ds._update_msv(dawgie.util.MetricStateVector(db, task))
+            ds._update_msv(dawgie_util.MetricStateVector(db, task))
             pass
         return value
 
@@ -487,10 +484,7 @@ class Analysis(_Metric):
         return False
 
     def do(self, goto: str = None) -> None:
-        # need to break circular dependancy so
-        # pylint: disable=import-outside-toplevel
-        import dawgie.db
-
+        dawgie_db = importlib.import_module ('dawgie.db')
         log = logging.getLogger(__name__ + '.Analysis')
         for step in filter(
             lambda s: goto is None or s.name() == goto, self.list()
@@ -501,7 +495,7 @@ class Analysis(_Metric):
             setattr(step, 'abort', self.abort)
             setattr(step, 'caller', self)
             self.__timing['gather_' + step.name()] = datetime.datetime.utcnow()
-            aspect = dawgie.db.gather(step, self)
+            aspect = dawgie_db.gather(step, self)
             self.__timing['collect_' + step.name()] = datetime.datetime.utcnow()
             aspect.collect(step.feedback())
             aspect.collect(step.traits())
@@ -812,9 +806,7 @@ class Regress(_Metric):
         return False
 
     def do(self, goto: str = None) -> None:
-        # need to break circular dependancy so
-        import dawgie.db  # pylint: disable=import-outside-toplevel
-
+        dawgie_db = importlib.import_module ('dawgie.db')
         log = logging.getLogger(__name__ + '.Regress')
         for step in filter(
             lambda s: goto is None or s.name() == goto, self.list()
@@ -825,7 +817,7 @@ class Regress(_Metric):
             setattr(step, 'abort', self.abort)
             setattr(step, 'caller', self)
             self.__timing['retreat_' + step.name()] = datetime.datetime.utcnow()
-            timeline = dawgie.db.retreat(step, self)
+            timeline = dawgie_db.retreat(step, self)
             self.__timing['recede_' + step.name()] = datetime.datetime.utcnow()
             timeline.recede(step.feedback())
             timeline.recede(step.variables())
@@ -1000,11 +992,8 @@ class Task(_Metric):
 
     def _make_ds(self, alg) -> Dataset:
         '''Make a Dataset with the minimal help from self.do()'''
-        # need to break circular dependancy so
-        # pylint: disable=import-outside-toplevel
-        import dawgie.db
-
-        return dawgie.db.connect(alg, self, self.__target)
+        dawgie_db = importlib.import_module('dawgie.db')
+        return dawgie_db.connect(alg, self, self.__target)
 
     def _name(self) -> str:
         return self.__name
