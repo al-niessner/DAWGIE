@@ -404,7 +404,7 @@ class FSM:
             done()
         else:
             log.info("Load the pipeline")
-            dawgie.pl.farm.notifyAll()
+            dawgie.pl.farm.notify_all()
             dawgie.pl.farm.clear()
             d = twisted.internet.threads.deferToThread(self._pipeline, 2)
             d.addCallbacks(

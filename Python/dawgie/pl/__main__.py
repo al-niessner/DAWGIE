@@ -46,7 +46,7 @@ import dawgie.pl.state
 import dawgie.tools.submit
 import dawgie.util
 import logging
-import matplotlib; matplotlib.use("Agg")  # fmt: skip # noqa: E702
+import matplotlib; matplotlib.use("Agg")  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import twisted.internet
 import sys
 
@@ -108,7 +108,7 @@ ap.add_argument(
 ap.add_argument(
     '-r',
     '--repo-dir',
-    default=dawgie.tools.submit.repo_dir,
+    default=dawgie.tools.submit.REPO_DIR,
     required=False,
     help='set the pre_ops repo directory where you want to do the merging [%(default)s]',
 )

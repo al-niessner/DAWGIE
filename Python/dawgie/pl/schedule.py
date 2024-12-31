@@ -100,17 +100,17 @@ import dawgie.pl.promotion
 import dawgie.pl.schedule
 import dawgie.pl.version
 import dawgie.util
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import twisted.internet.reactor
 
-ae = None
+ae = None  # not a constant so pylint: disable=invalid-name
 booted = []
 err = []
 que = []
 per = []
 suc = []
 
-pipeline_paused = False
+pipeline_paused = False  # not a constant so pylint: disable=invalid-name
 promote = dawgie.pl.promotion.Engine()
 
 
@@ -120,13 +120,13 @@ class _DelayNotKnowableError(ArithmeticError):
 
 def _delay(when: dawgie.EVENT) -> datetime.timedelta:
     now = datetime.datetime.utcnow()
+    then = now
     today = now.isoweekday() - 1
 
     if when.moment.boot is not None:
         if when in booted:
             raise _DelayNotKnowableError()
 
-        then = now
         booted.append(when)
     else:
         if when.moment.day is not None:

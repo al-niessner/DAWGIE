@@ -42,7 +42,7 @@ import dawgie.context
 import dawgie.db
 import dawgie.db.util
 import dawgie.util.metrics
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 
 from . import util
@@ -124,8 +124,8 @@ def archive(done):
         backup[i] = util.rotated_files(i)
         pass
     dawgie.db.util.rotate(path, orig, backup)
-    overflowNum = len(backup)
-    orig = util.rotated_files(overflowNum)
+    overflownum = len(backup)
+    orig = util.rotated_files(overflownum)
     for e in orig:
         os.remove(e)
 
@@ -184,17 +184,18 @@ def copy(dst, method, gateway):
         raise RuntimeError('called copy before open')
 
     connection = Connector()
-    retValue = connection.copy(dst, method)
+    ret_value = connection.copy(dst, method)
+    status = -10
 
     if method == Method.connector:
-        DBI.save_as(retValue, os.path.join(dst, dawgie.context.db_name))
+        DBI.save_as(ret_value, os.path.join(dst, dawgie.context.db_name))
         status = 0
     elif method == Method.rsync:
-        status = os.system(f"rsync --delete -ax {gateway}:{retValue}/ {dst}/")
+        status = os.system(f"rsync --delete -ax {gateway}:{ret_value}/ {dst}/")
     elif method == Method.scp:
-        status = os.system(f"scp -rp {gateway}:{retValue}/* {dst}/")
+        status = os.system(f"scp -rp {gateway}:{ret_value}/* {dst}/")
     elif method == Method.cp:
-        status = os.system(f"cp -rp {retValue}/* {dst}/")
+        status = os.system(f"cp -rp {ret_value}/* {dst}/")
 
     return status
 
@@ -328,7 +329,7 @@ def promote(juncture: (), runid: int):
     raise NotImplementedError('Not ready for shelve')
 
 
-# pylint: disable=too-many-arguments,too-many-locals
+# pylint: disable=too-many-arguments,too-many-locals,too-many-positional-arguments
 def remove(runid: int, tn: str, taskn: str, algn: str, svn: str, vn: str):
     '''Remove the specified key from the prime table'''
     if not DBI().is_open:
@@ -407,8 +408,8 @@ def retreat(reg, ret) -> dawgie.Timeline:
     if not DBI().is_open:
         raise RuntimeError('called connect before open')
     return Interface(
-        reg, ret, ret._target()
-    )  # pylint: disable=protected-access
+        reg, ret, ret._target()  # pylint: disable=protected-access
+    )
 
 
 def targets():
@@ -485,9 +486,10 @@ def update(tsk, alg, sv, vn, v):
     if DBI().is_reopened:
         raise RuntimeError('called outside of Foreman context')
 
-    tskid = util.append(tsk._name(), DBI().tables.task, DBI().indices.task)[
+    tskid = util.append(tsk._name(),  # pylint: disable=protected-access
+                        DBI().tables.task, DBI().indices.task)[
         1
-    ]  # pylint: disable=protected-access
+    ]
     algid = util.append(
         alg.name(), DBI().tables.alg, DBI().indices.alg, tskid, alg
     )[1]

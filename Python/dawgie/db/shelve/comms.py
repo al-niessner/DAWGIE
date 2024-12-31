@@ -43,7 +43,7 @@ import dawgie.db.lockview
 import dawgie.context
 import dawgie.pl.message
 import dawgie.security
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import pickle
 import struct
@@ -107,12 +107,12 @@ class Connector:  # pylint: disable=too-few-public-methods
     def _table(self, table) -> {}:
         return self.__do(COMMAND(Func.table, None, table, None))
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def _update_cmd(self, name, parent, table, value, ver):
         keyset = KEYSET(name, parent, ver)
         return self.__do(COMMAND(Func.upd, keyset, table, value))
 
-    # pylint: enable=too-many-arguments
+    # pylint: enable=too-many-arguments,too-many-positional-arguments
 
     # public methods for modules in this package
     def copy(self, dst, method):
@@ -344,7 +344,7 @@ class Worker(twisted.internet.protocol.Protocol):
         dst = param[1]
         src = dawgie.context.db_path
         tmpdst = util.mkStgDir()
-        retValue = None
+        ret_value = None
         log.debug("_do_copy: Acquiring. dst -> %s", dst)
         lok = acquire('copy')
 
@@ -356,15 +356,15 @@ class Worker(twisted.internet.protocol.Protocol):
                 DBI().close()
                 if method == Method.connector:
                     DBI().open()
-                    retValue = DBI().copy()
+                    ret_value = DBI().copy()
                 else:
                     r = os.system(f"rsync --delete -ax {src}/ {tmpdst}/")
-                    retValue = tmpdst if r == 0 else None
+                    ret_value = tmpdst if r == 0 else None
                     DBI().open()
                     pass
             else:
                 log.error('%s does not exists.', src)
-                retValue = None
+                ret_value = None
         finally:
             if not DBI().is_open:
                 DBI().open()
@@ -373,7 +373,7 @@ class Worker(twisted.internet.protocol.Protocol):
             release(lok)
             pass
 
-        self._send(retValue)
+        self._send(ret_value)
         if self.transport is not None:
             self.transport.loseConnection()
         return

@@ -40,7 +40,7 @@ NTR:
 
 import dawgie.util
 import dawgie.util.metrics
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 
 from dawgie import Dataset, Timeline
 from dawgie.db.util.aspect import Container
@@ -93,7 +93,7 @@ class Interface(Connector, Container, Dataset, Timeline):
             pass
         return reftable
 
-    # pylint: disable=protected-access,too-many-arguments
+    # pylint: disable=protected-access,too-many-arguments,too-many-positional-arguments
     def __to_key(
         self,
         runid: int,
@@ -116,7 +116,7 @@ class Interface(Connector, Container, Dataset, Timeline):
         vid = self._update_cmd(vn, sid, Table.value, None, sv[vn]._get_ver())[1]
         return (runid, trgtid, tid, aid, sid, vid)
 
-    # pylint: enable=protected-access,too-many-arguments
+    # pylint: enable=protected-access,too-many-arguments,too-many-positional-arguments
 
     def _collect(self, refs: [(dawgie.SV_REF, dawgie.V_REF)]) -> None:
         self.__span = {}
@@ -205,9 +205,9 @@ class Interface(Connector, Container, Dataset, Timeline):
                 # pylint: enable=protected-access
 
                 child = Interface(algref.impl, algref.factory(*args), tn)
-                child._load(
+                child._load(  # pylint: disable=protected-access
                     err=err, ver=ver, lok=lok
-                )  # pylint: disable=protected-access
+                )
                 pass
             else:
                 msv = dawgie.util.MetricStateVector(

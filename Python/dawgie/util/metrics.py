@@ -44,6 +44,13 @@ import dawgie
 class MetricStateVector(dawgie.StateVector):
     def __init__(self, db: dawgie.METRIC, task: dawgie.METRIC):
         dawgie.StateVector.__init__(self)
+        self.units = {'input':' (block)',
+                      'memory':' (Kbytes)',
+                      'output':' (block)',
+                      'pages':' (page)',
+                      'system':' (s)',
+                      'user':' (s)',
+                      'wall':' (s)'}
         self._version_ = dawgie.VERSION(1, 1, 1)
         self['db_input'] = MetricValue(db.input)
         self['db_memory'] = MetricValue(db.mem)
@@ -72,7 +79,7 @@ class MetricStateVector(dawgie.StateVector):
             sorted(filter(lambda k: k.startswith('db_'), self))
         ):
             k = k.split('_')[1]
-            table.get_cell(r, 0).add_primitive(k)
+            table.get_cell(r, 0).add_primitive(k + (' (undefined)' if k not in self.units else self.units[k]))
             table.get_cell(r, 1).add_primitive(self['db_' + k].value())
             table.get_cell(r, 2).add_primitive(self['task_' + k].value())
             pass

@@ -37,7 +37,7 @@ NTR:
 '''
 
 import dawgie
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import importlib
 import os
 

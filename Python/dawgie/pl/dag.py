@@ -43,7 +43,7 @@ import dawgie.context
 import dawgie.util
 import dawgie.util.fifo
 import enum
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import pydot
 import xml.etree.ElementTree
@@ -142,7 +142,8 @@ class Construct:
             for alg in bot.list():
                 for sv in alg.state_vectors():
                     for vn in sv:
-                        fn = '.'.join([bot._name(), alg.name(), sv.name(), vn])
+                        fn = '.'.join([bot._name(),  # pylint: disable=protected-access
+                                       alg.name(), sv.name(), vn])
 
                         if fn not in self._flat:
                             self._flat[fn] = Node(
@@ -498,6 +499,7 @@ class Node(xml.etree.ElementTree.Element):
 
 @enum.unique
 class Shape(enum.Enum):
+    # enums should not scream at you so pylint: disable=invalid-name
     component = 4
     ellipse = 0
     hexagon = 2

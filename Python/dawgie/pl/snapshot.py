@@ -144,7 +144,7 @@ def _grab_memory():
         objs = gc.get_objects()
         objs_id = hex(id(objs))
         gcnt = len(gc.garbage)
-        gsize = sum([sys.getsizeof(obj) for obj in gc.garbage])
+        gsize = sum(sys.getsizeof(obj) for obj in gc.garbage)
         gc.collect()
         for obj in objs:
             refs = gc.get_referents(obj)

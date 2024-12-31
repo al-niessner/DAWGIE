@@ -44,7 +44,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import twisted.internet.defer
 import twisted.python.failure
 

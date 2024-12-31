@@ -44,12 +44,12 @@ import dawgie.pl.schedule
 import dawgie.security
 import dawgie.util
 import importlib
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import math
 import struct
 import twisted.internet.task
 
-archive = False
+ARCHIVE = False
 
 
 class Hand(twisted.internet.protocol.Protocol):
@@ -77,7 +77,7 @@ class Hand(twisted.internet.protocol.Protocol):
             dawgie.pl.schedule.complete(job, msg.runid, inc, msg.timing, state)
 
             if state == dawgie.pl.schedule.State.success:
-                dawgie.pl.farm.archive |= any(msg.values)
+                dawgie.pl.farm.ARCHIVE |= any(msg.values)
                 dawgie.pl.schedule.update(msg.values, job, msg.runid)
             else:
                 dawgie.pl.schedule.purge(job, inc)
@@ -309,7 +309,7 @@ def dispatch():
     _jobs.extend(dawgie.pl.schedule.next_job_batch())
 
     if (
-        archive
+        ARCHIVE
         and not dawgie.pl.schedule.promote.more()
         and not sum([len(_jobs), len(_busy), len(_cluster), len(_cloud)])
     ):
@@ -366,11 +366,11 @@ def dispatch():
     _reject.clear()
     for dummy in range(min(len(_cluster), len(_workers))):
         _workers.pop(0).do(_cluster.pop(0))
-    notifyAll()
+    notify_all()
     return
 
 
-def notifyAll():
+def notify_all():
     keep = dawgie.context.fsm.is_pipeline_active()
     cclist = list(filter(lambda w: w.notify(keep), _workers))
     _workers.clear()
