@@ -36,12 +36,9 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-# pylint: disable=import-self
-
 import datetime
 import dawgie.context
 import dawgie.db
-import dawgie.pl.farm
 import dawgie.pl.message
 import dawgie.pl.schedule
 import dawgie.security
@@ -220,7 +217,7 @@ class Foreman(twisted.internet.protocol.Factory):
     pass
 
 
-_agency = None
+_agency = [None]
 _busy = []
 _cloud = []
 _cluster = []
@@ -261,7 +258,7 @@ def _put(job, runid: int, target: str, where: dawgie.Distribution):
         typ=dawgie.pl.message.Type.task,
     )
     (
-        _cloud if _agency and where == dawgie.Distribution.cloud else _cluster
+        _cloud if _agency[0] and where == dawgie.Distribution.cloud else _cluster
     ).append(msg)
     return
 
@@ -354,11 +351,11 @@ def dispatch():
         log.exception("Error processing from next_job_batch()")
     # pylint: enable=bare-except
 
-    if _agency:
+    if _agency[0]:
         _cloud.extend(_repeat)
         _repeat.clear()
         for cloud_job in _cloud:
-            _agency.do(
+            _agency[0].do(
                 cloud_job._replace(type=dawgie.pl.message.Type.cloud), _move
             )
             pass
@@ -374,22 +371,17 @@ def dispatch():
 
 
 def notifyAll():
-    # pylint: disable=protected-access
     keep = dawgie.context.fsm.is_pipeline_active()
-    dawgie.pl.farm._workers = list(filter(lambda w: w.notify(keep), _workers))
+    cclist = list(filter(lambda w: w.notify(keep), _workers))
+    _workers.clear()
+    _workers.extend(cclist)
     return
 
 
 def plow():
-    # necessary to do import here because items in dawgie.pl.aws depend on
-    # classes defined in this module. Therefore, have to turn off some pylint.
-    # pylint: disable=import-outside-toplevel,redefined-outer-name
-    import dawgie.pl.worker.aws
-
     if dawgie.context.cloud_provider == dawgie.context.CloudProvider.aws:
-        # pylint: disable=protected-access
-        dawgie.pl.farm._agency = dawgie.pl.worker.aws
-        _agency.initialize()
+        _agency[0] = importlib.import_module ('dawgie.pl.worker.aws')
+        _agency[0].initialize()
         pass
 
     if dawgie.security.useTLS():
