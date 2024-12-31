@@ -50,6 +50,7 @@ import subprocess
 # All of the names in this file are meant to mean more than a global variable
 # so ignoring all of the naming rules, pylint: disable=invalid-name
 
+
 class CloudProvider(enum.Enum):
     aws = 0
     none = 1
