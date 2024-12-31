@@ -41,6 +41,7 @@ import enum
 
 @enum.unique
 class State(enum.Enum):
+    # enums do not need to scream at you so pylint: disable=invalid-name
     delayed = 0  # delayed until a certain time (periodic task)
     failure = 1  # task ran but it had an exception causing the pipeline to fail
     initial = 5  # initial value

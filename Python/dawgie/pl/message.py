@@ -63,6 +63,7 @@ MSG = collections.namedtuple(
 
 @enum.unique
 class Type(enum.Enum):
+    # enums do not need to scream at you so pylint: disable=invalid-name
     cloud = 5
     register = 0
     response = 1
@@ -72,7 +73,7 @@ class Type(enum.Enum):
     pass
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def make(
     ctxt: bytes = None,
     fac=None,

@@ -49,17 +49,17 @@ def current(factories):
     for f in factories:
         bot = f(dawgie.util.task_name(f))
         for alg in bot.list():
-            name = '.'.join([bot._name(), alg.name()])
+            name = '.'.join([bot._name(), alg.name()])  # fmt: skip # pylint: disable=protected-access
             if name not in talg:
                 talg[name] = alg.asstring()
 
             for sv in alg.state_vectors():
-                name = '.'.join([bot._name(), alg.name(), sv.name()])
+                name = '.'.join([bot._name(), alg.name(), sv.name()])  # fmt: skip # pylint: disable=protected-access
                 if sv.keys() and name not in tsv:
                     tsv[name] = sv.asstring()
 
                 for k in sv.keys():
-                    name = '.'.join([bot._name(), alg.name(), sv.name(), k])
+                    name = '.'.join([bot._name(), alg.name(), sv.name(), k])  # fmt: skip # pylint: disable=protected-access
                     if name not in tv:
                         tv[name] = sv[k].asstring()
                     pass

@@ -585,6 +585,10 @@ contextmanager-decorators=contextlib.contextmanager
 # expressions are accepted.
 generated-members=dawgie.context.fsm,
                   logging.handlers.StreamHandler,
+                  self.archiving_trigger,
+                  self.running_trigger,
+                  self.state,
+                  self.update_trigger,
                   twisted.internet.reactor.callLater,
                   twisted.internet.reactor.listenSSL,
                   twisted.internet.reactor.listenTCP,

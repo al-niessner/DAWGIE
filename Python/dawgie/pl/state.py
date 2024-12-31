@@ -69,10 +69,23 @@ NTR: 49811
 '''
 
 import builtins
+import dawgie.context
+import dawgie.db
+import dawgie.fe
+import dawgie.pl
+import dawgie.pl.dag
+import dawgie.pl.farm
+import dawgie.pl.logger.fe
+import dawgie.pl.resources
+import dawgie.pl.scan
+import dawgie.pl.schedule
+import dawgie.pl.version
+import dawgie.tools.submit
+import dawgie.tools.trace
 import doctest
 import enum
 import importlib
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import pydot
 import sys
@@ -86,30 +99,27 @@ import twisted.web.server
 
 
 class RollbackImporter:
-    # pylint: disable=redefined-builtin,too-few-public-methods,too-many-arguments,too-many-public-methods
+    # pylint: disable=redefined-builtin,too-few-public-methods,too-many-arguments,too-many-positional-arguments,too-many-public-methods
     def __init__(self):
         # Creates an instance and installs as the global importer
-        self.dynamicModules = set()
-        self.realImport = builtins.__import__
-        self.staticModules = sys.modules.copy()
+        self.dynamic_modules = set()
+        self.real_import = builtins.__import__
+        self.static_modules = sys.modules.copy()
         builtins.__import__ = self._import
         pass
 
     def _import(self, name, globals=None, locals=None, fromlist=(), level=0):
-        result = self.realImport(name, globals, locals, fromlist, level)
-        self.dynamicModules.add(name)
+        result = self.real_import(name, globals, locals, fromlist, level)
+        self.dynamic_modules.add(name)
         return result
 
     def reload(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.context
-
         for modname in filter(
             lambda n: (
-                n not in self.staticModules
+                n not in self.static_modules
                 and n.startswith(dawgie.context.ae_base_package)
             ),
-            self.dynamicModules.copy(),
+            self.dynamic_modules.copy(),
         ):
             if modname in sys.modules:
                 importlib.reload(sys.modules[modname])
@@ -120,6 +130,7 @@ class RollbackImporter:
 
 
 class Status(enum.Enum):
+    # enums should not scream at you so pylint: disable=invalid-name
     done = 0
     not_done = 1
     crashed = 2
@@ -128,7 +139,7 @@ class Status(enum.Enum):
 
 
 class FSM:
-    # pylint: disable=no-self-use,too-many-instance-attributes,too-many-public-methods
+    # pylint: disable=too-many-instance-attributes,too-many-public-methods
     args = None
     states = [
         'archiving',
@@ -140,9 +151,6 @@ class FSM:
     ]
 
     def __init__(self, initial_state='starting', doctest_=False):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.context
-
         self.machine = transitions.Machine(
             model=self, states=FSM.states, initial=initial_state
         )
@@ -192,12 +200,6 @@ class FSM:
         return
 
     def _archive(self, *_args, **_kwds):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.context
-        import dawgie.db
-        import dawgie.pl.schedule
-        import dawgie.tools.trace
-
         log.info('entering state archive')
         basedir = os.path.abspath(
             os.path.join(dawgie.context.fe_path, 'pages/database')
@@ -212,9 +214,6 @@ class FSM:
         return
 
     def _archive_done(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl.farm
-
         if self.__doctest:
             print('self._archive_done()')
         else:
@@ -228,9 +227,6 @@ class FSM:
         return
 
     def _gui(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.fe
-
         if self.__doctest:
             print('self._gui()')
         else:
@@ -262,11 +258,6 @@ class FSM:
         return
 
     def _logging(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.context
-        import dawgie.pl.logger
-        import dawgie.pl.logger.fe
-
         if self.__doctest:
             print('self._logging()')
         else:
@@ -293,11 +284,6 @@ class FSM:
         return
 
     def _navel_gaze(self, *_args, **_kwds):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.db
-        import dawgie.pl.farm
-        import dawgie.pl.resources
-
         log.info('entering state navel gaze')
         dawgie.pl.farm.insights = dawgie.pl.resources.distribution(
             dawgie.db.metrics()
@@ -307,13 +293,6 @@ class FSM:
 
     def _pipeline(self, *_args, **_kwds):
         # Begin the process of starting the pipeline
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie
-        import dawgie.db
-        import dawgie.pl.scan
-        import dawgie.pl.schedule
-        import dawgie.pl.version
-
         if self.__doctest:
             print('self._pipeline()')
         else:
@@ -336,10 +315,6 @@ class FSM:
 
     def _reload(self, *args, **kwds):
         # pylint: disable=protected-access,unused-argument
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.db
-        import dawgie.tools.submit
-
         log.info('entering state updating (reload)')
 
         if self.__doctest:
@@ -356,9 +331,6 @@ class FSM:
         pass
 
     def _security(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.security
-
         if self.__doctest:
             print('self._security()')
         else:
@@ -374,9 +346,6 @@ class FSM:
         return
 
     def archive(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl.farm
-
         if self.__doctest:
             print('self.archive()')
             self._archive_done()
@@ -406,17 +375,11 @@ class FSM:
 
     def is_crew_done(self):
         # pylint: disable=protected-access
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl.farm
-
         while dawgie.pl.farm._busy and self.waiting_on_crew():
             time.sleep(0.2)
         return
 
     def is_doing_done(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl.schedule
-
         while dawgie.pl.schedule.view_doing() and self.waiting_on_doing():
             time.sleep(0.2)
         return
@@ -425,18 +388,11 @@ class FSM:
         return self.state == 'running'
 
     def is_todo_done(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl.schedule
-
         while dawgie.pl.schedule.que and self.waiting_on_todo():
             time.sleep(0.2)
         return
 
     def load(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl
-        import dawgie.pl.farm
-
         def done(*_args, **_kwds):
             self.running_trigger()
 
@@ -463,17 +419,11 @@ class FSM:
         return
 
     def navel_gaze(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl
-
         d = twisted.internet.threads.deferToThread(self._navel_gaze, 2)
         d.addErrback(dawgie.pl.LogFailure('while navel gazing', __name__).log)
         return
 
     def reload(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl
-
         def done(*_args, **_kwds):
             self.archiving_trigger()
 
@@ -505,13 +455,9 @@ class FSM:
         return
 
     def set_submit_info(self, changeset, priority):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.tools.submit
-
-        # pylint: disable=bare-except
         try:
             priority = dawgie.tools.submit.Priority(priority)
-        except:  # noqa: E722
+        except:  # noqa: E722 # pylint: disable=bare-except
             log.error(
                 'Could not convert "%s" to a meaningful priority defaulting to ToDo is empty',
                 str(priority),
@@ -525,10 +471,6 @@ class FSM:
         return
 
     def start(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.context
-        import dawgie.pl.farm
-
         if self.__doctest:
             print('self.start()')
 
@@ -543,20 +485,12 @@ class FSM:
         return
 
     def state_view(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.context
-        import dawgie.pl.dag
-        import dawgie.pl.schedule
-
         self.nodes[self.prior_state].set_fillcolor(self.inactive_color)
         self.prior_state = dawgie.context.fsm.state
         self.nodes[dawgie.context.fsm.state].set_fillcolor(self.active_color)
         return dawgie.pl.dag.Construct.graph(self.graph, [], 'current.svg')
 
     def submit_crossroads(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.tools.submit
-
         # Check if we are in the correct state
         log.info("At the submit crossroads.")
         if not self.is_pipeline_active():
@@ -579,9 +513,6 @@ class FSM:
         return
 
     def wait_for_crew(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl
-
         def done(*_args, **_kwds):
             if self.waiting_on_crew():
                 self.update_trigger()
@@ -608,9 +539,6 @@ class FSM:
         return
 
     def wait_for_doing(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl
-
         def done(*_args, **_kwds):
             if self.waiting_on_doing():
                 self.update_trigger()
@@ -644,9 +572,6 @@ class FSM:
         return
 
     def wait_for_todo(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl
-
         def done(*_args, **_kwds):
             if self.waiting_on_todo():
                 self.update_trigger()
