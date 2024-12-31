@@ -45,7 +45,7 @@ import sys
 
 
 def consumption():
-    # pylint: disable=protected-access
+    # pylint: disable=protected-access,used-before-assignment
     db = []
     dbs = []
     known = list(dawgie.db._prime_values())
@@ -111,14 +111,14 @@ if __name__ == '__main__':
     import dawgie.db.util
     import dawgie.util
 
-    unique_fn = '.'.join(['dbsinfo', getpass.getuser(), 'log'])
+    UNIQUE_FN = '.'.join(['dbsinfo', getpass.getuser(), 'log'])
     ap = argparse.ArgumentParser(
         description='Display interesting statistics about dbs.'
     )
     ap.add_argument(
         '-l',
         '--log-file',
-        default=unique_fn,
+        default=UNIQUE_FN,
         required=False,
         help='a filename to put all of the log messages into [%(default)s]',
     )

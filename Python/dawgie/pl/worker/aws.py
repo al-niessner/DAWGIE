@@ -581,7 +581,7 @@ def execute(address: (str, int), inc: int, ps_hint: int, rev: str):
 
 
 def initialize():
-    if dawgie.security.useTLS():
+    if dawgie.security.use_tls():
         controller = dawgie.security.authority().options(
             dawgie.security.certificate()
         )

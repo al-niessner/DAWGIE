@@ -50,7 +50,7 @@ import getpass
 import gnupg
 import importlib
 import inspect
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import random
 import shutil
@@ -63,7 +63,7 @@ import twisted.internet.ssl
 
 _certs = []
 _myself = {}
-_pgp = None
+_PGP = None
 gpgargname = (
     'gnupghome'
     if 'gnupghome' in inspect.signature(gnupg.GPG).parameters
@@ -108,10 +108,10 @@ class TwistedWrapper:
 
     def _p3(self, hid: bytes) -> bool:
         log.debug('p3: %s', str(self.__address))
-        response = _pgp.verify(hid)
+        response = _PGP.verify(hid)
 
         if response.valid:
-            hid = _pgp.decrypt(hid).data.decode()
+            hid = _PGP.decrypt(hid).data.decode()
             log.debug('Received handshake identification:\n%s', hid)
             self.__msg = 'timestamp: ' + str(datetime.datetime.utcnow())
             self.__msg += '\nunique id: ' + str(random.random())
@@ -136,10 +136,10 @@ class TwistedWrapper:
 
     def _p5(self, reply: bytes) -> bool:
         log.debug('p5: %s', str(self.__address))
-        response = _pgp.verify(reply)
+        response = _PGP.verify(reply)
 
         if response.valid:
-            reply = _pgp.decrypt(reply).data.decode()
+            reply = _PGP.decrypt(reply).data.decode()
             response.valid = reply.strip() == self.__msg.strip()
 
             if not response.valid:
@@ -210,8 +210,9 @@ def _recv(s: socket.socket) -> str:
 
 
 def _send(s: socket.socket, message: str):
-    signed = _pgp.sign(message, passphrase='1234567890', clearsign=True)
+    signed = _PGP.sign(message, passphrase='1234567890', clearsign=True)
 
+    # signed.data is dynamic so pylint: disable=no-member
     if signed.data:
         s.sendall(
             struct.pack('>I', 4)
@@ -230,7 +231,7 @@ def connect(address: (str, int)) -> socket.socket:
     '''connect using PGP handshaking'''
     s = socket.socket()
 
-    if useTLS():
+    if use_tls():
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         context.load_verify_locations(_myself['file'])
         context.load_cert_chain(_myself['file'])
@@ -248,11 +249,11 @@ def connect(address: (str, int)) -> socket.socket:
 
 
 def delete(keys: [str]) -> None:
-    _pgp.delete_keys('\n'.join(keys))
+    _PGP.delete_keys('\n'.join(keys))
 
 
 def extend(keys: [str]) -> None:
-    return _pgp.import_keys('\n'.join(keys))
+    return _PGP.import_keys('\n'.join(keys))
 
 
 def finalize() -> None:
@@ -260,7 +261,7 @@ def finalize() -> None:
 
     Should be called when all done with the security module.
     '''
-    shutil.rmtree(getattr(_pgp, gpgargname), ignore_errors=True)
+    shutil.rmtree(getattr(_PGP, gpgargname), ignore_errors=True)
     return
 
 
@@ -292,7 +293,7 @@ def _pgp_initialize(path: str = None) -> None:
     # pylint: disable=import-outside-toplevel,import-self,protected-access
     import dawgie.security
 
-    dawgie.security._pgp = gnupg.GPG(**{gpgargname: tempfile.mkdtemp()})
+    dawgie.security._PGP = gnupg.GPG(**{gpgargname: tempfile.mkdtemp()})
 
     if path and os.path.exists(path) and os.path.isdir(path):
         keys = []
@@ -306,7 +307,7 @@ def _pgp_initialize(path: str = None) -> None:
             pass
 
         if keys:
-            keys = _pgp.import_keys('\n'.join(keys))
+            keys = _PGP.import_keys('\n'.join(keys))
         else:
             log.warning(
                 'No PGP keys found for secure handshake in %s', str(path)
@@ -359,7 +360,7 @@ def _tls_initialize(
 
 
 def pgp():
-    return _pgp
+    return _PGP
 
 
 def _lookup(fullname: str):
@@ -474,11 +475,11 @@ def sanctioned(endpoint: str, cert: twisted.internet.ssl.Certificate) -> bool:
     return False
 
 
-def useClientVerification():
+def use_client_verification():
     return bool(_certs)
 
 
-def useTLS():
+def use_tls():
     return bool(_myself)
 
 

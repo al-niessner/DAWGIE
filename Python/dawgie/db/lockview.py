@@ -42,6 +42,7 @@ import enum
 
 
 class LockRequest(enum.Enum):
+    # enums should not scream at you so pylint: disable=invalid-name
     lrqb = "Lock_Request_Begin"
     lrqe = "Lock_Request_End"
     laqb = "Lock_Acquire_Begin"

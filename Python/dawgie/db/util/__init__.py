@@ -37,7 +37,7 @@ NTR:
 '''
 
 import dawgie.context
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import pickle
 import shutil
@@ -103,9 +103,9 @@ def rotate(path, orig, backup):
                 break
         pass
     else:
-        rotatedDb = sorted(backup.keys())
+        rotated_db = sorted(backup.keys())
         stack = []
-        for i in rotatedDb:
+        for i in rotated_db:
             if not backup[i]:
                 break
             stack.append(i)

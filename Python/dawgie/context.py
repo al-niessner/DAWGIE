@@ -47,6 +47,8 @@ import os
 import pickle
 import subprocess
 
+# All of the names in this file are meant to mean more than a global variable
+# so ignoring all of the naming rules, pylint: disable=invalid-name
 
 class CloudProvider(enum.Enum):
     aws = 0
@@ -460,7 +462,7 @@ def override(args):
     dawgie.context.db_port = args.context_db_port
     dawgie.context.db_rotate = args.context_db_rotate
     dawgie.context.db_rotate_path = args.context_db_rotate_path
-    dawgie.context.display = dawgie.types.DiplayType[args.context_display_type]
+    dawgie.context.display = dawgie.types.DisplayType[args.context_display_type]
     dawgie.context.email_alerts_to = args.context_email_alerts_to
     dawgie.context.email_signature = args.context_email_signature
     dawgie.context.farm_port = args.context_farm_port

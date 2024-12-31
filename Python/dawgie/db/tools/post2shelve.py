@@ -39,7 +39,7 @@ NTR:
 
 import argparse
 import dawgie.db.shelve.util
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import shelve
 import sys

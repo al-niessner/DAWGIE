@@ -105,7 +105,7 @@ class Hand(twisted.internet.protocol.Protocol):
         self.__incarnation = None
         self.__len = None
         log.debug('work application submission from %s', str(address))
-        if not dawgie.security.useTLS():
+        if not dawgie.security.use_tls():
             # really is used so pylint: disable=unused-private-member
             self.__handshake = dawgie.security.TwistedWrapper(self, address)
         self.__proceed = dawgie.pl.message.make(
@@ -258,7 +258,9 @@ def _put(job, runid: int, target: str, where: dawgie.Distribution):
         typ=dawgie.pl.message.Type.task,
     )
     (
-        _cloud if _agency[0] and where == dawgie.Distribution.cloud else _cluster
+        _cloud
+        if _agency[0] and where == dawgie.Distribution.cloud
+        else _cluster
     ).append(msg)
     return
 
@@ -380,11 +382,11 @@ def notify_all():
 
 def plow():
     if dawgie.context.cloud_provider == dawgie.context.CloudProvider.aws:
-        _agency[0] = importlib.import_module ('dawgie.pl.worker.aws')
+        _agency[0] = importlib.import_module('dawgie.pl.worker.aws')
         _agency[0].initialize()
         pass
 
-    if dawgie.security.useTLS():
+    if dawgie.security.use_tls():
         controller = dawgie.security.authority().options(
             dawgie.security.certificate()
         )

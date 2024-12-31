@@ -70,7 +70,7 @@ class LogSink(twisted.internet.protocol.Protocol):
         self.__buf = b''
         self.__blen = len(struct.pack('>L', 0))
         self.__len = None
-        if not dawgie.security.useTLS():
+        if not dawgie.security.use_tls():
             # this is really used so pylint: disable=unused-private-member
             self.__handshake = dawgie.security.TwistedWrapper(self, address)
         return
@@ -185,7 +185,7 @@ def start(path: str, port: int) -> None:
     import dawgie.pl.logger
 
     dawgie.pl.logger._ROOT = LogSinkFactory(path)
-    if dawgie.security.useTLS():
+    if dawgie.security.use_tls():
         controller = dawgie.security.authority().options(
             dawgie.security.certificate()
         )

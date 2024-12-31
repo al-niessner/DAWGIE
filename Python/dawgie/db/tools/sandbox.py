@@ -50,7 +50,7 @@ import sys
 from dawgie.db.shelve.enums import Method
 
 
-def mkDir(dst):
+def make_dir(dst):
     return os.system(f"mkdir -p {dst}")
 
 
@@ -58,7 +58,7 @@ def dbcopy(host, port, dst, method, gateway):
     print(host, port, dst, method, gateway)
     dawgie.db.reopen()
 
-    mkDir(dst)
+    make_dir(dst)
     dawgie.db.copy(dst=dst, method=method, gateway=gateway)
     dawgie.db.close()
 
@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
     import dawgie.db
 
-    unique_fn = '.'.join(['copy', getpass.getuser(), 'log'])
+    UNIQUE_FN = '.'.join(['copy', getpass.getuser(), 'log'])
 
     ap = argparse.ArgumentParser(
         description='Safely copies database to a specified location. This tool is necessary when creating a database sandbox.\n\nExample:\n    sandbox.py --context-db-copy-path=/tmp/mysandboxdb --context-db-port=9999'
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     ap.add_argument(
         '-l',
         '--log-file',
-        default=unique_fn,
+        default=UNIQUE_FN,
         required=False,
         help='a filename to put all of the log messages into [%(default)s]',
     )
@@ -130,13 +130,12 @@ if __name__ == "__main__":
     elif args.method == "cp":
         args.method = Method.cp
 
-    returnCode = dbcopy(
+    RETURN_CODE = dbcopy(
         args.context_db_host,
         int(args.context_db_port),
         args.context_db_copy_path,
         args.method,
         args.gateway,
     )
-    print(returnCode)
-    sys.exit(returnCode)
-    pass
+    print(RETURN_CODE)
+    sys.exit(RETURN_CODE)

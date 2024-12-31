@@ -45,7 +45,7 @@ import sys
 
 
 def info(runid, tn, taskn, algn, svn):
-    # pylint: disable=protected-access
+    # pylint: disable=protected-access,used-before-assignment
     dawgie.db.reopen()
     svl = list({'.'.join(k.split('.')[:-1]) for k in dawgie.db._prime_keys()})
     dawgie.db.close()
@@ -79,14 +79,14 @@ if __name__ == '__main__':
     import dawgie.db
     import dawgie.util
 
-    unique_fn = '.'.join(['list', getpass.getuser(), 'log'])
+    UNIQUE_FN = '.'.join(['list', getpass.getuser(), 'log'])
     ap = argparse.ArgumentParser(
         description='List all available state vectors. Wihtout specifying anything, all state vectors are listed. The user can then further limit the list by adding bits and pieces.'
     )
     ap.add_argument(
         '-l',
         '--log-file',
-        default=unique_fn,
+        default=UNIQUE_FN,
         required=False,
         help='a filename to put all of the log messages into [%(default)s]',
     )

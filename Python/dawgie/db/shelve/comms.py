@@ -132,7 +132,7 @@ class DBSerializer(twisted.internet.protocol.Factory):
     @staticmethod
     def open():
         try:
-            if dawgie.security.useTLS():
+            if dawgie.security.use_tls():
                 controller = dawgie.security.authority().options(
                     dawgie.security.certificate()
                 )
@@ -166,7 +166,7 @@ class Worker(twisted.internet.protocol.Protocol):
             'data': b'',
             'expected': None,
         }
-        if not dawgie.security.useTLS():
+        if not dawgie.security.use_tls():
             # really is used so pylint: disable=unused-private-member
             self.__handshake = dawgie.security.TwistedWrapper(self, address)
         self.__has_lock = False
@@ -343,7 +343,7 @@ class Worker(twisted.internet.protocol.Protocol):
         method = param[0]
         dst = param[1]
         src = dawgie.context.db_path
-        tmpdst = util.mkStgDir()
+        tmpdst = util.make_staging_dir()
         ret_value = None
         log.debug("_do_copy: Acquiring. dst -> %s", dst)
         lok = acquire('copy')

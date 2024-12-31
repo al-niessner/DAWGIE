@@ -46,6 +46,7 @@ import re
 
 class AsIsText:
     '''convert text to HTML as is (no decorations)'''
+
     # pylint: disable=too-few-public-methods
     def __init__(self, text):
         object.__init__(self)
@@ -60,6 +61,7 @@ class AsIsText:
 
 class Cell(dawgie.Visitor):
     '''render content into a table cell'''
+
     # pylint: disable=protected-access
     def __init__(self):
         dawgie.Visitor.__init__(self)

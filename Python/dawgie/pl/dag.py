@@ -142,8 +142,14 @@ class Construct:
             for alg in bot.list():
                 for sv in alg.state_vectors():
                     for vn in sv:
-                        fn = '.'.join([bot._name(),  # pylint: disable=protected-access
-                                       alg.name(), sv.name(), vn])
+                        fn = '.'.join(
+                            [
+                                bot._name(),  # pylint: disable=protected-access
+                                alg.name(),
+                                sv.name(),
+                                vn,
+                            ]
+                        )
 
                         if fn not in self._flat:
                             self._flat[fn] = Node(

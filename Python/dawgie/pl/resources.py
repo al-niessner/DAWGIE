@@ -48,7 +48,7 @@ HINT = collections.namedtuple(
 )
 
 
-def _latest(history: [dawgie.db.METRIC_DATA]) -> dawgie.db.METRIC_DATA:
+def _latest(history: [dawgie.db.MetricData]) -> dawgie.db.MetricData:
     most_recent = history[0]
     for h in history:
         if int(most_recent.run_id) < int(h.run_id):
@@ -57,7 +57,7 @@ def _latest(history: [dawgie.db.METRIC_DATA]) -> dawgie.db.METRIC_DATA:
     return most_recent
 
 
-def aspects(metric: [dawgie.db.METRIC_DATA]) -> {str: [dawgie.db.METRIC_DATA]}:
+def aspects(metric: [dawgie.db.MetricData]) -> {str: [dawgie.db.MetricData]}:
     log.debug('aspects() - metrics of aspects over %d', len(metric))
     reg = regress(metric)
     log.debug('aspects() - number of regressions %d', len(reg))
@@ -70,7 +70,7 @@ def aspects(metric: [dawgie.db.METRIC_DATA]) -> {str: [dawgie.db.METRIC_DATA]}:
     return asp
 
 
-def distribution(metric: [dawgie.db.METRIC_DATA]) -> {str: HINT}:
+def distribution(metric: [dawgie.db.MetricData]) -> {str: HINT}:
     log.debug(
         'distribution() - use metrics for automaated choice of distribution over %d',
         len(metric),
@@ -119,7 +119,7 @@ def distribution(metric: [dawgie.db.METRIC_DATA]) -> {str: HINT}:
     return dst
 
 
-def regress(metric: [dawgie.db.METRIC_DATA]) -> {str: [dawgie.db.METRIC_DATA]}:
+def regress(metric: [dawgie.db.MetricData]) -> {str: [dawgie.db.MetricData]}:
     log.debug('regress() - regress back across metric data %d', len(metric))
     names = {'.'.join([m.target, m.task, m.alg_name]) for m in metric}
     reg = {name: [] for name in names}

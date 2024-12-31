@@ -58,14 +58,14 @@ if __name__ == '__main__':
     import dawgie.db.util
     import dawgie.util
 
-    unique_fn = '.'.join(['purge', getpass.getuser(), 'log'])
+    UNIQUE_FN = '.'.join(['purge', getpass.getuser(), 'log'])
     ap = argparse.ArgumentParser(
         description='Removes all of the files (md5_sha1) in the store that no longer have a key that references it. There is no undo of this operation and it must be done to a database that is not active (the pipeline is not running.'
     )
     ap.add_argument(
         '-l',
         '--log-file',
-        default=unique_fn,
+        default=UNIQUE_FN,
         required=False,
         help='a filename to put all of the log messages into [%(default)s]',
     )
@@ -90,7 +90,6 @@ if __name__ == '__main__':
     if not values:
         logging.critical('Aborting purge becuase found NO keys!!!')
         sys.exit(-1)
-        pass
 
     for fn in os.listdir(dawgie.context.data_dbs):
         if fn not in values and os.path.isfile(

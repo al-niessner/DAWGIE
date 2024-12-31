@@ -38,7 +38,17 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-# pylint: disable=import-self,protected-access
+# pylint: disable=import-self,protected-access,too-many-lines
+#
+# Ugh...
+#
+# Some of the names chosen in this module reflect back into the postgres database
+# meaning they have more context than just python variables. Rather than break a
+# unit that has been working for a decade or longer and gains some meaning from
+# the variable names tying to the postgres tables, just going to ignore all of
+# the naming in this module. Sledge hammer, but probably better than anything
+#
+# pylint: disable=invalid-name
 
 import collections
 import dawgie
@@ -50,7 +60,7 @@ import dawgie.db.util
 import dawgie.db.util.aspect
 import dawgie.util
 import dawgie.util.metrics
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import pickle
 import psycopg
@@ -102,7 +112,7 @@ class Interface(
         self.__span = {}
         return
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
     @staticmethod
     def __fill(cur, sv, alg_ID, run_ID, task_ID, tn_ID, sv_ID):
         # Get rows from prime table that have these algorithm primary keys
@@ -128,7 +138,7 @@ class Interface(
             pass
         return
 
-    # pylint: enable=too-many-arguments
+    # pylint: enable=too-many-arguments,too-many-positional-arguments
 
     def __purge(self):
         table = self.__span['table']
@@ -1427,7 +1437,7 @@ def gather(anz, ans):
     return Interface(anz, ans, '__all__')
 
 
-def metrics() -> '[dawgie.db.METRIC_DATA]':
+def metrics() -> '[dawgie.db.MetricData]':
     if not dawgie.db.post._db:
         raise RuntimeError('called metrics before open')
 
@@ -1470,7 +1480,7 @@ def metrics() -> '[dawgie.db.METRIC_DATA]':
         )
         alg = cur.fetchone()
         result.append(
-            dawgie.db.METRIC_DATA(
+            dawgie.db.MetricData(
                 alg_name=alg[0],
                 alg_ver=dawgie.VERSION(*alg[1:]),
                 run_id=key[0],
@@ -1644,7 +1654,7 @@ def promote(juncture: (), runid: int):
     return True
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def remove(runid: int, tn: str, tskn: str, algn: str, svn: str, vn: str):
     if not dawgie.db.post._db:
         raise RuntimeError('called remove before open')
@@ -1782,7 +1792,7 @@ def targets():
     result = cur.fetchall()
     cur.close()
     conn.close()
-    return [r[0] for r in result]
+    return [r[0] for r in result]  # fmt: skip # need a list so pylint: disable=consider-using-generator
 
 
 def trace(task_alg_names):
@@ -1841,7 +1851,7 @@ def trace(task_alg_names):
             if not runid:
                 result[tn][tan] = None
             else:
-                result[tn][tan] = max([r[0] for r in runid])
+                result[tn][tan] = max(r[0] for r in runid)
             pass
         pass
     return result

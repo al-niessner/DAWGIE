@@ -44,7 +44,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR: 49811
 '''
 
-# pylint: disable=protected-access,redefined-builtin,too-many-arguments
+# pylint: disable=protected-access,redefined-builtin,too-many-arguments,too-many-positional-arguments
 
 import collections
 import dawgie
@@ -61,8 +61,8 @@ ID = collections.namedtuple(
 )  # version == dawgie.Version implementation
 REF = collections.namedtuple('REF', ['tid', 'aid', 'sid', 'vid'])
 
-METRIC_DATA = collections.namedtuple(
-    'METRIC_DATA', ['alg_name', 'alg_ver', 'sv', 'run_id', 'target', 'task']
+MetricData = collections.namedtuple(
+    'MetricData', ['alg_name', 'alg_ver', 'sv', 'run_id', 'target', 'task']
 )
 
 
@@ -148,7 +148,7 @@ def gather(anz, ans) -> dawgie.Aspect:
     return _db_in_use().gather(anz, ans)
 
 
-def metrics() -> [METRIC_DATA]:
+def metrics() -> [MetricData]:
     return _db_in_use().metrics()
 
 

@@ -104,11 +104,11 @@ def indexed(table: {}) -> []:
     return [t[0] for t in sorted(table.items(), key=lambda t: t[1])]
 
 
-def mkStgDir():
+def make_staging_dir():
     t = datetime.datetime.now()
     # too error prone to fix and probably not much more readable anyway so
     # pylint: disable=consider-using-f-string
-    tString = "%s/%d-%d-%dT%d:%d" % (
+    tstring = "%s/%d-%d-%dT%d:%d" % (
         dawgie.context.data_stg,
         t.year,
         t.month,
@@ -116,8 +116,8 @@ def mkStgDir():
         t.hour,
         t.minute,
     )
-    os.system(f'mkdir {tString}')
-    return tString
+    os.system(f'mkdir {tstring}')
+    return tstring
 
 
 def prime_keys(prime_table):

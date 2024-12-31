@@ -38,7 +38,7 @@ NTR: 49811
 '''
 
 # this module is to support testing and is exempt from most of QA checks
-# pylint: disable=duplicate-code,redefined-builtin,too-many-arguments,unused-argument
+# pylint: disable=duplicate-code,redefined-builtin,too-many-arguments,unused-argument,too-many-positional-arguments
 
 from dawgie.db import REF
 

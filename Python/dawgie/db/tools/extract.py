@@ -46,7 +46,6 @@ import sys
 
 
 class FakeItem(dict):
-    # pylint: disable=no-self-use
     def __init__(self, name, runid, svl):
         dict.__init__(self)
         self.__name = name
@@ -72,7 +71,7 @@ class FakeItem(dict):
     pass
 
 
-# pylint: disable=protected-access,too-many-arguments
+# pylint: disable=protected-access,too-many-arguments,too-many-positional-arguments,used-before-assignment
 def info(ofn, runid, tn, taskn, algn, svn):
     if any(
         [runid is None, tn is None, taskn is None, algn is None, svn is None]
@@ -117,14 +116,14 @@ if __name__ == '__main__':
     import dawgie.db
     import dawgie.util
 
-    unique_fn = '.'.join(['extract', getpass.getuser(), 'log'])
+    UNIQUE_FN = '.'.join(['extract', getpass.getuser(), 'log'])
     ap = argparse.ArgumentParser(
         description='Extract a single state vector from a database.'
     )
     ap.add_argument(
         '-l',
         '--log-file',
-        default=unique_fn,
+        default=UNIQUE_FN,
         required=False,
         help='a filename to put all of the log messages into [%(default)s]',
     )

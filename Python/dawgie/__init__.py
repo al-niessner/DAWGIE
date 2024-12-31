@@ -46,6 +46,11 @@ import logging
 import os
 import resource
 
+# The names here represent the basic API for developers beyond dawgie. Since
+# there are users of this and chaning these names would represent ripples beyond
+# this repository, just going to leave them as is. Going to leave the whole API
+# as it is since it works.
+# pylint: disable=attribute-defined-outside-init,invalid-name,protected-access,too-many-arguments,too-many-lines,too-many-positional-arguments
 
 # factory : the task factory that would normally create this algorithm
 # impl : an instance of the algorithm
@@ -218,7 +223,7 @@ class _Metric:
         self.__history.append({'child': child, 'task': task})
 
         if ds is not None:
-            dawgie_util = importlib.import_module ('dawgie.util')
+            dawgie_util = importlib.import_module('dawgie.util')
 
             db = ds.sum()
             task = self.sum()
@@ -484,7 +489,7 @@ class Analysis(_Metric):
         return False
 
     def do(self, goto: str = None) -> None:
-        dawgie_db = importlib.import_module ('dawgie.db')
+        dawgie_db = importlib.import_module('dawgie.db')
         log = logging.getLogger(__name__ + '.Analysis')
         for step in filter(
             lambda s: goto is None or s.name() == goto, self.list()
@@ -806,7 +811,7 @@ class Regress(_Metric):
         return False
 
     def do(self, goto: str = None) -> None:
-        dawgie_db = importlib.import_module ('dawgie.db')
+        dawgie_db = importlib.import_module('dawgie.db')
         log = logging.getLogger(__name__ + '.Regress')
         for step in filter(
             lambda s: goto is None or s.name() == goto, self.list()
@@ -1131,7 +1136,7 @@ class Value(Version):
 
     def __setstate__(self, state: dict) -> None:
         self.__dict__.update(state)
-        empty = self.__new__(self.__class__)
+        empty = self.__new__(cls=self.__class__, self=self)
         empty.__init__()
         self._version_ = empty._version_
         return

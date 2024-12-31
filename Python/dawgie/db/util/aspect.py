@@ -61,8 +61,7 @@ class Container(dawgie.Aspect):
 
     def __iter__(self):
         # pylint: disable=protected-access
-        for k in self.__parent._ckeys(self.__l1, self.__l2):
-            yield k
+        yield from self.__parent._ckeys(self.__l1, self.__l2)
         return
 
     def __len__(self):
@@ -76,14 +75,12 @@ class Container(dawgie.Aspect):
 
     def items(self):
         '''genrator of current (key,value) pairs'''
-        for i in zip(self.keys(), self.values()):
-            yield i
+        yield from zip(self.keys(), self.values())
         return
 
     def keys(self):
         '''generator of current level of keys'''
-        for k in self:
-            yield k
+        yield from self
         return
 
     def values(self):

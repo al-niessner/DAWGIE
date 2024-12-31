@@ -41,5 +41,6 @@ import enum
 
 
 class DisplayType(enum.Enum):
+    # enums should not scream at you so pylint: disable=invalid-name
     html = 0
     pass

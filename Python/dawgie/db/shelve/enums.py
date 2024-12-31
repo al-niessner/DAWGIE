@@ -42,6 +42,7 @@ import enum
 
 
 class Func(enum.IntEnum):
+    # enums should not scream at you so pylint: disable=invalid-name
     acquire = 0  # acquire a lock to the database
     dbcopy = 1  # copy the database to a new location (backup)
     get = 2  # get the value of the table for the key
@@ -53,6 +54,7 @@ class Func(enum.IntEnum):
 
 
 class Method(enum.Enum):
+    # enums should not scream at you so pylint: disable=invalid-name
     connector = "connector"
     rsync = "rsync"
     scp = "scp"
@@ -61,12 +63,14 @@ class Method(enum.Enum):
 
 
 class Mutex(enum.IntEnum):
+    # enums should not scream at you so pylint: disable=invalid-name
     lock = 0
     unlock = 1
     pass
 
 
 class Table(enum.IntEnum):
+    # enums should not scream at you so pylint: disable=invalid-name
     alg = 0
     prime = 1
     state = 2

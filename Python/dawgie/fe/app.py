@@ -183,7 +183,7 @@ def _s2(k):
 
 def _search(axis, key):
     # pylint: disable=cell-var-from-loop,protected-access
-    k1,k2,k3,k4,prime = '','','','',{}
+    k1, k2, k3, k4, prime = '', '', '', '', {}
     if axis == Axis.runid:
         k1, k2, k3, k4 = 'run_id', 'targets', 'target_name', 'state_vectors'
         prime, second, third = _s0, _s1, _s2
@@ -228,9 +228,7 @@ def _search_filter(fn: str, default: {}) -> bytes:
             ) as f:
                 default = json.load(f)
         except:  # noqa: E722 # pylint: disable=bare-except
-            log.exception(
-                'Text file could not be parsed as JSON'
-            )
+            log.exception('Text file could not be parsed as JSON')
     else:
         log.debug('using DAWGIE default for %s', fn)
     return json.dumps(default).encode()

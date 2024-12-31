@@ -211,7 +211,7 @@ def gather(anz, ans) -> dawgie.Aspect:
     return Interface(anz, ans, '__all__')
 
 
-def metrics() -> [dawgie.db.METRIC_DATA]:
+def metrics() -> [dawgie.db.MetricData]:
     if not DBI().is_open:
         raise RuntimeError('called metrics before open')
     if DBI().is_reopened:
@@ -274,7 +274,7 @@ def metrics() -> [dawgie.db.METRIC_DATA]:
                 dawgie.util.metrics.filled(-2), dawgie.util.metrics.filled(-2)
             )
             result.append(
-                dawgie.db.METRIC_DATA(
+                dawgie.db.MetricData(
                     alg_name=alg[0],
                     alg_ver=alg[1].version,
                     run_id=runid,
@@ -486,10 +486,11 @@ def update(tsk, alg, sv, vn, v):
     if DBI().is_reopened:
         raise RuntimeError('called outside of Foreman context')
 
-    tskid = util.append(tsk._name(),  # pylint: disable=protected-access
-                        DBI().tables.task, DBI().indices.task)[
-        1
-    ]
+    tskid = util.append(
+        tsk._name(),  # pylint: disable=protected-access
+        DBI().tables.task,
+        DBI().indices.task,
+    )[1]
     algid = util.append(
         alg.name(), DBI().tables.alg, DBI().indices.alg, tskid, alg
     )[1]
