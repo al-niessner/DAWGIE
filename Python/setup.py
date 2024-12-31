@@ -45,7 +45,7 @@ import setuptools
 
 def read_requirements():
     requirements = []
-    with open('./requirements.txt', 'rt') as file:
+    with open('./requirements.txt', 'rt', encoding='utf-8') as file:
         for line in file:
             # exclude comments
             line = line[: line.find("#")] if "#" in line else line
@@ -58,10 +58,14 @@ def read_requirements():
 
 dawgie = os.path.join('dawgie', '__init__.py')
 version = os.environ.get('DAWGIE_VERSION', '0.0.0')
-with open(os.path.join(os.path.dirname(__file__), dawgie)) as f:
+with open(
+    os.path.join(os.path.dirname(__file__), dawgie), 'rt', encoding='utf-8'
+) as f:
     t = f.read()
-t = t.replace("'0.0.0'", "'{0}'".format(version))
-with open(os.path.join(os.path.dirname(__file__), dawgie), 'tw') as f:
+t = t.replace("'0.0.0'", f"'{version}'")
+with open(
+    os.path.join(os.path.dirname(__file__), dawgie), 'tw', encoding='utf-8'
+) as f:
     f.write(t)
 
 # first item in list must be README file name
@@ -71,16 +75,16 @@ data_files_locations = [
     for f in data_files_names
 ]
 
-read_me_file = (
+READ_ME_FILE = (
     data_files_names[0]
     if os.path.exists(data_files_names[0])
     else f"../{data_files_names[0]}"
 )
-with open(read_me_file, "rt") as f:
+with open(READ_ME_FILE, "rt", encoding='utf-8') as f:
     description = f.read()
 
 deps = read_requirements()
-with open('dawgie/fe/requirements.txt', 'tw') as f:
+with open('dawgie/fe/requirements.txt', 'tw', encoding='utf-8') as f:
     for dep in sorted(deps):
         if '>' in dep:
             dep = dep[: dep.find('>')]

@@ -463,7 +463,7 @@ def exchange(message):  # AWS lambda function
         else:
             print('exchange() - invalid signature')
     except Exception:
-        log.exception('Exception processing request')
+        logging.getLogger(__name__).exception('Exception processing request')
     print('exchange() - complete')
     return response
 
