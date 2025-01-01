@@ -109,8 +109,9 @@ email_signature = dawgie.resolve_username()
 farm_port = int(
     os.environ.get('DAWGIE_FARM_PORT', 8080 + PortOffset.farm.value)
 )
-fe_path = os.environ('DAWGIE_FE_PATH',
-                     '/tmp/' + os.environ.get('USERNAME', 'unknown') + '/fe')
+fe_path = os.environ(
+    'DAWGIE_FE_PATH', '/tmp/' + os.environ.get('USERNAME', 'unknown') + '/fe'
+)
 fe_port = int(
     os.environ.get('DAWGIE_FE_PORT', 8080 + PortOffset.frontend.value)
 )
