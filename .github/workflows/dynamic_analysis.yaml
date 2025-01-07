@@ -2,8 +2,6 @@ name: Self Diagnositics
 run-name: ${{ github.actor }} is verifying code for merge compliance
 on: [push]
 jobs:
-  runner-job:
-jobs:
   PyTesting:
     name: Test with Coverage
     runs-on: ubuntu-24.04

@@ -523,7 +523,7 @@ class Post(DB, unittest.TestCase):
         os.mkdir(os.path.join(cls.root, 'dbs'))
         os.mkdir(os.path.join(cls.root, 'logs'))
         os.mkdir(os.path.join(cls.root, 'stg'))
-        dawgie.context.db_host = 'postgres'
+        dawgie.context.db_host = 'localhost'
         dawgie.context.db_impl = 'post'
         dawgie.context.db_name = 'testspace'
         dawgie.context.db_path = 'tester:password'
