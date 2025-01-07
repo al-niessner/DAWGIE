@@ -30,6 +30,9 @@ jobs:
         with:
           architecture: 'x64'
           python-version: '3.12'
+      - name: Update Ubuntu
+        run: |
+          sudo apt install graphviz
       - name: Prepare Python
         run: |
           python -m pip install --upgrade pip
