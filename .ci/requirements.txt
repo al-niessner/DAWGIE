@@ -7,3 +7,4 @@ pylint
 pyroma
 pytest
 pytest-cov
+scipy
