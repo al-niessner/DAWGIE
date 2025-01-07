@@ -1,5 +1,5 @@
 name: Static Analysis
-run-name: ${{ github.actor }} is verifying code for merge compliance
+run-name: ${{ github.actor }} is checking code quality/style for merge compliance
 on: [push]
 jobs:
   Style:
