@@ -35,10 +35,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r Python/requirements.txt
           pip install -r .ci/requirements.txt
+          pip install Python
       - name: Prepare Postgres
         run: |
-          echo "localhost:5432:testspace:tester:password" > ${HOME}/.pgpass
-          chmod 600 ${HOME}/.pgpass
           createdb -h localhost -U tester testspace
       - name: pytest
         run: pytest --cov=dawgie --cov-branch --cov-report term-missing -v Test
