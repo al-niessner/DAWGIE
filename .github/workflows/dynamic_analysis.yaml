@@ -36,6 +36,7 @@ jobs:
           pip install -r .ci/requirements.txt
       - name: Prepare Postgres
         run: |
+          echo "localhost:5432:testspace:tester:password" > ${HOME}/.pgpass
           createdb -h localhost -U tester testspace
       - name: pytest
         run: pytest --cov=dawgie --cov-branch --cov-report term-missing -v Test
