@@ -116,7 +116,7 @@ V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
             dawgie.security.use_client_verification(),
             'find and load client certs',
         )
-        self.assertFalse(dawgie.security.useTLS(), 'could not load')
+        self.assertFalse(dawgie.security.use_tls(), 'could not load')
         with open(base, 'tw') as file:
             file.write(
                 '''-----BEGIN CERTIFICATE-----
@@ -150,7 +150,7 @@ V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
             dawgie.security.use_client_verification(),
             'find and load client certs',
         )
-        self.assertFalse(dawgie.security.useTLS(), 'could not load')
+        self.assertFalse(dawgie.security.use_tls(), 'could not load')
         with open(base, 'tw') as file:
             file.write(
                 '''-----BEGIN PRIVATE KEY-----
@@ -211,7 +211,7 @@ V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
             dawgie.security.use_client_verification(),
             'find and load client certs',
         )
-        self.assertTrue(dawgie.security.useTLS(), 'could not load')
+        self.assertTrue(dawgie.security.use_tls(), 'could not load')
         return
 
     pass
