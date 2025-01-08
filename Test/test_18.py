@@ -107,7 +107,8 @@ V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
             )
         dawgie.security._tls_initialize(self.wdir)
         self.assertTrue(
-            dawgie.security.use_client_verification(), 'find and load client cert'
+            dawgie.security.use_client_verification(),
+            'find and load client cert'
         )
         base = os.path.join(self.wdir, 'myself.pem')
         with self.assertRaises(FileNotFoundError):
