@@ -1136,9 +1136,7 @@ class Value(Version):
 
     def __setstate__(self, state: dict) -> None:
         self.__dict__.update(state)
-        empty = self.__new__(cls=self.__class__, self=self)
-        empty.__init__()
-        self._version_ = empty._version_
+        self._version_ = self.__class__()._version_
         return
 
     def features(self) -> [Feature]:
