@@ -149,7 +149,7 @@ def _static(
     return result
 
 
-def root() -> dawgie.fe.basis.RoutePoint:
+def root() -> "dawgie.fe.basis.RoutePoint":
     # shared private variable
     # pylint: disable=protected-access
     dawgie.fe.basis._root.putChild(b'', RedirectContent('/pages/index.html'))
