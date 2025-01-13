@@ -86,5 +86,5 @@ jobs:
       - name: Compliance
         run: |
           python -m dawgie.tools.compliant --ae-dir=Test/ae --ae-pkg=ae
-          python -m dawgie.tools.compliant --ae-dir=Test/bae --ae-pkg=bae
           python -m dawgie.tools.compliant --ae-dir=Test/Integration/ae --ae-pkg=ae
+          if [[ $(python -m dawgie.tools.compliant --ae-dir=Test/bae --ae-pkg=bae) -ne 0 ]]; then exit 0; else exit 1;
