@@ -53,7 +53,7 @@ jobs:
       - name: bandit
         run: bandit -b .github/workflows/bandit_baseline.json -r Python/dawgie
   Delivery:
-    name: PyPi Compliance
+    name: Deployment (pypi) Compliance
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
