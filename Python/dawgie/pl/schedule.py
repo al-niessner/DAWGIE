@@ -119,7 +119,7 @@ class _DelayNotKnowableError(ArithmeticError):
 
 
 def _delay(when: dawgie.EVENT) -> datetime.timedelta:
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.UTC)
     then = now
     today = now.isoweekday() - 1
 
@@ -137,6 +137,7 @@ def _delay(when: dawgie.EVENT) -> datetime.timedelta:
                 hour=when.moment.time.hour,
                 minute=when.moment.time.minute,
                 second=when.moment.time.second,
+                tzinfo=datetime.UTC,
             )
             pass
 
@@ -149,6 +150,7 @@ def _delay(when: dawgie.EVENT) -> datetime.timedelta:
                 hour=when.moment.time.hour,
                 minute=when.moment.time.minute,
                 second=when.moment.time.second,
+                tzinfo=datetime.UTC,
             )
             pass
 
@@ -168,6 +170,7 @@ def _delay(when: dawgie.EVENT) -> datetime.timedelta:
                     hour=when.moment.time.hour,
                     minute=when.moment.time.minute,
                     second=when.moment.time.second,
+                    tzinfo=datetime.UTC,
                 )
                 + dd
             )
@@ -251,7 +254,7 @@ def build(factories, latest, previous):
 
 def complete(job, runid, target, timing, status):
     history = err if status == State.failure else suc
-    timing['completed'] = datetime.datetime.utcnow()
+    timing['completed'] = datetime.datetime.now(datetime.UTC)
     timing = {k: str(v) for k, v in timing.items()}
 
     if target == '__all__':

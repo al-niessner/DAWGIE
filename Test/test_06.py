@@ -118,6 +118,7 @@ class Schedule(unittest.TestCase):
         self.assertEqual(1, len(dawgie.pl.schedule.que))
         nodes[dei].get('doing').clear()
         nodes[dei].get('todo').clear()
+        nodes[dei].set('status', State.success)
         dawgie.pl.schedule.que.clear()
         return
 
@@ -146,6 +147,12 @@ class Schedule(unittest.TestCase):
             set(['a', 'c', 'e', 'b', 'f', 'd', 'g']), jobs[0].get('doing')
         )
         self.assertSetEqual(set(), jobs[0].get('todo'))
+        for p in dawgie.pl.schedule.per:
+            p.set('status', State.success)
+            p.get('do').clear()
+            p.get('doing').clear()
+            p.get('period').clear()
+            p.get('todo').clear()
         dawgie.pl.schedule.per.clear()
         dawgie.pl.schedule.que.clear()
         return
@@ -157,6 +164,8 @@ class Schedule(unittest.TestCase):
         na = [node.tag for node in nodes].index('network.analyzer')
         noio = [node.tag for node in nodes].index('noio.engine')
         for node in nodes:
+            node.get('doing').clear()
+            node.get('todo').clear()
             self.assertEqual(0, len(node.get('doing')) + len(node.get('todo')))
             pass
         nodes[noio].get('todo').update(['a', 'c', 'd'])
@@ -191,6 +200,7 @@ class Schedule(unittest.TestCase):
         self.assertEqual('disk.engine', dispatch[0].tag)
         self.assertEqual('noio.engine', dispatch[1].tag)
         self.assertEqual(0, len(nodes[dei].get('todo')))
+        print (nodes[dei].get('do'))
         self.assertEqual(5, len(nodes[dei].get('do')))
         self.assertEqual(5, len(nodes[dei].get('doing')))
         self.assertEqual(2, len(nodes[noio].get('todo')))
@@ -284,6 +294,7 @@ class Schedule(unittest.TestCase):
         dawgie.pl.schedule.periodics([fake_events_view])
         events = dawgie.pl.schedule.view_events()
         events = dict([(e['actor'], e['delays']) for e in events])
+        print (events)
         self.assertEqual(2, len(events))
         self.assertTrue('disk.engine' in events)
         self.assertEqual(2, len(events['disk.engine']))
@@ -304,7 +315,7 @@ def fake_events_defer():
     import ae.network
     import ae.network.bot
 
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.UTC)
     return [
         dawgie.schedule(
             ae.disk.task,
@@ -327,7 +338,7 @@ def fake_events_view():
     import ae.network
     import ae.network.bot
 
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.UTC)
     return [
         dawgie.schedule(
             ae.disk.task,
