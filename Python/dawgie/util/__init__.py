@@ -2,7 +2,7 @@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -41,9 +41,10 @@ NTR: 49811
 # Used to be a module and do not want to go and change legacy code since
 # it is working. However, want to add more items that would make the module
 # large and cumbersome. Moved it to a package with the old implementation
-# broken up into smaller modules. Therefore, pylint: disable=unused-import
-# allow the functions to be mapped to here were the legacy code expects it.
-from .args import log_level,set_ports
-from .metrics import MetricStateVector,MetricValue
-from .names import task_name,verify_name
-from .refs import algref2svref,as_vref,svref2vref,vref_as_name
+# broken up into smaller modules. Therefore,
+# pylint: disable=unused-import
+# to allow the functions to be mapped to here were the legacy code expects it.
+from .args import log_level, set_ports  # noqa: F401
+from .metrics import MetricStateVector, MetricValue  # noqa: F401
+from .names import task_name, verify_name  # noqa: F401
+from .refs import algref2svref, as_vref, svref2vref, vref_as_name  # noqa: F401

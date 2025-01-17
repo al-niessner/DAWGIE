@@ -1,7 +1,7 @@
 '''The algorithm engine for touching the local disk
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -40,30 +40,41 @@ NTR:
 import dawgie
 import numpy
 
+
 class StateVector(dawgie.StateVector):
     def __init__(self):
         dawgie.StateVector.__init__(self)
         self['scalar'] = Value(None)
-        self._version_ = dawgie.VERSION(1,0,0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         return
 
-    def name(self): return 'test'
+    def name(self):
+        return 'test'
 
-    def view(self, visitor:dawgie.Visitor):
-        visitor.add_declaration ('content:', tag='h3')
-        visitor.add_primitive (self['scalar'].uid(), label='uid')
-        visitor.add_primitive (self['scalar'].value(), label='value')
+    def view(self, visitor: dawgie.Visitor):
+        visitor.add_declaration('content:', tag='h3')
+        visitor.add_primitive(self['scalar'].uid(), label='uid')
+        visitor.add_primitive(self['scalar'].value(), label='value')
         return
+
     pass
 
+
 class Value(dawgie.Value):
-    def __init__(self, value:float=0.0, uid:int=0):
+    def __init__(self, value: float = 0.0, uid: int = 0):
         dawgie.Value.__init__(self)
         self.__uid = int(uid) if uid else 0
         self.__value = float(value) if value else 0.0
-        self._version_ = dawgie.VERSION(1,0,0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         return
-    def features(self): return []
-    def uid(self)->int: return self.__uid
-    def value(self)->float: return self.__value
+
+    def features(self):
+        return []
+
+    def uid(self) -> int:
+        return self.__uid
+
+    def value(self) -> float:
+        return self.__value
+
     pass

@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -42,36 +42,53 @@ import dawgie.db.test
 import dawgie.pl.promotion
 import unittest
 
+
 class SVMock(dawgie.StateVector):
     def __init__(self, base):
         dawgie.StateVector.__init__(self)
-        self.update (base)
-        self._version_ = dawgie.VERSION(2,2,2)
+        self.update(base)
+        self._version_ = dawgie.VERSION(2, 2, 2)
         return
+
     pass
+
+
 class VMock(dawgie.Value):
     def __init__(self):
         dawgie.Version.__init__(self)
-        self._version_ = (3,3,3)
+        self._version_ = (3, 3, 3)
         return
+
     pass
+
+
 class AlgMock(dawgie.Algorithm):
     def __init__(self):
         dawgie.Algorithm.__init__(self)
-        self._version_ = (1,1,1)
+        self._version_ = (1, 1, 1)
         return
-    def sv_as_dict(self): return {'d':SVMock({'e':VMock()}),
-                                  'g':SVMock({'h':VMock()})}
+
+    def sv_as_dict(self):
+        return {'d': SVMock({'e': VMock()}), 'g': SVMock({'h': VMock()})}
+
     pass
+
+
 class NodeMock:
-    def __init__(self, val:str, children:[]=[]):
+    def __init__(self, val: str, children: [] = []):
         self.__children = children
         self.__value = str
         return
-    def __iter__(self): return self.__children.__iter__()
+
+    def __iter__(self):
+        return self.__children.__iter__()
+
     @property
-    def tag(self): return self.__value
+    def tag(self):
+        return self.__value
+
     pass
+
 
 class PromotionEngine(unittest.TestCase):
     @classmethod
@@ -82,6 +99,7 @@ class PromotionEngine(unittest.TestCase):
         dawgie.context.allow_promotion = True
         dawgie.context.db_impl = 'test'
         return
+
     @classmethod
     def tearDownClass(cls):
         cls.promote = dawgie.pl.promotion.Engine()
@@ -89,56 +107,75 @@ class PromotionEngine(unittest.TestCase):
         dawgie.context.db_impl = cls.db_impl
         return
 
-    def mock_consistent (self, inputs:[dawgie.db.REF], outputs:[dawgie.db.REF],
-                         target_name:str)->():
+    def mock_consistent(
+        self,
+        inputs: [dawgie.db.REF],
+        outputs: [dawgie.db.REF],
+        target_name: str,
+    ) -> ():
         if self.mock_behavior[0]:  # return a valid juncture
-            return ((1,2,3,4,5), (6,7,8,9,0))
+            return ((1, 2, 3, 4, 5), (6, 7, 8, 9, 0))
         return ()
 
-    def mock_organize (self, task_names, runid=None, targets=None, event=None):
-        self.assertListEqual (['b.f.g.h'], task_names)
-        self.assertEqual (10101, runid)
-        self.assertEqual (['a'], list(targets))
+    def mock_organize(self, task_names, runid=None, targets=None, event=None):
+        self.assertListEqual(['b.f.g.h'], task_names)
+        self.assertEqual(10101, runid)
+        self.assertEqual(['a'], list(targets))
 
         if not self.mock_behavior[0]:
-            self.assertEqual('promotion not possible because no juncture found',
-                             event)
+            self.assertEqual(
+                'promotion not possible because no juncture found', event
+            )
         elif not self.mock_behavior[1]:
-            self.assertEqual ('promotion failed to insert', event)
-        else: self.assertEqual ('path not possible', event)
+            self.assertEqual('promotion failed to insert', event)
+        else:
+            self.assertEqual('path not possible', event)
         return
 
-    def mock_promote (self, juncture:(), runid:int):
-        self.assertTupleEqual (((1,2,3,4,5), (6,7,8,9,0)), juncture)
+    def mock_promote(self, juncture: (), runid: int):
+        self.assertTupleEqual(((1, 2, 3, 4, 5), (6, 7, 8, 9, 0)), juncture)
         return self.mock_behavior[1]
 
     def setUp(self):
         self.mock_behavior = [False, False]
-        setattr (dawgie.db.test, 'consistent', self.mock_consistent)
-        setattr (dawgie.db.test, 'promote', self.mock_promote)
+        setattr(dawgie.db.test, 'consistent', self.mock_consistent)
+        setattr(dawgie.db.test, 'promote', self.mock_promote)
         return
 
     def test_ae(self):
         ae = self.promote.ae
         self.promote.ae = None
-        self.assertTrue (self.promote.ae is None)
+        self.assertTrue(self.promote.ae is None)
         self.promote.ae = 1
-        self.assertEqual (1, self.promote.ae)
+        self.assertEqual(1, self.promote.ae)
         self.promote.ae = ae
         return
 
     def test_call(self):
-        with self.assertLogs ('dawgie.pl.promotion', level=0) as al:
-            self.assertFalse (self.promote ([('a.b.c',True)]))
+        with self.assertLogs('dawgie.pl.promotion', level=0) as al:
+            self.assertFalse(self.promote([('a.b.c', True)]))
             pass
-        print (al.output)
-        self.assertEqual (al.output, ['ERROR:dawgie.pl.promotion:Inconsistent arguments. Ignoring request.'])
-        self.assertFalse (self.promote ([('a.b.c',True)],
-                                        NodeMock('a.b', [NodeMock('c.d')]), 1))
-        self.assertTrue (self.promote ([('a.b.c',True), ('a.b.d',False)],
-                                       NodeMock('a.b', [NodeMock('c.d')]), 1))
+        print(al.output)
+        self.assertEqual(
+            al.output,
+            [
+                'ERROR:dawgie.pl.promotion:Inconsistent arguments. Ignoring request.'
+            ],
+        )
+        self.assertFalse(
+            self.promote(
+                [('a.b.c', True)], NodeMock('a.b', [NodeMock('c.d')]), 1
+            )
+        )
+        self.assertTrue(
+            self.promote(
+                [('a.b.c', True), ('a.b.d', False)],
+                NodeMock('a.b', [NodeMock('c.d')]),
+                1,
+            )
+        )
         self.promote.clear()
-        self.assertFalse (self.promote.more())
+        self.assertFalse(self.promote.more())
         return
 
     def test_do_allows(self):
@@ -148,47 +185,60 @@ class PromotionEngine(unittest.TestCase):
         3. No organizer
         '''
         self.promote.clear()
-        self.assertFalse (self.promote.more())
+        self.assertFalse(self.promote.more())
         self.promote.ae = None
         self.promote.organize = None
-        with self.assertRaises (ValueError): self.promote.do()
+        with self.assertRaises(ValueError):
+            self.promote.do()
         self.promote.ae = 1
-        with self.assertRaises (ValueError): self.promote.do()
+        with self.assertRaises(ValueError):
+            self.promote.do()
         ac = dawgie.context.allow_promotion
         dawgie.context.allow_promotion = False
-        self.assertTrue (self.promote ([('a.b.c',True), ('a.b.d',False)],
-                                       NodeMock('a.b', [NodeMock('c.d')]), 1))
-        self.assertFalse (self.promote.do())
+        self.assertTrue(
+            self.promote(
+                [('a.b.c', True), ('a.b.d', False)],
+                NodeMock('a.b', [NodeMock('c.d')]),
+                1,
+            )
+        )
+        self.assertFalse(self.promote.do())
         dawgie.context.allow_promotion = ac
         return
 
     def test_do(self):
         ct = 'b.c.d.e'
-        root = dawgie.pl.dag.Node('b.c',
-                                  attrib={'do':[],
-                                          'doing':[],
-                                          'parents':[],
-                                          'todo':[]})
-        node = dawgie.pl.dag.Node('b.c.d.e',
-                                  attrib={'alg':AlgMock(),
-                                          'do':[],
-                                          'doing':[],
-                                          'parents':[],
-                                          'todo':[]})
-        node = dawgie.pl.dag.Node('b.f.g.h',
-                                  attrib={'alg':AlgMock(),
-                                          'do':[],
-                                          'doing':[],
-                                          'parents':[node],
-                                          'todo':[]})
-        root.add (node)
+        root = dawgie.pl.dag.Node(
+            'b.c', attrib={'do': [], 'doing': [], 'parents': [], 'todo': []}
+        )
+        node = dawgie.pl.dag.Node(
+            'b.c.d.e',
+            attrib={
+                'alg': AlgMock(),
+                'do': [],
+                'doing': [],
+                'parents': [],
+                'todo': [],
+            },
+        )
+        node = dawgie.pl.dag.Node(
+            'b.f.g.h',
+            attrib={
+                'alg': AlgMock(),
+                'do': [],
+                'doing': [],
+                'parents': [node],
+                'todo': [],
+            },
+        )
+        root.add(node)
         self.mock_behavior[0] = False
         self.mock_behavior[1] = False
         self.promote.organize = self.mock_organize
-        self.promote.ae = {'b.f.g.h':[node]}
-        self.assertTrue (dawgie.context.allow_promotion)
-        self.promote.todo (root, 10101, [('1.a.'+ct, False)])
-        self.assertTrue (self.promote.more())
+        self.promote.ae = {'b.f.g.h': [node]}
+        self.assertTrue(dawgie.context.allow_promotion)
+        self.promote.todo(root, 10101, [('1.a.' + ct, False)])
+        self.assertTrue(self.promote.more())
         self.promote.do()
         self.mock_behavior[0] = True
         self.promote.do()
@@ -198,34 +248,41 @@ class PromotionEngine(unittest.TestCase):
 
     def test_more(self):
         self.promote.clear()
-        self.assertFalse (self.promote.more())
+        self.assertFalse(self.promote.more())
         self.promote._todo['a'] = 1
-        self.assertTrue (self.promote.more())
+        self.assertTrue(self.promote.more())
         self.promote.clear()
-        self.assertFalse (self.promote.more())
+        self.assertFalse(self.promote.more())
         return
 
     def test_organize(self):
         organize = self.promote.organize
         self.promote.organize = None
-        self.assertTrue (self.promote.organize is None)
+        self.assertTrue(self.promote.organize is None)
         self.promote.organize = 1
-        self.assertEqual (1, self.promote.organize)
+        self.assertEqual(1, self.promote.organize)
         self.promote.organize = organize
         return
 
     def test_todo(self):
         self.promote.clear()
-        self.assertFalse (self.promote.more())
-        self.promote.todo (NodeMock('a.b',[NodeMock('c.d')]), 1,
-                           values=[('a',True),('b',True),('c',True)])
-        self.assertFalse (self.promote.more())
+        self.assertFalse(self.promote.more())
+        self.promote.todo(
+            NodeMock('a.b', [NodeMock('c.d')]),
+            1,
+            values=[('a', True), ('b', True), ('c', True)],
+        )
+        self.assertFalse(self.promote.more())
         self.promote.clear()
-        self.assertFalse (self.promote.more())
-        self.promote.todo (NodeMock('a.b',[NodeMock('c.d')]), 1,
-                           values=[('a',True),('b',False),('c',True)])
-        self.assertTrue (self.promote.more())
+        self.assertFalse(self.promote.more())
+        self.promote.todo(
+            NodeMock('a.b', [NodeMock('c.d')]),
+            1,
+            values=[('a', True), ('b', False), ('c', True)],
+        )
+        self.assertTrue(self.promote.more())
         self.promote.clear()
-        self.assertFalse (self.promote.more())
+        self.assertFalse(self.promote.more())
         return
+
     pass

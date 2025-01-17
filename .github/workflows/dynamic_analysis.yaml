@@ -1,0 +1,46 @@
+name: Self Diagnositics
+run-name: ${{ github.actor }} is verifying code for merge compliance
+on: [push]
+jobs:
+  PyTesting:
+    name: Test with Coverage
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        # Docker Hub image
+        image: "postgres:17"
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: tester
+          POSTGRES_HOST_AUTH_METHOD: trust
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          architecture: 'x64'
+          python-version: '3.12'
+      - name: Update Ubuntu
+        run: |
+          sudo apt install graphviz
+      - name: Prepare Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r Python/requirements.txt
+          pip install -r .ci/requirements.txt
+          pip install Python/
+      - name: Prepare Postgres
+        run: |
+          createdb -h localhost -U tester testspace
+      - name: pytest
+        run: pytest --cov=dawgie --cov-branch --cov-report term-missing -v Test

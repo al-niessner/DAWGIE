@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -40,6 +40,7 @@ NTR:
 import dawgie.util.fifo
 import unittest
 
+
 class UniqueFiFo(unittest.TestCase):
     def test_new(self):
         todo = dawgie.util.fifo.Unique()
@@ -48,17 +49,19 @@ class UniqueFiFo(unittest.TestCase):
         todo = dawgie.util.fifo.Unique('abadfabcfdadf')
         self.assertIsNotNone(todo, 'should have an instance')
         self.assertEqual(5, len(todo), 'should be 5 unique character abdfc')
+
     def test_contains(self):
         todo = dawgie.util.fifo.Unique('abadfabcfdadf')
         self.assertIsNotNone(todo, 'should have an instance')
         self.assertEqual(5, len(todo), 'should be 5 unique character abdfc')
         self.assertTrue('d' in todo)
         self.assertFalse('z' in todo)
+
     def test_eq(self):
         todo_a = dawgie.util.fifo.Unique('abadfabcfdadf')
         self.assertIsNotNone(todo_a, 'should have an instance')
         self.assertEqual(5, len(todo_a), 'should be 5 unique character abdfc')
-        order = ['a','b', 'd', 'f', 'c']
+        order = ['a', 'b', 'd', 'f', 'c']
         self.assertEqual(todo_a, order, 'should be the same')
         self.assertEqual(todo_a, set(order), 'should be the same')
         self.assertNotEqual(todo_a, sorted(order), 'order changes it')
@@ -74,31 +77,35 @@ class UniqueFiFo(unittest.TestCase):
         self.assertIsNotNone(todo_d, 'should have an instance')
         self.assertEqual(5, len(todo_d), 'should be 5 unique character abdfc')
         self.assertNotEqual(todo_a, todo_d, 'should not be the same')
+
     def test_iter(self):
         todo = dawgie.util.fifo.Unique('abadfabcfdadf')
         self.assertIsNotNone(todo, 'should have an instance')
         self.assertEqual(5, len(todo), 'should be 5 unique character abdfc')
-        expected = ['a','b', 'd', 'f', 'c']
-        for a,b in zip(todo,expected):
-            self.assertEqual(a,b,'each element should be the same')
+        expected = ['a', 'b', 'd', 'f', 'c']
+        for a, b in zip(todo, expected):
+            self.assertEqual(a, b, 'each element should be the same')
+
     def test_add(self):
         todo = dawgie.util.fifo.Unique('abadfabcfdadf')
         self.assertIsNotNone(todo, 'should have an instance')
         self.assertEqual(5, len(todo), 'should be 5 unique character abdfc')
-        todo.add ('a')
+        todo.add('a')
         self.assertEqual(5, len(todo), 'should be 5 unique character abdfc')
-        todo.add ('e')
+        todo.add('e')
         self.assertEqual(6, len(todo), 'should be 5 unique character abdfc')
-        self.assertEqual(todo, ['a','b', 'd', 'f', 'c', 'e'])
+        self.assertEqual(todo, ['a', 'b', 'd', 'f', 'c', 'e'])
+
     def test_discard(self):
         todo = dawgie.util.fifo.Unique('abadfabcfdadf')
         self.assertIsNotNone(todo, 'should have an instance')
         self.assertEqual(5, len(todo), 'should be 5 unique character abdfc')
-        todo.discard ('z')
+        todo.discard('z')
         self.assertEqual(5, len(todo), 'should be 5 unique character abdfc')
-        todo.discard ('d')
+        todo.discard('d')
         self.assertEqual(4, len(todo), 'should be 5 unique character abdfc')
-        self.assertEqual(todo, ['a','b', 'f', 'c'])
+        self.assertEqual(todo, ['a', 'b', 'f', 'c'])
+
     def test_update(self):
         todo = dawgie.util.fifo.Unique()
         todo.update('abadfabcfdadf')

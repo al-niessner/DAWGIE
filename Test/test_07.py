@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -48,79 +48,110 @@ import struct
 import tempfile
 import unittest
 
+
 class aBar(dawgie.Analyzer):
     def __init__(self):
         dawgie.Analyzer.__init__(self)
         self._product = aSV()
-        self._version_ = dawgie.VERSION(1,1,1)
+        self._version_ = dawgie.VERSION(1, 1, 1)
         return
 
-    def name(self): return 'bar'
-    def run (self, aspects): return
-    def state_vectors(self): return [self._product]
-    def traits(self): return []
+    def name(self):
+        return 'bar'
+
+    def run(self, aspects):
+        return
+
+    def state_vectors(self):
+        return [self._product]
+
+    def traits(self):
+        return []
+
     pass
+
 
 class aFoo(dawgie.Analysis):
-    def list(self): return [aBar()]
+    def list(self):
+        return [aBar()]
+
     pass
 
+
 class aSV(dawgie.StateVector):
-    def __init__ (self):
+    def __init__(self):
         dawgie.StateVector.__init__(self)
         self['oops'] = aV()
         self['snafu'] = aV()
-        self._version_ = dawgie.VERSION(1,1,1)
+        self._version_ = dawgie.VERSION(1, 1, 1)
         return
-    def name(self): return 'and'
+
+    def name(self):
+        return 'and'
+
     pass
+
 
 class aV(dawgie.Value):
     def __init__(self):
         dawgie.Value.__init__(self)
-        self._version_ = dawgie.VERSION(1,1,1)
+        self._version_ = dawgie.VERSION(1, 1, 1)
         return
-    def features(self): return []
+
+    def features(self):
+        return []
+
     pass
+
 
 class Shelve(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.root = tempfile.mkdtemp()
-        print (cls.root)
-        for subdir in ['db', 'dbs', 'stg']: os.makedirs(os.path.join
-                                                        (cls.root, subdir))
+        print(cls.root)
+        for subdir in ['db', 'dbs', 'stg']:
+            os.makedirs(os.path.join(cls.root, subdir))
         dawgie.context.db_impl = 'shelve'
-        dawgie.context.db_path = os.path.join (cls.root, 'db')
-        dawgie.context.data_dbs = os.path.join (cls.root, 'dbs')
-        dawgie.context.data_log = os.path.join (cls.root, 'logs')
-        dawgie.context.data_stg = os.path.join (cls.root, 'stg')
+        dawgie.context.db_path = os.path.join(cls.root, 'db')
+        dawgie.context.data_dbs = os.path.join(cls.root, 'dbs')
+        dawgie.context.data_log = os.path.join(cls.root, 'logs')
+        dawgie.context.data_stg = os.path.join(cls.root, 'stg')
         dawgie.db_rotate_path = dawgie.context.db_path
         dawgie.db.open()
         base = aFoo('foo', 0, 1)
-        cls._acquire = getattr (dawgie.db.shelve.comms, 'acquire')
-        cls._do = getattr (dawgie.db.shelve.comms.Connector, '_Connector__do')
-        cls._release = getattr (dawgie.db.shelve.comms, 'release')
-        cls._send = getattr (dawgie.db.shelve.comms.Worker, '_send')
-        setattr (dawgie.db.shelve.comms, 'acquire', mock_acquire)
-        setattr (dawgie.db.shelve.comms.Connector, '_Connector__do', mock_do)
-        setattr (dawgie.db.shelve.comms, 'release', mock_release)
-        setattr (dawgie.db.shelve.comms.Worker, '_send', mock_send)
-        dawgie.db.update (base,base.list()[0],base.list()[0].state_vectors()[0],
-                          'oops', base.list()[0].state_vectors()[0]['oops'])
-        dawgie.db.update (base,base.list()[0],base.list()[0].state_vectors()[0],
-                          'snafu', base.list()[0].state_vectors()[0]['snafu'])
-        connection = dawgie.db.connect (base.list()[0], base, '__all__')
+        cls._acquire = getattr(dawgie.db.shelve.comms, 'acquire')
+        cls._do = getattr(dawgie.db.shelve.comms.Connector, '_Connector__do')
+        cls._release = getattr(dawgie.db.shelve.comms, 'release')
+        cls._send = getattr(dawgie.db.shelve.comms.Worker, '_send')
+        setattr(dawgie.db.shelve.comms, 'acquire', mock_acquire)
+        setattr(dawgie.db.shelve.comms.Connector, '_Connector__do', mock_do)
+        setattr(dawgie.db.shelve.comms, 'release', mock_release)
+        setattr(dawgie.db.shelve.comms.Worker, '_send', mock_send)
+        dawgie.db.update(
+            base,
+            base.list()[0],
+            base.list()[0].state_vectors()[0],
+            'oops',
+            base.list()[0].state_vectors()[0]['oops'],
+        )
+        dawgie.db.update(
+            base,
+            base.list()[0],
+            base.list()[0].state_vectors()[0],
+            'snafu',
+            base.list()[0].state_vectors()[0]['snafu'],
+        )
+        connection = dawgie.db.connect(base.list()[0], base, '__all__')
         connection.update()
         return
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree (cls.root)
-        setattr (dawgie.db.shelve.comms, 'acquire', cls._acquire)
-        setattr (dawgie.db.shelve.comms.Connector, '_Connector__do', cls._do)
-        setattr (dawgie.db.shelve.comms, 'release', cls._release)
-        setattr (dawgie.db.shelve.comms.Worker, '_send', cls._send)
+        shutil.rmtree(cls.root)
+        setattr(dawgie.db.shelve.comms, 'acquire', cls._acquire)
+        setattr(dawgie.db.shelve.comms.Connector, '_Connector__do', cls._do)
+        setattr(dawgie.db.shelve.comms, 'release', cls._release)
+        setattr(dawgie.db.shelve.comms.Worker, '_send', cls._send)
         return
 
     def test_issue_16(self):
@@ -137,8 +168,8 @@ class Shelve(unittest.TestCase):
 
         Even forcing __all__ into the search fails.
         '''
-        full_list = dawgie.db.targets (True)
-        self.assertTrue ('__all__' in full_list)
+        full_list = dawgie.db.targets(True)
+        self.assertTrue('__all__' in full_list)
         return
 
     def test_issue_214(self):
@@ -151,22 +182,33 @@ class Shelve(unittest.TestCase):
         try 1: give the function a good stream and see if it works
         '''
         worker = dawgie.db.shelve.comms.Worker(None)
-        data = pickle.dumps ({'a':1,'b':2})
-        data = struct.pack ('>I', len(data)) + data
-        self.assertRaises (AttributeError, worker.dataReceived, data)
+        data = pickle.dumps({'a': 1, 'b': 2})
+        data = struct.pack('>I', len(data)) + data
+        self.assertRaises(AttributeError, worker.dataReceived, data)
         return
+
     pass
 
-def mock_acquire (name): return True
-def mock_release (s): return True
+
+def mock_acquire(name):
+    return True
+
+
+def mock_release(s):
+    return True
+
 
 do_response = [None]
-def mock_do (self, request):
-    print ('mock do', request)
+
+
+def mock_do(self, request):
+    print('mock do', request)
     import dawgie.db.shelve
-    dawgie.db.shelve.comms.Worker(None).do (request)
+
+    dawgie.db.shelve.comms.Worker(None).do(request)
     return do_response[0]
 
-def mock_send (self, response):
+
+def mock_send(self, response):
     do_response[0] = response
     return

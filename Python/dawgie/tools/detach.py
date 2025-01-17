@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -48,97 +48,146 @@ import os
 import shelve
 import shutil
 
-def _algorithm (task, algorithm):
-    dataset = dawgie.db.connect (algorithm, task, args.target)
-    for f in algorithm.feedback(): dataset.load (f)
-    for p in algorithm.previous(): dataset.load (p)
+
+def _algorithm(task, algorithm):
+    dataset = dawgie.db.connect(algorithm, task, args.target)
+    for f in algorithm.feedback():
+        dataset.load(f)
+    for p in algorithm.previous():
+        dataset.load(p)
     return algorithm.feedback() + algorithm.previous()
 
-def _analyzer (analysis, analyzer):
-    aspect = dawgie.db.gather (analyzer, analysis)
-    aspect.collect (analyzer.feedback())
-    aspect.collect (analyzer.traits())
+
+def _analyzer(analysis, analyzer):
+    aspect = dawgie.db.gather(analyzer, analysis)
+    aspect.collect(analyzer.feedback())
+    aspect.collect(analyzer.traits())
     return analyzer.feedback() + analyzer.traits()
 
-def _copy (references):
-    for vr in dawgie.util.as_vref (references):
-        fn,nn = dawgie.db.util.encode (vr.impl.sv_as_dict()[vr.item][vr.feat])
-        nfn = os.path.join (args.output_dir, nn)
 
-        if not os.path.isfile (nfn): shutil.move (fn, nfn)
+def _copy(references):
+    for vr in dawgie.util.as_vref(references):
+        fn, nn = dawgie.db.util.encode(vr.impl.sv_as_dict()[vr.item][vr.feat])
+        nfn = os.path.join(args.output_dir, nn)
+
+        if not os.path.isfile(nfn):
+            shutil.move(fn, nfn)
         if args.private_database:
-            vn = '.'.join ([dawgie.util.task_name (vr.factory),
-                            vr.impl.name(), vr.item, vr.feat])
+            vn = '.'.join(
+                [
+                    dawgie.util.task_name(vr.factory),
+                    vr.impl.name(),
+                    vr.item,
+                    vr.feat,
+                ]
+            )
             for k in args.private_database:
-                if k.endswith (vn):
+                if k.endswith(vn):
                     fn = args.private_database[k]
-                    nfn = os.path.join (args.output_dir, fn)
-                    ofn = os.path.join (dawgie.context.data_dbs, fn)
+                    nfn = os.path.join(args.output_dir, fn)
+                    ofn = os.path.join(dawgie.context.data_dbs, fn)
 
-                    if os.path.isfile (ofn) and not os.path.isfile (nfn):\
-                       shutil.copy (ofn, nfn)
-                    pass
-                pass
-            pass
-        pass
+                    if os.path.isfile(ofn) and not os.path.isfile(nfn):
+                        shutil.copy(ofn, nfn)
     return
 
-def _dir (dn:str):
-    if not os.path.isdir (dn):
+
+def _dir(dn: str):
+    if not os.path.isdir(dn):
         raise ValueError(f'The specified value {dn} is not a directory')
     return dn
 
-def _regression (regress, regression):
-    timeline = dawgie.db.retreat (regression, regress)
-    timeline.recede (regression.feedback())
-    timeline.recede (regression.variables())
+
+def _regression(regress, regression):
+    timeline = dawgie.db.retreat(regression, regress)
+    timeline.recede(regression.feedback())
+    timeline.recede(regression.variables())
     return regression.feedback() + regression.variables()
 
-def _shelve (fn): return shelve.open (fn) if fn else fn
 
-ap = argparse.ArgumentParser(description='Replicate a small part of the DAWGIE data stored by DAWGIE into --output-dir. The output can then be used by private pipelines detached from the original DAWGIE system.')
-ap.add_argument ('-DB', '--private-database', default=None, required=False,
-                 type=_shelve, help='when the database contains old data')
-ap.add_argument ('-O', '--output-dir', required=True, type=_dir,
-                 help='directory to write the value files to')
-ap.add_argument ('-r', '--runid', default=1 << 30, required=False, type=int,
-                 help='runID to use for loading [%(default)s]')
-ap.add_argument ('-R', '--runnables', nargs='+', required=True, type=str,
-                 help='list of analysis.analyzer, regress.regression, task.algorithm')
-ap.add_argument ('-t', '--target', required=True, type=str,
-                 help='specific known target')
-load = {dawgie.Factories.analysis:_analyzer,
-        dawgie.Factories.regress:_regression,
-        dawgie.Factories.task:_algorithm}
-dawgie.context.add_arguments (ap)
+def _shelve(fn):
+    return shelve.open(fn) if fn else fn
+
+
+ap = argparse.ArgumentParser(
+    description='Replicate a small part of the DAWGIE data stored by DAWGIE into --output-dir. The output can then be used by private pipelines detached from the original DAWGIE system.'
+)
+# ignore tools that use similar arguments
+# pylint: disable=duplicate-code
+ap.add_argument(
+    '-DB',
+    '--private-database',
+    default=None,
+    required=False,
+    type=_shelve,
+    help='when the database contains old data',
+)
+ap.add_argument(
+    '-O',
+    '--output-dir',
+    required=True,
+    type=_dir,
+    help='directory to write the value files to',
+)
+ap.add_argument(
+    '-r',
+    '--runid',
+    default=1 << 30,
+    required=False,
+    type=int,
+    help='runID to use for loading [%(default)s]',
+)
+ap.add_argument(
+    '-R',
+    '--runnables',
+    nargs='+',
+    required=True,
+    type=str,
+    help='list of analysis.analyzer, regress.regression, task.algorithm',
+)
+ap.add_argument(
+    '-t', '--target', required=True, type=str, help='specific known target'
+)
+# pylint: enable=duplicate-code
+
+load = {
+    dawgie.Factories.analysis: _analyzer,
+    dawgie.Factories.regress: _regression,
+    dawgie.Factories.task: _algorithm,
+}
+dawgie.context.add_arguments(ap)
 args = ap.parse_args()
-dawgie.context.override (args)
+dawgie.context.override(args)
 dawgie.db.open()
-ARGS = {dawgie.Factories.analysis:(0, args.runid),
-        dawgie.Factories.regress:(0, args.target),
-        dawgie.Factories.task:(0, args.runid, args.target)}
+ARGS = {
+    dawgie.Factories.analysis: (0, args.runid),
+    dawgie.Factories.regress: (0, args.target),
+    dawgie.Factories.task: (0, args.runid, args.target),
+}
 for runnable in args.runnables:
     try:
-        instance = None
-        mod_name,runnable_name = runnable.split('.')
-        mod = importlib.import_module ('.'.join
-                                       ([dawgie.context.ae_base_package,
-                                         mod_name]))
+        INSTANCE = None
+        mod_name, runnable_name = runnable.split('.')
+        mod = importlib.import_module(
+            '.'.join([dawgie.context.ae_base_package, mod_name])
+        )
         for factory_method in dawgie.Factories:
             if factory_method.name in dir(mod):
-                instance = getattr (mod, factory_method.name)\
-                           (mod_name, *ARGS[factory_method])
-                for r in instance.list():
-                    if r.name() == runnable_name:\
-                       _copy (load[factory_method](instance, r))
+                INSTANCE = getattr(mod, factory_method.name)(
+                    mod_name, *ARGS[factory_method]
+                )
+                for r in INSTANCE.list():
+                    if r.name() == runnable_name:
+                        _copy(load[factory_method](INSTANCE, r))
                     pass
                 pass
             pass
 
-        if instance is None:\
-           logging.warning ('Could not locate runnable %s', runnable)
-    except ImportError as ie:\
-           logging.exception ("Could not import runnable's module %s", runnable)
+        if INSTANCE is None:
+            logging.warning('Could not locate runnable %s', runnable)
+    except ImportError:
+        logging.exception("Could not import runnable's module %s", runnable)
     pass
 
-if args.private_database: args.private_database.close()
+if args.private_database:
+    args.private_database.close()

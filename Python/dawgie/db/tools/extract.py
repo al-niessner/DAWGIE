@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 '''
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -44,93 +44,169 @@ import os
 import pickle
 import sys
 
+
 class FakeItem(dict):
-    # pylint: disable=no-self-use
-    def __init__ (self, name, runid, svl):
+    def __init__(self, name, runid, svl):
         dict.__init__(self)
         self.__name = name
         self.__runid = runid
         self.__svl = svl
         return
 
-    def _name (self): return self.__name
-    def _runid (self): return self.__runid
-    def abort(self): return False
-    def name (self): return self.__name
-    def state_vectors (self): return self.__svl
+    def _name(self):
+        return self.__name
+
+    def _runid(self):
+        return self.__runid
+
+    def abort(self):
+        return False
+
+    def name(self):
+        return self.__name
+
+    def state_vectors(self):
+        return self.__svl
+
     pass
 
-# pylint: disable=protected-access,too-many-arguments
-def info (ofn, runid, tn, taskn, algn, svn):
-    if any([runid is None,tn is None,taskn is None,algn is None,svn is None]):
-        logging.getLogger (__name__).critical ('All inputs are required and must be valid')
-        print ('All inputs are required and must be valid')
+
+# pylint: disable=protected-access,too-many-arguments,too-many-positional-arguments,used-before-assignment
+def info(ofn, runid, tn, taskn, algn, svn):
+    if any(
+        [runid is None, tn is None, taskn is None, algn is None, svn is None]
+    ):
+        logging.getLogger(__name__).critical(
+            'All inputs are required and must be valid'
+        )
+        print('All inputs are required and must be valid')
         pass
     else:
-        if ofn is None: ofn = '.'.join ([tn, taskn, algn, svn, 'pkl'])
+        if ofn is None:
+            ofn = '.'.join([tn, taskn, algn, svn, 'pkl'])
 
         dawgie.db.reopen()
-        ds = dawgie.db.connect (FakeItem(algn,runid,[FakeItem(svn, runid, [])]),
-                                FakeItem(taskn, runid, []),
-                                tn)
+        ds = dawgie.db.connect(
+            FakeItem(algn, runid, [FakeItem(svn, runid, [])]),
+            FakeItem(taskn, runid, []),
+            tn,
+        )
         ds.load()
-        with open (ofn, 'wb') as file: \
-             pickle.dump (dict(ds._alg().state_vectors()[0]), file,
-                          pickle.HIGHEST_PROTOCOL)
+        with open(ofn, 'wb') as file:
+            pickle.dump(
+                dict(ds._alg().state_vectors()[0]),
+                file,
+                pickle.HIGHEST_PROTOCOL,
+            )
         dawgie.db.close()
         dawgie.security.finalize()
         pass
     return
 
+
 if __name__ == '__main__':
     # main blocks always look the same; pylint: disable=duplicate-code
-    root = os.path.dirname (__file__)
-    for i in range(4): root = os.path.join (root, '..')
-    root = os.path.abspath (root)
-    sys.path.append (root)
+    root = os.path.dirname(__file__)
+    for i in range(4):
+        root = os.path.join(root, '..')
+    root = os.path.abspath(root)
+    sys.path.append(root)
 
     import dawgie.context
     import dawgie.db
     import dawgie.util
 
-    unique_fn = '.'.join (['extract', getpass.getuser(), 'log'])
-    ap = argparse.ArgumentParser(description='Extract a single state vector from a database.')
-    ap.add_argument ('-l', '--log-file', default=unique_fn, required=False,
-                     help='a filename to put all of the log messages into [%(default)s]')
-    ap.add_argument ('-L', '--log-level', default=logging.INFO, required=False,
-                     type=dawgie.util.log_level,
-                     help='set the verbosity that you want where a smaller number means more verbose [logging.INFO]')
-    ap.add_argument ('-o', '--output-filename', default=None, type=str,
-                     help='output filename and if none is given then a name will be generated: <target name>.<task name>.<algorithm name>.<state vector name>.pkl')
-    ap.add_argument ('-r', '--run-id', default=-1, required=False, type=int,
-                     help='The run ID to match where -1 means latest [%(default)s]')
-    ap.add_argument ('-T', '--target-name', required=True, type=str,
-                     help='The target name to match')
-    ap.add_argument ('-t', '--task-name', required=True, type=str,
-                     help='The task name to match')
-    ap.add_argument ('-a', '--alg-name', required=True, type=str,
-                     help='The algorithm name to match')
-    ap.add_argument ('-s', '--state-vector-name', required=True, type=str,
-                     help='The state vector name to match')
-    dawgie.context.add_arguments (ap)
+    UNIQUE_FN = '.'.join(['extract', getpass.getuser(), 'log'])
+    ap = argparse.ArgumentParser(
+        description='Extract a single state vector from a database.'
+    )
+    ap.add_argument(
+        '-l',
+        '--log-file',
+        default=UNIQUE_FN,
+        required=False,
+        help='a filename to put all of the log messages into [%(default)s]',
+    )
+    ap.add_argument(
+        '-L',
+        '--log-level',
+        default=logging.INFO,
+        required=False,
+        type=dawgie.util.log_level,
+        help='set the verbosity that you want where a smaller number means more verbose [logging.INFO]',
+    )
+    ap.add_argument(
+        '-o',
+        '--output-filename',
+        default=None,
+        type=str,
+        help='output filename and if none is given then a name will be generated: <target name>.<task name>.<algorithm name>.<state vector name>.pkl',
+    )
+    ap.add_argument(
+        '-r',
+        '--run-id',
+        default=-1,
+        required=False,
+        type=int,
+        help='The run ID to match where -1 means latest [%(default)s]',
+    )
+    ap.add_argument(
+        '-T',
+        '--target-name',
+        required=True,
+        type=str,
+        help='The target name to match',
+    )
+    ap.add_argument(
+        '-t',
+        '--task-name',
+        required=True,
+        type=str,
+        help='The task name to match',
+    )
+    ap.add_argument(
+        '-a',
+        '--alg-name',
+        required=True,
+        type=str,
+        help='The algorithm name to match',
+    )
+    ap.add_argument(
+        '-s',
+        '--state-vector-name',
+        required=True,
+        type=str,
+        help='The state vector name to match',
+    )
+    dawgie.context.add_arguments(ap)
     args = ap.parse_args()
-    dawgie.context.override (args)
-    logging.basicConfig (filename=os.path.join (dawgie.context.data_log,
-                                                args.log_file),
-                         level=args.log_level)
-    dawgie.security.initialize (path=os.path.expandvars
-                                (os.path.expanduser
-                                 (dawgie.context.guest_public_keys)),
-                                myname=dawgie.context.ssl_pem_myname,
-                                myself=os.path.expandvars
-                                (os.path.expanduser
-                                 (dawgie.context.ssl_pem_myself)))
+    dawgie.context.override(args)
+    logging.basicConfig(
+        filename=os.path.join(dawgie.context.data_log, args.log_file),
+        level=args.log_level,
+    )
+    dawgie.security.initialize(
+        path=os.path.expandvars(
+            os.path.expanduser(dawgie.context.guest_public_keys)
+        ),
+        myname=dawgie.context.ssl_pem_myname,
+        myself=os.path.expandvars(
+            os.path.expanduser(dawgie.context.ssl_pem_myself)
+        ),
+    )
 
-    info (args.output_filename, args.run_id, args.target_name,
-          args.task_name, args.alg_name, args.state_vector_name)
+    info(
+        args.output_filename,
+        args.run_id,
+        args.target_name,
+        args.task_name,
+        args.alg_name,
+        args.state_vector_name,
+    )
     pass
 else:
     import dawgie.context
     import dawgie.db
     import dawgie.util
+
     pass

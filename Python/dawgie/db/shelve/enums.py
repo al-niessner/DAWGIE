@@ -2,7 +2,7 @@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -40,7 +40,9 @@ NTR:
 
 import enum
 
+
 class Func(enum.IntEnum):
+    # enums should not scream at you so pylint: disable=invalid-name
     acquire = 0  # acquire a lock to the database
     dbcopy = 1  # copy the database to a new location (backup)
     get = 2  # get the value of the table for the key
@@ -50,19 +52,25 @@ class Func(enum.IntEnum):
     upd = 6  # update the table[key], returning True if it exists else False
     pass
 
+
 class Method(enum.Enum):
+    # enums should not scream at you so pylint: disable=invalid-name
     connector = "connector"
     rsync = "rsync"
     scp = "scp"
     cp = "cp"
     pass
 
+
 class Mutex(enum.IntEnum):
+    # enums should not scream at you so pylint: disable=invalid-name
     lock = 0
     unlock = 1
     pass
 
+
 class Table(enum.IntEnum):
+    # enums should not scream at you so pylint: disable=invalid-name
     alg = 0
     prime = 1
     state = 2

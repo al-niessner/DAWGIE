@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 '''
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -47,41 +47,57 @@ import sys
 
 if __name__ == '__main__':
     # main blocks always look the same; pylint: disable=duplicate-code
-    root = os.path.dirname (__file__)
-    for i in range(4): root = os.path.join (root, '..')
-    root = os.path.abspath (root)
-    sys.path.append (root)
+    root = os.path.dirname(__file__)
+    for i in range(4):
+        root = os.path.join(root, '..')
+    root = os.path.abspath(root)
+    sys.path.append(root)
 
     import dawgie.context
     import dawgie.db
     import dawgie.db.util
     import dawgie.util
 
-    unique_fn = '.'.join (['purge', getpass.getuser(), 'log'])
-    ap = argparse.ArgumentParser(description='Removes all of the files (md5_sha1) in the store that no longer have a key that references it. There is no undo of this operation and it must be done to a database that is not active (the pipeline is not running.')
-    ap.add_argument ('-l', '--log-file', default=unique_fn, required=False,
-                     help='a filename to put all of the log messages into [%(default)s]')
-    ap.add_argument ('-L', '--log-level', default=logging.INFO, required=False,
-                     type=dawgie.util.log_level,
-                     help='set the verbosity that you want where a smaller number means more verbose [logging.INFO]')
-    dawgie.context.add_arguments (ap)
+    UNIQUE_FN = '.'.join(['purge', getpass.getuser(), 'log'])
+    ap = argparse.ArgumentParser(
+        description='Removes all of the files (md5_sha1) in the store that no longer have a key that references it. There is no undo of this operation and it must be done to a database that is not active (the pipeline is not running.'
+    )
+    ap.add_argument(
+        '-l',
+        '--log-file',
+        default=UNIQUE_FN,
+        required=False,
+        help='a filename to put all of the log messages into [%(default)s]',
+    )
+    ap.add_argument(
+        '-L',
+        '--log-level',
+        default=logging.INFO,
+        required=False,
+        type=dawgie.util.log_level,
+        help='set the verbosity that you want where a smaller number means more verbose [logging.INFO]',
+    )
+    dawgie.context.add_arguments(ap)
     args = ap.parse_args()
-    dawgie.context.override (args)
-    logging.basicConfig (filename=os.path.join (dawgie.context.data_log,
-                                                args.log_file),
-                         level=args.log_level)
+    dawgie.context.override(args)
+    logging.basicConfig(
+        filename=os.path.join(dawgie.context.data_log, args.log_file),
+        level=args.log_level,
+    )
     dawgie.db.open()
     values = list(dawgie.db._prime_values())
 
     if not values:
-        logging.critical ('Aborting purge becuase found NO keys!!!')
-        sys.exit (-1)
-        pass
+        logging.critical('Aborting purge becuase found NO keys!!!')
+        sys.exit(-1)
 
-    for fn in os.listdir (dawgie.context.data_dbs):
-        if fn not in values and os.path.isfile (os.path.join
-                                                (dawgie.context.data_dbs, fn)):
-            os.unlink (os.path.join (dawgie.context.data_dbs, fn))
-            logging.getLogger (__name__).warning ('deleted the file %s from the store.', fn)
+    for fn in os.listdir(dawgie.context.data_dbs):
+        if fn not in values and os.path.isfile(
+            os.path.join(dawgie.context.data_dbs, fn)
+        ):
+            os.unlink(os.path.join(dawgie.context.data_dbs, fn))
+            logging.getLogger(__name__).warning(
+                'deleted the file %s from the store.', fn
+            )
         pass
     pass

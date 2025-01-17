@@ -2,7 +2,7 @@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -39,17 +39,24 @@ NTR: 49811
 '''
 
 import dawgie.context
-import logging  # needed for eval in log_level so, pylint: disable=unused-import
 
-def log_level (l):
-    """Allow log level to be symbolic or a plain integer
-    """
+# needed for eval in log_level(); pylint: disable=unused-import
+import logging  # noqa: F401
+
+# pylint: enable=unused-import
+
+
+def log_level(level):
+    """Allow log level to be symbolic or a plain integer"""
     # pylint: disable=bare-except,eval-used
-    try: ll = int(l)
-    except: ll = eval (l)
+    try:
+        ll = int(level)
+    except:  # noqa: E722
+        ll = eval(level)
     return ll
 
-def set_ports (fe_port:int)->None:
+
+def set_ports(fe_port: int) -> None:
     fep = int(fe_port)
     dawgie.context.cfe_port = fep + dawgie.context.PortOffset.certFE.value
     dawgie.context.cloud_port = fep + dawgie.context.PortOffset.cloud.value

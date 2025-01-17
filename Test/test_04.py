@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -43,28 +43,32 @@ import os
 import sys
 import unittest
 
+
 class Scan(unittest.TestCase):
-    def __init__ (self, *args):
+    def __init__(self, *args):
         unittest.TestCase.__init__(self, *args)
-        self.__ae_dir = os.path.abspath (os.path.join
-                                         (os.path.dirname (__file__), 'ae'))
+        self.__ae_dir = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), 'ae')
+        )
         self.__ae_pkg = 'ae'
-        sys.path.insert (0, os.path.abspath (os.path.dirname (__file__)))
+        sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
         return
 
-    def test (self):
-        factories = dawgie.pl.scan.for_factories (self.__ae_dir, self.__ae_pkg)
-        self.assertEqual (2, len (factories[dawgie.Factories.analysis]))
-        self.assertEqual (1, len (factories[dawgie.Factories.events]))
-        self.assertEqual (1, len (factories[dawgie.Factories.regress]))
-        self.assertEqual (4, len (factories[dawgie.Factories.task]))
-        for f in factories[dawgie.Factories.analysis]:\
-            self.assertTrue (isinstance (f('a', 0, 0), dawgie.Analysis))
+    def test(self):
+        factories = dawgie.pl.scan.for_factories(self.__ae_dir, self.__ae_pkg)
+        self.assertEqual(2, len(factories[dawgie.Factories.analysis]))
+        self.assertEqual(1, len(factories[dawgie.Factories.events]))
+        self.assertEqual(1, len(factories[dawgie.Factories.regress]))
+        self.assertEqual(4, len(factories[dawgie.Factories.task]))
+        for f in factories[dawgie.Factories.analysis]:
+            self.assertTrue(isinstance(f('a', 0, 0), dawgie.Analysis))
         for f in factories[dawgie.Factories.events]:
-            for e in f(): self.assertTrue (isinstance (e, dawgie.EVENT))
-        for f in factories[dawgie.Factories.regress]:\
-            self.assertTrue (isinstance (f('r', 0, 0), dawgie.Regress))
-        for f in factories[dawgie.Factories.task]:\
-            self.assertTrue (isinstance (f('t', 0, 0, 0), dawgie.Task))
+            for e in f():
+                self.assertTrue(isinstance(e, dawgie.EVENT))
+        for f in factories[dawgie.Factories.regress]:
+            self.assertTrue(isinstance(f('r', 0, 0), dawgie.Regress))
+        for f in factories[dawgie.Factories.task]:
+            self.assertTrue(isinstance(f('t', 0, 0, 0), dawgie.Task))
         return
+
     pass

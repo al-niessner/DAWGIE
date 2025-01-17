@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -36,6 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 NTR:
 '''
+
 import dawgie
 import numpy
 import os
@@ -43,45 +44,49 @@ import pickle
 import tempfile
 import unittest
 
+
 class Metric(unittest.TestCase):
     @staticmethod
-    def _cpu (N):
+    def _cpu(N):
         for n in range(N):
-            x = numpy.random.rand (1000,1000)
-            y = numpy.random.rand (1000,1000)
+            x = numpy.random.rand(1000, 1000)
+            y = numpy.random.rand(1000, 1000)
             z = x * y
             pass
         return
 
     @staticmethod
-    def _io (N):
-        fid,fn = tempfile.mkstemp()
-        os.close (fid)
+    def _io(N):
+        fid, fn = tempfile.mkstemp()
+        os.close(fid)
         for n in range(N):
-            x = numpy.random.rand (1200,1200)
-            with open (fn, 'bw') as f: pickle.dump (x, f)
-            with open (fn, 'br') as f: y = pickle.load (f)
+            x = numpy.random.rand(1200, 1200)
+            with open(fn, 'bw') as f:
+                pickle.dump(x, f)
+            with open(fn, 'br') as f:
+                y = pickle.load(f)
             pass
-        os.unlink (fn)
+        os.unlink(fn)
         return
 
     def test_cpu(self):
         m = dawgie._Metric()
-        m.measure (Metric._cpu, (100,))
+        m.measure(Metric._cpu, (100,))
         s = m.sum()
-        self.assertLess (30000, s.mem)
-        self.assertLess (0.5, s.user)
+        self.assertLess(30000, s.mem)
+        self.assertLess(0.5, s.user)
         return
 
     def test_io(self):
         m = dawgie._Metric()
-        m.measure (Metric._io, (100,))
+        m.measure(Metric._io, (100,))
         s = m.sum()
-        print ('metric:', s)
+        print('metric:', s)
         # self.assertTrue (1400000 < s.input)
-        self.assertLess (1400000, s.output)
-        self.assertLess (3000, s.mem)
-        self.assertLess (0.0, s.sys)
-        self.assertLess (0.0, s.user)
+        self.assertLess(1400000, s.output)
+        self.assertLess(3000, s.mem)
+        self.assertLess(0.0, s.sys)
+        self.assertLess(0.0, s.user)
         return
+
     pass

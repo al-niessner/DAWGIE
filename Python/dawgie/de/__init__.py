@@ -1,7 +1,7 @@
 '''The display engines.
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -37,22 +37,23 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import enum
 import dawgie
 import dawgie.context
+import dawgie.types
 import importlib
 
-class Type(enum.Enum):
-    html = 0
-    pass
 
+def factory(dt: dawgie.types.DisplayType = None) -> dawgie.Visitor:
+    '''concrete factory to construct the correct engine for type'''
+    if dt is None:
+        dt = dawgie.context.display
+    if isinstance(dt, dawgie.types.DisplayType):
+        dt = dt.name
+    if not isinstance(dt, str):
+        dt = str(dt)
 
-def factory (dt:Type=None) -> dawgie.Visitor:
-    if dt is None: dt = dawgie.context.display
-    if isinstance (dt, Type): dt = dt.name
-    if not isinstance (dt, str): dt = str(dt)
+    if not dt.count('.'):
+        dt = 'dawgie.de.' + dt
 
-    if not dt.count ('.'): dt = 'dawgie.de.' + dt
-
-    mod = importlib.import_module (dt)
+    mod = importlib.import_module(dt)
     return mod.Visitor()

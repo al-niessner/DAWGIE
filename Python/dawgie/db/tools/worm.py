@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 '''
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -43,57 +43,83 @@ import logging
 import os
 import sys
 
-# pylint: disable=protected-access,too-many-arguments
-def consume (runid, tn, taskn, algn, svn, vn):
+
+# pylint: disable=protected-access,too-many-arguments,too-many-positional-arguments
+def consume(runid, tn, taskn, algn, svn, vn):
     req = [runid, tn, taskn, algn, svn, vn]
-    if all ((x is None for x in req)):
-        print ('All parameters are None which means it would be simpler to delete and restart the database. Cowardly doing nothing.')
-        logging.getLogger (__name__).warning ('Cowardly doing nothing.')
+    if all((x is None for x in req)):
+        print(
+            'All parameters are None which means it would be simpler to delete and restart the database. Cowardly doing nothing.'
+        )
+        logging.getLogger(__name__).warning('Cowardly doing nothing.')
         return
 
+    # dawgie is already imported so pylint: disable=used-before-assignment
     dawgie.db.open()
     for k in dawgie.db._prime_keys():
-        ids = k.split ('.')
-        ids[0] = int (ids[0])
+        ids = k.split('.')
+        ids[0] = int(ids[0])
 
-        if all (((e is None or i == e)
-                 for i,e in zip (ids, req))): dawgie.db.remove (*ids)
+        if all(((e is None or i == e) for i, e in zip(ids, req))):
+            dawgie.db.remove(*ids)
         pass
     dawgie.db.close()
     return
 
+
 if __name__ == '__main__':
     # main blocks always look the same; pylint: disable=duplicate-code
-    root = os.path.dirname (__file__)
-    for i in range(4): root = os.path.join (root, '..')
-    root = os.path.abspath (root)
-    sys.path.append (root)
+    root = os.path.dirname(__file__)
+    for i in range(4):
+        root = os.path.join(root, '..')
+    root = os.path.abspath(root)
+    sys.path.append(root)
 
     import dawgie.context
     import dawgie.db
     import dawgie.db.tools.util
     import dawgie.util
 
-    unique_fn = '.'.join (['worm', getpass.getuser(), 'log'])
-    ap = argparse.ArgumentParser(description='Crawls through the database and removes all the matching keys from the primary table. It does not remove the referenced data in the store. There is no undo of this operation and it must be done to a database that is not active (the pipeline is not running.')
-    ap.add_argument ('-l', '--log-file', default=unique_fn, required=False,
-                     help='a filename to put all of the log messages into [%(default)s]')
-    ap.add_argument ('-L', '--log-level', default=logging.INFO, required=False,
-                     type=dawgie.util.log_level,
-                     help='set the verbosity that you want where a smaller number means more verbose [logging.INFO]')
-    dawgie.db.tools.util.add_arguments (ap)
-    dawgie.context.add_arguments (ap)
+    UNIQUE_FN = '.'.join(['worm', getpass.getuser(), 'log'])
+    ap = argparse.ArgumentParser(
+        description='Crawls through the database and removes all the matching keys from the primary table. It does not remove the referenced data in the store. There is no undo of this operation and it must be done to a database that is not active (the pipeline is not running.'
+    )
+    ap.add_argument(
+        '-l',
+        '--log-file',
+        default=UNIQUE_FN,
+        required=False,
+        help='a filename to put all of the log messages into [%(default)s]',
+    )
+    ap.add_argument(
+        '-L',
+        '--log-level',
+        default=logging.INFO,
+        required=False,
+        type=dawgie.util.log_level,
+        help='set the verbosity that you want where a smaller number means more verbose [logging.INFO]',
+    )
+    dawgie.db.tools.util.add_arguments(ap)
+    dawgie.context.add_arguments(ap)
     args = ap.parse_args()
-    dawgie.context.override (args)
-    logging.basicConfig (filename=os.path.join (dawgie.context.data_log,
-                                                args.log_file),
-                         level=args.log_level)
-    consume (args.run_id, args.target_name, args.task_name,
-             args.alg_name, args.state_vector_name, args.value_name)
+    dawgie.context.override(args)
+    logging.basicConfig(
+        filename=os.path.join(dawgie.context.data_log, args.log_file),
+        level=args.log_level,
+    )
+    consume(
+        args.run_id,
+        args.target_name,
+        args.task_name,
+        args.alg_name,
+        args.state_vector_name,
+        args.value_name,
+    )
     pass
 else:
     import dawgie.context
     import dawgie.db
     import dawgie.db.tools.util
     import dawgie.util
+
     pass

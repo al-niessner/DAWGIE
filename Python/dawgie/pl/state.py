@@ -32,7 +32,7 @@ True
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -69,10 +69,23 @@ NTR: 49811
 '''
 
 import builtins
+import dawgie.context
+import dawgie.db
+import dawgie.fe
+import dawgie.pl
+import dawgie.pl.dag
+import dawgie.pl.farm
+import dawgie.pl.logger.fe
+import dawgie.pl.resources
+import dawgie.pl.scan
+import dawgie.pl.schedule
+import dawgie.pl.version
+import dawgie.tools.submit
+import dawgie.tools.trace
 import doctest
 import enum
 import importlib
-import logging; log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import pydot
 import sys
@@ -86,55 +99,61 @@ import twisted.web.server
 
 
 class RollbackImporter:
-    # pylint: disable=redefined-builtin,too-few-public-methods,too-many-arguments,too-many-public-methods
+    # pylint: disable=redefined-builtin,too-few-public-methods,too-many-arguments,too-many-positional-arguments,too-many-public-methods
     def __init__(self):
         # Creates an instance and installs as the global importer
-        self.dynamicModules = set()
-        self.realImport = builtins.__import__
-        self.staticModules = sys.modules.copy()
+        self.dynamic_modules = set()
+        self.real_import = builtins.__import__
+        self.static_modules = sys.modules.copy()
         builtins.__import__ = self._import
         pass
 
     def _import(self, name, globals=None, locals=None, fromlist=(), level=0):
-        result = self.realImport(name, globals, locals, fromlist, level)
-        self.dynamicModules.add (name)
+        result = self.real_import(name, globals, locals, fromlist, level)
+        self.dynamic_modules.add(name)
         return result
 
     def reload(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.context
-
-        for modname in filter (lambda n:(n not in self.staticModules and
-                                         n.startswith(dawgie.context.ae_base_package)),
-                               self.dynamicModules.copy()):
-            if modname in sys.modules: importlib.reload (sys.modules[modname])
+        for modname in filter(
+            lambda n: (
+                n not in self.static_modules
+                and n.startswith(dawgie.context.ae_base_package)
+            ),
+            self.dynamic_modules.copy(),
+        ):
+            if modname in sys.modules:
+                importlib.reload(sys.modules[modname])
             pass
         return
+
     pass
 
+
 class Status(enum.Enum):
+    # enums should not scream at you so pylint: disable=invalid-name
     done = 0
     not_done = 1
     crashed = 2
     paused = 3
     pass
 
+
 class FSM:
-    # pylint: disable=no-self-use,too-many-instance-attributes,too-many-public-methods
+    # pylint: disable=too-many-instance-attributes,too-many-public-methods
     args = None
-    states = ['archiving',
-              'gitting',
-              'loading',
-              'running',
-              'starting',
-              'updating']
+    states = [
+        'archiving',
+        'gitting',
+        'loading',
+        'running',
+        'starting',
+        'updating',
+    ]
 
     def __init__(self, initial_state='starting', doctest_=False):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.context
-        self.machine = transitions.Machine(model=self,
-                                           states=FSM.states,
-                                           initial=initial_state)
+        self.machine = transitions.Machine(
+            model=self, states=FSM.states, initial=initial_state
+        )
         self.open_again = False
         self.changeset = None
         self.__doctest = doctest_
@@ -154,20 +173,24 @@ class FSM:
         self.reset()
         self.wait_timeout = 0.001
         self.nodes = {}
-        self.graph = pydot.graph_from_dot_file(os.path.join
-                                               (os.path.abspath
-                                                (os.path.dirname (__file__)),
-                                                self.dot_file_name))
-        idir = os.path.abspath (os.path.join
-                                (dawgie.context.fe_path, 'images/svg'))
+        self.graph = pydot.graph_from_dot_file(
+            os.path.join(
+                os.path.abspath(os.path.dirname(__file__)), self.dot_file_name
+            )
+        )
+        idir = os.path.abspath(
+            os.path.join(dawgie.context.fe_path, 'images/svg')
+        )
 
-        if not os.path.isdir (idir): os.makedirs (idir)
+        if not os.path.isdir(idir):
+            os.makedirs(idir)
 
-        fn = os.path.join (idir, 'state.svg')
-        self.graph.write_svg (fn)
+        fn = os.path.join(idir, 'state.svg')
+        self.graph.write_svg(fn)
         for edge in self.graph.get_edges():
-            self.machine.add_transition (**self.construct_attributes
-                                         (edge.get_attributes()))
+            self.machine.add_transition(
+                **self.construct_attributes(edge.get_attributes())
+            )
             pass
         for node in self.graph.get_nodes():
             node.set_style("filled")
@@ -177,133 +200,125 @@ class FSM:
         return
 
     def _archive(self, *_args, **_kwds):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.context
-        import dawgie.db
-        import dawgie.pl.schedule
-        import dawgie.tools.trace
-
-        log.info ('entering state archive')
-        basedir = os.path.abspath (os.path.join (dawgie.context.fe_path,
-                                                 'pages/database'))
-        os.makedirs (basedir, exist_ok=True)
+        log.info('entering state archive')
+        basedir = os.path.abspath(
+            os.path.join(dawgie.context.fe_path, 'pages/database')
+        )
+        os.makedirs(basedir, exist_ok=True)
         self.open_again = dawgie.db.reopen()
         # disable trace until issue 237 is addressed
         # dawgie.tools.trace.main (os.path.join(basedir, 'trace_report.html'),
         #                          dawgie.pl.schedule.ae.at)
         dawgie.db.close()
-        dawgie.db.archive (self._archive_done)
+        dawgie.db.archive(self._archive_done)
         return
 
     def _archive_done(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl.farm
+        if self.__doctest:
+            print('self._archive_done()')
+        else:
+            dawgie.pl.farm.archive = False
 
-        if self.__doctest: print ('self._archive_done()')
-        else: dawgie.pl.farm.archive = False
-
-        if self.open_again: dawgie.db.open()
+        if self.open_again:
+            dawgie.db.open()
 
         self.open_again = False
-        getattr (self, self.__prior + '_trigger')()
+        getattr(self, self.__prior + '_trigger')()
         return
 
-    def _gui (self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.fe
-
-        if self.__doctest: print ('self._gui()')
+    def _gui(self):
+        if self.__doctest:
+            print('self._gui()')
         else:
             factory = twisted.web.server.Site(dawgie.fe.root())
 
             if dawgie.context.ssl_pem_file:
-                if os.path.isfile (dawgie.context.ssl_pem_file):
-                    with open (dawgie.context.ssl_pem_file, 'rt',
-                               encoding='UTF-8') as f: cert = f.read()
+                if os.path.isfile(dawgie.context.ssl_pem_file):
+                    with open(
+                        dawgie.context.ssl_pem_file, 'rt', encoding='UTF-8'
+                    ) as f:
+                        cert = f.read()
                     cert = twisted.internet.ssl.PrivateCertificate.loadPEM(cert)
-                    twisted.internet.reactor.listenSSL (dawgie.context.fe_port,
-                                                        factory,
-                                                        cert.options())
+                    twisted.internet.reactor.listenSSL(
+                        dawgie.context.fe_port, factory, cert.options()
+                    )
                     if dawgie.security.clients():
                         twisted.internet.reactor.listenSSL(
-                            dawgie.context.cfe_port, factory,
-                            cert.options (*dawgie.security.clients()))
+                            dawgie.context.cfe_port,
+                            factory,
+                            cert.options(*dawgie.security.clients()),
+                        )
                 else:
                     raise FileNotFoundError(dawgie.context.ssl_pem_file)
-            else: twisted.internet.reactor.listenTCP (dawgie.context.fe_port,
-                                                      factory)
+            else:
+                twisted.internet.reactor.listenTCP(
+                    dawgie.context.fe_port, factory
+                )
             pass
         return
 
-    def _logging (self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.context
-        import dawgie.pl.logger
-        import dawgie.pl.logger.fe
-
-        if self.__doctest: print ('self._logging()')
+    def _logging(self):
+        if self.__doctest:
+            print('self._logging()')
         else:
-            dawgie.pl.logger.start (path=os.path.expanduser
-                                    (os.path.expandvars
-                                     (os.path.join (dawgie.context.data_log,
-                                                    self.args.log_file))),
-                                    port=dawgie.context.log_port)
+            dawgie.pl.logger.start(
+                path=os.path.expanduser(
+                    os.path.expandvars(
+                        os.path.join(
+                            dawgie.context.data_log, self.args.log_file
+                        )
+                    )
+                ),
+                port=dawgie.context.log_port,
+            )
             dawgie.pl.logger.fe.instance = dawgie.pl.logger.fe.Handler()
-            twisted_handler = dawgie.pl.logger.TwistedHandler\
-                              (host=dawgie.context.db_host,
-                               port=dawgie.context.log_port)
-            logging.basicConfig (handlers=[dawgie.pl.logger.fe.instance,
-                                           twisted_handler],
-                                 level=self.args.log_level)
-            logging.captureWarnings (True)
+            twisted_handler = dawgie.pl.logger.TwistedHandler(
+                host=dawgie.context.db_host, port=dawgie.context.log_port
+            )
+            logging.basicConfig(
+                handlers=[dawgie.pl.logger.fe.instance, twisted_handler],
+                level=self.args.log_level,
+            )
+            logging.captureWarnings(True)
             pass
         return
 
-    def _navel_gaze (self, *_args, **_kwds):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.db
-        import dawgie.pl.farm
-        import dawgie.pl.resources
-
-        log.info ('entering state navel gaze')
-        dawgie.pl.farm.insights = dawgie.pl.resources.distribution\
-                                  (dawgie.db.metrics())
-        log.info ('exiting state navel gaze')
+    def _navel_gaze(self, *_args, **_kwds):
+        log.info('entering state navel gaze')
+        dawgie.pl.farm.insights = dawgie.pl.resources.distribution(
+            dawgie.db.metrics()
+        )
+        log.info('exiting state navel gaze')
         return
 
     def _pipeline(self, *_args, **_kwds):
         # Begin the process of starting the pipeline
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie
-        import dawgie.db
-        import dawgie.pl.scan
-        import dawgie.pl.schedule
-        import dawgie.pl.version
-
-        if self.__doctest: print ('self._pipeline()')
+        if self.__doctest:
+            print('self._pipeline()')
         else:
-            facs = dawgie.pl.scan.for_factories (dawgie.context.ae_base_path,
-                                                 dawgie.context.ae_base_package)
+            facs = dawgie.pl.scan.for_factories(
+                dawgie.context.ae_base_path, dawgie.context.ae_base_package
+            )
             dawgie.db.open()
-            dawgie.pl.schedule.build (facs,
-                                      dawgie.pl.version.current
-                                      (facs[dawgie.Factories.analysis] +
-                                       facs[dawgie.Factories.regress] +
-                                       facs[dawgie.Factories.task]),
-                                      dawgie.pl.version.persistent())
-            dawgie.pl.schedule.periodics (facs[dawgie.Factories.events])
+            dawgie.pl.schedule.build(
+                facs,
+                dawgie.pl.version.current(
+                    facs[dawgie.Factories.analysis]
+                    + facs[dawgie.Factories.regress]
+                    + facs[dawgie.Factories.task]
+                ),
+                dawgie.pl.version.persistent(),
+            )
+            dawgie.pl.schedule.periodics(facs[dawgie.Factories.events])
             pass
         return
 
     def _reload(self, *args, **kwds):
         # pylint: disable=protected-access,unused-argument
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.db
-        import dawgie.tools.submit
+        log.info('entering state updating (reload)')
 
-        log.info ('entering state updating (reload)')
-
-        if self.__doctest: print ('self._reload()')
+        if self.__doctest:
+            print('self._reload()')
         else:
             log.info("Jump into the time machine. Do the reload Rollback.")
             dawgie.db.close()
@@ -312,34 +327,37 @@ class FSM:
             self.time_machine.reload()
             pass
 
-        log.info ('exiting state updating (reload)')
+        log.info('exiting state updating (reload)')
         pass
 
     def _security(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.security
-
-        if self.__doctest: print ('self._security()')
-        else: dawgie.security.initialize (path=os.path.expandvars
-                                          (os.path.expanduser
-                                           (dawgie.context.guest_public_keys)),
-                                          myname=dawgie.context.ssl_pem_myname,
-                                          myself=os.path.expandvars
-                                          (os.path.expanduser
-                                           (dawgie.context.ssl_pem_myself)))
+        if self.__doctest:
+            print('self._security()')
+        else:
+            dawgie.security.initialize(
+                path=os.path.expandvars(
+                    os.path.expanduser(dawgie.context.guest_public_keys)
+                ),
+                myname=dawgie.context.ssl_pem_myname,
+                myself=os.path.expandvars(
+                    os.path.expanduser(dawgie.context.ssl_pem_myself)
+                ),
+            )
         return
 
-    def archive (self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl.farm
-
+    def archive(self):
         if self.__doctest:
-            print ('self.archive()')
+            print('self.archive()')
             self._archive_done()
         elif dawgie.pl.farm.archive:
             d = twisted.internet.threads.deferToThread(self._archive, 2)
-            d.addErrback (dawgie.pl.LogFailure('while archiving the pipeline', __name__).log)
-        else: self._archive_done()
+            d.addErrback(
+                dawgie.pl.LogFailure(
+                    'while archiving the pipeline', __name__
+                ).log
+            )
+        else:
+            self._archive_done()
         return
 
     def construct_attributes(self, attributes):
@@ -347,8 +365,9 @@ class FSM:
         d = attributes.copy()
         c = "conditions"
 
-        if 'label' in d: del d['label']
-        if c in d and isinstance (d[c], list):
+        if 'label' in d:
+            del d['label']
+        if c in d and isinstance(d[c], list):
             v = d[c][1:-1]
             v = v.split(" ")
             d[c] = list(v)
@@ -356,15 +375,11 @@ class FSM:
 
     def is_crew_done(self):
         # pylint: disable=protected-access
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl.farm
         while dawgie.pl.farm._busy and self.waiting_on_crew():
             time.sleep(0.2)
         return
 
     def is_doing_done(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl.schedule
         while dawgie.pl.schedule.view_doing() and self.waiting_on_doing():
             time.sleep(0.2)
         return
@@ -373,58 +388,58 @@ class FSM:
         return self.state == 'running'
 
     def is_todo_done(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl.schedule
         while dawgie.pl.schedule.que and self.waiting_on_todo():
             time.sleep(0.2)
         return
 
     def load(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl
-        import dawgie.pl.farm
+        def done(*_args, **_kwds):
+            self.running_trigger()
 
-        def done(*_args, **_kwds): self.running_trigger()
-
-        log.info ('entering state loading')
+        log.info('entering state loading')
 
         if self.__doctest:
-            print ('self.load()')
+            print('self.load()')
             self._pipeline()
             done()
         else:
             log.info("Load the pipeline")
-            dawgie.pl.farm.notifyAll()
+            dawgie.pl.farm.notify_all()
             dawgie.pl.farm.clear()
             d = twisted.internet.threads.deferToThread(self._pipeline, 2)
-            d.addCallbacks (done, dawgie.pl.LogFailure('while loading the pipeline', __name__).log)
+            d.addCallbacks(
+                done,
+                dawgie.pl.LogFailure(
+                    'while loading the pipeline', __name__
+                ).log,
+            )
             pass
 
-        log.info ('exiting state loading')
+        log.info('exiting state loading')
         return
 
     def navel_gaze(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl
-
         d = twisted.internet.threads.deferToThread(self._navel_gaze, 2)
-        d.addErrback (dawgie.pl.LogFailure('while navel gazing', __name__).log)
+        d.addErrback(dawgie.pl.LogFailure('while navel gazing', __name__).log)
         return
 
     def reload(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl
-
-        def done(*_args, **_kwds): self.archiving_trigger()
+        def done(*_args, **_kwds):
+            self.archiving_trigger()
 
         if self.__doctest:
-            print ('self.reload()')
+            print('self.reload()')
             self._reload()
             done()
         else:
-            log.info ('Reload the pipeline')
+            log.info('Reload the pipeline')
             d = twisted.internet.threads.deferToThread(self._reload, 2)
-            d.addCallbacks (done, dawgie.pl.LogFailure('while reloading the pipeline', __name__).log)
+            d.addCallbacks(
+                done,
+                dawgie.pl.LogFailure(
+                    'while reloading the pipeline', __name__
+                ).log,
+            )
             pass
         return
 
@@ -435,63 +450,56 @@ class FSM:
         self.priority = None
         return
 
-    def save_prior_state (self):
+    def save_prior_state(self):
         self.__prior = self.state
         return
 
     def set_submit_info(self, changeset, priority):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.tools.submit
-
-        # pylint: disable=bare-except
-        try: priority = dawgie.tools.submit.Priority(priority)
-        except:
-            log.error ('Could not convert "%s" to a meaningful priority defaulting to ToDo is empty', str (priority))
+        try:
+            priority = dawgie.tools.submit.Priority(priority)
+        except:  # noqa: E722 # pylint: disable=bare-except
+            log.error(
+                'Could not convert "%s" to a meaningful priority defaulting to ToDo is empty',
+                str(priority),
+            )
             priority = dawgie.tools.submit.Priority.TODO
             pass
-        self.priority = dawgie.tools.submit.Priority.max (self.priority,
-                                                          priority)
+        self.priority = dawgie.tools.submit.Priority.max(
+            self.priority, priority
+        )
         self.changeset = changeset
         return
 
     def start(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.context
-        import dawgie.pl.farm
+        if self.__doctest:
+            print('self.start()')
 
-        if self.__doctest: print ('self.start()')
-
-        log.info ('entering state starting')
+        log.info('entering state starting')
         self._security()
         self._gui()
         self._logging()
-        log.info ('Starting the pipeline')
+        log.info('Starting the pipeline')
         dawgie.pl.farm.plow()
         self.time_machine = RollbackImporter()
-        log.info ('exiting state starting')
+        log.info('exiting state starting')
         return
 
     def state_view(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.context
-        import dawgie.pl.dag
-        import dawgie.pl.schedule
-
         self.nodes[self.prior_state].set_fillcolor(self.inactive_color)
         self.prior_state = dawgie.context.fsm.state
         self.nodes[dawgie.context.fsm.state].set_fillcolor(self.active_color)
-        return dawgie.pl.dag.Construct.graph (self.graph, [], 'current.svg')
+        return dawgie.pl.dag.Construct.graph(self.graph, [], 'current.svg')
 
     def submit_crossroads(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.tools.submit
-
         # Check if we are in the correct state
         log.info("At the submit crossroads.")
         if not self.is_pipeline_active():
-            log.warning("Pipeline is not active while we are at the submit crossroad.")
+            log.warning(
+                "Pipeline is not active while we are at the submit crossroad."
+            )
         else:
-            if self.priority is None: pass
+            if self.priority is None:
+                pass
             elif self.priority == dawgie.tools.submit.Priority.CREW:
                 self.wait_for_crew()
             elif self.priority == dawgie.tools.submit.Priority.DOING:
@@ -505,9 +513,6 @@ class FSM:
         return
 
     def wait_for_crew(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl
-
         def done(*_args, **_kwds):
             if self.waiting_on_crew():
                 self.update_trigger()
@@ -521,15 +526,19 @@ class FSM:
         self.wait_on_todo.set()
 
         if self.crew_thread is None:
-            self.crew_thread = twisted.internet.threads.deferToThread(self.is_crew_done)
-            self.crew_thread.addCallbacks (done, dawgie.pl.LogFailure('while signaling crew is done', __name__).log)
+            self.crew_thread = twisted.internet.threads.deferToThread(
+                self.is_crew_done
+            )
+            self.crew_thread.addCallbacks(
+                done,
+                dawgie.pl.LogFailure(
+                    'while signaling crew is done', __name__
+                ).log,
+            )
             pass
         return
 
     def wait_for_doing(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl
-
         def done(*_args, **_kwds):
             if self.waiting_on_doing():
                 self.update_trigger()
@@ -542,8 +551,15 @@ class FSM:
         self.wait_on_todo.set()
 
         if self.doing_thread is None:
-            self.doing_thread = twisted.internet.threads.deferToThread(self.is_doing_done)
-            self.doing_thread.addCallbacks (done, dawgie.pl.LogFailure('while signaling doing is done', __name__).log)
+            self.doing_thread = twisted.internet.threads.deferToThread(
+                self.is_doing_done
+            )
+            self.doing_thread.addCallbacks(
+                done,
+                dawgie.pl.LogFailure(
+                    'while signaling doing is done', __name__
+                ).log,
+            )
             pass
         return
 
@@ -556,9 +572,6 @@ class FSM:
         return
 
     def wait_for_todo(self):
-        # avoid circular dependencies so pylint: disable=import-outside-toplevel
-        import dawgie.pl
-
         def done(*_args, **_kwds):
             if self.waiting_on_todo():
                 self.update_trigger()
@@ -570,8 +583,15 @@ class FSM:
         self.wait_on_todo.clear()
 
         if self.todo_thread is None:
-            self.todo_thread = twisted.internet.threads.deferToThread(self.is_todo_done)
-            self.todo_thread.addCallbacks (done, dawgie.pl.LogFailure('while signaling todo is done', __name__).log)
+            self.todo_thread = twisted.internet.threads.deferToThread(
+                self.is_todo_done
+            )
+            self.todo_thread.addCallbacks(
+                done,
+                dawgie.pl.LogFailure(
+                    'while signaling todo is done', __name__
+                ).log,
+            )
             pass
         return
 
@@ -583,8 +603,10 @@ class FSM:
 
     def waiting_on_todo(self):
         return not self.wait_on_todo.wait(self.wait_timeout)
+
     pass
 
+
 if __name__ == "__main__":
-    doctest.testmod (verbose=True, exclude_empty=True)
+    doctest.testmod(verbose=True, exclude_empty=True)
     pass

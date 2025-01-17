@@ -1,7 +1,7 @@
 '''The algorithm engine for touching the local disk
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -43,31 +43,50 @@ import ae.prime.bot
 import dawgie
 import numpy.random
 
+
 class Actor(dawgie.Task):
-    def list(self): return [Engine()]
+    def list(self):
+        return [Engine()]
+
     pass
+
 
 class Engine(dawgie.Algorithm):
     def __init__(self):
         dawgie.Algorithm.__init__(self)
         self.__prime = ae.prime.bot.Engine()
         self.__sv = ae.StateVector()
-        self.__sv['e'] = ae.Value (1.0, 0)
-        self.__sv['f'] = ae.Value (1.0, 0)
-        self._version_ = dawgie.VERSION(1,0,0)
+        self.__sv['e'] = ae.Value(1.0, 0)
+        self.__sv['f'] = ae.Value(1.0, 0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         return
 
-    def name(self): return 'engine'
-    def previous(self): return [dawgie.V_REF(factory=ae.prime.task,
-                                             impl=self.__prime,
-                                             item=self.__prime.state_vectors()[0],
-                                             feat='c')]
+    def name(self):
+        return 'engine'
 
-    def run (self, ds, ps):
-        self.__sv['e'] = ae.Value (numpy.random.rand() + self.__prime.state_vectors()[0]['c'].value(), 0x0011)
-        self.__sv['f'] = ae.Value (numpy.random.rand() * self.__prime.state_vectors()[0]['c'].value(), 0x0012)
+    def previous(self):
+        return [
+            dawgie.V_REF(
+                factory=ae.prime.task,
+                impl=self.__prime,
+                item=self.__prime.state_vectors()[0],
+                feat='c',
+            )
+        ]
+
+    def run(self, ds, ps):
+        self.__sv['e'] = ae.Value(
+            numpy.random.rand() + self.__prime.state_vectors()[0]['c'].value(),
+            0x0011,
+        )
+        self.__sv['f'] = ae.Value(
+            numpy.random.rand() * self.__prime.state_vectors()[0]['c'].value(),
+            0x0012,
+        )
         ds.update()
         return
 
-    def state_vectors (self): return [self.__sv]
+    def state_vectors(self):
+        return [self.__sv]
+
     pass

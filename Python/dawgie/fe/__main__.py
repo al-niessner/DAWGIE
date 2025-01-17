@@ -1,7 +1,7 @@
 '''Built-in Front-End for DAWGIE
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -37,6 +37,9 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+# main modules usually have very similar lines to other mains or inits so
+# pylint: disable=duplicate-code
+
 import dawgie.context
 import dawgie.pl.state
 import dawgie.fe
@@ -47,26 +50,30 @@ import twisted.web.resource
 import twisted.web.server
 
 dawgie.context.fsm = dawgie.pl.state.FSM()
-dawgie.security.initialize(path=dawgie.context.guest_public_keys,
-                           myname=dawgie.context.ssl_pem_myname,
-                           myself=dawgie.context.ssl_pem_myself)
+dawgie.security.initialize(
+    path=dawgie.context.guest_public_keys,
+    myname=dawgie.context.ssl_pem_myname,
+    myself=dawgie.context.ssl_pem_myself,
+)
 factory = twisted.web.server.Site(dawgie.fe.root())
 
 if dawgie.context.ssl_pem_file:
-    if os.path.isfile (dawgie.context.ssl_pem_file):
-        with open (dawgie.context.ssl_pem_file, 'rt', encoding="utf-8") as f: \
-             cert = f.read()
+    if os.path.isfile(dawgie.context.ssl_pem_file):
+        with open(dawgie.context.ssl_pem_file, 'rt', encoding="utf-8") as f:
+            cert = f.read()
         cert = twisted.internet.ssl.PrivateCertificate.loadPEM(cert)
-        twisted.internet.reactor.listenSSL (dawgie.context.fe_port,
-                                            factory,
-                                            cert.options())
+        twisted.internet.reactor.listenSSL(
+            dawgie.context.fe_port, factory, cert.options()
+        )
         if dawgie.security.clients():
-            twisted.internet.reactor.listenSSL (dawgie.context.cfe_port,
-                                                factory,
-                                                cert.options
-                                                (*dawgie.security.clients()))
+            twisted.internet.reactor.listenSSL(
+                dawgie.context.cfe_port,
+                factory,
+                cert.options(*dawgie.security.clients()),
+            )
     else:
         raise FileNotFoundError(dawgie.context.ssl_pem_file)
-else: twisted.internet.reactor.listenTCP (dawgie.context.fe_port, factory)
+else:
+    twisted.internet.reactor.listenTCP(dawgie.context.fe_port, factory)
 
 twisted.internet.reactor.run()

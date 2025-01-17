@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -44,38 +44,66 @@ import dawgie.pl.scan
 import logging
 import os
 
-def _dir (dn:str):
-    if not os.path.isdir (dn):
+
+def _dir(dn: str):
+    if not os.path.isdir(dn):
         raise ValueError(f'The specified value {dn} is not a directory')
     return dn
 
+
 known = set()
-def pt (task, text=''):
+
+
+def pt(task, text=''):
     text += task.tag
 
     if task.tag not in known and task:
-        known.add (task.tag)
-        for c in task: text = pt (c, text + ' -> ')
+        known.add(task.tag)
+        for c in task:
+            text = pt(c, text + ' -> ')
     return text
 
-ap = argparse.ArgumentParser(description='Build the task, algorithm, state vector, and value trees for the AE and write them to --output-dir.')
-ap.add_argument ('-O', '--output-dir', required=True, type=_dir,
-                 help='directory to write the SVG files to')
-ap.add_argument ('-v', '--verbose', action='store_true', default=False,
-                 help='display processing information')
-dawgie.context.add_arguments (ap)
+
+ap = argparse.ArgumentParser(
+    description='Build the task, algorithm, state vector, and value trees for the AE and write them to --output-dir.'
+)
+# ignore tools that use similar arguments
+# pylint: disable=duplicate-code
+ap.add_argument(
+    '-O',
+    '--output-dir',
+    required=True,
+    type=_dir,
+    help='directory to write the SVG files to',
+)
+ap.add_argument(
+    '-v',
+    '--verbose',
+    action='store_true',
+    default=False,
+    help='display processing information',
+)
+# pylint: enable=duplicate-code
+dawgie.context.add_arguments(ap)
 args = ap.parse_args()
 
-if args.verbose: logging.basicConfig(level=logging.DEBUG)
+if args.verbose:
+    logging.basicConfig(level=logging.DEBUG)
 
-dawgie.context.override (args)
+dawgie.context.override(args)
 dawgie.db.open()
-factories = dawgie.pl.scan.for_factories (dawgie.context.ae_base_path,
-                                          dawgie.context.ae_base_package)
+factories = dawgie.pl.scan.for_factories(
+    dawgie.context.ae_base_path, dawgie.context.ae_base_package
+)
 dag = dawgie.pl.dag.Construct(factories)
-print ('root count:', len (dag.tt))
-for tt in dag.tt: print (pt (tt))
-with open (os.path.join (args.output_dir,'av.svg'),'wb') as f: f.write (dag.av)
-with open (os.path.join (args.output_dir,'sv.svg'),'wb') as f: f.write (dag.svv)
-with open (os.path.join (args.output_dir,'tv.svg'),'wb') as f: f.write (dag.tv)
-with open (os.path.join (args.output_dir,'vv.svg'),'wb') as f: f.write (dag.vv)
+print('root count:', len(dag.tt))
+for tt in dag.tt:
+    print(pt(tt))
+with open(os.path.join(args.output_dir, 'av.svg'), 'wb') as f:
+    f.write(dag.av)
+with open(os.path.join(args.output_dir, 'sv.svg'), 'wb') as f:
+    f.write(dag.svv)
+with open(os.path.join(args.output_dir, 'tv.svg'), 'wb') as f:
+    f.write(dag.tv)
+with open(os.path.join(args.output_dir, 'vv.svg'), 'wb') as f:
+    f.write(dag.vv)

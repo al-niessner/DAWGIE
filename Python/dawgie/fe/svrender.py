@@ -1,7 +1,7 @@
 '''Define a deferred rendering of a state vector
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -37,52 +37,61 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-from dawgie.fe import Defer as absDefer
+from dawgie.fe.basis import Defer as absDefer
 
 import dawgie
-import logging; log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import twisted.internet.threads
+
 
 class Defer(absDefer):
     @staticmethod
-    def _db_item (display:dawgie.Visitor, identity, path:str)->None:
-        runid,tn,task,alg,sv = path[0].split ('.')
-        dawgie.db.view (display, identity, int(runid), tn, task, alg, sv)
+    def _db_item(display: dawgie.Visitor, identity, path: str) -> None:
+        runid, tn, task, alg, sv = path[0].split('.')
+        dawgie.db.view(display, identity, int(runid), tn, task, alg, sv)
         return
 
-    def __call__ (self, path:str):
+    def __call__(self, path: str):
         display = dawgie.de.factory()
-        d = twisted.internet.threads.deferToThread(self._db_item,
-                                                   display=display,
-                                                   identity=self.identity,
-                                                   path=path)
+        d = twisted.internet.threads.deferToThread(
+            self._db_item, display=display, identity=self.identity, path=path
+        )
         h = Renderer(display, self.request)
-        d.addCallbacks (h.success, h.failure)
+        d.addCallbacks(h.success, h.failure)
         return twisted.web.server.NOT_DONE_YET
+
     pass
 
+
 class Renderer:
-    def __init__ (self, display, request):
+    def __init__(self, display, request):
         object.__init__(self)
         self.__display = display
         self.__request = request
         return
 
-    def failure (self, result):
+    def failure(self, result):
         # pylint: disable=bare-except
-        self.__request.write (b'<h1>Dynamic Content Generation Failed</h1><p>' +
-                              str (result).replace ('\n','<br/>').encode() +
-                              b'</p>')
-        try: self.__request.finish()
-        except: log.exception ('Failed to complete an error page: %s',
-                               str (result))
+        self.__request.write(
+            b'<h1>Dynamic Content Generation Failed</h1><p>'
+            + str(result).replace('\n', '<br/>').encode()
+            + b'</p>'
+        )
+        try:
+            self.__request.finish()
+        except:  # noqa: E722
+            log.exception('Failed to complete an error page: %s', str(result))
         return
 
-    def success (self, result):
+    def success(self, result):
         # pylint: disable=bare-except
-        self.__request.write (self.__display.render().encode())
-        try: self.__request.finish()
-        except: log.exception ('Failed to complete a successful page: %s',
-                               str (result))
+        self.__request.write(self.__display.render().encode())
+        try:
+            self.__request.finish()
+        except:  # noqa: E722
+            log.exception(
+                'Failed to complete a successful page: %s', str(result)
+            )
         return
+
     pass

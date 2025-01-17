@@ -2,7 +2,7 @@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -41,7 +41,8 @@ NTR: 49811
 import dawgie.context
 import logging
 
-def task_name (factory):
+
+def task_name(factory):
     '''Compute the pipeline specified prefix for any dawgie.Task
 
     Given the factory function for a list of dawgie.Task, compute the prefix
@@ -49,9 +50,10 @@ def task_name (factory):
     the index of the task in the list.
     '''
     cnt = len(dawgie.context.ae_base_package.split('.'))
-    return '.'.join (factory.__module__.split ('.')[cnt:])
+    return '.'.join(factory.__module__.split('.')[cnt:])
 
-def verify_name (o, err=False):
+
+def verify_name(o, err=False):
     '''Check the name of an object meets the naming convention
 
     The architecture generate a full name by ".".join (elements). Hence, the
@@ -66,18 +68,20 @@ def verify_name (o, err=False):
     return True when o.name().find (".") < 0 and same for
                 dawgie.StateVector.keys()
     '''
-    log = logging.getLogger (__file__)
-    result = o.name().find (".") < 0
+    log = logging.getLogger(__file__)
+    result = o.name().find(".") < 0
 
-    if not result: \
-       log.critical ('The name "%s" contains the special character "."', o.name)
-    if isinstance (o, dawgie.StateVector):
-        for name,state in [(k,k.find ('.') < 0) for k in o.keys()]:
+    if not result:
+        log.critical('The name "%s" contains the special character "."', o.name)
+    if isinstance(o, dawgie.StateVector):
+        for name, state in [(k, k.find('.') < 0) for k in o.keys()]:
             result &= state
-            if not state: \
-               log.critical ('The name "%s" contains the special character "."',
-                             name)
+            if not state:
+                log.critical(
+                    'The name "%s" contains the special character "."', name
+                )
             pass
         pass
-    if err and not result: raise ValueError('The name(s) contains the special character "."')
+    if err and not result:
+        raise ValueError('The name(s) contains the special character "."')
     return result

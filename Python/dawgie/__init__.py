@@ -1,7 +1,7 @@
 '''
 --
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -41,19 +41,24 @@ import collections
 import datetime
 import enum
 import getpass
+import importlib
 import logging
 import os
 import resource
 
-# pylint: disable=attribute-defined-outside-init,no-self-use,protected-access,too-many-arguments
+# The names here represent the basic API for developers beyond dawgie. Since
+# there are users of this and chaning these names would represent ripples beyond
+# this repository, just going to leave them as is. Going to leave the whole API
+# as it is since it works.
+# pylint: disable=attribute-defined-outside-init,invalid-name,protected-access,too-many-arguments,too-many-lines,too-many-positional-arguments
 
 # factory : the task factory that would normally create this algorithm
 # impl : an instance of the algorithm
-ALG_REF = collections.namedtuple ('ALG_REF', ['factory', 'impl'])
+ALG_REF = collections.namedtuple('ALG_REF', ['factory', 'impl'])
 
 # factory : the task/analysis factory
 # name : name of the algorithm within related to the factory
-EVENT = collections.namedtuple ('EVENT', ['algref', 'moment'])
+EVENT = collections.namedtuple('EVENT', ['algref', 'moment'])
 
 # see resource.getrusage()
 # input  : number of times the filesystem had to perform input  [ru_inblock]
@@ -62,8 +67,9 @@ EVENT = collections.namedtuple ('EVENT', ['algref', 'moment'])
 # pages  : number of page faults serviced that required I/O     [ru_majflt]
 # sys    : total amount of time spent executing in kernel mode  [ru_stime]
 # user   : total amount of time spent executing in user mode    [ru_utime]
-METRIC = collections.namedtuple ('METRIC', ['input', 'mem', 'output',
-                                            'pages', 'sys', 'user', 'wall'])
+METRIC = collections.namedtuple(
+    'METRIC', ['input', 'mem', 'output', 'pages', 'sys', 'user', 'wall']
+)
 # day : an instance of an object that describes a calendar date
 #       known working instances are:
 # dom : day-of-month or int from 1-31
@@ -71,38 +77,46 @@ METRIC = collections.namedtuple ('METRIC', ['input', 'mem', 'output',
 # time: an instance of datetime.time and tzone will be assigned UTC if None
 #
 # Only one of boot, date, dom, or dow should be defined
-MOMENT = collections.namedtuple ('MOMENT', ['boot','day','dom','dow','time'])
+MOMENT = collections.namedtuple('MOMENT', ['boot', 'day', 'dom', 'dow', 'time'])
 
-def schedule(factory, impl,
-             boot:bool=None,
-             day:datetime.date=None, dom:int=None,
-             dow:int=None, time:datetime.time=None):
+
+def schedule(
+    factory,
+    impl,
+    boot: bool = None,
+    day: datetime.date = None,
+    dom: int = None,
+    dow: int = None,
+    time: datetime.time = None,
+):
     not_defined = [boot is None, day is None, dom is None, dow is None]
 
-    if sum (not_defined) != len (not_defined)-1:
-        raise ValueError('One and only one of boot, day, dom, or dow ' +
-                         'should be defined.')
-    if day and not isinstance (day, datetime.date):
+    if sum(not_defined) != len(not_defined) - 1:
+        raise ValueError(
+            'One and only one of boot, day, dom, or dow ' + 'should be defined.'
+        )
+    if day and not isinstance(day, datetime.date):
         raise ValueError('day must be of datetime.date')
-    if dom and not isinstance (dom, int):
+    if dom and not isinstance(dom, int):
         raise ValueError('dom must be an integer')
-    if dow and not isinstance (dow, int):
+    if dow and not isinstance(dow, int):
         raise ValueError('dow must be an integer')
-    if not boot and (time and not isinstance (time, datetime.time)):
+    if not boot and (time and not isinstance(time, datetime.time)):
         raise ValueError('time must be of datetime.time')
 
     return EVENT(ALG_REF(factory, impl), MOMENT(boot, day, dom, dow, time))
 
+
 # factory : the task factory that would normally create this algorithm
 # impl : an instance of the algorithm
 # item : an instance of the state vector from the algorithm
-SV_REF = collections.namedtuple ('SV_REF', ['factory', 'impl', 'item'])
+SV_REF = collections.namedtuple('SV_REF', ['factory', 'impl', 'item'])
 
 # factory : the task factory that would normally create this algorithm
 # impl : an instance of the algorithm
 # item : an instance of the state vector from the algorithm
 # feat : a string to use as the key in the state vector
-V_REF = collections.namedtuple ('V_REF', ['factory', 'impl', 'item', 'feat'])
+V_REF = collections.namedtuple('V_REF', ['factory', 'impl', 'item', 'feat'])
 
 
 #
@@ -113,27 +127,37 @@ VERSION = collections.namedtuple('VERSION', ['design', 'impl', 'bugfix'])
 
 # An exception to abort processing order that is initiated from anywhere deep
 # in the AE.
-class AbortAEError(RuntimeError): pass
+class AbortAEError(RuntimeError):
+    pass
+
 
 # These two exceptions are used to help the pipeline understand the data flow.
 # The appropriate exception should be used to terminate processing at the
 # current task/algorithm.
-class NoValidInputDataError(ValueError): pass
-class NoValidOutputDataError(ValueError): pass
+class NoValidInputDataError(ValueError):
+    pass
+
+
+class NoValidOutputDataError(ValueError):
+    pass
+
 
 # This exception is for the pipeline to signal that the AE is not complaint
 # with the architecture since not all checks can be done statically with
 # tools/compliant.py
-class NotValidImplementationError(ValueError): pass
+class NotValidImplementationError(ValueError):
+    pass
+
 
 # An enumeration of allowable ways to distribute an algorithm, analyzer,
 # or regression
 @enum.unique
 class Distribution(enum.Enum):
-    auto = None      # Place holder for default where()
-    cloud = True     # No IO other than the db (db can access S3)
+    auto = None  # Place holder for default where()
+    cloud = True  # No IO other than the db (db can access S3)
     cluster = False  # Allows IO (could be a mirrored cluster)
     pass
+
 
 # An enumeration of allowable factories in ae/<task>/__init__.py
 # The should follow this form:
@@ -148,73 +172,82 @@ class Distribution(enum.Enum):
 #     target is the name to be used for look up and should default to __none__
 class Factories(enum.Enum):
     analysis = enum.auto()  # create an dawgie.Analysis for all targets
-    events = enum.auto()    # list of dawgie.EVENT
-    regress = enum.auto()   # create an dawgie.Regression for a target
-    task = enum.auto()      # create an dawgie.Task for a target
+    events = enum.auto()  # list of dawgie.EVENT
+    regress = enum.auto()  # create an dawgie.Regression for a target
+    task = enum.auto()  # create an dawgie.Task for a target
 
     @staticmethod
-    def resolve (reference): return Factories[reference.factory.__name__]
+    def resolve(reference):
+        return Factories[reference.factory.__name__]
+
     pass
+
 
 ###
 # Below are the interfaces that developers must use
 ###
 
+
 class _Metric:
     '''Interface used internally to measure process resource usage'''
+
     def __init__(self):
         self.__history = []
         self.msv = None
         return
 
     @staticmethod
-    def diff (a, b, dt)->METRIC:
+    def diff(a, b, dt) -> METRIC:
         '''compute a - b'''
-        return METRIC(input=a.ru_inblock - b.ru_inblock,
-                      mem=a.ru_maxrss - b.ru_maxrss,
-                      output=a.ru_oublock - b.ru_oublock,
-                      pages=a.ru_majflt - b.ru_majflt,
-                      sys=a.ru_stime - b.ru_stime,
-                      user=a.ru_utime - b.ru_utime,
-                      wall=dt)
+        return METRIC(
+            input=a.ru_inblock - b.ru_inblock,
+            mem=a.ru_maxrss - b.ru_maxrss,
+            output=a.ru_oublock - b.ru_oublock,
+            pages=a.ru_majflt - b.ru_majflt,
+            sys=a.ru_stime - b.ru_stime,
+            user=a.ru_utime - b.ru_utime,
+            wall=dt,
+        )
 
-    def measure (self, func, args=(), ds:'Dataset'=None):
-        c0 = resource.getrusage (resource.RUSAGE_CHILDREN)
-        s0 = resource.getrusage (resource.RUSAGE_SELF)
+    def measure(self, func, args=(), ds: 'Dataset' = None):
+        c0 = resource.getrusage(resource.RUSAGE_CHILDREN)
+        s0 = resource.getrusage(resource.RUSAGE_SELF)
         t0 = datetime.datetime.utcnow()
-        value = func (*args)
-        c1 = resource.getrusage (resource.RUSAGE_CHILDREN)
-        s1 = resource.getrusage (resource.RUSAGE_SELF)
-        child = _Metric.diff (c1, c0, 0)
-        task = _Metric.diff (s1, s0,
-                             (datetime.datetime.utcnow()-t0).total_seconds())
-        self.__history.append ({'child':child, 'task':task})
+        value = func(*args)
+        c1 = resource.getrusage(resource.RUSAGE_CHILDREN)
+        s1 = resource.getrusage(resource.RUSAGE_SELF)
+        child = _Metric.diff(c1, c0, 0)
+        task = _Metric.diff(
+            s1, s0, (datetime.datetime.utcnow() - t0).total_seconds()
+        )
+        self.__history.append({'child': child, 'task': task})
 
         if ds is not None:
-            # need to break circular dependancy so
-            # pylint: disable=import-outside-toplevel
-            import dawgie.db
-            import dawgie.util
+            dawgie_util = importlib.import_module('dawgie.util')
 
             db = ds.sum()
             task = self.sum()
-            ds._update_msv (dawgie.util.MetricStateVector(db,task))
+            ds._update_msv(dawgie_util.MetricStateVector(db, task))
             pass
         return value
 
-    def sum (self):
+    def sum(self):
         '''return the sum of all collected metrics'''
         s = METRIC(input=0, mem=0, output=0, pages=0, sys=0.0, user=0.0, wall=0)
-        for h in self.__history:\
-            s = METRIC(input=s.input + h['child'].input + h['task'].input,
-                       mem=s.mem + h['child'].mem + h['task'].mem,
-                       output=s.output + h['child'].output + h['task'].output,
-                       pages=s.pages + h['child'].pages + h['task'].pages,
-                       sys=s.sys + h['child'].sys + h['task'].sys,
-                       user=s.user + h['child'].user + h['task'].user,
-                       wall=s.wall + h['child'].wall + h['task'].wall)
+        for h in self.__history:
+            s = METRIC(
+                input=s.input + h['child'].input + h['task'].input,
+                mem=s.mem + h['child'].mem + h['task'].mem,
+                output=s.output + h['child'].output + h['task'].output,
+                pages=s.pages + h['child'].pages + h['task'].pages,
+                sys=s.sys + h['child'].sys + h['task'].sys,
+                user=s.user + h['child'].user + h['task'].user,
+                wall=s.wall + h['child'].wall + h['task'].wall,
+            )
         return s
+
     pass
+
 
 class Version:
     '''Define what a version number is the context of DAWGIE
@@ -260,44 +293,87 @@ class Version:
     self._get_ver() and self._set_ver(). However, this should be done with
     extreme caution.
     '''
+
     def __eq__(self, other):
-        return all ([self.design() == other.design(),
-                     self.implementation() == other.implementation(),
-                     self.bugfix() == other.bugfix()])
+        return all(
+            [
+                self.design() == other.design(),
+                self.implementation() == other.implementation(),
+                self.bugfix() == other.bugfix(),
+            ]
+        )
+
     def __ge__(self, other):
-        if self.design() > other.design(): return True
+        if self.design() > other.design():
+            return True
         if self.design() == other.design():
-            if self.implementation() > other.implementation(): return True
+            if self.implementation() > other.implementation():
+                return True
             if self.implementation() == other.implementation():
                 return self.bugfix() >= other.bugfix()
         return False
-    def __gt__(self, other): return self.__ge__ (other) and self.__ne__ (other)
+
+    def __gt__(self, other):
+        return self.__ge__(other) and self.__ne__(other)
+
     def __le__(self, other):
-        if self.design() < other.design(): return True
+        if self.design() < other.design():
+            return True
         if self.design() == other.design():
-            if self.implementation() < other.implementation(): return True
+            if self.implementation() < other.implementation():
+                return True
             if self.implementation() == other.implementation():
                 return self.bugfix() <= other.bugfix()
         return False
-    def __lt__(self, other): return self.__le__ (other) and self.__ne__ (other)
-    def __ne__(self, other):
-        return any ([self.design() != other.design(),
-                     self.implementation() != other.implementation(),
-                     self.bugfix() != other.bugfix()])
 
-    def _get_ver(self)->VERSION: return self._version_
-    def _set_ver(self, ver:VERSION): self._version_ = ver
-    def asstring(self)->str: return '.'.join ([str(self.design()),
-                                               str(self.implementation()),
-                                               str(self.bugfix())])
-    def bugfix(self)->int: return self._get_ver().bugfix
-    def design(self)->int: return self._get_ver().design
-    def implementation(self)->int: return self._get_ver().impl
-    def newer (self, than:VERSION)->bool:
-        return (than.design < self.design() or
-                (than.design == self.design() and than.impl < self.implementation()) or
-                (than.design == self.design() and than.impl == self.implementation() and than.bugfix < self.bugfix()))
+    def __lt__(self, other):
+        return self.__le__(other) and self.__ne__(other)
+
+    def __ne__(self, other):
+        return any(
+            [
+                self.design() != other.design(),
+                self.implementation() != other.implementation(),
+                self.bugfix() != other.bugfix(),
+            ]
+        )
+
+    def _get_ver(self) -> VERSION:
+        return self._version_
+
+    def _set_ver(self, ver: VERSION):
+        self._version_ = ver
+
+    def asstring(self) -> str:
+        return '.'.join(
+            [str(self.design()), str(self.implementation()), str(self.bugfix())]
+        )
+
+    def bugfix(self) -> int:
+        return self._get_ver().bugfix
+
+    def design(self) -> int:
+        return self._get_ver().design
+
+    def implementation(self) -> int:
+        return self._get_ver().impl
+
+    def newer(self, than: VERSION) -> bool:
+        return (
+            than.design < self.design()
+            or (
+                than.design == self.design()
+                and than.impl < self.implementation()
+            )
+            or (
+                than.design == self.design()
+                and than.impl == self.implementation()
+                and than.bugfix < self.bugfix()
+            )
+        )
+
     pass
+
 
 class Algorithm(Version):
     '''Define what an algorithm means in the context of DAWGIE
@@ -335,20 +411,40 @@ class Algorithm(Version):
        - when called prior to run() Values should be the base Value
        - when called post to run() Values should contain current Value
     '''
+
     def __repr__(self):
-        if 'caller' not in dir(self): self.caller = None
-        if self.caller: return '.'.join ([repr(self.caller), self.name()])
+        if 'caller' not in dir(self):
+            self.caller = None
+        if self.caller:
+            return '.'.join([repr(self.caller), self.name()])
         return self.name()
-    def abort(self)->bool: return False
-    def feedback(self)->[SV_REF, V_REF]: return []
-    def name(self)->str: raise NotImplementedError()
-    def previous(self)->[SV_REF, V_REF]: raise NotImplementedError()
-    def run(self, ds, ps): raise NotImplementedError()
-    def state_vectors(self)->'[StateVector]': raise NotImplementedError()
-    def sv_as_dict(self)->'{str:StateVector}':
-        return {sv.name():sv for sv in self.state_vectors()}
-    def where(self)->Distribution: return Distribution.auto
+
+    def abort(self) -> bool:
+        return False
+
+    def feedback(self) -> [SV_REF, V_REF]:
+        return []
+
+    def name(self) -> str:
+        raise NotImplementedError()
+
+    def previous(self) -> [SV_REF, V_REF]:
+        raise NotImplementedError()
+
+    def run(self, ds, ps):
+        raise NotImplementedError()
+
+    def state_vectors(self) -> '[StateVector]':
+        raise NotImplementedError()
+
+    def sv_as_dict(self) -> '{str:StateVector}':
+        return {sv.name(): sv for sv in self.state_vectors()}
+
+    def where(self) -> Distribution:
+        return Distribution.auto
+
     pass
+
 
 class Analysis(_Metric):
     '''The Analysis is the base for all bots that analyze data across targets
@@ -357,6 +453,7 @@ class Analysis(_Metric):
 
     list() -> return a list of all analyzers
     '''
+
     def __init__(self, name, ps_hint, runid):
         _Metric.__init__(self)
         self.__name = name
@@ -365,15 +462,23 @@ class Analysis(_Metric):
         self.__runid = runid
         self.__timing = {}
         return
-    def __repr__(self): return '.'.join ([str(self.__runid),
-                                          '__all__',
-                                          self.__name])
-    def _name(self)->str: return self.__name
-    def _ps_hint(self)->int: return self.__ps_hint
-    def _runid(self)->int: return self.__runid
-    def _target(self)->str: return '__all__'
 
-    def abort(self)->bool:
+    def __repr__(self):
+        return '.'.join([str(self.__runid), '__all__', self.__name])
+
+    def _name(self) -> str:
+        return self.__name
+
+    def _ps_hint(self) -> int:
+        return self.__ps_hint
+
+    def _runid(self) -> int:
+        return self.__runid
+
+    def _target(self) -> str:
+        return '__all__'
+
+    def abort(self) -> bool:
         '''Check with the pipeline to see if system should abort.
 
         The default implementation is to always return False. This will allow
@@ -383,37 +488,41 @@ class Analysis(_Metric):
         '''
         return False
 
-    def do(self, goto:str=None)->None:
-        # need to break circular dependancy so
-        # pylint: disable=import-outside-toplevel
-        import dawgie.db
+    def do(self, goto: str = None) -> None:
+        dawgie_db = importlib.import_module('dawgie.db')
+        log = logging.getLogger(__name__ + '.Analysis')
+        for step in filter(
+            lambda s: goto is None or s.name() == goto, self.list()
+        ):
+            if self.abort():
+                raise AbortAEError()
 
-        log = logging.getLogger (__name__ + '.Analysis')
-        for step in filter (lambda s:goto is None or s.name() == goto,
-                            self.list()):
-            if self.abort(): raise AbortAEError()
-
-            setattr (step, 'abort', self.abort)
-            setattr (step, 'caller', self)
+            setattr(step, 'abort', self.abort)
+            setattr(step, 'caller', self)
             self.__timing['gather_' + step.name()] = datetime.datetime.utcnow()
-            aspect = dawgie.db.gather (step, self)
+            aspect = dawgie_db.gather(step, self)
             self.__timing['collect_' + step.name()] = datetime.datetime.utcnow()
-            aspect.collect (step.feedback())
-            aspect.collect (step.traits())
+            aspect.collect(step.feedback())
+            aspect.collect(step.traits())
             self.__timing['start_' + self._name()] = datetime.datetime.utcnow()
-            log.debug ('Stepping into %s', step.name())
-            self.measure (step.run, args=(aspect,), ds=aspect.ds())
-            setattr (step, 'caller', None)
+            log.debug('Stepping into %s', step.name())
+            self.measure(step.run, args=(aspect,), ds=aspect.ds())
+            setattr(step, 'caller', None)
         return
 
-    def list(self)->'[Analyzer]': raise NotImplementedError()
+    def list(self) -> '[Analyzer]':
+        raise NotImplementedError()
 
-    def new_values (self, value:(str,bool)=None)->[(str,bool)]:
-        if value: self.__nv.append (value)
+    def new_values(self, value: (str, bool) = None) -> [(str, bool)]:
+        if value:
+            self.__nv.append(value)
         return self.__nv
 
-    def timing (self): return self.__timing
+    def timing(self):
+        return self.__timing
+
     pass
+
 
 class Analyzer(Version):
     '''Define what an analyzer means in the context of DAWGIE
@@ -444,20 +553,40 @@ class Analyzer(Version):
        - when called post to run() Values should contain current Value
     traits() -> list of traits to provide within an Aspect
     '''
+
     def __repr__(self):
-        if 'caller' not in dir(self): self.caller = None
-        if self.caller: return '.'.join ([repr(self.caller), self.name()])
+        if 'caller' not in dir(self):
+            self.caller = None
+        if self.caller:
+            return '.'.join([repr(self.caller), self.name()])
         return self.name()
-    def abort(self)->bool: return False
-    def feedback(self)->[SV_REF, V_REF]: return []
-    def name(self)->str: raise NotImplementedError()
-    def run (self, aspects:'Aspect')->None: raise NotImplementedError()
-    def state_vectors(self)->'[StateVector]': raise NotImplementedError()
-    def sv_as_dict(self)->'{str:StateVector}':
-        return {sv.name():sv for sv in self.state_vectors()}
-    def traits(self)->[ALG_REF, SV_REF, V_REF]: raise NotImplementedError()
-    def where(self)->Distribution: return Distribution.auto
+
+    def abort(self) -> bool:
+        return False
+
+    def feedback(self) -> [SV_REF, V_REF]:
+        return []
+
+    def name(self) -> str:
+        raise NotImplementedError()
+
+    def run(self, aspects: 'Aspect') -> None:
+        raise NotImplementedError()
+
+    def state_vectors(self) -> '[StateVector]':
+        raise NotImplementedError()
+
+    def sv_as_dict(self) -> '{str:StateVector}':
+        return {sv.name(): sv for sv in self.state_vectors()}
+
+    def traits(self) -> [ALG_REF, SV_REF, V_REF]:
+        raise NotImplementedError()
+
+    def where(self) -> Distribution:
+        return Distribution.auto
+
     pass
+
 
 class Aspect:
     '''The Aspect is the data pertaining to all targets
@@ -473,23 +602,40 @@ class Aspect:
     While access is granted as a dictionary, it is just a portion of it and
     is read-only.
     '''
-    def __contains__(self, item): raise NotImplementedError()
-    def __getitem__(self, key): raise NotImplementedError()
-    def __iter__(self): raise NotImplementedError()
-    def __len__(self): raise NotImplementedError()
-    def _collect (self, refs:[(SV_REF,V_REF)])->None:
+
+    def __contains__(self, item):
         raise NotImplementedError()
 
-    def collect (self, refs:[(SV_REF,V_REF)])->None:
-        self.ds().measure (self._collect, (refs,))
+    def __getitem__(self, key):
+        raise NotImplementedError()
+
+    def __iter__(self):
+        raise NotImplementedError()
+
+    def __len__(self):
+        raise NotImplementedError()
+
+    def _collect(self, refs: [(SV_REF, V_REF)]) -> None:
+        raise NotImplementedError()
+
+    def collect(self, refs: [(SV_REF, V_REF)]) -> None:
+        self.ds().measure(self._collect, (refs,))
         return
 
-    def ds(self)->'Dataset': raise NotImplementedError()
-    def items(self)->[(str,{str:{str:'dagie.Value'}})]:
+    def ds(self) -> 'Dataset':
         raise NotImplementedError()
-    def keys(self)->[str]: raise NotImplementedError()
-    def values(self)->[{str:{str:'dawgie.Value'}}]: raise NotImplementedError()
+
+    def items(self) -> [(str, {str: {str: 'dawgie.Value'}})]:  # noqa: F821
+        raise NotImplementedError()
+
+    def keys(self) -> [str]:
+        raise NotImplementedError()
+
+    def values(self) -> [{str: {str: 'dawgie.Value'}}]:  # noqa: F821
+        raise NotImplementedError()
+
     pass
+
 
 class Dataset(_Metric):
     '''Define what a dataset means in the context of DAWGIE
@@ -500,50 +646,62 @@ class Dataset(_Metric):
 
     Implementations are done in dawgie.db.
     '''
-    def __init__ (self, alg, bot, tn):
+
+    def __init__(self, alg, bot, tn):
         '''Generate a helper to move data between an algorithm and the database
 
         alg - an instance of dawgie.Algorithm
         bot - an instance of dawgie.Task
         tn  - the target name being worked upon
         '''
-        _Metric.__init__ (self)
+        _Metric.__init__(self)
         self.__alg = alg
         self.__bot = bot
         self.__tn = tn
         pass
 
-    def _alg(self)->Algorithm: return self.__alg
-    def _algn(self)->str: return self.__alg.name()
-    def _bot(self)->'Task': return self.__bot
+    def _alg(self) -> Algorithm:
+        return self.__alg
 
-    def _compare_insensitive (self, l, r) -> bool:
+    def _algn(self) -> str:
+        return self.__alg.name()
+
+    def _bot(self) -> 'Task':
+        return self.__bot
+
+    def _compare_insensitive(self, left, right) -> bool:
         '''Compare two target names ignoring case'''
-        return l.lower() == r.lower()
+        return left.lower() == right.lower()
 
-    def _compare_sensitive (self, l, r) -> bool:
+    def _compare_sensitive(self, left, right) -> bool:
         '''Compare two target names using case as a discriminator'''
-        return l == r
+        return left == right
 
-    def _load(self, algref=None, err=True, ver=None)->None:
+    def _load(self, algref=None, err=True, ver=None) -> None:
         '''see load() of this class'''
         raise NotImplementedError()
 
-    def _retarget(self, subname:str, upstream:[ALG_REF])->'Dataset':
+    def _retarget(self, subname: str, upstream: [ALG_REF]) -> 'Dataset':
         '''see retarget() of this class'''
         raise NotImplementedError()
 
-    def _runid(self)->int: return self.__bot._runid()
-    def _task(self)->str: return self.__bot._name()
-    def _tn(self)->str: return self.__tn
+    def _runid(self) -> int:
+        return self.__bot._runid()
 
-    def _update(self)->None:
+    def _task(self) -> str:
+        return self.__bot._name()
+
+    def _tn(self) -> str:
+        return self.__tn
+
+    def _update(self) -> None:
         '''see update() of this class'''
         raise NotImplementedError()
 
-    def _update_msv (self, msv)->None: raise NotImplementedError()
+    def _update_msv(self, msv) -> None:
+        raise NotImplementedError()
 
-    def load(self, algref=None, err=True, ver=None)->None:
+    def load(self, algref=None, err=True, ver=None) -> None:
         '''Load the most recent database values
 
         algref - specify which state vectors to load with None being the
@@ -558,10 +716,10 @@ class Dataset(_Metric):
         state vectors generated during the algorithm execution defined
         in the constructor.
         '''
-        self.measure (self._load, args=(algref, err, ver))
+        self.measure(self._load, args=(algref, err, ver))
         return
 
-    def retarget (self, subname:str, upstream:[ALG_REF])->'Dataset':
+    def retarget(self, subname: str, upstream: [ALG_REF]) -> 'Dataset':
         '''Retarget this Dataset to a new subtarget in a new Dataset
 
         subname - create a new target name based on the current target name and
@@ -582,25 +740,33 @@ class Dataset(_Metric):
         if subname != '..' and any(c in subname for c in '(.)'):
             raise ValueError(f'"{subname}" contains an illegal character "(.)"')
 
-        name = (self._tn()[:self._tn().rfind ('(')].strip()
-                if subname == '..' else (f'{self._tn()} ({subname})'
-                                         if is_not_subnamed else
-                                         f'{self._tn()}({subname})'))
-        return self._retarget (name, upstream)
+        name = (
+            self._tn()[: self._tn().rfind('(')].strip()
+            if subname == '..'
+            else (
+                f'{self._tn()} ({subname})'
+                if is_not_subnamed
+                else f'{self._tn()}({subname})'
+            )
+        )
+        return self._retarget(name, upstream)
 
-    def update(self)->None:
+    def update(self) -> None:
         '''Update intermediate data in the database
 
         Writes all the values contained in all of state vectors that the
         algorithm given at construction generates.
         '''
-        self.measure (self._update)
+        self.measure(self._update)
         return
+
     pass
+
 
 class Feature:
     # pylint: disable=too-few-public-methods
     pass
+
 
 class Regress(_Metric):
     '''The Regress is the base for all bots that analyze data across runids
@@ -609,6 +775,7 @@ class Regress(_Metric):
 
     list() -> return a list of all analyzers
     '''
+
     def __init__(self, name, ps_hint, target):
         _Metric.__init__(self)
         self.__name = name
@@ -618,13 +785,22 @@ class Regress(_Metric):
         self.__timing = {}
         return
 
-    def __repr__(self)->str: return '.'.join(['0', self.__target, self.__name])
-    def _name(self)->str: return self.__name
-    def _ps_hint(self)->int: return self.__ps_hint
-    def _runid(self)->int: return 0
-    def _target(self)->str: return self.__target
+    def __repr__(self) -> str:
+        return '.'.join(['0', self.__target, self.__name])
 
-    def abort(self)->bool:
+    def _name(self) -> str:
+        return self.__name
+
+    def _ps_hint(self) -> int:
+        return self.__ps_hint
+
+    def _runid(self) -> int:
+        return 0
+
+    def _target(self) -> str:
+        return self.__target
+
+    def abort(self) -> bool:
         '''Check with the pipeline to see if system should abort.
 
         The default implementation is to always return False. This will allow
@@ -634,37 +810,43 @@ class Regress(_Metric):
         '''
         return False
 
-    def do(self, goto:str=None)->None:
-        # need to break circular dependancy so
-        import dawgie.db  # pylint: disable=import-outside-toplevel
+    def do(self, goto: str = None) -> None:
+        dawgie_db = importlib.import_module('dawgie.db')
+        log = logging.getLogger(__name__ + '.Regress')
+        for step in filter(
+            lambda s: goto is None or s.name() == goto, self.list()
+        ):
+            if self.abort():
+                raise AbortAEError()
 
-        log = logging.getLogger (__name__ + '.Regress')
-        for step in filter (lambda s:goto is None or s.name() == goto,
-                            self.list()):
-            if self.abort(): raise AbortAEError()
-
-            setattr (step, 'abort', self.abort)
-            setattr (step, 'caller', self)
+            setattr(step, 'abort', self.abort)
+            setattr(step, 'caller', self)
             self.__timing['retreat_' + step.name()] = datetime.datetime.utcnow()
-            timeline = dawgie.db.retreat (step, self)
+            timeline = dawgie_db.retreat(step, self)
             self.__timing['recede_' + step.name()] = datetime.datetime.utcnow()
-            timeline.recede (step.feedback())
-            timeline.recede (step.variables())
+            timeline.recede(step.feedback())
+            timeline.recede(step.variables())
             self.__timing['start_' + self._name()] = datetime.datetime.utcnow()
-            log.debug ('Stepping into %s', step.name())
-            self.measure (step.run,
-                          args=(self._ps_hint(), timeline), ds=timeline.ds())
-            setattr (step, 'caller', None)
+            log.debug('Stepping into %s', step.name())
+            self.measure(
+                step.run, args=(self._ps_hint(), timeline), ds=timeline.ds()
+            )
+            setattr(step, 'caller', None)
         return
 
-    def list(self)->'[Regression]': raise NotImplementedError()
+    def list(self) -> '[Regression]':
+        raise NotImplementedError()
 
-    def new_values (self, value:(str,bool)=None)->[(str,bool)]:
-        if value: self.__nv.append (value)
+    def new_values(self, value: (str, bool) = None) -> [(str, bool)]:
+        if value:
+            self.__nv.append(value)
         return self.__nv
 
-    def timing (self): return self.__timing
+    def timing(self):
+        return self.__timing
+
     pass
+
 
 class Regression(Version):
     '''Define what a regression means in the context of DAWGIE
@@ -695,21 +877,40 @@ class Regression(Version):
        - when called post to run() Values should contain current Value
     variables() -> list of variables to provide within a Timeline
     '''
+
     def __repr__(self):
-        if 'caller' not in dir(self): self.caller = None
-        if self.caller: return '.'.join ([repr(self.caller), self.name()])
+        if 'caller' not in dir(self):
+            self.caller = None
+        if self.caller:
+            return '.'.join([repr(self.caller), self.name()])
         return self.name()
-    def abort(self)->bool: return False
-    def feedback(self)->[SV_REF, V_REF]: return []
-    def name(self)->str: raise NotImplementedError()
-    def run (self, ps:int, timeline:'Timeline')->None:
+
+    def abort(self) -> bool:
+        return False
+
+    def feedback(self) -> [SV_REF, V_REF]:
+        return []
+
+    def name(self) -> str:
         raise NotImplementedError()
-    def state_vectors(self)->'[StateVector]': raise NotImplementedError()
-    def sv_as_dict(self)->'{str:StateVector}':
-        return {sv.name():sv for sv in self.state_vectors()}
-    def variables(self)->[ALG_REF, SV_REF, V_REF]: raise NotImplementedError()
-    def where(self)->Distribution: return Distribution.auto
+
+    def run(self, ps: int, timeline: 'Timeline') -> None:
+        raise NotImplementedError()
+
+    def state_vectors(self) -> '[StateVector]':
+        raise NotImplementedError()
+
+    def sv_as_dict(self) -> '{str:StateVector}':
+        return {sv.name(): sv for sv in self.state_vectors()}
+
+    def variables(self) -> [ALG_REF, SV_REF, V_REF]:
+        raise NotImplementedError()
+
+    def where(self) -> Distribution:
+        return Distribution.auto
+
     pass
+
 
 class StateVector(Version, dict):
     '''Define what a state vector means in the context of DAWGIE
@@ -750,14 +951,28 @@ class StateVector(Version, dict):
     name() -> the unique name of the state vector
     view() -> use the visitee to convert the content to a nice view
     '''
+
     # pylint: disable=unused-argument
-    def clear(self): return
-    def name(self)->str: raise NotImplementedError()
-    def pop(self): return
-    def popitem (self,i): return
-    def setdefault (self,k,d=None): return
-    def view(self, caller, visitor:'Visitor')->None: raise NotImplementedError()
+    def clear(self):
+        return
+
+    def name(self) -> str:
+        raise NotImplementedError()
+
+    def pop(self):
+        return
+
+    def popitem(self, i):
+        return
+
+    def setdefault(self, k, d=None):
+        return
+
+    def view(self, caller, visitor: 'Visitor') -> None:
+        raise NotImplementedError()
+
     pass
+
 
 class Task(_Metric):
     '''The Task is the base class for all bots which are to complete a task
@@ -766,6 +981,7 @@ class Task(_Metric):
 
     list() -> return a list of all algorithms
     '''
+
     def __init__(self, name, ps_hint, runid, target='__all__'):
         _Metric.__init__(self)
         self.__name = name
@@ -775,22 +991,28 @@ class Task(_Metric):
         self.__target = target
         self.__timing = {}
         return
-    def __repr__(self): return '.'.join([str(self.__runid),
-                                             self.__target,
-                                             self.__name])
-    def _make_ds (self, alg) -> Dataset:
+
+    def __repr__(self):
+        return '.'.join([str(self.__runid), self.__target, self.__name])
+
+    def _make_ds(self, alg) -> Dataset:
         '''Make a Dataset with the minimal help from self.do()'''
-        # need to break circular dependancy so
-        # pylint: disable=import-outside-toplevel
-        import dawgie.db
-        return dawgie.db.connect (alg, self, self.__target)
+        dawgie_db = importlib.import_module('dawgie.db')
+        return dawgie_db.connect(alg, self, self.__target)
 
-    def _name(self)->str: return self.__name
-    def _ps_hint(self)->int: return self.__ps_hint
-    def _runid(self)->int: return self.__runid
-    def _target(self)->str: return self.__target
+    def _name(self) -> str:
+        return self.__name
 
-    def abort(self)->bool:
+    def _ps_hint(self) -> int:
+        return self.__ps_hint
+
+    def _runid(self) -> int:
+        return self.__runid
+
+    def _target(self) -> str:
+        return self.__target
+
+    def abort(self) -> bool:
         '''Check with the pipeline to see if system should abort.
 
         The default implementation is to always return False. This will allow
@@ -800,39 +1022,48 @@ class Task(_Metric):
         '''
         return False
 
-    def do(self, goto:str=None)->None:
-        log = logging.getLogger (__name__ + '.Task')
-        log.debug ('Starting %s for %s', self.__name, self._target())
-        for step in filter (lambda s:goto is None or s.name() == goto,
-                            self.list()):
-            if self.abort(): raise AbortAEError()
+    def do(self, goto: str = None) -> None:
+        log = logging.getLogger(__name__ + '.Task')
+        log.debug('Starting %s for %s', self.__name, self._target())
+        for step in filter(
+            lambda s: goto is None or s.name() == goto, self.list()
+        ):
+            if self.abort():
+                raise AbortAEError()
 
-            setattr (step, 'abort', self.abort)
-            setattr (step, 'caller', self)
+            setattr(step, 'abort', self.abort)
+            setattr(step, 'caller', self)
             sname = f'{self._target()}.{self._name()}.{step.name()}'
-            log.debug ('Loading into %s', sname)
+            log.debug('Loading into %s', sname)
             self.__timing['load_' + step.name()] = datetime.datetime.utcnow()
-            ds = self._make_ds (step)
-            for f in step.feedback(): ds.load (f)
-            for p in step.previous(): ds.load (p)
-            log.debug ('Loaded into %s', sname)
+            ds = self._make_ds(step)
+            for f in step.feedback():
+                ds.load(f)
+            for p in step.previous():
+                ds.load(p)
+            log.debug('Loaded into %s', sname)
             self.__timing[f'start_{step.name()}'] = datetime.datetime.utcnow()
-            log.debug ('Stepping into %s', sname)
-            self.measure (step.run, args=(ds, self._ps_hint()), ds=ds)
-            log.debug ('Returned from %s', sname)
-            setattr (step, 'caller', None)
+            log.debug('Stepping into %s', sname)
+            self.measure(step.run, args=(ds, self._ps_hint()), ds=ds)
+            log.debug('Returned from %s', sname)
+            setattr(step, 'caller', None)
             pass
-        log.debug ('Completed %s for %s', self.__name, self._target())
+        log.debug('Completed %s for %s', self.__name, self._target())
         return
 
-    def list(self)->[Algorithm]: raise NotImplementedError()
+    def list(self) -> [Algorithm]:
+        raise NotImplementedError()
 
-    def new_values (self, value:(str,bool)=None)->[(str,bool)]:
-        if value: self.__nv.append (value)
+    def new_values(self, value: (str, bool) = None) -> [(str, bool)]:
+        if value:
+            self.__nv.append(value)
         return self.__nv
 
-    def timing (self): return self.__timing
+    def timing(self):
+        return self.__timing
+
     pass
+
 
 class Timeline:
     '''The Aspect is the data pertaining to all targets
@@ -848,22 +1079,40 @@ class Timeline:
     While access is granted as a dictionary, it is just a portion of it and
     is read-only.
     '''
-    def __contains__(self, item): raise NotImplementedError()
-    def __getitem__(self, key): raise NotImplementedError()
-    def __iter__(self): raise NotImplementedError()
-    def __len__(self): raise NotImplementedError()
-    def _recede (self, refs:[(SV_REF,V_REF)])->None: raise NotImplementedError()
-    def ds(self)->'Dataset': raise NotImplementedError()
-    def items(self)->[(str,{str:{str:'dagie.Value'}})]:
-        raise NotImplementedError()
-    def keys(self)->[str]: raise NotImplementedError()
 
-    def recede (self, refs:[(SV_REF,V_REF)])->None:
-        self.ds().measure (self._recede, (refs,))
+    def __contains__(self, item):
+        raise NotImplementedError()
+
+    def __getitem__(self, key):
+        raise NotImplementedError()
+
+    def __iter__(self):
+        raise NotImplementedError()
+
+    def __len__(self):
+        raise NotImplementedError()
+
+    def _recede(self, refs: [(SV_REF, V_REF)]) -> None:
+        raise NotImplementedError()
+
+    def ds(self) -> 'Dataset':
+        raise NotImplementedError()
+
+    def items(self) -> [(str, {str: {str: 'dawgie.Value'}})]:  # noqa: F821
+        raise NotImplementedError()
+
+    def keys(self) -> [str]:
+        raise NotImplementedError()
+
+    def recede(self, refs: [(SV_REF, V_REF)]) -> None:
+        self.ds().measure(self._recede, (refs,))
         return
 
-    def values(self)->[{str:{str:'dawgie.Value'}}]: raise NotImplementedError()
+    def values(self) -> [{str: {str: 'dawgie.Value'}}]:  # noqa: F821
+        raise NotImplementedError()
+
     pass
+
 
 class Value(Version):
     '''Define what a value means in the context of DAWGIE
@@ -877,62 +1126,82 @@ class Value(Version):
     features() -> return an iterable or be a generator
     view()  -> add self to a viewable visitor
     '''
+
     # pylint: disable=too-few-public-methods
-    def __getstate__(self)->dict:
+    def __getstate__(self) -> dict:
         state = self.__dict__.copy()
         state['_version_seal_'] = state['_version_']
         del state['_version_']
         return state
 
-    def __setstate__ (self, state:dict)->None:
-        self.__dict__.update (state)
-        empty = self.__new__(self.__class__)
-        empty.__init__()
-        self._version_ = empty._version_
+    def __setstate__(self, state: dict) -> None:
+        self.__dict__.update(state)
+        self._version_ = self.__class__()._version_
         return
 
-    def features(self)->[Feature]: raise NotImplementedError()
+    def features(self) -> [Feature]:
+        raise NotImplementedError()
+
     pass
 
 
 class Visitor:
-    def add_declaration (self, text:str, **kwds)->None:
+    def add_declaration(self, text: str, **kwds) -> None:
         raise NotImplementedError()
-    def add_declaration_inline(self, text:str, **kwds)->None:
+
+    def add_declaration_inline(self, text: str, **kwds) -> None:
         raise NotImplementedError()
-    def add_image (self, alternate:str, label:str, img:bytes)->None:
+
+    def add_image(self, alternate: str, label: str, img: bytes) -> None:
         raise NotImplementedError()
-    def add_primitive (self, value, label:str=None)->None:
+
+    def add_primitive(self, value, label: str = None) -> None:
         raise NotImplementedError()
-    def add_table (self, clabels:[str], rows:int=0, title:str=None)->'TableVisitor':
+
+    def add_table(
+        self, clabels: [str], rows: int = 0, title: str = None
+    ) -> 'TableVisitor':
         raise NotImplementedError()
+
     pass
+
 
 class TableVisitor:
     # pylint: disable=too-few-public-methods
-    def get_cell (self, r:int, c:int)->Visitor:
+    def get_cell(self, r: int, c: int) -> Visitor:
         raise NotImplementedError()
+
     pass
+
 
 def _version():
     result = '0.0.0'
-    v = os.path.basename (os.path.abspath
-                          (os.path.join (os.path.dirname (__file__), '..')))
+    v = os.path.basename(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    )
 
-    if v.startswith ('dawgie-') and v.endswith ('.egg'): \
-       result = v[7:v.find ('-', 7)]
+    if v.startswith('dawgie-') and v.endswith('.egg'):
+        result = v[7 : v.find('-', 7)]
 
     return result
 
+
 __version__ = _version()
 
-def resolve_username()->str:
+
+def resolve_username() -> str:
     # Change error message to this context so pylint: disable=raise-missing-from
-    try: name = getpass.getuser()
+    try:
+        name = getpass.getuser()
     except KeyError:
-        if 'USER' in os.environ: name = os.environ['USER']
-        elif 'USERNAME' in os.environ: name = os.environ['USERNAME']
-        else: raise KeyError ('Neither getpass.getuser(), os.environ[USER], ' +
-                              'nor os.environ[USERNAME] would resolve to a ' +
-                              'users name.')
+        if 'USER' in os.environ:
+            name = os.environ['USER']
+        elif 'USERNAME' in os.environ:
+            name = os.environ['USERNAME']
+        else:
+            raise KeyError(
+                'Neither getpass.getuser(), os.environ[USER], '
+                + 'nor os.environ[USERNAME] would resolve to a '
+                + 'users name.'
+            )
     return name

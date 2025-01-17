@@ -1,7 +1,7 @@
 '''
 --
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -40,33 +40,47 @@ NTR: 49811
 import dawgie.context
 import logging.handlers
 
-instance = None
+INSTANCE = None
+
 
 class Handler(logging.handlers.BufferingHandler):
-    def __init__ (self):
-        logging.handlers.BufferingHandler.__init__(self,
-                                                   dawgie.context.log_capacity)
-        self.setFormatter (logging.Formatter('%(asctime)s;\n;' +
-                                             '%(name)s;\n;' +
-                                             '%(levelname)s;\n;' +
-                                             '%(message)s'))
+    def __init__(self):
+        logging.handlers.BufferingHandler.__init__(
+            self, dawgie.context.log_capacity
+        )
+        self.setFormatter(
+            logging.Formatter(
+                '%(asctime)s;\n;'
+                + '%(name)s;\n;'
+                + '%(levelname)s;\n;'
+                + '%(message)s'
+            )
+        )
         return
 
     def emit(self, record):
-        self.buffer.insert (0, record)
-        while self.capacity <= len (self.buffer): self.buffer.pop()
+        self.buffer.insert(0, record)
+        while self.capacity <= len(self.buffer):
+            self.buffer.pop()
         return
 
-    def shouldFlush(self, record): return False
+    def shouldFlush(self, record):
+        return False
+
     pass
+
 
 def remembered():
     history = []
-    for r in instance.buffer:
-        details = instance.format (r).split (';\n;')
-        history.append ({'timeStamp':details[0],
-                         'name':details[1],
-                         'level':details[2],
-                         'message':'\n\n'.join (details[3:])})
+    for r in INSTANCE.buffer:
+        details = INSTANCE.format(r).split(';\n;')
+        history.append(
+            {
+                'timeStamp': details[0],
+                'name': details[1],
+                'level': details[2],
+                'message': '\n\n'.join(details[3:]),
+            }
+        )
         pass
     return history

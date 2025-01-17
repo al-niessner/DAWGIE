@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -40,10 +40,11 @@ NTR:
 import dawgie
 import unittest
 
+
 class Dawgie(unittest.TestCase):
     def test_schedule(self):
-        self.assertRaises (ValueError, dawgie.schedule, None, None, 1, 1)
-        self.assertIsInstance (dawgie.schedule (None, None, True),
-                               dawgie.EVENT)
+        self.assertRaises(ValueError, dawgie.schedule, None, None, 1, 1)
+        self.assertIsInstance(dawgie.schedule(None, None, True), dawgie.EVENT)
         return
+
     pass

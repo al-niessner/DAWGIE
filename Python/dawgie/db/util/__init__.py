@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -37,47 +37,57 @@ NTR:
 '''
 
 import dawgie.context
-import logging; log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import pickle
 import shutil
 import subprocess
 import tempfile
 
-def _extract (response):
-    for pair in filter (lambda l:0 < len (l),
-                        response.decode ('utf-8').split ('\n')):
-        index = pair.find (' ')
+
+def _extract(response):
+    for pair in filter(
+        lambda s: 0 < len(s), response.decode('utf-8').split('\n')
+    ):
+        index = pair.find(' ')
         cksum = pair[:index]
         lc = cksum.strip()
         pass
     return lc
 
-def decode (entry):
-    with open (os.path.join (dawgie.context.data_dbs, entry), 'rb') as f:
-        result = pickle.load (f)
+
+def decode(entry):
+    with open(os.path.join(dawgie.context.data_dbs, entry), 'rb') as f:
+        result = pickle.load(f)
         pass
     return result
 
-def encode (value):
-    fid,fn = tempfile.mkstemp (dir=dawgie.context.data_stg,
-                               prefix='shelve_', suffix='.pkl')
-    os.close (fid)
-    with open (fn, 'wb') as f: pickle.dump (value, f, pickle.HIGHEST_PROTOCOL)
-    os.chmod (fn, int ('0664', 8))  # -rw-rw-r--
-    m = _extract (subprocess.check_output (['md5sum', '-b', fn]))
-    s = _extract (subprocess.check_output (['sha1sum', '-b',  fn]))
-    result = '_'.join ([m,s])
-    return (fn,result)
 
-def move (fn, result):
-    nfn = os.path.join (dawgie.context.data_dbs, result)
-    exists = os.path.exists (nfn)
+def encode(value):
+    fid, fn = tempfile.mkstemp(
+        dir=dawgie.context.data_stg, prefix='shelve_', suffix='.pkl'
+    )
+    os.close(fid)
+    with open(fn, 'wb') as f:
+        pickle.dump(value, f, pickle.HIGHEST_PROTOCOL)
+    os.chmod(fn, int('0664', 8))  # -rw-rw-r--
+    m = _extract(subprocess.check_output(['md5sum', '-b', fn]))
+    s = _extract(subprocess.check_output(['sha1sum', '-b', fn]))
+    result = '_'.join([m, s])
+    return (fn, result)
 
-    if exists: os.unlink (fn)
-    else: shutil.move (fn, nfn)
 
-    return result,exists
+def move(fn, result):
+    nfn = os.path.join(dawgie.context.data_dbs, result)
+    exists = os.path.exists(nfn)
+
+    if exists:
+        os.unlink(fn)
+    else:
+        shutil.move(fn, nfn)
+
+    return result, exists
+
 
 def rotate(path, orig, backup):
     # if current db is missing, then copy recent db
@@ -93,29 +103,32 @@ def rotate(path, orig, backup):
                 break
         pass
     else:
-        rotatedDb = sorted(backup.keys())
+        rotated_db = sorted(backup.keys())
         stack = []
-        for i in rotatedDb:
-            if not backup[i]: break
+        for i in rotated_db:
+            if not backup[i]:
+                break
             stack.append(i)
         for i in range(len(stack)):
             t = stack.pop()
             for v in backup[t]:
                 ext = v.split(".")[-1]
-                shutil.move(v, f'{path}/{t+1:d}.{dawgie.context.db_name}.{ext}')
+                shutil.move(v, f'{path}/{t+1:d}.{dawgie.context.db_name}.{ext}')  # fmt: skip # noqa: E226
         for v in orig:
             ext = v.split(".")[-1]
             shutil.copy(v, f'{path}/0.{dawgie.context.db_name}.{ext}')
 
     return
 
-def verify (value):
+
+def verify(value):
     # pylint: disable=bare-except
     result = [False, False, False, False]
-    result[0] = isinstance (value, dawgie.Value)
+    result[0] = isinstance(value, dawgie.Value)
     try:
-        result[1] = isinstance (value.bugfix(), int)
-        result[2] = isinstance (value.design(), int)
-        result[3] = isinstance (value.implementation(), int)
-    except: pass
-    return all (result)
+        result[1] = isinstance(value.bugfix(), int)
+        result[2] = isinstance(value.design(), int)
+        result[3] = isinstance(value.implementation(), int)
+    except:  # noqa: E722
+        pass
+    return all(result)

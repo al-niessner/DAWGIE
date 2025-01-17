@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -41,56 +41,115 @@ import dawgie
 import unittest
 import unittest.mock
 
+
 class NCAlg(dawgie.Algorithm):
-    def name(self): return 'NCAlg'
+    def name(self):
+        return 'NCAlg'
+
+
 class NCAsp(dawgie.Analyzer):
-    def name(self): return 'NCAsp'
+    def name(self):
+        return 'NCAsp'
+
+
 class NCReg(dawgie.Regression):
-    def name(self): return 'NCReg'
+    def name(self):
+        return 'NCReg'
+
 
 class WCAlg(dawgie.Algorithm):
     fullrepr = None
-    def name(self): return 'WCAlg'
-    def previous(self): return []
-    def run(self, *args): WCAlg.fullrepr = repr(self)
+
+    def name(self):
+        return 'WCAlg'
+
+    def previous(self):
+        return []
+
+    def run(self, *args):
+        WCAlg.fullrepr = repr(self)
+
+
 class WCAsp(dawgie.Analyzer):
     fullrepr = None
-    def name(self): return 'WCAsp'
-    def run(self, *args): WCAsp.fullrepr = repr(self)
-    def traits(self): return []
+
+    def name(self):
+        return 'WCAsp'
+
+    def run(self, *args):
+        WCAsp.fullrepr = repr(self)
+
+    def traits(self):
+        return []
+
+
 class WCReg(dawgie.Regression):
     fullrepr = None
-    def name(self): return 'WCReg'
-    def run(self, *args): WCReg.fullrepr = repr(self)
-    def variables(self): return []
+
+    def name(self):
+        return 'WCReg'
+
+    def run(self, *args):
+        WCReg.fullrepr = repr(self)
+
+    def variables(self):
+        return []
+
+
 class Analysis(dawgie.Analysis):
-    def list(self): return [WCAsp()]
+    def list(self):
+        return [WCAsp()]
+
+
 class Aspect(dawgie.Aspect):
-    def collect (*args, **kwds): return
-    def ds(*args, **kwds): return None
+    def collect(*args, **kwds):
+        return
+
+    def ds(*args, **kwds):
+        return None
+
+
 class Regress(dawgie.Regress):
-    def list(self): return [WCReg()]
+    def list(self):
+        return [WCReg()]
+
+
 class Task(dawgie.Task):
-    def _make_ds(self, alg): return None
-    def list(self): return [WCAlg()]
+    def _make_ds(self, alg):
+        return None
+
+    def list(self):
+        return [WCAlg()]
+
+
 class Timeline(dawgie.Timeline):
-    def ds(*args,**kwds): return None
-    def recede (*args,**kwds): return
+    def ds(*args, **kwds):
+        return None
+
+    def recede(*args, **kwds):
+        return
+
 
 class Repr(unittest.TestCase):
     def test_no_caller(self):
         self.assertEqual(repr(NCAlg()), 'NCAlg')
         self.assertEqual(repr(NCAsp()), 'NCAsp')
         self.assertEqual(repr(NCReg()), 'NCReg')
+
     def test_with_caller(self):
-        with unittest.mock.patch ('dawgie.db.gather', gather):
+        with unittest.mock.patch('dawgie.db.gather', gather):
             Analysis('meditate', 2, 37).do()
-        with unittest.mock.patch ('dawgie.db.retreat', retreat):
+        with unittest.mock.patch('dawgie.db.retreat', retreat):
             Regress('pit', 2, 'cherry').do()
         Task('seeds', 2, 101, 'apple').do()
         self.assertEqual(WCAlg.fullrepr, '101.apple.seeds.WCAlg')
         self.assertEqual(WCAsp.fullrepr, '37.__all__.meditate.WCAsp')
         self.assertEqual(WCReg.fullrepr, '0.cherry.pit.WCReg')
 
-def gather(*args, **kwds): return Aspect()
-def retreat(*args, **kwds): return Timeline()
+
+def gather(*args, **kwds):
+    return Aspect()
+
+
+def retreat(*args, **kwds):
+    return Timeline()

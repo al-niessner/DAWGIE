@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -40,9 +40,11 @@ NTR:
 import dawgie.context
 import unittest
 
+
 class Context(unittest.TestCase):
     def test_dumps(self):
         b = dawgie.context.dumps()
-        self.assertTrue (0 < len (b))
+        self.assertTrue(0 < len(b))
         return
+
     pass

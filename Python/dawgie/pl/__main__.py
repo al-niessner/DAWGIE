@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 '''
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -37,82 +37,126 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+# main modules usually have very similar lines to other mains or inits so
+# pylint: disable=duplicate-code
+
 import argparse
 import dawgie.context
 import dawgie.pl.state
 import dawgie.tools.submit
 import dawgie.util
 import logging
-import matplotlib; matplotlib.use("Agg")
+import matplotlib; matplotlib.use("Agg")  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import twisted.internet
 import sys
 
 from . import _merge
 from . import LogFailure
 
+
 class Start(LogFailure):
-    def __init__ (self, cmdl_args, label, name):
+    def __init__(self, cmdl_args, label, name):
         LogFailure.__init__(self, label, name)
         self.__args = cmdl_args
         self.__deferred = twisted.internet.defer.Deferred()
-        self.__deferred.addCallback (self.run).addErrback (self.log)
+        self.__deferred.addCallback(self.run).addErrback(self.log)
         return
 
     @property
-    def callback (self): return self.__deferred.callback
-    @property
-    def deferred (self): return self.__deferred
+    def callback(self):
+        return self.__deferred.callback
 
-    def run (self, *_args, **_kwds):
+    @property
+    def deferred(self):
+        return self.__deferred
+
+    def run(self, *_args, **_kwds):
         dawgie.context.fsm = dawgie.pl.state.FSM()
         dawgie.context.fsm.args = self.__args
         dawgie.context.fsm.starting_trigger()
         return
+
     pass
 
-ap = argparse.ArgumentParser(description='The main routine to run the fully automated pipeline.')
-ap.add_argument ('-l', '--log-file', default='dawgie.log', required=False,
-                 help='a filename to put all of the log messages into [%(default)s]')
-ap.add_argument ('-L', '--log-level', default=logging.ERROR, required=False,
-                 type=dawgie.util.log_level,
-                 help='set the verbosity that you want where a smaller number means more verbose [logging.WARN]')
-ap.add_argument ('-p', '--port', default=dawgie.context.fe_port,
-                 required=False, type=int,
-                 help='server port number for the display [%(default)s]')
-ap.add_argument('-r', '--repo-dir', default=dawgie.tools.submit.repo_dir, required=False,
-                help='set the pre_ops repo directory where you want to do the merging [%(default)s]')
-dawgie.context.add_arguments (ap)
+
+ap = argparse.ArgumentParser(
+    description='The main routine to run the fully automated pipeline.'
+)
+ap.add_argument(
+    '-l',
+    '--log-file',
+    default='dawgie.log',
+    required=False,
+    help='a filename to put all of the log messages into [%(default)s]',
+)
+ap.add_argument(
+    '-L',
+    '--log-level',
+    default=logging.ERROR,
+    required=False,
+    type=dawgie.util.log_level,
+    help='set the verbosity that you want where a smaller number means more verbose [logging.WARN]',
+)
+ap.add_argument(
+    '-p',
+    '--port',
+    default=dawgie.context.fe_port,
+    required=False,
+    type=int,
+    help='server port number for the display [%(default)s]',
+)
+ap.add_argument(
+    '-r',
+    '--repo-dir',
+    default=dawgie.tools.submit.REPO_DIR,
+    required=False,
+    help='set the pre_ops repo directory where you want to do the merging [%(default)s]',
+)
+dawgie.context.add_arguments(ap)
 args = ap.parse_args()
 
 if args.port != dawgie.context.fe_port:
     gnew = args.port + dawgie.context.PortOffset.frontend.value
-    args.context_cfe_port = _merge (dawgie.context.fe_port,
-                                    gnew,
-                                    dawgie.context.PortOffset.certFE.value,
-                                    args.context_cfe_port)
-    args.context_cloud_port = _merge (dawgie.context.fe_port,
-                                      gnew,
-                                      dawgie.context.PortOffset.cloud.value,
-                                      args.context_cloud_port)
-    args.context_db_port = _merge (dawgie.context.fe_port,
-                                   gnew,
-                                   dawgie.context.PortOffset.shelve.value,
-                                   args.context_db_port)
-    args.context_farm_port = _merge (dawgie.context.fe_port,
-                                     gnew,
-                                     dawgie.context.PortOffset.farm.value,
-                                     args.context_farm_port)
-    args.context_log_port = _merge (dawgie.context.fe_port,
-                                    gnew,
-                                    dawgie.context.PortOffset.log.value,
-                                    args.context_log_port)
-    dawgie.context.fe_port = args.port+dawgie.context.PortOffset.frontend.value
+    args.context_cfe_port = _merge(
+        dawgie.context.fe_port,
+        gnew,
+        dawgie.context.PortOffset.certFE.value,
+        args.context_cfe_port,
+    )
+    args.context_cloud_port = _merge(
+        dawgie.context.fe_port,
+        gnew,
+        dawgie.context.PortOffset.cloud.value,
+        args.context_cloud_port,
+    )
+    args.context_db_port = _merge(
+        dawgie.context.fe_port,
+        gnew,
+        dawgie.context.PortOffset.shelve.value,
+        args.context_db_port,
+    )
+    args.context_farm_port = _merge(
+        dawgie.context.fe_port,
+        gnew,
+        dawgie.context.PortOffset.farm.value,
+        args.context_farm_port,
+    )
+    args.context_log_port = _merge(
+        dawgie.context.fe_port,
+        gnew,
+        dawgie.context.PortOffset.log.value,
+        args.context_log_port,
+    )
+    dawgie.context.fe_port = (
+        args.port + dawgie.context.PortOffset.frontend.value
+    )
     pass
 
 dawgie.context.log_level = args.log_level
-dawgie.context.override (args)
-twisted.internet.reactor.callLater (0, Start(args, 'starting the pipeline',
-                                             'dawgie.pl').callback, 'main')
+dawgie.context.override(args)
+twisted.internet.reactor.callLater(
+    0, Start(args, 'starting the pipeline', 'dawgie.pl').callback, 'main'
+)
 twisted.internet.reactor.run()
-print ('calling system exit...')
+print('calling system exit...')
 sys.exit()

@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -43,7 +43,9 @@ import datetime
 import dawgie.context
 import dawgie.security
 import json
-import logging; log = logging.getLogger ('lambda function')
+import logging
+
+log = logging.getLogger('lambda function')
 import os
 import pickle
 
@@ -129,16 +131,27 @@ j9MXah81BJp4ULWWWoyZCCxElweP8ovAv+mwO98=
 =MKRM
 -----END PGP PUBLIC KEY BLOCK-----'''
 
+
 def lambda_handler(event, context):
-    aws_bot_private_key = os.environ['AWSBOTPRIVATEKEY'].replace (';:;', '\n')
+    aws_bot_private_key = os.environ['AWSBOTPRIVATEKEY'].replace(';:;', '\n')
 
     if event['httpMethod'] == 'POST':
-        dawgie.security.initialize(myname=dawgie.context.myname,
-                                   myself=dawgie.context.myself)
-        dawgie.security.extend ([aws_bot_public_key, aws_bot_private_key,
-                                 dawgie_bot_public_key])
-        data = event['body'] if isinstance (event['body'], dict) else json.loads (event['body'])
-        sc,body = 200,exchange (data['request'])
-    else: sc,body = 400,'invalid request'
-    return {'statusCode':sc, 'body':body,
-            'headers':{'Content-Type':'application/json'}}
+        dawgie.security.initialize(
+            myname=dawgie.context.myname, myself=dawgie.context.myself
+        )
+        dawgie.security.extend(
+            [aws_bot_public_key, aws_bot_private_key, dawgie_bot_public_key]
+        )
+        data = (
+            event['body']
+            if isinstance(event['body'], dict)
+            else json.loads(event['body'])
+        )
+        sc, body = 200, exchange(data['request'])
+    else:
+        sc, body = 400, 'invalid request'
+    return {
+        'statusCode': sc,
+        'body': body,
+        'headers': {'Content-Type': 'application/json'},
+    }

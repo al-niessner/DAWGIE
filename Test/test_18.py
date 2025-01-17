@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -44,35 +44,43 @@ import shutil
 import tempfile
 import unittest
 
+
 class Security(unittest.TestCase):
     '''check just the TLS client certificate lookups'''
+
     @classmethod
     def setUpClass(cls):
         cls.wdir = tempfile.mkdtemp()
+
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.wdir,True)
+        shutil.rmtree(cls.wdir, True)
 
     def test_init(self):
         dawgie.security._tls_initialize()
-        self.assertFalse(dawgie.security.useClientVerification(),
-                         'clear known serts')
-        dawgie.security._certs.extend (['a','b','c'])
+        self.assertFalse(
+            dawgie.security.use_client_verification(), 'clear known serts'
+        )
+        dawgie.security._certs.extend(['a', 'b', 'c'])
         dawgie.security._tls_initialize()
-        self.assertFalse(dawgie.security.useClientVerification(),
-                         'clear known serts')
+        self.assertFalse(
+            dawgie.security.use_client_verification(), 'clear known serts'
+        )
         # FUTURE: when dawgie.security is updated, this should expect ValueError
         dawgie.security._tls_initialize(self.wdir)
-        self.assertFalse(dawgie.security.useClientVerification(),
-                         'clear known serts')
-        with open (os.path.join (self.wdir, 'dawgie.public.pem'),'tw') as file:
-            file.write ('bad cert')
+        self.assertFalse(
+            dawgie.security.use_client_verification(), 'clear known serts'
+        )
+        with open(os.path.join(self.wdir, 'dawgie.public.pem'), 'tw') as file:
+            file.write('bad cert')
         with self.assertRaises(OpenSSL.crypto.Error):
             dawgie.security._tls_initialize(self.wdir)
-        self.assertFalse(dawgie.security.useClientVerification(),
-                         'clear known serts')
-        with open (os.path.join (self.wdir, 'dawgie.public.pem'),'tw') as file:
-            file.write ('''-----BEGIN CERTIFICATE-----
+        self.assertFalse(
+            dawgie.security.use_client_verification(), 'clear known serts'
+        )
+        with open(os.path.join(self.wdir, 'dawgie.public.pem'), 'tw') as file:
+            file.write(
+                '''-----BEGIN CERTIFICATE-----
 MIID7DCCAtSgAwIBAgIUB0JGjlKNuRBhs1ElGrhsobOa+AMwDQYJKoZIhvcNAQEL
 BQAwTDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMQswCQYDVQQHDAJMQTENMAsG
 A1UECgwETm9uZTEUMBIGA1UEAwwLZXhhbXBsZS5jb20wHhcNMjQwNjE3MjI1NzA5
@@ -95,18 +103,24 @@ l18iXAzutefQoEIOBI0V3/m3fgh5AIRqOlTiruFPnO6yLVLtg2GpQc2ZHMNhSWyg
 P3pZlXKkWW0k5n3SG2+I4YIPrPHwxcSQ9fugdGrnC6Vk6lIvTImxe7ljYbnSsSVV
 V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
 -----END CERTIFICATE-----
-''')
+'''
+            )
         dawgie.security._tls_initialize(self.wdir)
-        self.assertTrue (dawgie.security.useClientVerification(),
-                         'find and load client cert')
-        base = os.path.join (self.wdir, 'myself.pem')
+        self.assertTrue(
+            dawgie.security.use_client_verification(),
+            'find and load client cert',
+        )
+        base = os.path.join(self.wdir, 'myself.pem')
         with self.assertRaises(FileNotFoundError):
             dawgie.security._tls_initialize(self.wdir, 'example.com', base)
-        self.assertTrue (dawgie.security.useClientVerification(),
-                         'find and load client certs')
-        self.assertFalse (dawgie.security.useTLS(), 'could not load')
-        with open (base, 'tw') as file:
-            file.write ('''-----BEGIN CERTIFICATE-----
+        self.assertTrue(
+            dawgie.security.use_client_verification(),
+            'find and load client certs',
+        )
+        self.assertFalse(dawgie.security.use_tls(), 'could not load')
+        with open(base, 'tw') as file:
+            file.write(
+                '''-----BEGIN CERTIFICATE-----
 MIID7DCCAtSgAwIBAgIUB0JGjlKNuRBhs1ElGrhsobOa+AMwDQYJKoZIhvcNAQEL
 BQAwTDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMQswCQYDVQQHDAJMQTENMAsG
 A1UECgwETm9uZTEUMBIGA1UEAwwLZXhhbXBsZS5jb20wHhcNMjQwNjE3MjI1NzA5
@@ -129,14 +143,18 @@ l18iXAzutefQoEIOBI0V3/m3fgh5AIRqOlTiruFPnO6yLVLtg2GpQc2ZHMNhSWyg
 P3pZlXKkWW0k5n3SG2+I4YIPrPHwxcSQ9fugdGrnC6Vk6lIvTImxe7ljYbnSsSVV
 V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
 -----END CERTIFICATE-----
-''')
+'''
+            )
         with self.assertRaises(OpenSSL.crypto.Error):
             dawgie.security._tls_initialize(self.wdir, 'example.com', base)
-        self.assertTrue (dawgie.security.useClientVerification(),
-                         'find and load client certs')
-        self.assertFalse (dawgie.security.useTLS(), 'could not load')
-        with open (base, 'tw') as file:
-            file.write ('''-----BEGIN PRIVATE KEY-----
+        self.assertTrue(
+            dawgie.security.use_client_verification(),
+            'find and load client certs',
+        )
+        self.assertFalse(dawgie.security.use_tls(), 'could not load')
+        with open(base, 'tw') as file:
+            file.write(
+                '''-----BEGIN PRIVATE KEY-----
 MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCsHUBbz4USAXfS
 raguO9CXuwi81BOMUOw19QcSsqg5ISc7r2T9G0TMQ/OyUXE8JZlBLIH7xxchp+3K
 MYjddzKYe3bInNcrzbAbc+sZ6Ab8Cf8Bil11cvcx9dJcwfJBI0ZrU6UZCTyGNjPK
@@ -187,10 +205,14 @@ l18iXAzutefQoEIOBI0V3/m3fgh5AIRqOlTiruFPnO6yLVLtg2GpQc2ZHMNhSWyg
 P3pZlXKkWW0k5n3SG2+I4YIPrPHwxcSQ9fugdGrnC6Vk6lIvTImxe7ljYbnSsSVV
 V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
 -----END CERTIFICATE-----
-''')
+'''
+            )
         dawgie.security._tls_initialize(self.wdir, 'example.com', base)
-        self.assertTrue (dawgie.security.useClientVerification(),
-                         'find and load client certs')
-        self.assertTrue (dawgie.security.useTLS(), 'could not load')
+        self.assertTrue(
+            dawgie.security.use_client_verification(),
+            'find and load client certs',
+        )
+        self.assertTrue(dawgie.security.use_tls(), 'could not load')
         return
+
     pass

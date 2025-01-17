@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -40,60 +40,91 @@ import collections
 import dawgie
 import dawgie.context
 import dawgie.db
-import logging; log = logging.getLogger(__name__)
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import numpy
 
-HINT = collections.namedtuple ('HINT',['cpu','io','memory','pages','summary'])
+HINT = collections.namedtuple(
+    'HINT', ['cpu', 'io', 'memory', 'pages', 'summary']
+)
 
-def _latest (history:[dawgie.db.METRIC_DATA])->dawgie.db.METRIC_DATA:
+
+def _latest(history: [dawgie.db.MetricData]) -> dawgie.db.MetricData:
     most_recent = history[0]
     for h in history:
-        if int(most_recent.run_id) < int(h.run_id): most_recent = h
+        if int(most_recent.run_id) < int(h.run_id):
+            most_recent = h
         pass
     return most_recent
 
-def aspects (metric:[dawgie.db.METRIC_DATA])->{str:[dawgie.db.METRIC_DATA]}:
-    log.debug ('aspects() - metrics of aspects over %d', len (metric))
-    reg = regress (metric)
-    log.debug ('aspects() - number of regressions %d', len (reg))
-    names = {'.'.join ([m.task, m.alg_name]) for m in metric}
-    asp = {name:[] for name in names}
+
+def aspects(metric: [dawgie.db.MetricData]) -> {str: [dawgie.db.MetricData]}:
+    log.debug('aspects() - metrics of aspects over %d', len(metric))
+    reg = regress(metric)
+    log.debug('aspects() - number of regressions %d', len(reg))
+    names = {'.'.join([m.task, m.alg_name]) for m in metric}
+    asp = {name: [] for name in names}
     for r in reg:
-        name = '.'.join (r.split ('.')[1:])
-        asp[name].append (_latest (reg[r]))
+        name = '.'.join(r.split('.')[1:])
+        asp[name].append(_latest(reg[r]))
         pass
     return asp
 
-def distribution (metric:[dawgie.db.METRIC_DATA])->{str:HINT}:
-    log.debug ('distribution() - use metrics for automaated choice of distribution over %d', len (metric))
+
+def distribution(metric: [dawgie.db.MetricData]) -> {str: HINT}:
+    log.debug(
+        'distribution() - use metrics for automaated choice of distribution over %d',
+        len(metric),
+    )
     dst = {}
-    reg = regress (metric)
-    log.debug ('distribution() - number of regressions %d', len (reg))
+    reg = regress(metric)
+    log.debug('distribution() - number of regressions %d', len(reg))
     for name in reg:
         if reg[name]:
-            cpu = numpy.median ([m.sv['task_system'].value() +
-                                 m.sv['task_user'].value() for m in reg[name]])
-            io = numpy.median ([m.sv['task_input'].value() +
-                                m.sv['task_output'].value() for m in reg[name]])
-            memory = numpy.median ([round ((m.sv['db_memory'].value() +
-                                            m.sv['task_memory'].value())/2**20)
-                                    for m in reg[name]])
-            pages = numpy.median ([m.sv['task_pages'].value() +
-                                   m.sv['task_pages'].value()
-                                   for m in reg[name]])
+            cpu = numpy.median(
+                [
+                    m.sv['task_system'].value() + m.sv['task_user'].value()
+                    for m in reg[name]
+                ]
+            )
+            io = numpy.median(
+                [
+                    m.sv['task_input'].value() + m.sv['task_output'].value()
+                    for m in reg[name]
+                ]
+            )
+            memory = numpy.median(
+                [
+                    round(
+                        (
+                            m.sv['db_memory'].value()
+                            + m.sv['task_memory'].value()
+                        )
+                        / 2**20
+                    )
+                    for m in reg[name]
+                ]
+            )
+            pages = numpy.median(
+                [
+                    m.sv['task_pages'].value() + m.sv['task_pages'].value()
+                    for m in reg[name]
+                ]
+            )
             summary = dawgie.context.cpu_threshold <= cpu
-        else: cpu,io,memory,pages,summary = 0,0,0,0,False
+        else:
+            cpu, io, memory, pages, summary = 0, 0, 0, 0, False
 
         dst[name] = HINT(cpu, io, memory, pages, dawgie.Distribution(summary))
         pass
     return dst
 
-def regress (metric:[dawgie.db.METRIC_DATA])->{str:[dawgie.db.METRIC_DATA]}:
-    log.debug ('regress() - regress back across metric data %d', len (metric))
-    names = {'.'.join ([m.target, m.task, m.alg_name]) for m in metric}
-    reg = {name:[] for name in names}
+
+def regress(metric: [dawgie.db.MetricData]) -> {str: [dawgie.db.MetricData]}:
+    log.debug('regress() - regress back across metric data %d', len(metric))
+    names = {'.'.join([m.target, m.task, m.alg_name]) for m in metric}
+    reg = {name: [] for name in names}
     for m in metric:
-        name = '.'.join ([m.target, m.task, m.alg_name])
-        reg[name].append (m)
+        name = '.'.join([m.target, m.task, m.alg_name])
+        reg[name].append(m)
         pass
     return reg

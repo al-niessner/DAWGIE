@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 '''
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -50,14 +50,14 @@ import sys
 import tempfile
 import webbrowser
 
-_template_image = '''
+_TEMPLATE_IMAGE = '''
 <div>
 <h3>{title:s}</h3>
 <img src="data:image/svg+xml;base64,{tree:s}">
 <img src="data:image/png;base64,{chart:s}">
 </div>
 '''
-_template_page = """
+_TEMPLATE_PAGE = """
 <!DOCTYPE html>
 <html>
   <head>
@@ -80,22 +80,25 @@ _template_page = """
 </html>
 """
 
+
 # pylint: disable=dangerous-default-value,protected-access
-def _trace (t, path=[], routes={}):
+def _trace(t, path=[], routes={}):
     path = path.copy() + [t.tag]
 
     if list(t):
-        for c in filter (lambda n,this=t.tag:n.tag != this, t):\
-            _trace (c, path.copy(), routes)
+        for c in filter(lambda n, this=t.tag: n.tag != this, t):
+            _trace(c, path.copy(), routes)
         pass
-    elif t.get ('shape') != dawgie.pl.dag.Shape.rectangle:
-        key = (path[0],path[-1])
-        if key not in routes: routes[key] = []
-        routes[key].append (path)
+    elif t.get('shape') != dawgie.pl.dag.Shape.rectangle:  # fmt: skip # pylint: disable=used-before-assignment
+        key = (path[0], path[-1])
+        if key not in routes:
+            routes[key] = []
+        routes[key].append(path)
         pass
     return routes
 
-def main (fn:str=None, at=None):
+
+def main(fn: str = None, at=None):
     '''Find and graph all targets through the algorithm dependency tree
 
     at : algorithm tree from dawgie.pl.dag.Construct()
@@ -107,8 +110,9 @@ def main (fn:str=None, at=None):
     import matplotlib.pyplot
 
     if at is None:
-        factories = dawgie.pl.scan.for_factories(dawgie.context.ae_base_path,
-                                                 dawgie.context.ae_base_package)
+        factories = dawgie.pl.scan.for_factories(
+            dawgie.context.ae_base_path, dawgie.context.ae_base_package
+        )
         at = dawgie.pl.dag.Construct(factories).at
         pass
 
@@ -116,93 +120,117 @@ def main (fn:str=None, at=None):
     images = ''
     routes = {}
     traces = {}
-    for root in at: routes.update (_trace (root))
-    for key in sorted (routes, key='.'.join):
+    for root in at:
+        routes.update(_trace(root))
+    for key in sorted(routes, key='.'.join):
         algs = set()
         traces[key] = {}
-        for path in routes[key]: algs.update (path)
-        traces[key] = dawgie.db.trace (algs)
+        for path in routes[key]:
+            algs.update(path)
+        traces[key] = dawgie.db.trace(algs)
         pass
-    for key,route in routes.items():
+    for key, route in routes.items():
         last = []
         rank = {}
-        for tn in sorted (traces[key]):
+        for tn in sorted(traces[key]):
             if not rank:
                 for tan in traces[key][tn].keys():
-                    rank[tan] = max([path.index (tan) if tan in path else 0
-                                     for path in route])
+                    rank[tan] = max(
+                        (
+                            path.index(tan) if tan in path else 0
+                            for path in route
+                        )
+                    )
                     pass
-                rank = {tan:i for i,(tan,r) in enumerate
-                        (sorted (rank.items(), key=lambda x:x[1]))}
-                algs = [i[0] for i in sorted (rank.items(), key=lambda x:x[1])]
+                rank = {
+                    tan: i
+                    for i, (tan, r) in enumerate(
+                        sorted(rank.items(), key=lambda x: x[1])
+                    )
+                }
+                algs = [i[0] for i in sorted(rank.items(), key=lambda x: x[1])]
                 pass
 
-            last.append (0)
-            for tan,r in sorted (rank.items(), key=lambda x:x[1]):
-                if traces[key][tn][tan] is not None: last[-1] = r
+            last.append(0)
+            for tan, r in sorted(rank.items(), key=lambda x: x[1]):
+                if traces[key][tn][tan] is not None:
+                    last[-1] = r
                 pass
             pass
-        charts[key] = matplotlib.pyplot.figure(figsize=(9,6))
-        sp = charts[key].add_subplot (111)
-        sp.barh (numpy.arange (len (traces[key])), last)
-        matplotlib.pyplot.xticks (numpy.arange (len (rank)),
-                                  [i[0] for i in sorted (rank.items(),
-                                                         key=lambda x:x[1])],
-                                  rotation=90)
-        matplotlib.pyplot.yticks (numpy.arange (len (traces[key])),
-                                  sorted (traces[key].keys()))
+        charts[key] = matplotlib.pyplot.figure(figsize=(9, 6))
+        sp = charts[key].add_subplot(111)
+        sp.barh(numpy.arange(len(traces[key])), last)
+        matplotlib.pyplot.xticks(
+            numpy.arange(len(rank)),
+            [i[0] for i in sorted(rank.items(), key=lambda x: x[1])],
+            rotation=90,
+        )
+        matplotlib.pyplot.yticks(
+            numpy.arange(len(traces[key])), sorted(traces[key].keys())
+        )
         pass
-    fid,tfn = tempfile.mkstemp ('.html','trace')
-    os.close (fid)
+    fid, tfn = tempfile.mkstemp('.html', 'trace')
+    os.close(fid)
     av = pydot.Dot(graph_type='digraph', rank='same')
-    for r in at: r._reset()
-    for r in at: r.graph (av)
-    with open (tfn, 'tw', encoding='UTF-8') as ff:
-        for key in sorted (routes, key='.'.join):
+    for r in at:
+        r._reset()
+    for r in at:
+        r.graph(av)
+    with open(tfn, 'tw', encoding='UTF-8') as ff:
+        for key in sorted(routes, key='.'.join):
             br = io.BytesIO()
-            charts[key].savefig (br)
+            charts[key].savefig(br)
             names = set()
-            for path in routes[key]: names.update (path)
+            for path in routes[key]:
+                names.update(path)
             for n in av.get_nodes():
                 if n.get_name()[1:-1] in names:
-                    n.set_style ('filled')
-                    n.set_fillcolor ('lawngreen')
+                    n.set_style('filled')
+                    n.set_fillcolor('lawngreen')
                 else:
-                    n.set_style ('filled')
-                    n.set_fillcolor ('white')
+                    n.set_style('filled')
+                    n.set_fillcolor('white')
                     pass
                 pass
-            fid,ttfn = tempfile.mkstemp()
-            os.close (fid)
-            av.write_svg (ttfn)
-            with open (ttfn, 'br') as fff: tree = fff.read()
-            os.unlink (ttfn)
-            images += _template_image.format \
-                      (chart=base64.encodebytes (br.getvalue()).decode(),
-                       title=key[0] + ' -> ' + key[1],
-                       tree=base64.encodebytes (tree).decode())
+            fid, ttfn = tempfile.mkstemp()
+            os.close(fid)
+            av.write_svg(ttfn)  # pylint: disable=no-member
+            with open(ttfn, 'br') as fff:
+                tree = fff.read()
+            os.unlink(ttfn)
+            images += _TEMPLATE_IMAGE.format(
+                chart=base64.encodebytes(br.getvalue()).decode(),
+                title=key[0] + ' -> ' + key[1],
+                tree=base64.encodebytes(tree).decode(),
+            )
             pass
-        ff.write (_template_page.format (images=images,
-                                         npaths=sum ([len (v) for v in
-                                                      routes.values()]),
-                                         nroots=len (at),
-                                         nroutes=len (routes)))
+        ff.write(
+            _TEMPLATE_PAGE.format(
+                images=images,
+                npaths=sum((len(v) for v in routes.values())),
+                nroots=len(at),
+                nroutes=len(routes),
+            )
+        )
         pass
 
     if fn:
-        if not os.path.isdir (os.path.dirname (fn)): \
-           os.makedirs (os.path.dirname (fn))
-        shutil.move (tfn, fn)
-    else: webbrowser.open_new_tab ('file://' + tfn)
+        if not os.path.isdir(os.path.dirname(fn)):
+            os.makedirs(os.path.dirname(fn))
+        shutil.move(tfn, fn)
+    else:
+        webbrowser.open_new_tab('file://' + tfn)
 
     return
 
+
 if __name__ == '__main__':
     # main blocks always look the same; pylint: disable=duplicate-code
-    root_dir = os.path.dirname (__file__)
-    for i in range(3): root_dir = os.path.join (root_dir, '..')
-    root_dir = os.path.abspath (root_dir)
-    sys.path.insert (0,root_dir)
+    root_dir = os.path.dirname(__file__)
+    for i in range(3):
+        root_dir = os.path.join(root_dir, '..')
+    root_dir = os.path.abspath(root_dir)
+    sys.path.insert(0, root_dir)
 
     import argparse
     import dawgie.context
@@ -212,18 +240,35 @@ if __name__ == '__main__':
     import dawgie.tools.trace
     import dawgie.util
 
-    ap = argparse.ArgumentParser(description='Follow targets through the pipeline and display the results.')
-    ap.add_argument ('-f', '--file-name', default=None, required=False,
-                     help='file name to write the report -- a temp file will be used and displayed in your browser is none is given')
-    ap.add_argument ('-l', '--log-file', default='trace.log', required=False,
-                     help='a filename to put all of the log messages into [%(default)s]')
-    ap.add_argument ('-L', '--log-level', default=logging.ERROR, required=False,
-                     type=dawgie.util.log_level,
-                     help='set the verbosity that you want where a smaller number means more verbose [logging.ERROR]')
-    dawgie.context.add_arguments (ap)
+    ap = argparse.ArgumentParser(
+        description='Follow targets through the pipeline and display the results.'
+    )
+    ap.add_argument(
+        '-f',
+        '--file-name',
+        default=None,
+        required=False,
+        help='file name to write the report -- a temp file will be used and displayed in your browser is none is given',
+    )
+    ap.add_argument(
+        '-l',
+        '--log-file',
+        default='trace.log',
+        required=False,
+        help='a filename to put all of the log messages into [%(default)s]',
+    )
+    ap.add_argument(
+        '-L',
+        '--log-level',
+        default=logging.ERROR,
+        required=False,
+        type=dawgie.util.log_level,
+        help='set the verbosity that you want where a smaller number means more verbose [logging.ERROR]',
+    )
+    dawgie.context.add_arguments(ap)
     args = ap.parse_args()
     dawgie.context.log_level = args.log_level
-    dawgie.context.override (args)
+    dawgie.context.override(args)
     dawgie.db.open()
     dawgie.tools.trace.main(fn=args.file_name)
     dawgie.db.close()
@@ -233,4 +278,5 @@ else:
     import dawgie.pl.dag
     import dawgie.pl.scan
     import dawgie.util
+
     pass

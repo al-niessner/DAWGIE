@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -39,19 +39,25 @@ NTR:
 import os
 import sys
 
+
 def do():
-    h = dawgie.pl.resources.HINT(0,0,0,0,False)
+    # being a main imports are last so pylint: disable=used-before-assignment
+    h = dawgie.pl.resources.HINT(0, 0, 0, 0, False)
     return h
+
 
 if __name__ == '__main__':
     # main blocks always look the same; pylint: disable=duplicate-code
-    root = os.path.dirname (__file__)
-    for gi in range(2): root = os.path.join (root, '..')
-    root = os.path.abspath (root)
-    sys.path.insert (0,root)
+    root = os.path.dirname(__file__)
+    for gi in range(2):
+        root = os.path.join(root, '..')
+    root = os.path.abspath(root)
+    sys.path.insert(0, root)
 
     import dawgie.pl.resources
+
     do()
 else:
     import dawgie.pl.resources
+
     pass

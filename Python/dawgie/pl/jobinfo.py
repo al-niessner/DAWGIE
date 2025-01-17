@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -38,8 +38,10 @@ NTR:
 
 import enum
 
+
 @enum.unique
 class State(enum.Enum):
+    # enums do not need to scream at you so pylint: disable=invalid-name
     delayed = 0  # delayed until a certain time (periodic task)
     failure = 1  # task ran but it had an exception causing the pipeline to fail
     initial = 5  # initial value

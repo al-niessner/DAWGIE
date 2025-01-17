@@ -1,7 +1,7 @@
 '''The algorithm engine for touching the local disk
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -36,9 +36,14 @@ POSSIBILITY OF SUCH DAMAGE.
 
 NTR:
 '''
+
 ignore = False  # forces the pipeline to ignore this package (aka task)
 
-def task (prefix:str, ps_hint:int=0, runid:int=-1, target:str='__none__'):
+
+def task(
+    prefix: str, ps_hint: int = 0, runid: int = -1, target: str = '__none__'
+):
     # avoid circular dependencies so pylint: disable=import-outside-toplevel
     import ae.second.bot
+
     return ae.second.bot.Actor(prefix, ps_hint, runid, target)

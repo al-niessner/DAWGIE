@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -40,4 +40,5 @@ NTR:
 import dawgie.context
 import dawgie.pl.state
 
-if 'fsm' not in dir(dawgie.context): dawgie.context.fsm = dawgie.pl.state.FSM()
+if 'fsm' not in dir(dawgie.context):
+    dawgie.context.fsm = dawgie.pl.state.FSM()

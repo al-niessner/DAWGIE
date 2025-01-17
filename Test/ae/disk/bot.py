@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -47,9 +47,13 @@ import os
 import pickle
 import tempfile
 
+
 class Actor(dawgie.Task):
-    def list(self): return [Engine()]
+    def list(self):
+        return [Engine()]
+
     pass
+
 
 class Engine(dawgie.Algorithm):
     def __init__(self):
@@ -57,27 +61,33 @@ class Engine(dawgie.Algorithm):
         self.__base = ae.network.bot.Engine()
         self.__dirty = ae.StateVector()
         self.__noise = ae.network.bot.Analyzer()
-        self._version_ = dawgie.VERSION(1,0,0)
+        self._version_ = dawgie.VERSION(1, 0, 0)
         return
 
-    def name(self): return 'engine'
-    def previous(self): return [dawgie.ALG_REF(factory=ae.network.analysis,
-                                               impl=self.__noise),
-                                dawgie.ALG_REF(factory=ae.network.task,
-                                               impl=self.__base)]
+    def name(self):
+        return 'engine'
 
-    def run (self, ds, ps):
+    def previous(self):
+        return [
+            dawgie.ALG_REF(factory=ae.network.analysis, impl=self.__noise),
+            dawgie.ALG_REF(factory=ae.network.task, impl=self.__base),
+        ]
+
+    def run(self, ds, ps):
         base = self.__base.sv_as_dict()['test']['image'].array()
         dirt = self.__noise.sv_as_dict()['test']['image'].array()
-        for _i in range (10):
-            fid,fn = tempfile.mkstemp()
-            os.close (fid)
-            with open (fn, 'bw') as f: pickle.dump (base, f)
-            os.unlink (fn)
+        for _i in range(10):
+            fid, fn = tempfile.mkstemp()
+            os.close(fid)
+            with open(fn, 'bw') as f:
+                pickle.dump(base, f)
+            os.unlink(fn)
             pass
-        self.__dirty['image'] = ae.Value(array=base+dirt)
+        self.__dirty['image'] = ae.Value(array=base + dirt)
         ds.update()
         return
 
-    def state_vectors (self): return [self.__dirty]
+    def state_vectors(self):
+        return [self.__dirty]
+
     pass

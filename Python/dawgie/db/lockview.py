@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2024, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -40,7 +40,9 @@ import collections
 import datetime
 import enum
 
+
 class LockRequest(enum.Enum):
+    # enums should not scream at you so pylint: disable=invalid-name
     lrqb = "Lock_Request_Begin"
     lrqe = "Lock_Request_End"
     laqb = "Lock_Acquire_Begin"
@@ -49,8 +51,9 @@ class LockRequest(enum.Enum):
     lrle = "Lock_Release_End"
     pass
 
+
 class TaskLock:
-    def __init__(self, tn:str, action:str):
+    def __init__(self, tn: str, action: str):
         self.tn = tn
         self.action = action
         self.starttime = datetime.datetime.utcnow()
@@ -58,7 +61,8 @@ class TaskLock:
         self.state = "busy"
         pass
 
-    def done(self): self.set_state("done")
+    def done(self):
+        self.set_state("done")
 
     def get_delta_time(self):
         return (datetime.datetime.utcnow() - self.starttime).total_seconds()
@@ -69,8 +73,8 @@ class TaskLock:
         self.lasttime_delta = self.get_delta_time()
         return self.lasttime_delta
 
-    def set_state(self, s:str):
-        if s in ["done","busy"]:
+    def set_state(self, s: str):
+        if s in ["done", "busy"]:
             self.state = s
             self.lasttime_delta = self.get_delta_time()
             pass
@@ -78,19 +82,21 @@ class TaskLock:
 
     def to_string(self):
         return f"{self.starttime.isoformat()} {self.tn} {self.action.value}"
+
     pass
+
 
 class TaskLockEngine:
     def __init__(self):
         self.queue = collections.OrderedDict()
         pass
 
-    def add_task(self, name:str, action:str):
-        self.queue[(name,action)] = TaskLock(name, action)
+    def add_task(self, name: str, action: str):
+        self.queue[(name, action)] = TaskLock(name, action)
         pass
 
-    def end_task(self, name:str, action:str):
-        self.queue[(name,action)].done()
+    def end_task(self, name: str, action: str):
+        self.queue[(name, action)].done()
         pass
 
     def get_progress(self):
@@ -102,4 +108,5 @@ class TaskLockEngine:
 
     def view_progress(self):
         return {"tasks": self.get_progress()}
+
     pass
