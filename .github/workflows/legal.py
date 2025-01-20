@@ -77,3 +77,5 @@ for p,dns,fns in os.walk ('.'):
 
 if not legal:
     sys.exit(1)
+
+print ('all legal preambles seem to be valid')
