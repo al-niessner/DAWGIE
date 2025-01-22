@@ -9,7 +9,39 @@ do_job()
     python -m venv $3/venv
     . $3/venv/bin/activate
     python -m pip install pyyaml
-    python $this/steps.py $1 $2 > $3/do.sh
+    python <<EOF > $3/do.sh
+import os
+import sys
+import yaml
+
+with open ("$1", 'rt') as file: y = yaml.safe_load(file)
+lc = 0
+steps = []
+if "$2" == 'PyTesting':
+    print ('docker pull postgres:latest')
+    print ('docker run --detach --env POSTGRES_PASSWORD=password '
+           '--env POSTGRES_USER=tester --name ga_postgres --network host '
+           '--rm  postgres:latest')
+    print ('sleep 5')
+    print ('docker exec -i ga_postgres createdb -U tester testspace')
+for step in y['jobs']['$2']['steps']:
+    if 'run' in step:
+        for line in filter (len, step['run'].split('\n')):
+            if line.startswith ('sudo'): continue
+            if line.startswith ('createdb'): continue
+            if '&&' in line: line = line[:line.find('&&')]
+            if '||' in line: line = line[:line.find('||')]
+            cmd = line.split()[0]
+            lc += 1
+            if cmd == 'black' and 'KEEP_STYLE' in os.environ:
+                line = line.replace ('--check --diff ','')
+            print (line,f'&& echo "result of github action step: success,{cmd}" '
+                   f'|| echo "result of github action step: failure,{cmd}"')
+if lc: print (f'echo "github actions expected steps: {lc}"')
+if "$2" == 'PyTesting':
+    print ('docker stop ga_postgres')
+
+EOF
     chmod 755 $3/do.sh
     $3/do.sh
 }
@@ -54,7 +86,14 @@ trap "rm -rf $wdir $root/Python/build $root/Python/dawgie.egg-info $root/Python/
 for yaml in $(ls $this/*.yaml)
 do
     echo "yaml: $yaml"
-    for job in $(python $this/jobs.py $yaml)
+    for job in $(python <<EOF
+import sys
+import yaml
+
+with open ("$yaml", 'rt') as file: y = yaml.safe_load(file)
+print(' '.join(y['jobs'].keys()))
+EOF
+                 )
     do
         if $(within $job $*)
         then
