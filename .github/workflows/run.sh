@@ -14,6 +14,19 @@ do_job()
     $3/do.sh
 }
 
+within()
+{
+    [[ $# -eq 1 ]] && return 0
+    base=$1
+    shift
+    while [[ $# -gt 0 ]]
+    do
+        [[ "$base" = "$1" ]] && return 0
+        shift
+    done
+    return 1
+}
+
 if [ -z "$(which python)" ]
 then
     echo "'python' is not defined in your path. It should execute Python 3.12 or later."
@@ -31,22 +44,71 @@ then
     python --version
     exit -2
 fi
+expected_jobs=""
 root=$(realpath $(dirname $0)/../..)
 this=$(realpath $(dirname $0))
 wdir=$this/local
 cd $root
-trap "rm -rf $wdir" EXIT
-for yaml in $(ls $this/s*.yaml)
+rm $root/*.rpt.txt
+#trap "rm -rf $wdir $root/Python/build $root/Python/dawgie.egg-info $root/Python/dawgie/fe/requirements.txt" EXIT
+for yaml in $(ls $this/d*.yaml)
 do
     echo "yaml: $yaml"
     for job in $(python $this/jobs.py $yaml)
     do
-        echo "   queuing job: $job"
-        mkdir -p $wdir/$job
-        do_job $yaml $job $wdir/$job > $root/$job.rpt.txt 2>&1 &
+        if $(within $job $*)
+        then
+            echo "   queuing job: $job"
+            expected_jobs="${expected_jobs} $job"
+            mkdir -p $wdir/$job
+            do_job $yaml $job $wdir/$job > $root/$job.rpt.txt 2>&1 &
+        else
+            echo "   skipping $job"
+        fi
     done
 done
-echo "waiting for jobs to end"
+echo "waiting for jobs to complete"
 wait
-rm -rf $wdir
-trap - EXIT
+#rm -rf $wdir $root/Python/build $root/Python/dawgie.egg-info $root/Python/dawgie/fe/requirements.txt
+declare -i summary=0
+for job in $expected_jobs
+do
+    if [ -f $root/$job.rpt.txt ]
+    then
+        python <<EOF
+import os,sys
+def extract (frm:str, stmnt:str)->[str]:
+    result = []
+    idx = frm.find(stmnt)
+    while idx >= 0:
+       result.append (frm[idx+len(stmnt):frm.find('\n',idx)].strip())
+       idx = frm.find(stmnt, idx+len(stmnt))
+    return result
+with open ("$root/$job.rpt.txt", 'rt') as file: content = file.read()
+count = int(extract (frm=content,
+                     stmnt='github actions expected steps: ')[0])
+results = extract (frm=content,
+                   stmnt='result of github action step: ')
+summary = False
+if len(results) != count:
+    print ('Failure: $job did not produce all of the exptected messages. See $root/$job.rpt.txt for details.')
+else:
+    summary = all(r.startswith('success') for r in results) 
+    if summary: print ('Success: $job')
+    else: print ('Failure: $job - see $root/$job.rpt.txt for details')
+for result in results:
+    state,cmd = result.split(',')
+    print (' ', state+':', cmd)
+if summary:
+    os.unlink("$root/$job.rpt.txt")
+    sys.exit(0)
+else: sys.exit(1)
+EOF
+        summary=$summary+$?
+    else
+        echo "Failure: $job did not create expected report."
+        summary=1
+    fi
+done
+[[ $summary -eq 0 ]] && echo "Summary: All test verifications were successful" || echo "Summary: Some or all test verifications failed." 
+#trap - EXIT
