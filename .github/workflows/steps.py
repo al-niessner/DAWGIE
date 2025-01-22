@@ -22,7 +22,7 @@ for step in y['jobs'][sys.argv[2]]['steps']:
             cmd = line.split()[0]
             lc += 1
             if cmd == 'black' and 'KEEP_STYLE' in os.environ:
-                line = line.replace ('--check ','')
+                line = line.replace ('--check --diff ','')
             print (line,f'&& echo "result of github action step: success,{cmd}" '
                    f'|| echo "result of github action step: failure,{cmd}"')
 if lc: print (f'echo "github actions expected steps: {lc}"')
