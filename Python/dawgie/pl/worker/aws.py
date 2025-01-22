@@ -191,7 +191,7 @@ class Connect:
             pass
         message = {
             'id': os.path.basename(self._did),
-            'now': datetime.datetime.utcnow(),
+            'now': datetime.datetime.now(datetime.UTC),
             'payload': '',
             'step': 'advertise',
         }
@@ -218,7 +218,7 @@ class Connect:
     def interview(self):
         message = {
             'id': os.path.basename(self._did),
-            'now': datetime.datetime.utcnow(),
+            'now': datetime.datetime.now(datetime.UTC),
             'payload': '',
             'step': 'interview',
         }
@@ -257,7 +257,7 @@ class Connect:
     def hire(self):
         message = {
             'id': os.path.basename(self._did),
-            'now': datetime.datetime.utcnow(),
+            'now': datetime.datetime.now(datetime.UTC),
             'payload': dawgie.pl.message.dumps(self._job),
             'step': 'hire',
         }
@@ -414,7 +414,7 @@ def exchange(message):  # AWS lambda function
             step = message['step']
 
             if (
-                datetime.datetime.utcnow() - message['now']
+                datetime.datetime.now(datetime.UTC) - message['now']
             ).total_seconds() < 50:
                 print('exchange() - within time bounds')
                 print('exchange() - do', step)

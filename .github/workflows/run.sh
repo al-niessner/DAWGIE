@@ -50,7 +50,7 @@ this=$(realpath $(dirname $0))
 wdir=$this/local
 cd $root
 rm $root/*.rpt.txt
-#trap "rm -rf $wdir $root/Python/build $root/Python/dawgie.egg-info $root/Python/dawgie/fe/requirements.txt" EXIT
+trap "rm -rf $wdir $root/Python/build $root/Python/dawgie.egg-info $root/Python/dawgie/fe/requirements.txt" EXIT
 for yaml in $(ls $this/d*.yaml)
 do
     echo "yaml: $yaml"
@@ -69,7 +69,7 @@ do
 done
 echo "waiting for jobs to complete"
 wait
-#rm -rf $wdir $root/Python/build $root/Python/dawgie.egg-info $root/Python/dawgie/fe/requirements.txt
+rm -rf $wdir $root/Python/build $root/Python/dawgie.egg-info $root/Python/dawgie/fe/requirements.txt
 declare -i summary=0
 for job in $expected_jobs
 do
@@ -111,4 +111,4 @@ EOF
     fi
 done
 [[ $summary -eq 0 ]] && echo "Summary: All test verifications were successful" || echo "Summary: Some or all test verifications failed." 
-#trap - EXIT
+trap - EXIT
