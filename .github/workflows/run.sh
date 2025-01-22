@@ -49,9 +49,9 @@ root=$(realpath $(dirname $0)/../..)
 this=$(realpath $(dirname $0))
 wdir=$this/local
 cd $root
-rm $root/*.rpt.txt
+rm -f $root/*.rpt.txt
 trap "rm -rf $wdir $root/Python/build $root/Python/dawgie.egg-info $root/Python/dawgie/fe/requirements.txt" EXIT
-for yaml in $(ls $this/d*.yaml)
+for yaml in $(ls $this/*.yaml)
 do
     echo "yaml: $yaml"
     for job in $(python $this/jobs.py $yaml)
@@ -100,7 +100,7 @@ for result in results:
     state,cmd = result.split(',')
     print (' ', state+':', cmd)
 if summary:
-    os.unlink("$root/$job.rpt.txt")
+    if 'KEEP_REPORTS' not in os.environ: os.unlink("$root/$job.rpt.txt")
     sys.exit(0)
 else: sys.exit(1)
 EOF
