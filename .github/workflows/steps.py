@@ -10,7 +10,7 @@ if sys.argv[2] == 'PyTesting':
     print ('docker run --detach --env POSTGRES_PASSWORD=password '
            '--env POSTGRES_USER=tester --name ga_postgres --network host '
            '--rm  postgres:latest')
-    print ('sleep 3')
+    print ('sleep 5')
     print ('docker exec -i ga_postgres createdb -U tester testspace')
 for step in y['jobs'][sys.argv[2]]['steps']:
     if 'run' in step:

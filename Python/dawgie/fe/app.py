@@ -281,11 +281,6 @@ def start_state():
 
 
 def versions():
-    # it is iterable so pylint: disable=not-an-iterable
-    dl = {
-        p.key: p.parsed_version.base_version for p in pkg_resources.working_set
-    }
-    # pylint: enable=not-an-iterable
     fn = os.path.join(os.path.dirname(__file__), 'requirements.txt')
     vers = {'dawgie': dawgie.__version__, 'python': sys.version}
     with open(fn, 'rt', encoding="utf-8") as f:
