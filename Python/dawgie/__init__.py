@@ -499,12 +499,18 @@ class Analysis(_Metric):
 
             setattr(step, 'abort', self.abort)
             setattr(step, 'caller', self)
-            self.__timing['gather_' + step.name()] = datetime.datetime.now(datetime.UTC)
+            self.__timing['gather_' + step.name()] = datetime.datetime.now(
+                datetime.UTC
+            )
             aspect = dawgie_db.gather(step, self)
-            self.__timing['collect_' + step.name()] = datetime.datetime.now(datetime.UTC)
+            self.__timing['collect_' + step.name()] = datetime.datetime.now(
+                datetime.UTC
+            )
             aspect.collect(step.feedback())
             aspect.collect(step.traits())
-            self.__timing['start_' + self._name()] = datetime.datetime.now(datetime.UTC)
+            self.__timing['start_' + self._name()] = datetime.datetime.now(
+                datetime.UTC
+            )
             log.debug('Stepping into %s', step.name())
             self.measure(step.run, args=(aspect,), ds=aspect.ds())
             setattr(step, 'caller', None)
@@ -821,12 +827,18 @@ class Regress(_Metric):
 
             setattr(step, 'abort', self.abort)
             setattr(step, 'caller', self)
-            self.__timing['retreat_' + step.name()] = datetime.datetime.now(datetime.UTC)
+            self.__timing['retreat_' + step.name()] = datetime.datetime.now(
+                datetime.UTC
+            )
             timeline = dawgie_db.retreat(step, self)
-            self.__timing['recede_' + step.name()] = datetime.datetime.now(datetime.UTC)
+            self.__timing['recede_' + step.name()] = datetime.datetime.now(
+                datetime.UTC
+            )
             timeline.recede(step.feedback())
             timeline.recede(step.variables())
-            self.__timing['start_' + self._name()] = datetime.datetime.now(datetime.UTC)
+            self.__timing['start_' + self._name()] = datetime.datetime.now(
+                datetime.UTC
+            )
             log.debug('Stepping into %s', step.name())
             self.measure(
                 step.run, args=(self._ps_hint(), timeline), ds=timeline.ds()
@@ -1035,14 +1047,18 @@ class Task(_Metric):
             setattr(step, 'caller', self)
             sname = f'{self._target()}.{self._name()}.{step.name()}'
             log.debug('Loading into %s', sname)
-            self.__timing['load_' + step.name()] = datetime.datetime.now(datetime.UTC)
+            self.__timing['load_' + step.name()] = datetime.datetime.now(
+                datetime.UTC
+            )
             ds = self._make_ds(step)
             for f in step.feedback():
                 ds.load(f)
             for p in step.previous():
                 ds.load(p)
             log.debug('Loaded into %s', sname)
-            self.__timing[f'start_{step.name()}'] = datetime.datetime.now(datetime.UTC)
+            self.__timing[f'start_{step.name()}'] = datetime.datetime.now(
+                datetime.UTC
+            )
             log.debug('Stepping into %s', sname)
             self.measure(step.run, args=(ds, self._ps_hint()), ds=ds)
             log.debug('Returned from %s', sname)

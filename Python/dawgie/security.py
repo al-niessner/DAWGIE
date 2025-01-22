@@ -113,7 +113,9 @@ class TwistedWrapper:
         if response.valid:
             hid = _PGP.decrypt(hid).data.decode()
             log.debug('Received handshake identification:\n%s', hid)
-            self.__msg = 'timestamp: ' + str(datetime.datetime.now(datetime.UTC))
+            self.__msg = 'timestamp: ' + str(
+                datetime.datetime.now(datetime.UTC)
+            )
             self.__msg += '\nunique id: ' + str(random.random())
             msg = struct.pack('>I', len(self.__msg)) + self.__msg.encode()
 
