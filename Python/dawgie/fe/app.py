@@ -50,9 +50,9 @@ import dawgie.pl.logger.fe
 import dawgie.pl.schedule
 import dawgie.pl.snapshot
 import enum
+import importlib.metadata
 import json
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
-import pkg_resources
 import os
 import sys
 
@@ -281,20 +281,18 @@ def start_state():
 
 
 def versions():
-    # it is iterable so pylint: disable=not-an-iterable
-    dl = {
-        p.key: p.parsed_version.base_version for p in pkg_resources.working_set
-    }
-    # pylint: enable=not-an-iterable
     fn = os.path.join(os.path.dirname(__file__), 'requirements.txt')
     vers = {'dawgie': dawgie.__version__, 'python': sys.version}
     with open(fn, 'rt', encoding="utf-8") as f:
         for name in f.readlines():
-            if name in dl:
-                vers[name] = dl[name]
-            else:
+            name = name.strip()
+            for c in ['=', '<', '>']:
+                if c in name:
+                    name = name[: name.find(c)]
+            try:
+                vers[name] = importlib.metadata.version(name)
+            except importlib.metadata.PackageNotFoundError:
                 vers[name] = 'indeterminate'
-            pass
         pass
     return json.dumps(vers).encode()
 

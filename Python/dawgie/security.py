@@ -113,7 +113,9 @@ class TwistedWrapper:
         if response.valid:
             hid = _PGP.decrypt(hid).data.decode()
             log.debug('Received handshake identification:\n%s', hid)
-            self.__msg = 'timestamp: ' + str(datetime.datetime.utcnow())
+            self.__msg = 'timestamp: ' + str(
+                datetime.datetime.now(datetime.UTC)
+            )
             self.__msg += '\nunique id: ' + str(random.random())
             msg = struct.pack('>I', len(self.__msg)) + self.__msg.encode()
 
@@ -241,7 +243,7 @@ def connect(address: (str, int)) -> socket.socket:
 
     s.connect(address)
     message = ' machine: ' + _my_ip() + '\n'
-    message += 'temporal: ' + str(datetime.datetime.utcnow()) + '\n'
+    message += 'temporal: ' + str(datetime.datetime.now(datetime.UTC)) + '\n'
     message += 'username: ' + getpass.getuser() + '\n'
     _send(s, message)
     _send(s, _recv(s))

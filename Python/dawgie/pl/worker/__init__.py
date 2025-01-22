@@ -82,7 +82,7 @@ class Context:
         )
         setattr(task, 'abort', self.abort)
         dawgie.pl.version.record(task, only=jobid.split('.')[1])
-        timing['started'] = datetime.datetime.utcnow()
+        timing['started'] = datetime.datetime.now(datetime.UTC)
         task.do(goto=jobid.split('.')[1])
         timing.update(task.timing())
         return task.new_values()

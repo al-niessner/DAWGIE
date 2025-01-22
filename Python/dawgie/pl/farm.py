@@ -246,7 +246,7 @@ def _put(job, runid: int, target: str, where: dawgie.Distribution):
         )
         pass
 
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.UTC)
     fac = job.get('factory')
     msg = dawgie.pl.message.make(
         ctxt=dawgie.context.dumps(),
