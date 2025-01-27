@@ -54,25 +54,21 @@ dawgie.security.initialize(
     path=dawgie.context.guest_public_keys,
     myname=dawgie.context.ssl_pem_myname,
     myself=dawgie.context.ssl_pem_myself,
+    system=dawgie.context.ssl_pem_file,
 )
 factory = twisted.web.server.Site(dawgie.fe.root())
 
-if dawgie.context.ssl_pem_file:
-    if os.path.isfile(dawgie.context.ssl_pem_file):
-        with open(dawgie.context.ssl_pem_file, 'rt', encoding="utf-8") as f:
-            cert = f.read()
-        cert = twisted.internet.ssl.PrivateCertificate.loadPEM(cert)
-        twisted.internet.reactor.listenSSL(
-            dawgie.context.fe_port, factory, cert.options()
+if dawgie.security.use_tls():
+    cert = dawgie.security.authority()
+    twisted.internet.reactor.listenSSL(
+        dawgie.context.fe_port, factory, cert.options()
         )
-        if dawgie.security.clients():
-            twisted.internet.reactor.listenSSL(
-                dawgie.context.cfe_port,
-                factory,
-                cert.options(*dawgie.security.clients()),
+    if dawgie.security.clients():
+        twisted.internet.reactor.listenSSL(
+            dawgie.context.cfe_port,
+            factory,
+            cert.options(*dawgie.security.clients()),
             )
-    else:
-        raise FileNotFoundError(dawgie.context.ssl_pem_file)
 else:
     twisted.internet.reactor.listenTCP(dawgie.context.fe_port, factory)
 

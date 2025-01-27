@@ -63,6 +63,7 @@ import twisted.internet.ssl
 
 _certs = []
 _myself = {}
+_system = []
 _PGP = None
 gpgargname = (
     'gnupghome'
@@ -268,14 +269,14 @@ def finalize() -> None:
 
 
 def initialize(
-    path: str = None, myname: str = None, myself: str = None
+    path: str = None, myname: str = None, myself: str = None, system: str = None,
 ) -> None:
     '''initialie this library with the PGP keyring location and TLS certificates
 
     Load both PGP and TLS to be backward compatible.
     '''
     _pgp_initialize(path)
-    _tls_initialize(path, myname, myself)
+    _tls_initialize(path, myname, myself, system)
     return
 
 
@@ -319,7 +320,7 @@ def _pgp_initialize(path: str = None) -> None:
 
 
 def _tls_initialize(
-    path: str = None, myname: str = None, myself: str = None
+    path: str = None, myname: str = None, myself: str = None, system: str = None
 ) -> None:
     '''initialize this library with the TLS certificates
 
@@ -331,10 +332,17 @@ def _tls_initialize(
     myname : the host name in the certificate
     myself : absolute file path a private certificate PEM that contains the
              private key and a single certificate.
+    system : should be dawgie.conext.ssl_pem_file
     '''
     _certs.clear()
     _myself.clear()
+    _system.clear()
     certs = []
+    if system and os.path.exists(system) and os.path.isfile(system):
+        with open(system, 'rt', encoding='utf-8') as file:
+            cxt = file.read()
+        prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
+        _system.append (prv)
     if path and os.path.exists(path) and os.path.isdir(path):
         for fn in filter(
             lambda fn: fn.startswith('dawgie.public.pem'), os.listdir(path)
@@ -374,7 +382,7 @@ def _lookup(fullname: str):
 
 
 def authority() -> twisted.internet.ssl.PrivateCertificate:
-    return _myself['private']
+    return _system[0] if system else _myself['private']
 
 
 def certificate() -> twisted.internet.ssl.Certificate.loadPEM:

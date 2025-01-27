@@ -192,7 +192,8 @@ if __name__ == '__main__':
         myname=dawgie.context.ssl_pem_myname,
         myself=os.path.expandvars(
             os.path.expanduser(dawgie.context.ssl_pem_myself)
-        ),
+            ),
+        system=dawgie.context.ssl_pem_file,
     )
 
     info(

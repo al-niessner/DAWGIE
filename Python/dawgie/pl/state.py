@@ -232,25 +232,20 @@ class FSM:
         else:
             factory = twisted.web.server.Site(dawgie.fe.root())
 
-            if dawgie.context.ssl_pem_file:
-                if os.path.isfile(dawgie.context.ssl_pem_file):
-                    with open(
-                        dawgie.context.ssl_pem_file, 'rt', encoding='UTF-8'
-                    ) as f:
-                        cert = f.read()
-                    cert = twisted.internet.ssl.PrivateCertificate.loadPEM(cert)
-                    twisted.internet.reactor.listenSSL(
-                        dawgie.context.fe_port, factory, cert.options()
+            if dawgie.security.use_tls():
+                log.info ('starting front end using HTTPS')
+                cert = dawgie.security.authority()
+                twisted.internet.reactor.listenSSL(
+                    int(dawgie.context.fe_port), factory, cert.options()
                     )
-                    if dawgie.security.clients():
-                        twisted.internet.reactor.listenSSL(
-                            dawgie.context.cfe_port,
-                            factory,
-                            cert.options(*dawgie.security.clients()),
+                if dawgie.security.clients():
+                    twisted.internet.reactor.listenSSL(
+                        dawgie.context.cfe_port,
+                        factory,
+                        cert.options(*dawgie.security.clients()),
                         )
-                else:
-                    raise FileNotFoundError(dawgie.context.ssl_pem_file)
             else:
+                log.info ('starting front end using HTTP')
                 twisted.internet.reactor.listenTCP(
                     dawgie.context.fe_port, factory
                 )
@@ -342,6 +337,7 @@ class FSM:
                 myself=os.path.expandvars(
                     os.path.expanduser(dawgie.context.ssl_pem_myself)
                 ),
+                system=dawgie.context.ssl_pem_file,
             )
         return
 
