@@ -270,6 +270,7 @@ def main():
             myself=os.path.expandvars(
                 os.path.expanduser(dawgie.context.ssl_pem_myself)
             ),
+            system=dawgie.context.ssl_pem_file,
         )
         print('dawgie.security.initialize')
         handler = dawgie.pl.logger.TwistedHandler(host=host, port=int(port))

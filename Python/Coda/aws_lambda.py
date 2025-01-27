@@ -137,7 +137,9 @@ def lambda_handler(event, context):
 
     if event['httpMethod'] == 'POST':
         dawgie.security.initialize(
-            myname=dawgie.context.myname, myself=dawgie.context.myself
+            myname=dawgie.context.myname,
+            myself=dawgie.context.myself,
+            system=dawgie.context.ssl_pem_file,
         )
         dawgie.security.extend(
             [aws_bot_public_key, aws_bot_private_key, dawgie_bot_public_key]
