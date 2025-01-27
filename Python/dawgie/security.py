@@ -269,7 +269,10 @@ def finalize() -> None:
 
 
 def initialize(
-    path: str = None, myname: str = None, myself: str = None, system: str = None,
+    path: str = None,
+    myname: str = None,
+    myself: str = None,
+    system: str = None,
 ) -> None:
     '''initialie this library with the PGP keyring location and TLS certificates
 
@@ -342,7 +345,7 @@ def _tls_initialize(
         with open(system, 'rt', encoding='utf-8') as file:
             cxt = file.read()
         prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
-        _system.append (prv)
+        _system.append(prv)
     if path and os.path.exists(path) and os.path.isdir(path):
         for fn in filter(
             lambda fn: fn.startswith('dawgie.public.pem'), os.listdir(path)

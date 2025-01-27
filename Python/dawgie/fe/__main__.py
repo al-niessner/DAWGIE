@@ -62,13 +62,13 @@ if dawgie.security.use_tls():
     cert = dawgie.security.authority()
     twisted.internet.reactor.listenSSL(
         dawgie.context.fe_port, factory, cert.options()
-        )
+    )
     if dawgie.security.clients():
         twisted.internet.reactor.listenSSL(
             dawgie.context.cfe_port,
             factory,
             cert.options(*dawgie.security.clients()),
-            )
+        )
 else:
     twisted.internet.reactor.listenTCP(dawgie.context.fe_port, factory)
 

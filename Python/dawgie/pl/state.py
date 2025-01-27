@@ -233,19 +233,19 @@ class FSM:
             factory = twisted.web.server.Site(dawgie.fe.root())
 
             if dawgie.security.use_tls():
-                log.info ('starting front end using HTTPS')
+                log.info('starting front end using HTTPS')
                 cert = dawgie.security.authority()
                 twisted.internet.reactor.listenSSL(
                     int(dawgie.context.fe_port), factory, cert.options()
-                    )
+                )
                 if dawgie.security.clients():
                     twisted.internet.reactor.listenSSL(
                         dawgie.context.cfe_port,
                         factory,
                         cert.options(*dawgie.security.clients()),
-                        )
+                    )
             else:
-                log.info ('starting front end using HTTP')
+                log.info('starting front end using HTTP')
                 twisted.internet.reactor.listenTCP(
                     dawgie.context.fe_port, factory
                 )
