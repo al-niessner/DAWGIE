@@ -341,7 +341,7 @@ def _tls_initialize(
     _myself.clear()
     _system.clear()
     certs = []
-    if system and os.path.exists(system) and os.path.isfile(system):
+    if system and os.path.isfile(system):
         with open(system, 'rt', encoding='utf-8') as file:
             cxt = file.read()
         prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
@@ -385,7 +385,7 @@ def _lookup(fullname: str):
 
 
 def authority() -> twisted.internet.ssl.PrivateCertificate:
-    return _system[0] if system else _myself['private']
+    return _system[0] if _system else _myself['private']
 
 
 def certificate() -> twisted.internet.ssl.Certificate.loadPEM:

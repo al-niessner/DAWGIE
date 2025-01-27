@@ -44,7 +44,6 @@ import dawgie.context
 import dawgie.pl.state
 import dawgie.fe
 import dawgie.security
-import os
 import twisted.internet
 import twisted.web.resource
 import twisted.web.server
