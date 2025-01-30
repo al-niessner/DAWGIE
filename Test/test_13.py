@@ -1,4 +1,4 @@
-''' show that all DBs behave the same
+'''show that all DBs behave the same
 
 COPYRIGHT:
 Copyright (c) 2015-2025, California Institute of Technology ("Caltech").

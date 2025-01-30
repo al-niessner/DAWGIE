@@ -1,4 +1,4 @@
-''' take a snapshot of the running pipeline state
+'''take a snapshot of the running pipeline state
 
 The snapshot state is incomplete and can be changes as necessary to support live debugging. It was added for issue_206 because there is an intermitten behavior of the pipeline where the farm has work to do, idle hands to do the work, but nothinng is moving to the workers. The description of 206 shows that it is the _busy and _cluster lists seem to be cleared while do and doing in the tasks themselves are not empty. It puts the problem squarely in the farm but without knowing its internal state, it is not possible to determine the cause let alone root cause of the erroneous behavior.
 

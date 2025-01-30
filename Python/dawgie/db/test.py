@@ -1,4 +1,4 @@
-''' unit testing implementation of dawgie.db
+'''unit testing implementation of dawgie.db
 
 COPYRIGHT:
 Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
