@@ -45,7 +45,6 @@ import importlib
 import logging
 import os
 import resource
-import sys
 
 # make datetime backward compatible
 if 'UTC' not in dir(datetime):
