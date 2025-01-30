@@ -238,7 +238,9 @@ def connect(address: (str, int)) -> socket.socket:
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         context.load_verify_locations(_myself['file'])
         context.load_cert_chain(_myself['file'])
-        ss = context.wrap_socket(s, server_hostname=_myself['name'])
+        ss = context.wrap_socket(
+            s, server_hostname=authority().getSubject()['commonName']
+        )
         ss.connect(address)
         return ss
 
