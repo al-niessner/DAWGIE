@@ -360,7 +360,7 @@ def _tls_initialize(
             cxt = file.read()
         prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
         prv.options(*_pub_certs(cxt))
-        _system['file'] = ssytem
+        _system['file'] = system
         _system['pem'] = prv
     if path and os.path.exists(path) and os.path.isdir(path):
         for fn in filter(
@@ -377,10 +377,11 @@ def _tls_initialize(
     if myself:
         with open(myself, 'rt', encoding='utf-8') as file:
             cxt = file.read()
+        pubs = _pub_certs (cxt)
         prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
-        prv.options(*_pub_certs(cxt))
+        prv.options(*pubs)
         _myself.update(
-            {'file': myself, 'name': myname, 'private': prv, 'public': pub}
+            {'file': myself, 'name': myname, 'private': prv, 'public': pubs}
         )
     return
 
@@ -401,7 +402,7 @@ def authority() -> twisted.internet.ssl.PrivateCertificate:
     return _system['pem'] if _system else _myself['private']
 
 
-def certificate() -> twisted.internet.ssl.Certificate.loadPEM:
+def certificates() -> [twisted.internet.ssl.Certificate.loadPEM]:
     return _myself['public']
 
 

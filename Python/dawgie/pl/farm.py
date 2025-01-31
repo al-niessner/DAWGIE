@@ -388,7 +388,7 @@ def plow():
 
     if dawgie.security.use_tls():
         controller = dawgie.security.authority().options(
-            dawgie.security.certificate()
+            *dawgie.security.certificate()
         )
         twisted.internet.reactor.listenSSL(
             int(dawgie.context.farm_port),
