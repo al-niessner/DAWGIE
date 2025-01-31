@@ -63,7 +63,7 @@ import twisted.internet.ssl
 
 _certs = []
 _myself = {}
-_system = []
+_system = {}
 _PGP = None
 gpgargname = (
     'gnupghome'
@@ -236,8 +236,9 @@ def connect(address: (str, int)) -> socket.socket:
 
     if use_tls():
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-        context.load_verify_locations(_myself['file'])
-        context.load_cert_chain(_myself['file'])
+        file = _system['file'] if _system else _myself['file']
+        context.load_verify_locations(file)
+        context.load_cert_chain(file)
         ss = context.wrap_socket(
             s, server_hostname=authority().getSubject()['commonName']
         )
@@ -324,6 +325,17 @@ def _pgp_initialize(path: str = None) -> None:
     return
 
 
+def _pub_certs(cxt: str):
+    '''helper function to get more than one cert from a PEM'''
+    pub = []
+    bdx = cxt.find('-----BEGIN CERTIFICATE-----')
+    while bdx > 0:
+        edx = cxt.find('-----END CERTIFICATE-----', bdx) + 25
+        pub.append(twisted.internet.ssl.Certificate.loadPEM(cxt[bdx:edx]))
+        bdx = cxt.find('-----BEGIN CERTIFICATE-----', edx)
+    return pub
+
+
 def _tls_initialize(
     path: str = None, myname: str = None, myself: str = None, system: str = None
 ) -> None:
@@ -347,7 +359,9 @@ def _tls_initialize(
         with open(system, 'rt', encoding='utf-8') as file:
             cxt = file.read()
         prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
-        _system.append(prv)
+        prv.options(*_pub_certs(cxt))
+        _system['file'] = ssytem
+        _system['pem'] = prv
     if path and os.path.exists(path) and os.path.isdir(path):
         for fn in filter(
             lambda fn: fn.startswith('dawgie.public.pem'), os.listdir(path)
@@ -364,10 +378,7 @@ def _tls_initialize(
         with open(myself, 'rt', encoding='utf-8') as file:
             cxt = file.read()
         prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
-        cxt = cxt[cxt.find('-----BEGIN CERTIFICATE-----') :]
-        cxt = cxt[: cxt.find('-----END CERTIFICATE-----') + 25]
-        pub = twisted.internet.ssl.Certificate.loadPEM(cxt)
-        prv.options(pub)
+        prv.options(*_pub_certs(cxt))
         _myself.update(
             {'file': myself, 'name': myname, 'private': prv, 'public': pub}
         )
@@ -387,7 +398,7 @@ def _lookup(fullname: str):
 
 
 def authority() -> twisted.internet.ssl.PrivateCertificate:
-    return _system[0] if _system else _myself['private']
+    return _system['pem'] if _system else _myself['private']
 
 
 def certificate() -> twisted.internet.ssl.Certificate.loadPEM:
