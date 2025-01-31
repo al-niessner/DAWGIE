@@ -377,7 +377,7 @@ def _tls_initialize(
     if myself:
         with open(myself, 'rt', encoding='utf-8') as file:
             cxt = file.read()
-        pubs = _pub_certs (cxt)
+        pubs = _pub_certs(cxt)
         prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
         prv.options(*pubs)
         _myself.update(
