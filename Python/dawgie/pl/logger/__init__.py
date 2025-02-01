@@ -187,7 +187,7 @@ def start(path: str, port: int) -> None:
     dawgie.pl.logger._ROOT = LogSinkFactory(path)
     if dawgie.security.use_tls():
         controller = dawgie.security.authority().options(
-            *dawgie.security.certificate()
+            *dawgie.security.certificates()
         )
         twisted.internet.reactor.listenSSL(
             port,

@@ -134,7 +134,7 @@ class DBSerializer(twisted.internet.protocol.Factory):
         try:
             if dawgie.security.use_tls():
                 controller = dawgie.security.authority().options(
-                    *dawgie.security.certificate()
+                    *dawgie.security.certificates()
                 )
                 twisted.internet.reactor.listenSSL(
                     int(dawgie.context.db_port),
