@@ -154,7 +154,7 @@ def auto_merge_prepare(
         return State.FAILED
 
     # Make sure checkout is clean.
-    status = git_execute(g, f"git pull ORIGIN {a_pre_ops}")
+    status = git_execute(g, f"git pull {ORIGIN} {a_pre_ops}")
     if status == State.FAILED:
         mail_out(f"Failed to pull in {a_pre_ops}")
         return State.FAILED
@@ -202,7 +202,7 @@ def auto_merge_push(
         return State.FAILED
 
     # Push changes
-    status = git_execute(g, f"git push ORIGIN {a_pre_ops}")
+    status = git_execute(g, f"git push {ORIGIN} {a_pre_ops}")
     if status == State.FAILED:
         mail_out(f"Failed to push changes to {a_pre_ops}")
         return State.FAILED
@@ -262,7 +262,7 @@ def mail_out(msg):
 
 
 def merge_into(g, src, dst):
-    status = git_execute(g, f"git merge ORIGIN/{src}")
+    status = git_execute(g, f"git merge {ORIGIN}/{src}")
     if status == State.FAILED:
         msg = f"Failed to merge {src} into {dst}."
 
@@ -287,7 +287,7 @@ def update_ops():
         return State.FAILED
 
     # push PRE_OPS
-    status = git_execute(g, f"git push ORIGIN {PRE_OPS}")
+    status = git_execute(g, f"git push {ORIGIN} {PRE_OPS}")
 
     # Now update the real thing
     g = git.cmd.Git(OPS_DIR)
@@ -303,7 +303,7 @@ def update_ops():
         return State.FAILED
 
     # push OPS
-    if git_execute(g, f"git push ORIGIN {OPS}") == State.FAILED:
+    if git_execute(g, f"git push {ORIGIN} {OPS}") == State.FAILED:
         mail_out(f"update_ops: Failed to push to {OPS}")
         return State.FAILED
 
