@@ -271,7 +271,7 @@ class FSM:
                 host=dawgie.context.db_host, port=dawgie.context.log_port
             )
             logging.basicConfig(
-                handlers=[dawgie.pl.logger.fe.instance, twisted_handler],
+                handlers=[dawgie.pl.logger.fe.INSTANCE, twisted_handler],
                 level=self.args.log_level,
             )
             logging.captureWarnings(True)
