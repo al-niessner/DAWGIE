@@ -266,7 +266,7 @@ class FSM:
                 ),
                 port=dawgie.context.log_port,
             )
-            dawgie.pl.logger.fe.instance = dawgie.pl.logger.fe.Handler()
+            dawgie.pl.logger.fe.INSTANCE = dawgie.pl.logger.fe.Handler()
             twisted_handler = dawgie.pl.logger.TwistedHandler(
                 host=dawgie.context.db_host, port=dawgie.context.log_port
             )
