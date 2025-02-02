@@ -583,7 +583,7 @@ def execute(address: (str, int), inc: int, ps_hint: int, rev: str):
 def initialize():
     if dawgie.security.use_tls():
         controller = dawgie.security.authority().options(
-            dawgie.security.certificate()
+            *dawgie.security.certificates()
         )
         twisted.internet.reactor.listenSSL(
             int(dawgie.context.cloud_port),

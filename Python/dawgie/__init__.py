@@ -46,6 +46,10 @@ import logging
 import os
 import resource
 
+# make datetime backward compatible
+if 'UTC' not in dir(datetime):
+    datetime.UTC = datetime.timezone.utc
+
 # The names here represent the basic API for developers beyond dawgie. Since
 # there are users of this and chaning these names would represent ripples beyond
 # this repository, just going to leave them as is. Going to leave the whole API

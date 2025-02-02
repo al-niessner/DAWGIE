@@ -115,6 +115,7 @@ dawgie.security.initialize(
     myself=os.path.expandvars(
         os.path.expanduser(dawgie.context.ssl_pem_myself)
     ),
+    system=dawgie.context.ssl_pem_file,
 )
 try:
     if args.cloud_provider == 'aws':
