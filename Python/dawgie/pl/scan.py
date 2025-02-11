@@ -51,8 +51,19 @@ def for_factories(ae, pkg):
         fp = '.'.join([pkg, pkg_name])
         mod = importlib.import_module(fp)
         dm = dir(mod)
-        ignore = (
-            getattr(mod, 'dawgie_ignore') if 'dawgie_ignore' in dm else False
+        ignore = any(
+            [
+                (
+                    getattr(mod, 'dawgie_ignore')
+                    if 'dawgie_ignore' in dm
+                    else False
+                ),
+                (
+                    getattr(mod, 'DAWGIE_IGNORE')
+                    if 'DAWGIE_IGNORE' in dm
+                    else False
+                ),
+            ]
         )
 
         if ignore:
