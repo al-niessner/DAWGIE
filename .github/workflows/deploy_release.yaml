@@ -18,7 +18,7 @@ permissions:
 jobs:
   Build:
     env:
-      DAWGIE_VERSION: ${{ github.ref }}
+      DAWGIE_VERSION: ${{ github.ref.name }}
     name: Build DAWGIE
     runs-on: ubuntu-latest
     steps:
