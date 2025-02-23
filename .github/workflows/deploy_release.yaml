@@ -16,10 +16,10 @@ permissions:
   contents: read
 
 jobs:
-  release-build:
-    environment:
+  Build:
+    env:
       DAWGIE_VERSION: ${{ github.event.release.name }}
-    name: Build
+    name: Build DAWGIE
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,8 +35,8 @@ jobs:
         with:
           name: release-dists
           path: dist/
-  pypi-publish:
-    name: Upload
+  Publish:
+    name: Upload DAWGIE
     runs-on: ubuntu-latest
     needs:
       - release-build
