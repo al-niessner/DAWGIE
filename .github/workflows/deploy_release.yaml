@@ -18,7 +18,7 @@ permissions:
 jobs:
   Build:
     env:
-      DAWGIE_VERSION: ${{ github.event.release.name }}
+      DAWGIE_VERSION: ${{ github.ref }}
     name: Build DAWGIE
     runs-on: ubuntu-latest
     steps:
@@ -26,10 +26,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Prepare Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r Python/requirements.txt
       - name: Build release distributions
         run: |
           echo "dawgie version: $DAWGIE_VERSION"
-          python -m pip wheel -w dist --no-deps .
+          python -m pip wheel -w dist --no-deps Python
       - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
