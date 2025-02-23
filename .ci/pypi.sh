@@ -58,7 +58,7 @@ cat ../COPYRIGHT.txt > LICENSE
 echo "" >> LICENSE
 echo "" >> LICENSE
 cat ../LICENSE.txt >> LICENSE
-python3 setup.py sdist bdist_wheel
+python -m pip wheel -w dist --no-deps .
 twine check dist/*
 twine upload --verbose dist/*
 cd ${bdir}
