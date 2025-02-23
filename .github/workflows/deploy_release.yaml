@@ -18,7 +18,7 @@ permissions:
 jobs:
   Build:
     env:
-      DAWGIE_VERSION: ${{ github.ref.name }}
+      DAWGIE_VERSION: ${{ github.ref_name }}
     name: Build DAWGIE
     runs-on: ubuntu-latest
     steps:
@@ -33,7 +33,7 @@ jobs:
       - name: Build release distributions
         run: |
           echo "dawgie version: $DAWGIE_VERSION"
-          python -m pip wheel -w dist --no-deps Python
+          python -m pip wheel -w dist --no-deps Python/
       - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
