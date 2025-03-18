@@ -217,7 +217,7 @@ class FSM:
         if self.__doctest:
             print('self._archive_done()')
         else:
-            dawgie.pl.farm.archive = False
+            dawgie.pl.farm.ARCHIVE = False
 
         if self.open_again:
             dawgie.db.open()
@@ -345,7 +345,7 @@ class FSM:
         if self.__doctest:
             print('self.archive()')
             self._archive_done()
-        elif dawgie.pl.farm.archive:
+        elif dawgie.pl.farm.ARCHIVE:
             d = twisted.internet.threads.deferToThread(self._archive, 2)
             d.addErrback(
                 dawgie.pl.LogFailure(

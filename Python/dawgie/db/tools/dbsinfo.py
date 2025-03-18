@@ -48,7 +48,9 @@ def consumption():
     # pylint: disable=protected-access,used-before-assignment
     db = []
     dbs = []
+    # false positive # pylint: disable=possibly-used-before-assignment
     known = list(dawgie.db._prime_values())
+    # false positive # pylint: enable=possibly-used-before-assignment
     scrapes = {}
     for dp, dns, fns in os.walk(dawgie.context.data_dbs):
         for dn in dns:
