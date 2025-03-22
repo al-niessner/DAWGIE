@@ -317,7 +317,6 @@ class FSM:
         else:
             log.info("Jump into the time machine. Do the reload Rollback.")
             dawgie.db.close()
-            dawgie.tools.submit.update_ops()
             dawgie.context.git_rev = dawgie.context._rev()
             self.time_machine.reload()
             pass

@@ -90,7 +90,10 @@ class Process:
         log.debug('Process.__submission %s', str(submission))
         self.__changeset = changeset
         self.__clear = clear
-        self.__msg = 'unspecified'
+        self.__msg = {
+            'alert_status': 'danger',
+            'alert_message': 'unspecified',
+        }
         self.__request = request
         self.__submission = submission
         return
@@ -126,7 +129,6 @@ class Process:
         d = twisted.internet.defer.Deferred()
         d.addCallback(self.step_1)
         d.addCallbacks(self.step_2, self.failure)
-        d.addCallbacks(self.step_3, self.failure)
         twisted.internet.reactor.callLater(0, d.callback, None)
         return
 
@@ -141,7 +143,7 @@ class Process:
             return twisted.python.failure.Failure(Exception())
 
         if dawgie.tools.submit.already_applied(
-            self.__changeset, dawgie.tools.submit.REPO_DIR
+            self.__changeset, dawgie.context.ae_base_path
         ):
             log.warning("submit: changeset already in history")
             self.__msg = {
@@ -160,47 +162,13 @@ class Process:
             'alert_status': 'danger',
             'alert_message': 'The submit tool could not prepare pre_ops.',
         }
-        status = dawgie.tools.submit.auto_merge_prepare(
-            self.__changeset,
-            dawgie.tools.submit.PRE_OPS,
-            dawgie.tools.submit.REPO_DIR,
-            dawgie.tools.submit.ORIGIN,
-        )
-        result = (
-            None
-            if status == dawgie.tools.submit.State.SUCCESS
-            else twisted.python.failure.Failure(Exception())
-        )
-        return result
-
-    def step_3(self, _result):
-        '''dawgie compliant'''
-        self.__msg = {
-            'alert_status': 'danger',
-            'alert_message': 'DAWGIE compliant checks failed.',
-        }
-        handler = VerifyHandler(self)
-        status = dawgie.tools.submit.auto_merge_compliant(
-            self.__changeset, dawgie.tools.submit.REPO_DIR, handler.spawn_off
-        )
-        result = (
-            None
-            if status == dawgie.tools.submit.State.SUCCESS
-            else twisted.python.failure.Failure(Exception())
-        )
-        return result
-
-    def step_4(self, _result):
-        '''push results'''
-        self.__msg = {
-            'alert_status': 'danger',
-            'alert_message': 'Could not pull pre_ops into master.',
-        }
-        status = dawgie.tools.submit.auto_merge_push(
-            self.__changeset,
-            dawgie.tools.submit.PRE_OPS,
-            dawgie.tools.submit.REPO_DIR,
-            self.__submission,
+        status = dawgie.tools.submit.automatic(
+            changeset=self.__changeset,
+            loc=dawgie.context.ae_repository_remote,
+            ops=dawgie.context.ae_repository_branch_ops,
+            repo=dawgie.context.ae_base_path,
+            stable=dawgie.context.ae_repository_branch_stable,
+            test=dawgie.context.ae_repository_branch_test,
         )
         result = (
             None
@@ -230,8 +198,6 @@ class Process:
         dawgie.context.fsm.submit_crossroads()
         return
 
-    pass
-
 
 class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
     def __init__(self, process: Process):
@@ -255,7 +221,6 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
             self.__process.failure(twisted.python.failure.Failure(Exception()))
         else:
             d = twisted.internet.defer.Deferred()
-            d.addCallback(self.__process.step_4)
             d.addCallbacks(self.__process.step_5, self.__process.failure)
             twisted.internet.reactor.callLater(0, d.callback, None)
             pass

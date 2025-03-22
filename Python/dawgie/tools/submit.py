@@ -49,12 +49,6 @@ import logging
 import smtplib
 import subprocess
 
-OPS = "main"
-PRE_OPS = "pre_ops"
-REPO_DIR = "/proj/src/ws"
-ORIGIN = "origin"
-OPS_DIR = "/proj/src/ae"
-
 
 class Priority(enum.Enum):
     NOW = "now"
@@ -88,29 +82,70 @@ class State(enum.IntEnum):
     pass
 
 
-def _main(an_args):
-    # being a main, imports are later so pylint: disable=used-before-assignment
-    # 1. Run auto merge tool
-    status = dawgie.tools.submit.auto_merge_prepare(
-        an_args.changeset, an_args.PRE_OPS, an_args.REPO_DIR, an_args.ORIGIN
-    )
+# pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-return-statements
+def automatic(changeset, loc, ops, repo, stable, test):
+    '''fully automatic processing to update the main branch
 
-    if status == State.SUCCESS:
-        status = dawgie.tools.submit.auto_merge_compliant(
-            an_args.changeset, an_args.REPO_DIR, _spawn
-        )
-    if status == State.SUCCESS:
-        status = dawgie.tools.submit.auto_merge_push(
-            an_args.changeset, an_args.REPO_DIR
-        )
+    0. get all the remote changes
+    1. switch to a testing branch from stable branch
+    2. pull the stable branch into the testing branch
+    3. verify dawgie.tools.compliant ABD changeset matches
+      if compliant:
+        b. delete ops branch
+        c. branch stable to ops at the changeset
+    4. checkout ops branch
+    5. delete test branch
 
-    if status == State.SUCCESS:
-        # 2. Update master
-        if dawgie.tools.submit.update_ops() != State.SUCCESS:
-            mail_out("update_ops failed.")
-    else:
-        mail_out("Automerge failed; so, failed to update_ops.")
-    return
+    changeset: the git changeset to move to
+    ops: the branch considered operational
+    repo: the path to the top of the repository
+    stable: the branch to pull the changeset from
+    test: the name of a temporary branch for compliance testing
+    '''
+    g = git.cmd.Git(repo)
+    status = State.FAILED
+    try:
+        status = git_execute(g, f'git checkout {stable}')
+        if status == State.FAILED:
+            return status
+        status = git_execute(g, f'git pull {loc} {stable}')
+        if status == State.FAILED:
+            return status
+        status = git_execute(g, f'git checkout -b {test}')
+        if status == State.FAILED:
+            return status
+        cs = g.execute('git rev-parse HEAD'.split())
+        if cs != changeset:
+            mail_out(
+                f'The current HEAD of {stable} is {cs} while you are asking for {changeset}. Aborting the automatic merging of {stable} to {ops}'
+            )
+            return State.FAILED
+        status = auto_merge_compliant(changeset, repo, _spawn)
+        if status == State.FAILED:
+            return status
+        status = git_execute(g, f'git checkout {stable}')
+        if status == State.FAILED:
+            return status
+        status = git_execute(g, f'git branch -D {ops}')
+        if status == State.FAILED:
+            return status
+        status = git_execute(g, f'git checkout -b {ops}')
+        if status == State.FAILED:
+            return status
+    finally:
+        git_execute(g, f'git checkout {ops}')
+        git_execute(g, f'git branch -D {test}')
+        if status == State.SUCCESS:
+            mail_out(f'The operational AE is now at {changeset}.')
+        else:
+            mail_out(
+                f'Failed to update the operational AE to {changeset}. '
+                'Check the state of the pipeline before continuing.'
+            )
+    return State.SUCCESS
+
+
+# pylint: enable=too-many-arguments,too-many-positional-arguments,too-many-return-statements
 
 
 def _spawn(cmd: [str]):
@@ -123,101 +158,15 @@ def already_applied(changeset, a_repo_dir):
     return -1 < gl.find(changeset)
 
 
-def auto_merge_prepare(
-    changeset, a_pre_ops=None, a_repo_dir=None, a_origin=None
-):
-    # pylint: disable=too-many-return-statements
-    if not a_pre_ops or not a_repo_dir or not a_origin:
-        mail_out("auto_merge parameters are not all defined.")
-        return State.FAILED
-
-    g = git.cmd.Git(a_repo_dir)
-
-    # Up to date
-    status = git_execute(g, "git fetch")
-    if status == State.FAILED:
-        logging.info("Failed to fetch")
-        return State.FAILED
-
-    # Check if commit exists
-    status = git_execute(g, f'git cat-file -t {changeset}')
-    if status == State.FAILED:
-        mail_out(
-            f"You forgot to push your changes ({changeset}). Please, push them."
-        )
-        return State.FAILED
-
-    # Check-out PRE_OPS
-    status = git_execute(g, f"git checkout {a_pre_ops}")
-    if status == State.FAILED:
-        mail_out(f"Failed to checkout {a_pre_ops}")
-        return State.FAILED
-
-    # Make sure checkout is clean.
-    status = git_execute(g, f"git pull {ORIGIN} {a_pre_ops}")
-    if status == State.FAILED:
-        mail_out(f"Failed to pull in {a_pre_ops}")
-        return State.FAILED
-
-    # Merge with changeset
-    commit_msg = f"merging_{changeset}_into_{a_pre_ops}"
-    status = git_execute(g, f"git merge -m {commit_msg} {changeset}")
-    if status == State.FAILED:
-        msg = "Failed to merge " + changeset + " into " + a_pre_ops + "."
-        msg += " You probably have merge conflicts. Please update and merge"
-        msg += " master into your branch and try again.\n"
-        msg += "Aborting merge."
-        status = git_execute(g, "git merge --abort")
-        if status == State.FAILED:
-            msg += "\nFailed to abort merge. Take Action! Take Action!"
-
-        mail_out(msg)
-        return State.FAILED
-    return State.SUCCESS
-
-
-def auto_merge_compliant(changeset, a_repo_dir, spawn):
-    g = git.cmd.Git(a_repo_dir)
+def auto_merge_compliant(changeset, repo, spawn):
     # Validate compliance
     # run compliance
     # if failed then revert git reset --hard ORIG_HEAD
     # otherwise continue
-    if not dawgie.tools.compliant.verify(a_repo_dir, True, False, spawn):
+    if not dawgie.tools.compliant.verify(repo, True, False, spawn):
         msg = f"Compliancy check failed. Please run compliant.py for ({changeset})"
-        status = git_execute(g, "git reset --hard ORIG_HEAD")
-        if status == State.FAILED:
-            msg += " And also failed to do a git reset. Please check this out Keepers of the Pipelie."
         mail_out(msg)
         return State.FAILED
-    return State.SUCCESS
-
-
-def auto_merge_push(
-    changeset, a_pre_ops=None, a_repo_dir=None, priority=Priority.TODO.value
-):
-    g = git.cmd.Git(a_repo_dir)
-    status = git_execute(g, f"git checkout {a_pre_ops}")
-    if status == State.FAILED:
-        mail_out(f"Failed to checkout {a_pre_ops}")
-        return State.FAILED
-
-    # Push changes
-    status = git_execute(g, f"git push {ORIGIN} {a_pre_ops}")
-    if status == State.FAILED:
-        mail_out(f"Failed to push changes to {a_pre_ops}")
-        return State.FAILED
-
-    # Mail out the good news
-    cmd = f'git show --no-patch {changeset}'
-    status = git_execute(g, cmd)
-    if status == State.FAILED:
-        mail_out(f"Failed to run: {cmd}")
-        return State.FAILED
-
-    mail_out(
-        f"Successfully merged {changeset} into {a_pre_ops}. The pipeline is reloading with your changes based on the scheduled priority.\nSubmission asks for the pipeline to reload: {priority}.\n"
-        + g.execute(cmd.split(' '))
-    )
     return State.SUCCESS
 
 
@@ -257,12 +206,12 @@ def mail_out(msg):
         except OSError:
             logging.critical('No email: %s', str(msg))
     else:
-        logging.critical('Missing email destination: %s', str(msg))
+        logging.info(msg)
     return
 
 
-def merge_into(g, src, dst):
-    status = git_execute(g, f"git merge {ORIGIN}/{src}")
+def merge_into(g, loc, src, dst):
+    status = git_execute(g, f"git merge {loc}/{src}")
     if status == State.FAILED:
         msg = f"Failed to merge {src} into {dst}."
 
@@ -273,43 +222,6 @@ def merge_into(g, src, dst):
     return status
 
 
-def update_ops():
-    g = git.cmd.Git(REPO_DIR)
-
-    # Up to date
-    status = git_execute(g, "git fetch")
-    if status == State.FAILED:
-        logging.info("update_ops: Failed to fetch on %s", REPO_DIR)
-        return State.FAILED
-
-    # merge OPS into PRE_OPS
-    if merge_into(g, OPS, PRE_OPS) == State.FAILED:
-        return State.FAILED
-
-    # push PRE_OPS
-    status = git_execute(g, f"git push {ORIGIN} {PRE_OPS}")
-
-    # Now update the real thing
-    g = git.cmd.Git(OPS_DIR)
-
-    # Up to date
-    status = git_execute(g, "git fetch")
-    if status == State.FAILED:
-        logging.info("update_ops: Failed to fetch on %s", OPS_DIR)
-        return State.FAILED
-
-    # merge PRE_OPS into OPS
-    if merge_into(g, PRE_OPS, OPS) == State.FAILED:
-        return State.FAILED
-
-    # push OPS
-    if git_execute(g, f"git push {ORIGIN} {OPS}") == State.FAILED:
-        mail_out(f"update_ops: Failed to push to {OPS}")
-        return State.FAILED
-
-    return State.SUCCESS
-
-
 if __name__ == "__main__":
     import dawgie.context
     import dawgie.tools.compliant
@@ -317,7 +229,7 @@ if __name__ == "__main__":
     import dawgie.util
 
     ap = argparse.ArgumentParser(
-        description='Automatically merge changeset into PRE_OPS.'
+        description='Merge the CHANGE_SET into PRE_OPS. Verify that it is dawgie.tools.compliant. If it is compliant, merge it in OPS.'
     )
     ap.add_argument(
         '-l',
@@ -335,58 +247,57 @@ if __name__ == "__main__":
         help='set the verbosity that you want where a smaller number means more verbose [logging.INFO]',
     )
     ap.add_argument(
-        '-r',
-        '--repo-dir',
-        default=dawgie.tools.submit.REPO_DIR,
-        required=False,
-        help='set the PRE_OPS repo directory where you want to do the merging [%(default)s]',
-    )
-    ap.add_argument(
-        '-m',
-        '--ops-dir',
-        default=dawgie.tools.submit.OPS_DIR,
-        required=False,
-        help='set the OPS repo directory where you want to do the merging [%(default)s]',
-    )
-    ap.add_argument(
-        '-o',
-        '--origin',
-        default=dawgie.tools.submit.ORIGIN,
-        required=False,
-        help='The name of the ORIGIN. [%(default)s]',
-    )
-    ap.add_argument(
-        '-M',
-        '--ops',
-        default=dawgie.tools.submit.OPS,
-        required=False,
-        help='The name of the OPS branch. [%(default)s]',
-    )
-    ap.add_argument(
-        '-p',
-        '--pre-ops',
-        default=dawgie.tools.submit.PRE_OPS,
-        required=False,
-        help='The name of the PRE_OPS branch. [%(default)s]',
-    )
-    ap.add_argument(
         '-c',
         '--changeset',
         default=None,
         required=True,
-        help='The changeset hashtag to merge.',
+        help='The changeset to verify then merge to the final/stable/operational branch.',
+    )
+    ap.add_argument(
+        '-r',
+        '--repository-dir',
+        required=True,
+        help='set repo directory where you want to do the merging',
+    )
+    ap.add_argument(
+        '-R',
+        '--remote',
+        default='origin',
+        required=False,
+        help='The name of the remoate location for the stable branch [%(default)s].',
+    )
+    ap.add_argument(
+        '-o',
+        '--branch-operational',
+        default='ops',
+        required=False,
+        help='The name of the final or stable or operational branch [%(default)s].',
+    )
+    ap.add_argument(
+        '-s',
+        '--branch-stable',
+        required=True,
+        help='The name of the final or stable or operational branch.',
+    )
+    ap.add_argument(
+        '-t',
+        '--branch-test',
+        default='tops',
+        required=False,
+        help='The name of the branch for testing the new commit to verify it is dawgie.tools.compliant  [%(default)s]',
     )
     dawgie.context.add_arguments(ap)
     args = ap.parse_args()
     dawgie.context.override(args)
-    dawgie.tools.submit.REPO_DIR = args.repo_dir
-    dawgie.tools.submit.ORIGIN = args.origin
-    dawgie.tools.submit.PRE_OPS = args.pre_ops
-    dawgie.tools.submit.OPS = args.ops
-    dawgie.tools.submit.OPS_DIR = args.ops_dir
-
     logging.basicConfig(filename=args.log_file, level=args.log_level)
-    _main(args)
+    automatic(
+        changeset=args.changeset,
+        loc=args.remote,
+        ops=args.branch_operational,
+        repo=args.repository_dir,
+        stable=args.branch_stable,
+        test=args.branch_test,
+    )
 else:
     import dawgie.tools.compliant
 
