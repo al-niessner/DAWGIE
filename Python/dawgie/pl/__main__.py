@@ -43,7 +43,6 @@ NTR:
 import argparse
 import dawgie.context
 import dawgie.pl.state
-import dawgie.tools.submit
 import dawgie.util
 import logging
 import matplotlib; matplotlib.use("Agg")  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
@@ -104,13 +103,6 @@ ap.add_argument(
     required=False,
     type=int,
     help='server port number for the display [%(default)s]',
-)
-ap.add_argument(
-    '-r',
-    '--repo-dir',
-    default=dawgie.tools.submit.REPO_DIR,
-    required=False,
-    help='set the pre_ops repo directory where you want to do the merging [%(default)s]',
 )
 dawgie.context.add_arguments(ap)
 args = ap.parse_args()

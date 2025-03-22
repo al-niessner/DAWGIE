@@ -70,6 +70,15 @@ class PortOffset(enum.Enum):
 ae_base_path = os.environ.get('DAWGIE_AE_BASE_PATH', '/proj/src/ae')
 ae_base_package = os.environ.get('DAWGIE_AE_BASE_PACKAGE', 'ae')
 
+ae_repository_remote = os.environ.get('DAWGIE_AE_REPO_REMOTE', 'origin')
+ae_repository_branch_ops = os.environ.get('DAWGIE_AE_REPO_BRANCH_OPS', 'ops')
+ae_repository_branch_stable = os.environ.get(
+    'DAWGIE_AE_REPO_BRANCH_STABLE', 'main'
+)
+ae_repository_branch_test = os.environ.get(
+    'DAWGIE_AE_REPO_BRANCH_TEST', 'opstest'
+)
+
 allow_promotion = os.environ.get('DAWGIE_PROMOTION', 'false').lower() in 'true'
 
 cfe_port = int(
@@ -173,6 +182,30 @@ def add_arguments(ap):
         default=ae_base_package,
         required=False,
         help='the package prefix for the AE [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-ae-repo-remote',
+        default=ae_repository_remote,
+        required=False,
+        help='the git remote to pull changes from when a changeset is submitted [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-ae-repo-branch-ops',
+        default=ae_repository_branch_ops,
+        required=False,
+        help='the local and transitory git branch to use for operations[%(default)s]',
+    )
+    ap.add_argument(
+        '--context-ae-repo-branch-stable',
+        default=ae_repository_branch_stable,
+        required=False,
+        help='the git branch to pull changes from when they are stable enough for operations [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-ae-repo-branch-test',
+        default=ae_repository_branch_test,
+        required=False,
+        help='the local and transitory git branch for doing dawgie.tools.compliant [%(default)s]',
     )
     ap.add_argument(
         '--context-allow-promotion',
@@ -448,6 +481,12 @@ def override(args):
 
     dawgie.context.ae_base_path = args.context_ae_dir
     dawgie.context.ae_base_package = args.context_ae_pkg
+    dawgie.context.ae_repository_remote = args.context_ae_repo_remote
+    dawgie.context.ae_repository_branch_ops = args.context_ae_repo_branch_ops
+    dawgie.context.ae_repository_branch_stable = (
+        args.context_ae_repo_branch_stable
+    )
+    dawgie.context.ae_repository_branch_test = args.context_ae_repo_branch_test
     dawgie.context.allow_promotion = args.context_allow_promotion
     dawgie.context.cfe_port = args.context_cfe_port
     dawgie.context.cloud_data = args.context_cloud_data
