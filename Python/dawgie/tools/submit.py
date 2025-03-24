@@ -111,7 +111,7 @@ def automatic(changeset, loc, ops, repo, stable, test):
         status = git_execute(g, f'git pull {loc} {stable}')
         if status == State.FAILED:
             return status
-        status = git_execute(g, f'git checkout -b {test}')
+        status = git_execute(g, f'git rebase {stable} {test}')
         if status == State.FAILED:
             return status
         cs = g.execute('git rev-parse HEAD'.split())
@@ -126,15 +126,11 @@ def automatic(changeset, loc, ops, repo, stable, test):
         status = git_execute(g, f'git checkout {stable}')
         if status == State.FAILED:
             return status
-        status = git_execute(g, f'git branch -D {ops}')
-        if status == State.FAILED:
-            return status
-        status = git_execute(g, f'git checkout -b {ops}')
+        status = git_execute(g, f'git rebase {stable} {ops}')
         if status == State.FAILED:
             return status
     finally:
         git_execute(g, f'git checkout {ops}')
-        git_execute(g, f'git branch -D {test}')
         if status == State.SUCCESS:
             mail_out(f'The operational AE is now at {changeset}.')
         else:
@@ -262,27 +258,28 @@ if __name__ == "__main__":
     ap.add_argument(
         '-R',
         '--remote',
-        default='origin',
+        default=dawgie.context.ae_repository_remote,
         required=False,
         help='The name of the remoate location for the stable branch [%(default)s].',
     )
     ap.add_argument(
         '-o',
         '--branch-operational',
-        default='ops',
+        default=dawgie.context.ae_repository_branch_ops,
         required=False,
         help='The name of the final or stable or operational branch [%(default)s].',
     )
     ap.add_argument(
         '-s',
         '--branch-stable',
-        required=True,
-        help='The name of the final or stable or operational branch.',
+        default=dawgie.context.ae_repository_branch_stable,
+        required=False,
+        help='The name of the final or stable or operational branch [%(default)s].',
     )
     ap.add_argument(
         '-t',
         '--branch-test',
-        default='tops',
+        default=dawgie.context.ae_repository_branch_test,
         required=False,
         help='The name of the branch for testing the new commit to verify it is dawgie.tools.compliant  [%(default)s]',
     )
