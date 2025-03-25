@@ -95,6 +95,10 @@ class Process:
             'alert_message': 'unspecified',
         }
         self.__request = request
+        if dawgie.context.ae_base_path.endswith(dawgie.context.ae_base_package):
+            self.__repo = os.path.dirname(dawgie.context.ae_base_path)
+        else:
+            self.__repo = dawgie.context.ae_base_path
         self.__submission = submission
         return
 
@@ -143,11 +147,7 @@ class Process:
             }
             return twisted.python.failure.Failure(Exception())
 
-        if dawgie.context.ae_base_path.endswith(dawgie.context.ae_base_package):
-            repo = os.path.dirname(dawgie.context.ae_base_path)
-        else:
-            repo = dawgie.context.ae_base_path
-        if dawgie.tools.submit.already_applied(self.__changeset, repo):
+        if dawgie.tools.submit.already_applied(self.__changeset, self.__repo):
             log.warning(
                 "submit: changeset %s already in history", self.__changeset
             )
@@ -171,7 +171,7 @@ class Process:
             changeset=self.__changeset,
             loc=dawgie.context.ae_repository_remote,
             ops=dawgie.context.ae_repository_branch_ops,
-            repo=dawgie.context.ae_base_path,
+            repo=self.__repo,
             stable=dawgie.context.ae_repository_branch_stable,
             test=dawgie.context.ae_repository_branch_test,
         )
