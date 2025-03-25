@@ -142,13 +142,17 @@ class Process:
             }
             return twisted.python.failure.Failure(Exception())
 
-        if dawgie.tools.submit.already_applied(
-            self.__changeset, dawgie.context.ae_base_path
-        ):
-            log.warning("submit: changeset already in history")
+        if dawgie.context.ae_base_path.endswith(dawgie.context.ae_base_package):
+            repo = os.dirname(dawgie.context.ae_base_path)
+        else:
+            repo = dawgie.context.ae_base_path
+        if dawgie.tools.submit.already_applied(self.__changeset, repo):
+            log.warning(
+                "submit: changeset %s already in history", self.__changeset
+            )
             self.__msg = {
                 'alert_status': 'danger',
-                'alert_message': 'The changeset is already in history.',
+                'alert_message': f'The changeset {self.__changeset} is already in history.',
             }
             return twisted.python.failure.Failure(Exception())
 
