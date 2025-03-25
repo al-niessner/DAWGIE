@@ -95,11 +95,10 @@ class Process:
             'alert_message': 'unspecified',
         }
         self.__request = request
-        if dawgie.context.ae_base_path.endswith(dawgie.context.ae_base_package):
-            self.__repo = os.path.dirname(dawgie.context.ae_base_path)
-        else:
-            self.__repo = dawgie.context.ae_base_path
+        self.__repo = dawgie.context.ae_base_path
         self.__submission = submission
+        while !os.path.isdir (os.path.join (self.__repo, '.git')):
+            self.__repo = os.path.dirname (self.__repo)
         return
 
     def failure(self, fail):
