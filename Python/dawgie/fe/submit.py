@@ -97,7 +97,7 @@ class Process:
         self.__request = request
         self.__repo = dawgie.context.ae_base_path
         self.__submission = submission
-        while !os.path.isdir (os.path.join (self.__repo, '.git')):
+        while not os.path.isdir (os.path.join (self.__repo, '.git')):
             self.__repo = os.path.dirname (self.__repo)
         return
 
