@@ -160,7 +160,9 @@ def auto_merge_compliant(changeset, repo, spawn):
     # if failed then revert git reset --hard ORIG_HEAD
     # otherwise continue
     if not dawgie.tools.compliant.verify(repo, True, False, spawn):
-        msg = f"Compliancy check failed. Please run compliant.py for ({changeset})"
+        msg = (
+            f"Compliancy check failed. Please run compliant.py for {changeset}"
+        )
         mail_out(msg)
         return State.FAILED
     return State.SUCCESS

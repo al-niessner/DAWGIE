@@ -43,6 +43,7 @@ import dawgie.context
 import dawgie.tools.submit
 import json
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
+import os
 import twisted.internet.reactor
 import twisted.web.server
 
@@ -94,7 +95,10 @@ class Process:
             'alert_message': 'unspecified',
         }
         self.__request = request
+        self.__repo = dawgie.context.ae_base_path
         self.__submission = submission
+        while not os.path.isdir(os.path.join(self.__repo, '.git')):
+            self.__repo = os.path.dirname(self.__repo)
         return
 
     def failure(self, fail):
@@ -142,13 +146,13 @@ class Process:
             }
             return twisted.python.failure.Failure(Exception())
 
-        if dawgie.tools.submit.already_applied(
-            self.__changeset, dawgie.context.ae_base_path
-        ):
-            log.warning("submit: changeset already in history")
+        if dawgie.tools.submit.already_applied(self.__changeset, self.__repo):
+            log.warning(
+                "submit: changeset %s already in history", self.__changeset
+            )
             self.__msg = {
                 'alert_status': 'danger',
-                'alert_message': 'The changeset is already in history.',
+                'alert_message': f'The changeset {self.__changeset} is already in history.',
             }
             return twisted.python.failure.Failure(Exception())
 
@@ -166,7 +170,7 @@ class Process:
             changeset=self.__changeset,
             loc=dawgie.context.ae_repository_remote,
             ops=dawgie.context.ae_repository_branch_ops,
-            repo=dawgie.context.ae_base_path,
+            repo=self.__repo,
             stable=dawgie.context.ae_repository_branch_stable,
             test=dawgie.context.ae_repository_branch_test,
         )
