@@ -144,7 +144,7 @@ class Process:
             return twisted.python.failure.Failure(Exception())
 
         if dawgie.context.ae_base_path.endswith(dawgie.context.ae_base_package):
-            repo = os.dirname(dawgie.context.ae_base_path)
+            repo = os.path.dirname(dawgie.context.ae_base_path)
         else:
             repo = dawgie.context.ae_base_path
         if dawgie.tools.submit.already_applied(self.__changeset, repo):
