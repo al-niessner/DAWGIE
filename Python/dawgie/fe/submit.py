@@ -171,6 +171,7 @@ class Process:
             loc=dawgie.context.ae_repository_remote,
             ops=dawgie.context.ae_repository_branch_ops,
             repo=self.__repo,
+            spawn=VerifyHandler.spawn_off,
             stable=dawgie.context.ae_repository_branch_stable,
             test=dawgie.context.ae_repository_branch_test,
         )
@@ -201,3 +202,39 @@ class Process:
         dawgie.context.fsm.set_submit_info(self.__changeset, self.__submission)
         dawgie.context.fsm.submit_crossroads()
         return
+
+
+class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
+    def __init__(self, process: Process):
+        self.__command = 'unknown'
+        self.__process = process
+        return
+
+    def childDataReceived(self, childFD, data):
+        log.debug('VerifyHandler.childDataReceived() %s', str(data))
+        return
+
+    def processEnded(self, reason):
+        if isinstance(reason.value, twisted.internet.error.ProcessTerminated):
+            log.critical(
+                'Error while running compliant.py.    EXIT CODE: %s   SIGNAL: %s    STATUS: %s   COMMAND: "%s"',
+                str(reason.value.exitCode),
+                str(reason.value.signal),
+                str(reason.value.status),
+                self.__command,
+            )
+            self.__process.failure(twisted.python.failure.Failure(Exception()))
+        else:
+            d = twisted.internet.defer.Deferred()
+            d.addCallbacks(self.__process.step_3)
+            twisted.internet.reactor.callLater(0, d.callback, None)
+            pass
+        return
+
+    def spawn_off(self, cmd: [str]):
+        self.__command = ' '.join(cmd)
+        log.debug('VerifyHandler.spawn_off (%s)', self.__command)
+        twisted.internet.reactor.spawnProcess(
+            self, cmd[0], args=cmd, env=os.environ, usePTY=True
+        )
+        return True

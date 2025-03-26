@@ -83,7 +83,7 @@ class State(enum.IntEnum):
 
 
 # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-return-statements
-def automatic(changeset, loc, ops, repo, stable, test):
+def automatic(changeset, loc, ops, repo, stable, test, spawn):
     '''fully automatic processing to update the main branch
 
     0. get all the remote changes
@@ -120,7 +120,7 @@ def automatic(changeset, loc, ops, repo, stable, test):
                 f'The current HEAD of {stable} is {cs} while you are asking for {changeset}. Aborting the automatic merging of {stable} to {ops}'
             )
             return State.FAILED
-        status = auto_merge_compliant(changeset, repo, _spawn)
+        status = auto_merge_compliant(changeset, repo, spawn)
         if status == State.FAILED:
             return status
         status = git_execute(g, f'git checkout {stable}')
@@ -294,6 +294,7 @@ if __name__ == "__main__":
         loc=args.remote,
         ops=args.branch_operational,
         repo=args.repository_dir,
+        spawn=_spawn,
         stable=args.branch_stable,
         test=args.branch_test,
     )
