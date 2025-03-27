@@ -171,7 +171,7 @@ class Process:
             loc=dawgie.context.ae_repository_remote,
             ops=dawgie.context.ae_repository_branch_ops,
             repo=self.__repo,
-            spawn=VerifyHandler.spawn_off,
+            spawn=VerifyHandler(self).spawn_off,
             stable=dawgie.context.ae_repository_branch_stable,
             test=dawgie.context.ae_repository_branch_test,
         )
