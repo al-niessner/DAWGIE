@@ -36,30 +36,4 @@
 #
 # NTR:
 
-if [[ $# -ne 1 ]]
-then
-    echo "usage: $0 <version>"
-    echo "   where <version> is the release number to get from github.com"
-    exit
-fi
-
-# sudo pip3 install -U twine wheel setuptools
-# . ${HOME}/.venv/dawgie/bin/activate
-export DAWGIE_VERSION=$1
-bdir=$(pwd)
-wdir=$(mktemp -d)
-echo "tempdir: ${wdir}"
-cd $wdir
-wget https://github.com/al-niessner/DAWGIE/archive/${1}.tar.gz
-tar  --strip-components=1 -xzf ${1}.tar.gz
-cd Python
-cp ../README.md README.md
-cat ../COPYRIGHT.txt > LICENSE
-echo "" >> LICENSE
-echo "" >> LICENSE
-cat ../LICENSE.txt >> LICENSE
-python -m pip wheel -w dist --no-deps .
-twine check dist/*
-twine upload --verbose dist/*
-cd ${bdir}
-rm -rf ${wdir}
+echo "github actions does this now"
