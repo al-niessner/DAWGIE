@@ -161,10 +161,10 @@ class Process:
         return None
 
     def step_2(self, _result):
-        '''prepare_pre_ops'''
+        '''prepare branch for deployment'''
         self.__msg = {
             'alert_status': 'danger',
-            'alert_message': 'The submit tool could not prepare pre_ops.',
+            'alert_message': f'The submit tool could not prepare {dawgie.context.ae_repository_branch_test}.',
         }
         status = dawgie.tools.submit.automatic(
             changeset=self.__changeset,
