@@ -110,8 +110,8 @@ def schedule_failure():
     return json.dumps(dawgie.pl.schedule.view_failure()).encode()
 
 
-def schedule_reset(archive: str = 'false'):
-    archive = archive.lower() in [
+def schedule_reset(archive: [str] = 'false'):
+    archive = archive[-1].lower() in [
         'true',
         'tru',
         'tr',
