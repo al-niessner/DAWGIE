@@ -46,7 +46,6 @@ NTR:
         archiving[id=archiving];
         { rank=same loading updating }
         rankdir=TB;
-
         starting -> loading [label=start,
                              trigger=starting_trigger,
                              source=starting,
