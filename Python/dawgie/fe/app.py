@@ -111,7 +111,8 @@ def schedule_failure():
 
 
 def schedule_reset(archive: [str] = 'false'):
-    if isinstance (archive, list): archive = archive[-1]
+    if isinstance (archive, list):
+        archive = archive[-1]
     archive = archive[-1].lower() in [
         'true',
         'tru',
