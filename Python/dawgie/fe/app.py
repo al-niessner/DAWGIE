@@ -110,7 +110,9 @@ def schedule_failure():
     return json.dumps(dawgie.pl.schedule.view_failure()).encode()
 
 
-def schedule_reset(archive: str = 'false'):
+def schedule_reset(archive: [str] = 'false'):
+    if isinstance(archive, list):
+        archive = archive[-1]
     archive = archive.lower() in [
         'true',
         'tru',
@@ -131,8 +133,7 @@ def schedule_reset(archive: str = 'false'):
             'alert_status': 'success',
             'alert_message': 'Triggered updating then load.',
         }
-        if archive:
-            dawgie.context.fsm.archive()
+        dawgie.pl.farm.ARCHIVE = archive
         dawgie.context.fsm.wait_for_nothing()
     return json.dumps(msg).encode()
 
