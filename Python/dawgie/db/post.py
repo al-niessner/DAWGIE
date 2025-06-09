@@ -1064,11 +1064,14 @@ def _insert(*args):
             log.warning('Shared lock problem failure. Trying again.')
             again = True
             conn.rollback()
+        except psycopg.errors.UniqueViolation:
+            conn.rollback()  # common practice here to let error not insert
         except psycopg.IntegrityError:
             log.exception('Could not insert into database due to:')
             conn.rollback()
         except psycopg.ProgrammingError:
-            conn.rollback()  # ignored permission issue
+            log.exception('Program error during insertion:')
+            conn.rollback()
     cursor.close()
     conn.close()
     return success
