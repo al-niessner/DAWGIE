@@ -159,7 +159,7 @@ class Interface(
             pass
         return
 
-    def __tn_id(self, conn, cur, tn=None):
+    def __tn_id(self, cur, tn=None):
         tn = tn if tn else self._tn()
         # Get target id that matches target name or create it if not there
         _insert('INSERT into Target (name) values (%s)', [tn])
@@ -378,7 +378,7 @@ class Interface(
             child.load(err=err, ver=ver)
         else:
             # get the target
-            tn_ID = self.__tn_id(conn, cur)
+            tn_ID = self.__tn_id(cur)
             # Get task id that matches task name
             cur.execute('SELECT * from TASK WHERE name = %s;', [self._task()])
             task_ID = _fetchone(cur, 'Dataset load: Could not find task ID')
@@ -580,8 +580,8 @@ class Interface(
     ) -> dawgie.Dataset:
         conn = dawgie.db.post._conn()
         cur = dawgie.db.post._cur(conn)
-        target_ID = self.__tn_id(conn, cur)
-        subname_ID = self.__tn_id(conn, cur, subname)
+        target_ID = self.__tn_id(cur)
+        subname_ID = self.__tn_id(cur, subname)
         log.debug(
             'retarget "%s"[%d] as "%s"[%d]',
             self._tn(),
@@ -692,7 +692,7 @@ class Interface(
                 # primary keys from their respective tables
 
                 # get the target ID
-                tn_ID = self.__tn_id(conn, cur)
+                tn_ID = self.__tn_id(cur)
 
                 # Get task id that matches task name
                 cur.execute(
@@ -840,7 +840,7 @@ class Interface(
             # primary keys from their respective tables
 
             # get the target ID
-            tn_ID = self.__tn_id(conn, cur)
+            tn_ID = self.__tn_id(cur)
 
             # Get task id that matches task name
             cur.execute('SELECT * from TASK WHERE name = %s;', [self._task()])
