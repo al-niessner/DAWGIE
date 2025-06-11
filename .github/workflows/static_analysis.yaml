@@ -52,8 +52,8 @@ jobs:
           pip install -r .ci/requirements.txt
       - name: bandit
         run: |
-          bandit -f json -o .github/workflows/bandit_full.json -r Python/dawgie
           bandit -b .github/workflows/bandit_baseline.json -r Python/dawgie
+          bandit -f json -o .github/workflows/bandit_full.json -r Python/dawgie || exit 0
   Delivery:
     name: Deployment (pypi) Compliance
     runs-on: ubuntu-24.04
