@@ -85,7 +85,7 @@ rm -f $root/*.rpt.txt
 trap "rm -rf $wdir $root/Python/build $root/Python/dawgie.egg-info $root/Python/dawgie/fe/requirements.txt" EXIT
 for yaml in $(ls $this/*.yaml)
 do
-    echo "yaml: $yaml"
+    echo "yaml: $(basename $yaml)"
     for job in $(python <<EOF
 import sys
 import yaml
@@ -144,11 +144,11 @@ if summary:
 else: sys.exit(1)
 EOF
         summary=$summary+$?
-        [ -z ${KEEP_REPORTS+x} ] && rm -f $root/.github/workflows/full.json
     else
         echo "Failure: $job did not create expected report."
         summary=1
     fi
 done
+[ -z "${KEEP_REPORTS+x}" ] && rm -f $root/.github/workflows/bandit_full.json
 [[ $summary -eq 0 ]] && echo "Summary: All test verifications were successful" || echo "Summary: Some or all test verifications failed." 
 trap - EXIT
