@@ -62,10 +62,12 @@ import dawgie.util
 import dawgie.util.metrics
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
+import random
 import pickle
 import psycopg
 import psycopg.rows
 import shutil
+import time
 import twisted.internet.error
 import twisted.internet.protocol
 import twisted.internet.reactor
@@ -817,6 +819,11 @@ class Interface(
             except psycopg.errors.DeadlockDetected:
                 log.warning('Update had a shared lock detected. Trying again')
                 conn.rollback()
+                time.sleep(random.uniform(.250, .750)
+            except psycopg.errors.UniqueViolation:
+                log.warning('Update collision. Will try again')
+                conn.rollback()
+                time.sleep(random.uniform(.250, .750)
             except psycopg.IntegrityError:
                 log.exception('Could not update because:')
                 conn.rollback()
@@ -976,6 +983,11 @@ class Interface(
             except psycopg.errors.DeadlockDetected:
                 log.warning('Update MSV detected shared lock. Trying again')
                 conn.rollback()
+                time.sleep(random.uniform(.250, .750)
+            except psycopg.errors.UniqueViolation:
+                log.warning('Update collision. Will try again')
+                conn.rollback()
+                time.sleep(random.uniform(.250, .750)
             except psycopg.IntegrityError:
                 log.exception('Update MSV could not insert because:')
                 conn.rollback()
@@ -1064,6 +1076,7 @@ def _insert(*args):
             log.warning('Shared lock problem failure. Trying again.')
             again = True
             conn.rollback()
+            time.sleep(random.uniform(.250, .750)
         except psycopg.errors.UniqueViolation:
             conn.rollback()  # common practice here to let error not insert
         except psycopg.IntegrityError:
