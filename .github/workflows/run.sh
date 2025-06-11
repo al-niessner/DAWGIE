@@ -144,6 +144,7 @@ if summary:
 else: sys.exit(1)
 EOF
         summary=$summary+$?
+        [ -z ${KEEP_REPORTS+x} ] && rm -f $root/.github/workflows/full.json
     else
         echo "Failure: $job did not create expected report."
         summary=1
