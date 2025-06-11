@@ -29,12 +29,11 @@ for step in y['jobs']['$2']['steps']:
         for line in filter (len, step['run'].split('\n')):
             if line.startswith ('sudo'): continue
             if line.startswith ('createdb'): continue
-            if '&&' in line: line = line[:line.find('&&')]
-            if '||' in line: line = line[:line.find('||')]
             cmd = line.split()[0]
             lc += 1
             if cmd == 'black' and 'KEEP_STYLE' in os.environ:
                 line = line.replace ('--check --diff ','')
+            if '&&' in line or '||' in line: line = '( ' + line + ' )'
             print (line,f'&& echo "result of github action step: success,{cmd}" '
                    f'|| echo "result of github action step: failure,{cmd}"')
 if lc: print (f'echo "github actions expected steps: {lc}"')
