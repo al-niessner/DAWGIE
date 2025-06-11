@@ -819,11 +819,11 @@ class Interface(
             except psycopg.errors.DeadlockDetected:
                 log.warning('Update had a shared lock detected. Trying again')
                 conn.rollback()
-                time.sleep(random.uniform(.250, .750))
+                time.sleep(random.uniform(0.250, 0.750))
             except psycopg.errors.UniqueViolation:
                 log.warning('Update collision. Will try again')
                 conn.rollback()
-                time.sleep(random.uniform(.250, .750))
+                time.sleep(random.uniform(0.250, 0.750))
             except psycopg.IntegrityError:
                 log.exception('Could not update because:')
                 conn.rollback()
@@ -983,11 +983,11 @@ class Interface(
             except psycopg.errors.DeadlockDetected:
                 log.warning('Update MSV detected shared lock. Trying again')
                 conn.rollback()
-                time.sleep(random.uniform(.250, .750))
+                time.sleep(random.uniform(0.250, 0.750))
             except psycopg.errors.UniqueViolation:
                 log.warning('Update collision. Will try again')
                 conn.rollback()
-                time.sleep(random.uniform(.250, .750))
+                time.sleep(random.uniform(0.250, 0.750))
             except psycopg.IntegrityError:
                 log.exception('Update MSV could not insert because:')
                 conn.rollback()
@@ -1076,7 +1076,7 @@ def _insert(*args):
             log.warning('Shared lock problem failure. Trying again.')
             again = True
             conn.rollback()
-            time.sleep(random.uniform(.250, .750))
+            time.sleep(random.uniform(0.250, 0.750))
         except psycopg.errors.UniqueViolation:
             conn.rollback()  # common practice here to let error not insert
         except psycopg.IntegrityError:
