@@ -29,12 +29,11 @@ for step in y['jobs']['$2']['steps']:
         for line in filter (len, step['run'].split('\n')):
             if line.startswith ('sudo'): continue
             if line.startswith ('createdb'): continue
-            if '&&' in line: line = line[:line.find('&&')]
-            if '||' in line: line = line[:line.find('||')]
             cmd = line.split()[0]
             lc += 1
             if cmd == 'black' and 'KEEP_STYLE' in os.environ:
                 line = line.replace ('--check --diff ','')
+            if '&&' in line or '||' in line: line = '( ' + line + ' )'
             print (line,f'&& echo "result of github action step: success,{cmd}" '
                    f'|| echo "result of github action step: failure,{cmd}"')
 if lc: print (f'echo "github actions expected steps: {lc}"')
@@ -85,7 +84,7 @@ rm -f $root/*.rpt.txt
 trap "rm -rf $wdir $root/Python/build $root/Python/dawgie.egg-info $root/Python/dawgie/fe/requirements.txt" EXIT
 for yaml in $(ls $this/*.yaml)
 do
-    echo "yaml: $yaml"
+    echo "yaml: $(basename $yaml)"
     for job in $(python <<EOF
 import sys
 import yaml
@@ -149,5 +148,6 @@ EOF
         summary=1
     fi
 done
+[ -z "${KEEP_REPORTS+x}" ] && rm -f $root/.github/workflows/bandit_full.json
 [[ $summary -eq 0 ]] && echo "Summary: All test verifications were successful" || echo "Summary: Some or all test verifications failed." 
 trap - EXIT
