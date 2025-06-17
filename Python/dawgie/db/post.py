@@ -62,10 +62,12 @@ import dawgie.util
 import dawgie.util.metrics
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
+import random
 import pickle
 import psycopg
 import psycopg.rows
 import shutil
+import time
 import twisted.internet.error
 import twisted.internet.protocol
 import twisted.internet.reactor
@@ -159,16 +161,10 @@ class Interface(
             pass
         return
 
-    def __tn_id(self, conn, cur, tn=None):
+    def __tn_id(self, cur, tn=None):
         tn = tn if tn else self._tn()
         # Get target id that matches target name or create it if not there
-        try:
-            cur.execute('INSERT into Target (name) values (%s)', [tn])
-            conn.commit()
-        except psycopg.IntegrityError:
-            conn.rollback()
-        except psycopg.ProgrammingError:
-            conn.rollback()  # permission issue
+        _insert('INSERT into Target (name) values (%s)', [tn])
         cur.execute('SELECT * from Target WHERE name = %s;', [tn])
         tn_ID = _fetchone(cur, 'Dataset: Could not find target ID')
         return tn_ID
@@ -384,7 +380,7 @@ class Interface(
             child.load(err=err, ver=ver)
         else:
             # get the target
-            tn_ID = self.__tn_id(conn, cur)
+            tn_ID = self.__tn_id(cur)
             # Get task id that matches task name
             cur.execute('SELECT * from TASK WHERE name = %s;', [self._task()])
             task_ID = _fetchone(cur, 'Dataset load: Could not find task ID')
@@ -586,8 +582,8 @@ class Interface(
     ) -> dawgie.Dataset:
         conn = dawgie.db.post._conn()
         cur = dawgie.db.post._cur(conn)
-        target_ID = self.__tn_id(conn, cur)
-        subname_ID = self.__tn_id(conn, cur, subname)
+        target_ID = self.__tn_id(cur)
+        subname_ID = self.__tn_id(cur, subname)
         log.debug(
             'retarget "%s"[%d] as "%s"[%d]',
             self._tn(),
@@ -663,8 +659,8 @@ class Interface(
             raise dawgie.AbortAEError()
 
         log.debug("in Interface update")
-        conn = dawgie.db.post._conn()
-        cur = dawgie.db.post._cur(conn)
+        conn = _conn()
+        cur = _cur(conn)
         primes = []
         valid = True
         for sv in self._alg().state_vectors():
@@ -698,7 +694,7 @@ class Interface(
                 # primary keys from their respective tables
 
                 # get the target ID
-                tn_ID = self.__tn_id(conn, cur)
+                tn_ID = self.__tn_id(cur)
 
                 # Get task id that matches task name
                 cur.execute(
@@ -768,22 +764,18 @@ class Interface(
                 cur.execute(*args)
                 val_ID = cur.fetchone()
                 if val_ID is None:
-                    try:
-                        cur.execute(
-                            'INSERT into Value (name, sv_id, design, '
-                            + 'bugfix, implementation) values '
-                            + '(%s, %s, %s, %s, %s);',
-                            (
-                                vn,
-                                sv_ID,
-                                val.design(),
-                                val.bugfix(),
-                                val.implementation(),
-                            ),
-                        )
-                        conn.commit()
-                    except psycopg.IntegrityError:
-                        conn.rollback()
+                    _insert(
+                        'INSERT into Value (name, sv_id, design, '
+                        + 'bugfix, implementation) values '
+                        + '(%s, %s, %s, %s, %s);',
+                        (
+                            vn,
+                            sv_ID,
+                            val.design(),
+                            val.bugfix(),
+                            val.implementation(),
+                        ),
+                    )
                     cur.execute(*args)
                     val_ID = cur.fetchone()
                     pass
@@ -806,6 +798,9 @@ class Interface(
                 pass
             pass
 
+        cur.close()
+        conn.close()
+
         if not valid:
             # exceptions always look the same; pylint: disable=duplicate-code
             raise dawgie.NotValidImplementationError(
@@ -813,16 +808,25 @@ class Interface(
                 + 'dawgie.Value correctly. See log for details.'
             )
 
+        conn = _conn(False)
+        cur = _cur(conn)
         while primes:
-            cur = dawgie.db.post._cur(conn)
             try:
                 for args in primes:
                     cur.execute(*args)
                 conn.commit()
                 primes.clear()
-            except psycopg.IntegrityError:
+            except psycopg.errors.DeadlockDetected:
+                log.warning('Update had a shared lock detected. Trying again')
                 conn.rollback()
-            pass
+                time.sleep(random.uniform(0.250, 0.750))
+            except psycopg.errors.UniqueViolation:
+                log.warning('Update collision. Will try again')
+                conn.rollback()
+                time.sleep(random.uniform(0.250, 0.750))
+            except psycopg.IntegrityError:
+                log.exception('Could not update because:')
+                conn.rollback()
         cur.close()
         conn.close()
         return
@@ -843,7 +847,7 @@ class Interface(
             # primary keys from their respective tables
 
             # get the target ID
-            tn_ID = self.__tn_id(conn, cur)
+            tn_ID = self.__tn_id(cur)
 
             # Get task id that matches task name
             cur.execute('SELECT * from TASK WHERE name = %s;', [self._task()])
@@ -883,22 +887,18 @@ class Interface(
             sv_ID = cur.fetchone()
 
             if sv_ID is None:
-                try:
-                    cur.execute(
-                        'INSERT into StateVector '
-                        + '(name, alg_ID, design, bugfix, '
-                        + 'implementation) values (%s, %s, %s, %s, %s);',
-                        (
-                            msv.name(),
-                            alg_ID,
-                            msv.design(),
-                            msv.bugfix(),
-                            msv.implementation(),
-                        ),
-                    )
-                    conn.commit()
-                except psycopg.IntegrityError:
-                    conn.rollback()
+                _insert(
+                    'INSERT into StateVector '
+                    + '(name, alg_ID, design, bugfix, '
+                    + 'implementation) values (%s, %s, %s, %s, %s);',
+                    (
+                        msv.name(),
+                        alg_ID,
+                        msv.design(),
+                        msv.bugfix(),
+                        msv.implementation(),
+                    ),
+                )
                 cur.execute(*args)
                 sv_ID = cur.fetchone()
                 pass
@@ -930,22 +930,18 @@ class Interface(
             val_ID = cur.fetchone()
 
             if val_ID is None:
-                try:
-                    cur.execute(
-                        'INSERT into Value (name, sv_id, design, '
-                        + 'bugfix, implementation) values '
-                        + '(%s, %s, %s, %s, %s);',
-                        (
-                            vn,
-                            sv_ID[0],
-                            val.design(),
-                            val.bugfix(),
-                            val.implementation(),
-                        ),
-                    )
-                    conn.commit()
-                except psycopg.IntegrityError:
-                    conn.rollback()
+                _insert(
+                    'INSERT into Value (name, sv_id, design, '
+                    + 'bugfix, implementation) values '
+                    + '(%s, %s, %s, %s, %s);',
+                    (
+                        vn,
+                        sv_ID[0],
+                        val.design(),
+                        val.bugfix(),
+                        val.implementation(),
+                    ),
+                )
                 cur.execute(*args)
                 val_ID = cur.fetchone()
                 pass
@@ -966,6 +962,8 @@ class Interface(
                 )
             )
             pass
+        cur.close()
+        conn.close()
 
         if not valid:
             # exceptions always look the same; pylint: disable=duplicate-code
@@ -974,14 +972,24 @@ class Interface(
                 + 'dawgie.Value correctly. See log for details.'
             )
 
+        conn = _conn(False)
+        cur = _cur(conn)
         while primes:
-            cur = dawgie.db.post._cur(conn)
             try:
                 for args in primes:
                     cur.execute(*args)
                 conn.commit()
                 primes.clear()
+            except psycopg.errors.DeadlockDetected:
+                log.warning('Update MSV detected shared lock. Trying again')
+                conn.rollback()
+                time.sleep(random.uniform(0.250, 0.750))
+            except psycopg.errors.UniqueViolation:
+                log.warning('Update collision. Will try again')
+                conn.rollback()
+                time.sleep(random.uniform(0.250, 0.750))
             except psycopg.IntegrityError:
+                log.exception('Update MSV could not insert because:')
                 conn.rollback()
             pass
         cur.close()
@@ -1013,10 +1021,10 @@ def _append_ver(d: dict, k: str, v: str):
     return
 
 
-def _conn():
+def _conn(autocommit=True):
     uri = f'postgresql://{dawgie.context.db_path}@{dawgie.context.db_host}:{dawgie.context.db_port}/{dawgie.context.db_name}'
     log.debug('using URI: %s', uri)
-    return psycopg.connect(uri)
+    return psycopg.connect(uri, autocommit=autocommit)
 
 
 def _cur(conn, real_dict=False):
@@ -1051,6 +1059,35 @@ def _find(da: [dict], **kwds) -> dict:
             pass
         pass
     return result
+
+
+def _insert(*args):
+    again = True
+    conn = _conn(False)
+    cursor = _cur(conn)
+    success = False
+    while again:
+        again = False
+        try:
+            cursor.execute(*args)
+            conn.commit()
+            success = True
+        except psycopg.errors.DeadlockDetected:
+            log.warning('Shared lock problem failure. Trying again.')
+            again = True
+            conn.rollback()
+            time.sleep(random.uniform(0.250, 0.750))
+        except psycopg.errors.UniqueViolation:
+            conn.rollback()  # common practice here to let error not insert
+        except psycopg.IntegrityError:
+            log.exception('Could not insert into database due to:')
+            conn.rollback()
+        except psycopg.ProgrammingError:
+            log.exception('Program error during insertion:')
+            conn.rollback()
+    cursor.close()
+    conn.close()
+    return success
 
 
 def _prime_keys():
@@ -1122,14 +1159,8 @@ def add(target_name: str) -> bool:
     if pk:
         exists = len(pk) == 1
     else:
-        try:
-            cur.execute('INSERT into Target (name) values (%s)', [target_name])
-            conn.commit()
-            exists = True
-        except psycopg.IntegrityError:
-            conn.rollback()
-        except psycopg.ProgrammingError:
-            conn.rollback()  # permission issue
+        exists = _insert('INSERT into Target (name) values (%s)', [target_name])
+
     cur.close()
     conn.close()
     return exists
@@ -1632,26 +1663,33 @@ def promote(juncture: (), runid: int):
     if any((e is not None for e in entries)):
         return False
 
-    conn = dawgie.db.post._conn()
-    cur = dawgie.db.post._cur(conn)
-    try:
-        for tn_ID, task_ID, alg_ID, sv_ID, v_ID, bn in juncture:
-            cur.execute(
-                'INSERT INTO Prime (run_ID, tn_ID, task_ID, '
-                + 'alg_ID, sv_ID, val_ID, blob_name) values '
-                + '(%s, %s, %s, %s, %s, %s, %s);',
-                [runid, tn_ID, task_ID, alg_ID, sv_ID, v_ID, bn],
-            )
-            pass
-        conn.commit()
-    except psycopg.IntegrityError:
-        conn.rollback()
-        cur.close()
-        conn.close()
-        return False
+    again = True
+    conn = _conn(False)
+    cur = _cur(conn)
+    success = True
+    while again:
+        try:
+            again = False
+            for tn_ID, task_ID, alg_ID, sv_ID, v_ID, bn in juncture:
+                cur.execute(
+                    'INSERT INTO Prime (run_ID, tn_ID, task_ID, '
+                    + 'alg_ID, sv_ID, val_ID, blob_name) values '
+                    + '(%s, %s, %s, %s, %s, %s, %s);',
+                    [runid, tn_ID, task_ID, alg_ID, sv_ID, v_ID, bn],
+                )
+                pass
+            conn.commit()
+        except psycopg.errors.DeadlockDetected:
+            again = True
+            log.warning('Promotion detected shared lock. Trying again.')
+            conn.rollback()
+        except psycopg.IntegrityError:
+            log.exception('Promotion failed:')
+            conn.rollback()
+            success = False
     cur.close()
     conn.close()
-    return True
+    return success
 
 
 # pylint: disable=too-many-arguments,too-many-positional-arguments
@@ -1870,30 +1908,22 @@ def update(tsk, alg, sv, vn, v):
     conn = _conn()
     cur = _cur(conn)
     # Add stuff. Check if they already exist in the tables first.
-    try:
-        cur.execute('INSERT into Task(name) values (%s);', [tsk._name()])
-        conn.commit()
-    except psycopg.IntegrityError:
-        conn.rollback()
+    _insert('INSERT into Task(name) values (%s);', [tsk._name()])
     cur.execute('SELECT pk from TASK WHERE name = %s;', [tsk._name()])
     task_ID = cur.fetchone()
     task_ID = task_ID[0]
-    try:
-        cur.execute(
-            'INSERT into Algorithm(name, task_ID, design, '
-            + 'implementation, bugfix) values '
-            + '(%s, %s, %s, %s, %s);',
-            (
-                alg.name(),
-                task_ID,
-                alg.design(),
-                alg.implementation(),
-                alg.bugfix(),
-            ),
-        )
-        conn.commit()
-    except psycopg.IntegrityError:
-        conn.rollback()
+    _insert(
+        'INSERT into Algorithm(name, task_ID, design, '
+        + 'implementation, bugfix) values '
+        + '(%s, %s, %s, %s, %s);',
+        (
+            alg.name(),
+            task_ID,
+            alg.design(),
+            alg.implementation(),
+            alg.bugfix(),
+        ),
+    )
 
     if sv:
         cur.execute(
@@ -1908,39 +1938,30 @@ def update(tsk, alg, sv, vn, v):
             ),
         )
         alg_ID = cur.fetchone()[0]
-        try:
-            cur.execute(
-                'INSERT into StateVector(name, alg_ID, '
-                + 'design, implementation, bugfix) values '
-                + '(%s, %s, %s, %s, %s);',
-                (
-                    sv.name(),
-                    alg_ID,
-                    sv.design(),
-                    sv.implementation(),
-                    sv.bugfix(),
-                ),
-            )
-            conn.commit()
-        except psycopg.IntegrityError:
-            conn.rollback()
+        _insert(
+            'INSERT into StateVector(name, alg_ID, '
+            + 'design, implementation, bugfix) values '
+            + '(%s, %s, %s, %s, %s);',
+            (
+                sv.name(),
+                alg_ID,
+                sv.design(),
+                sv.implementation(),
+                sv.bugfix(),
+            ),
+        )
         cur.execute(
             'SELECT pk from StateVector WHERE name = %s and alg_ID = %s '
             + 'and design = %s and implementation = %s and bugfix = %s;',
             (sv.name(), alg_ID, sv.design(), sv.implementation(), sv.bugfix()),
         )
         sv_ID = cur.fetchone()[0]
-        try:
-            cur.execute(
-                'INSERT into Value(name, sv_ID, design, '
-                + 'implementation, bugfix) values '
-                + '(%s, %s, %s, %s, %s);',
-                (vn, sv_ID, v.design(), v.implementation(), v.bugfix()),
-            )
-            conn.commit()
-        except psycopg.IntegrityError:
-            conn.rollback()
-        pass
+        _insert(
+            'INSERT into Value(name, sv_ID, design, '
+            + 'implementation, bugfix) values '
+            + '(%s, %s, %s, %s, %s);',
+            (vn, sv_ID, v.design(), v.implementation(), v.bugfix()),
+        )
 
     cur.close()
     conn.close()
