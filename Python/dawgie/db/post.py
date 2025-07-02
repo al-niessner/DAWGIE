@@ -476,7 +476,7 @@ class Interface(
                 ): pickle.dumps(ref.item)
                 for ref in refs
             },
-            'table': {},
+            'table': collections.OrderedDict(),
         }
         cur.execute('SELECT PK FROM Target WHERE name = %s;', [self._tn()])
         tnid = cur.fetchone()[0]
@@ -517,7 +517,7 @@ class Interface(
                 + 'sv_ID = ANY(%s);',
                 [tnid, task_ID, alg_IDs, sv_IDs],
             )
-            rids = sorted({r[0] for r in cur.fetchall()})
+            rids = sorted({r[0] for r in cur.fetchall()}, reverse=True)
             for rid in rids:
                 cur.execute(
                     'SELECT PK,alg_ID,sv_ID FROM Prime WHERE '

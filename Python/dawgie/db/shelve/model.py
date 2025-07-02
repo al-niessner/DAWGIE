@@ -270,7 +270,9 @@ class Interface(Connector, Container, Dataset, Timeline):
         self.__span = {}
         refis = self.__refs2indices(refs)
         tni = self._table(Table.target)[self._tn()]
-        for pk in filter(lambda t, k=tni: t[1] == k, self._prime_keys()):
+        for pk in sorted (filter(lambda t,k=tni: t[1] == k,
+                                 self._prime_keys())
+                          , key=lambda k:k[0], reverse=True):
             if pk[2:] in refis:
                 fsvn, vn = refis[pk[2:]]
                 if pk[0] not in self.__span:
