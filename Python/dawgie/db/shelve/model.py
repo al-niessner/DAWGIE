@@ -38,6 +38,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+import collections
 import dawgie.util
 import dawgie.util.metrics
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
@@ -267,7 +268,7 @@ class Interface(Connector, Container, Dataset, Timeline):
         return self
 
     def _recede(self, refs: [(dawgie.SV_REF, dawgie.V_REF)]) -> None:
-        self.__span = {}
+        self.__span = collections.OrderedDict()
         refis = self.__refs2indices(refs)
         tni = self._table(Table.target)[self._tn()]
         for pk in sorted(
