@@ -69,7 +69,7 @@ jobs:
           pip install -r Python/requirements.txt
           pip install -r .ci/requirements.txt
       - name: pyroma
-        run: pyroma --min 9 Python
+        run: pyroma --min 10 Python
   Compliance:
     name: Test Engine Compliance
     runs-on: ubuntu-24.04
