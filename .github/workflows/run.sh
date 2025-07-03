@@ -31,7 +31,7 @@ for step in y['jobs']['$2']['steps']:
             if line.startswith ('createdb'): continue
             cmd = line.split()[0]
             lc += 1
-            if cmd == 'black' and 'KEEP_STYLE' in os.environ:
+            if cmd == 'black' and 'KEEP_CHANGES' in os.environ:
                 line = line.replace ('--check --diff ','')
             if '&&' in line or '||' in line: line = '( ' + line + ' )'
             print (line,f'&& echo "result of github action step: success,{cmd}" '
