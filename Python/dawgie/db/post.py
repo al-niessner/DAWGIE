@@ -57,7 +57,7 @@ import dawgie.db
 from dawgie.db import REF
 import dawgie.db.post
 import dawgie.db.util
-import dawgie.db.util.aspect
+import dawgie.db.util.wraps
 import dawgie.util
 import dawgie.util.metrics
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
@@ -106,10 +106,10 @@ class ArchiveHandler(twisted.internet.protocol.ProcessProtocol):
 
 
 class Interface(
-    dawgie.db.util.aspect.Container, dawgie.Dataset, dawgie.Timeline
+    dawgie.db.util.wraps.Container, dawgie.Dataset, dawgie.Timeline
 ):
     def __init__(self, *args):
-        dawgie.db.util.aspect.Container.__init__(self)
+        dawgie.db.util.wraps.Container.__init__(self)
         dawgie.Dataset.__init__(self, *args)
         self.__span = {}
         return
