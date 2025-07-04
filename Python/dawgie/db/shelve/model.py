@@ -281,7 +281,7 @@ class Interface(Connector, Container, Dataset, Timeline):
                 if pk[0] not in self.__span:
                     self.__span[pk[0]] = {}
                 if fsvn not in self.__span[pk[0]]:
-                    self.__span[fsvn] = {}
+                    self.__span[pk[0]][fsvn] = {}
                 self.__span[pk[0]][fsvn][vn] = self._get_prime(pk)
                 pass
             pass
