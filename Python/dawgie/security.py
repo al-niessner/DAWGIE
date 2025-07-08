@@ -234,24 +234,37 @@ def connect(address: (str, int)) -> socket.socket:
     '''connect using PGP handshaking'''
     s = socket.socket()
 
-    if use_tls():
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-        file = _system['file'] if _system else _myself['file']
-        context.load_verify_locations(file)
-        context.load_cert_chain(_myself['file'])
-        ss = context.wrap_socket(
-            s, server_hostname=authority().getSubject()['commonName']
-        )
-        ss.connect(address)
-        return ss
+    try:
+        if use_tls():
+            context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+            file = _system['file'] if _system else _myself['file']
+            context.load_verify_locations(file)
+            context.load_cert_chain(_myself['file'])
+            ss = context.wrap_socket(
+                s, server_hostname=authority().getSubject()['commonName']
+            )
+            ss.connect(address)
+            return ss
 
-    s.connect(address)
-    message = ' machine: ' + _my_ip() + '\n'
-    message += 'temporal: ' + str(datetime.datetime.now(datetime.UTC)) + '\n'
-    message += 'username: ' + getpass.getuser() + '\n'
-    _send(s, message)
-    _send(s, _recv(s))
-    return s
+        s.connect(address)
+        message = ' machine: ' + _my_ip() + '\n'
+        message += (
+            'temporal: ' + str(datetime.datetime.now(datetime.UTC)) + '\n'
+        )
+        message += 'username: ' + getpass.getuser() + '\n'
+        _send(s, message)
+        _send(s, _recv(s))
+        return s
+    # catch all exceptions (bare) to log a message for address resolution
+    # then continue raising the same eception, which makes catching bare
+    # exception just fine
+    except:  # fmt: skip # noqa: E722 # pylint: disable=bare-except
+        log.exception(
+            'Could not connect to %s:%s because',
+            str(address[0]),
+            str(address[1]),
+        )
+        raise
 
 
 def delete(keys: [str]) -> None:
