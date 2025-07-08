@@ -248,13 +248,22 @@ def connect(address: (str, int)) -> socket.socket:
 
         s.connect(address)
         message = ' machine: ' + _my_ip() + '\n'
-        message += 'temporal: ' + str(datetime.datetime.now(datetime.UTC)) + '\n'
+        message += (
+            'temporal: ' + str(datetime.datetime.now(datetime.UTC)) + '\n'
+        )
         message += 'username: ' + getpass.getuser() + '\n'
         _send(s, message)
         _send(s, _recv(s))
         return s
-    except:
-        log.exception(f'Could not connect to {address[0]}:{address[1]}')
+    # catch all exceptions (bare) to log a message for address resolution
+    # then continue raising the same eception, which makes catching bare
+    # exception just fine
+    except:  # fmt: skip # noqa: E722 # pylint: disable=bare-except
+        log.exception(
+            'Could not connect to %s:%s because',
+            str(address[0]),
+            str(address[1]),
+        )
         raise
 
 
