@@ -58,14 +58,14 @@ class Container:
                 'item is not a dictionary',
             )
             self.assertEqual(keys, sorted(i1.keys()), 'secondary keys - alg.sv')
-            for k2,i2 in i1.items():
+            for k2, i2 in i1.items():
                 keys = ['.'.join([k2, k]) for k in KEYS]
                 self.assertTrue(
                     isinstance(i2, dawgie.db.util.wraps.Container),
                     'item is not a dictionary',
                 )
                 self.assertEqual(keys, sorted(i2.keys()), 'tertiary keys - val')
-                for i,(k3,v) in enumerate(sorted(i2.items())):
+                for i, (k3, v) in enumerate(sorted(i2.items())):
                     self.assertEqual(i, v, 'value')
 
     def test_keys(self):
@@ -96,7 +96,7 @@ class Container:
                     isinstance(v2, dawgie.db.util.wraps.Container),
                     'item is not a dictionary',
                 )
-                for i,v in enumerate(sorted(v2.values())):
+                for i, v in enumerate(sorted(v2.values())):
                     self.assertEqual(i, v, 'value')
 
 
