@@ -807,6 +807,47 @@ def rule_10(task):
     return all(findings)
 
 
+def rule_11(task):
+    '''Verify that all *_REF resolve correctly
+
+    dawgie.*_REF are used to link modules together. They need to be resolved
+    as dawgie.pl would do during runtime.
+    '''
+
+    def _resolve(ref):
+        fn = dawgie.util.task_name(ref.factory)
+        resolved = [False]
+        for alg in ref.factory(fn).list():
+            if alg.name() == ref.impl.name():
+                index = 0
+                resolved[0] = True
+                for vref in dawgie.util.as_vref([ref]):
+                    index += 1
+                    resolved.append(False)
+                    for sv in alg.state_vectors():
+                        if vref.item.name() == sv.name():
+                            resolved[index] = True
+                            resolved.append(vref.feat in sv)
+                            index += 1
+                    if not resolved[-1]:
+                        logging.error(
+                            'Could not resolve %s.%s.%s.%s',
+                            fn,
+                            alg.name(),
+                            vref.item.name(),
+                            vref.feat,
+                        )
+        if not resolved[0]:
+            logging.error(
+                'Could not resolve the algorithm %s.%s', fn, ref.impl.name()
+            )
+        findings.append(all(resolved))
+
+    findings = [True]
+    _walk(task, ifref=_resolve)
+    return all(findings)
+
+
 def verify(repo: str, silent: bool, verbose: bool, spawn):
     '''verify a repo meets DAWGIEs needs
 
