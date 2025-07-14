@@ -39,9 +39,11 @@ NTR:
 
 import dawgie.db.post
 import dawgie.db.shelve.model
+import dawgie.db.util.wraps
 import unittest
 
-KEYS = ['a','b','c']
+KEYS = ['a', 'b', 'c']
+
 
 class Container:
     @property
@@ -49,41 +51,73 @@ class Container:
         return self._container
 
     def test_items(self):
-        self.assertTrue(False,'implement me')
+        for k1, i1 in self.container.items():
+            keys = ['.'.join([k1, k]) for k in KEYS]
+            self.assertTrue(
+                isinstance(i1, dawgie.db.util.wraps.Container),
+                'item is not a dictionary',
+            )
+            self.assertEqual(keys, sorted(i1.keys()), 'secondary keys - alg.sv')
+            for k2,i2 in i1.items():
+                keys = ['.'.join([k2, k]) for k in KEYS]
+                self.assertTrue(
+                    isinstance(i2, dawgie.db.util.wraps.Container),
+                    'item is not a dictionary',
+                )
+                self.assertEqual(keys, sorted(i2.keys()), 'tertiary keys - val')
+                for i,(k3,v) in enumerate(sorted(i2.items())):
+                    self.assertEqual(i, v, 'value')
 
     def test_keys(self):
-        self.assertEqual(KEYS, sorted(self.container),
-                         'primary keys - target or runid')
+        self.assertEqual(
+            KEYS, sorted(self.container), 'primary keys - target or runid'
+        )
         for k1 in self.container:
-            keys = ['.'.join([k1,k]) for k in KEYS]
-            self.assertEqual(keys, sorted(self.container[k1]),
-                             'secondary keys - alg.sv')
+            keys = ['.'.join([k1, k]) for k in KEYS]
+            self.assertEqual(
+                keys, sorted(self.container[k1]), 'secondary keys - alg.sv'
+            )
             for k2 in self.container[k1]:
-                keys = ['.'.join([k2,k]) for k in KEYS]
-                self.assertEqual(keys, sorted(self.container[k1][k2]),
-                                 'tertiary keys - val')
-                for i,k3 in enumerate(sorted(self.container[k1][k2])):
-                    self.assertEqual(i,self._container[k1][k2][k3],'value')
+                keys = ['.'.join([k2, k]) for k in KEYS]
+                self.assertEqual(
+                    keys, sorted(self.container[k1][k2]), 'tertiary keys - val'
+                )
+                for i, k3 in enumerate(sorted(self.container[k1][k2])):
+                    self.assertEqual(i, self._container[k1][k2][k3], 'value')
 
     def test_values(self):
-        self.assertTrue(False, 'implement me')
+        for v1 in self.container.values():
+            self.assertTrue(
+                isinstance(v1, dawgie.db.util.wraps.Container),
+                'item is not a dictionary',
+            )
+            for v2 in v1.values():
+                self.assertTrue(
+                    isinstance(v2, dawgie.db.util.wraps.Container),
+                    'item is not a dictionary',
+                )
+                for i,v in enumerate(sorted(v2.values())):
+                    self.assertEqual(i, v, 'value')
 
-class Post(Container,unittest.TestCase):
+
+class Post(Container, unittest.TestCase):
     def setUp(self):
         self._container = dawgie.db.post.Interface(None, None, None)
         self._container._Interface__span['table'] = fill()
 
-class Shelve(Container,unittest.TestCase):
+
+class Shelve(Container, unittest.TestCase):
     def setUp(self):
         self._container = dawgie.db.shelve.model.Interface(None, None, None)
         self._container._Interface__span.update(fill())
+
 
 def fill():
     result = {}
     for k1 in KEYS:
         result[k1] = {}
         for k2 in KEYS:
-            result[k1]['.'.join([k1,k2])] = {}
-            for k3,v in zip(KEYS,range(len(KEYS))):
-                result[k1]['.'.join([k1,k2])]['.'.join([k1,k2,k3])] = v
+            result[k1]['.'.join([k1, k2])] = {}
+            for k3, v in zip(KEYS, range(len(KEYS))):
+                result[k1]['.'.join([k1, k2])]['.'.join([k1, k2, k3])] = v
     return result

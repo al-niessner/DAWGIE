@@ -106,7 +106,10 @@ class ArchiveHandler(twisted.internet.protocol.ProcessProtocol):
 
 
 class Interface(
-    dawgie.db.util.wraps.Container, dawgie.Dataset, dawgie.Timeline
+    dawgie.db.util.wraps.Container,
+    dawgie.Aspect,
+    dawgie.Dataset,
+    dawgie.Timeline,
 ):
     def __init__(self, *args):
         dawgie.db.util.wraps.Container.__init__(self)
