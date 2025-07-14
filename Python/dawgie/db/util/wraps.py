@@ -39,7 +39,7 @@ NTR:
 import dawgie
 
 
-class Container(dawgie.Aspect):
+class Container(dawgie.Aspect, dawgie.Timeline):
     def __init__(self, l1=None, l2=None, parent=None):
         self.__l1 = l1
         self.__l2 = l2

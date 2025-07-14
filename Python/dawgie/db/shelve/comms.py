@@ -119,7 +119,7 @@ class Connector:  # pylint: disable=too-few-public-methods
         '''public method for .impl'''
         return self._copy(dst, method)
 
-    def keys(self, table) -> []:
+    def dbkeys(self, table) -> []:
         return list(self._table(table))
 
     pass

@@ -33,6 +33,8 @@ for step in y['jobs']['$2']['steps']:
             lc += 1
             if cmd == 'black' and 'KEEP_CHANGES' in os.environ:
                 line = line.replace ('--check --diff ','')
+            if cmd == 'pytest' and 'PYTESTING_LIMITS' in os.environ:
+                line = line.replace ('Test', os.environ['PYTESTING_LIMITS'])
             if '&&' in line or '||' in line: line = '( ' + line + ' )'
             print (line,f'&& echo "result of github action step: success,{cmd}" '
                    f'|| echo "result of github action step: failure,{cmd}"')

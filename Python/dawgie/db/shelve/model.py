@@ -44,19 +44,17 @@ import dawgie.util.metrics
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 
 from dawgie import Dataset, Timeline
-from dawgie.db.util.aspect import Container
+from dawgie.db.util.wraps import Container
 
 from . import comms
 from .comms import Connector
 from .enums import Table
 
-import dawgie.db.util.aspect
-
 
 class Interface(Connector, Container, Dataset, Timeline):
     def __init__(self, *args):
         dawgie.Dataset.__init__(self, *args)
-        dawgie.db.util.aspect.Container.__init__(self)
+        Container.__init__(self)
         self.__span = {}
         self.__null_metric = dawgie.util.metrics.filled(-1)
         self._log = log.getChild(self.__class__.__name__)
