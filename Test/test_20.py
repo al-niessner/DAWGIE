@@ -44,17 +44,18 @@ import pickle
 import tempfile
 import unittest
 
+
 class LazyMetricValue(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        fid,fn = tempfile.mkstemp()
+        fid, fn = tempfile.mkstemp()
         os.close(fid)
         cls.afn = fn
         cls.fn = os.path.basename(fn)
         cls.mv = dawgie.util.metrics.MetricValue(5)
         dawgie.context.data_dbs = os.path.dirname(fn)
-        with open(fn,'bw') as file:
-            pickle.dump (cls.mv, file)
+        with open(fn, 'bw') as file:
+            pickle.dump(cls.mv, file)
 
     @classmethod
     def tearDownClass(cls):
@@ -62,4 +63,4 @@ class LazyMetricValue(unittest.TestCase):
 
     def test_value(self):
         lmv = dawgie.util.metrics.LazyMetricValue(self.fn)
-        self.assertEqual(self.mv.value(),lmv.value())
+        self.assertEqual(self.mv.value(), lmv.value())
