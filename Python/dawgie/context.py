@@ -97,6 +97,7 @@ cpu_threshold = int(os.environ.get('DAWGIE_CPU_THRESH', 30))
 
 data_dbs = os.environ.get('DAWGIE_DATA_DBSTOR', '/proj/data/dbs')
 data_log = os.environ.get('DAWGIE_DATA_LOGDIR', '/proj/data/logs')
+data_per = os.environ.get('DAWGIE_DATA_PERSONAL', '/proj/data/db')
 data_stg = os.environ.get('DAWGIE_DATA_STAGED', '/proj/data/stg')
 
 db_host = os.environ.get('DAWGIE_DB_HOST', 'localhost')

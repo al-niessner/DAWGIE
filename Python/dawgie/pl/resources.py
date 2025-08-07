@@ -42,32 +42,41 @@ import dawgie.context
 import dawgie.db
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import numpy
+import os
+import pickle
 
 HINT = collections.namedtuple(
     'HINT', ['cpu', 'io', 'memory', 'pages', 'summary']
 )
 
 
-def _latest(history: [dawgie.db.MetricData]) -> dawgie.db.MetricData:
-    most_recent = history[0]
-    for h in history:
-        if int(most_recent.run_id) < int(h.run_id):
-            most_recent = h
-        pass
-    return most_recent
+def _read_diary():
+    fn = os.path.join(dawgie.context.data_per, 'diary.pkl')
+    past = {}
+    if os.path.isfile(fn):
+        with open(fn, 'br') as file:
+            past = pickle.load(file)
+        # make sure loaded context is an expected structure
+        if isinstance(past, dict) and all(
+            isinstance(k, str) and isinstance(v, dict) for k, v in past.items()
+        ):
+            for timelines in past.values():
+                if not all(
+                    isinstance(k, dict) and isinstance(v, set)
+                    for k, v in timelines.items()
+                ):
+                    past = {}
+                    break
+        else:
+            past = {}
+    return past
 
 
-def aspects(metric: [dawgie.db.MetricData]) -> {str: [dawgie.db.MetricData]}:
-    log.debug('aspects() - metrics of aspects over %d', len(metric))
-    reg = regress(metric)
-    log.debug('aspects() - number of regressions %d', len(reg))
-    names = {'.'.join([m.task, m.alg_name]) for m in metric}
-    asp = {name: [] for name in names}
-    for r in reg:
-        name = '.'.join(r.split('.')[1:])
-        asp[name].append(_latest(reg[r]))
-        pass
-    return asp
+def _write_diary(known):
+    fn = os.path.join(dawgie.context.data_per, 'diary.pkl')
+    if os.path.isdir(dawgie.context.data_per):
+        with open(fn, 'bw') as file:
+            pickle.dump(known, file)
 
 
 def distribution(metric: [dawgie.db.MetricData]) -> {str: HINT}:
@@ -78,37 +87,28 @@ def distribution(metric: [dawgie.db.MetricData]) -> {str: HINT}:
     dst = {}
     reg = regress(metric)
     log.debug('distribution() - number of regressions %d', len(reg))
-    for name in reg:
-        if reg[name]:
-            cpu = numpy.median(
-                [
-                    m.sv['task_system'].value() + m.sv['task_user'].value()
-                    for m in reg[name]
-                ]
+    for name, metrics in reg.items():
+        if metrics['runids']:
+            cpu = numpy.nanmedian(
+                numpy.array(metrics['task_system'])
+                + numpy.array(metrics['task_user'])
             )
-            io = numpy.median(
-                [
-                    m.sv['task_input'].value() + m.sv['task_output'].value()
-                    for m in reg[name]
-                ]
+            io = numpy.nanmedian(
+                numpy.array(metrics['task_input'])
+                + numpy.array(metrics['task_output'])
             )
-            memory = numpy.median(
-                [
-                    round(
-                        (
-                            m.sv['db_memory'].value()
-                            + m.sv['task_memory'].value()
-                        )
-                        / 2**20
+            memory = numpy.nanmedian(
+                (
+                    (
+                        numpy.array(metrics['db_memory'])
+                        + numpy.array(metrics['task_memory'])
                     )
-                    for m in reg[name]
-                ]
+                    / 2**20
+                ).round()
             )
-            pages = numpy.median(
-                [
-                    m.sv['task_pages'].value() + m.sv['task_pages'].value()
-                    for m in reg[name]
-                ]
+            pages = numpy.nanmedian(
+                numpy.array(metrics['db_pages'])
+                + numpy.array(metrics['task_pages'])
             )
             summary = dawgie.context.cpu_threshold <= cpu
         else:
@@ -121,10 +121,34 @@ def distribution(metric: [dawgie.db.MetricData]) -> {str: HINT}:
 
 def regress(metric: [dawgie.db.MetricData]) -> {str: [dawgie.db.MetricData]}:
     log.debug('regress() - regress back across metric data %d', len(metric))
+    keys = [
+        'task_system',
+        'task_user',
+        'task_input',
+        'task_output',
+        'db_memory',
+        'task_memory',
+        'db_pages',
+        'task_pages',
+        'rids',
+    ]
     names = {'.'.join([m.target, m.task, m.alg_name]) for m in metric}
-    reg = {name: [] for name in names}
+    reg = _read_diary()
+    reg.update(
+        {
+            name: {k: set() for k in keys}
+            for name in names.difference(reg.keys())
+        }
+    )
     for m in metric:
         name = '.'.join([m.target, m.task, m.alg_name])
-        reg[name].append(m)
+        if m.runid not in reg[name]['rids']:
+            reg[name]['rids'].add(m.runid)
+            for vn in keys[:-1]:
+                v = m.sv[vn].value()
+                if v < 0:
+                    v = numpy.nan
+                reg[name][vn].add(v)
         pass
+    _write_diary(reg)
     return reg
