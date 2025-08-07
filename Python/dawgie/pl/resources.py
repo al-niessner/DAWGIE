@@ -62,7 +62,7 @@ def _read_diary():
         ):
             for timelines in past.values():
                 if not all(
-                    isinstance(k, dict) and isinstance(v, set)
+                    isinstance(k, dict) and isinstance(v, (list, set))
                     for k, v in timelines.items()
                 ):
                     past = {}
@@ -88,7 +88,7 @@ def distribution(metric: [dawgie.db.MetricData]) -> {str: HINT}:
     reg = regress(metric)
     log.debug('distribution() - number of regressions %d', len(reg))
     for name, metrics in reg.items():
-        if metrics['runids']:
+        if metrics['rids']:
             cpu = numpy.nanmedian(
                 numpy.array(metrics['task_system'])
                 + numpy.array(metrics['task_user'])
@@ -136,19 +136,19 @@ def regress(metric: [dawgie.db.MetricData]) -> {str: [dawgie.db.MetricData]}:
     reg = _read_diary()
     reg.update(
         {
-            name: {k: set() for k in keys}
+            name: {k: set() if k == 'rids' else [] for k in keys}
             for name in names.difference(reg.keys())
         }
     )
     for m in metric:
         name = '.'.join([m.target, m.task, m.alg_name])
-        if m.runid not in reg[name]['rids']:
-            reg[name]['rids'].add(m.runid)
+        if m.run_id not in reg[name]['rids']:
+            reg[name]['rids'].add(m.run_id)
             for vn in keys[:-1]:
                 v = m.sv[vn].value()
                 if v < 0:
                     v = numpy.nan
-                reg[name][vn].add(v)
+                reg[name][vn].append(v)
         pass
     _write_diary(reg)
     return reg
