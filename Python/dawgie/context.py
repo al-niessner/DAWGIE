@@ -261,6 +261,12 @@ def add_arguments(ap):
         help='location of the log files [%(default)s]',
     )
     ap.add_argument(
+        '--context-data-per',
+        default=data_per,
+        required=False,
+        help='location of the DB data store [%(default)s]',
+    )
+    ap.add_argument(
         '--context-data-stg',
         default=data_stg,
         required=False,
@@ -496,6 +502,7 @@ def override(args):
     dawgie.context.cpu_threshold = args.context_cpu_threshold
     dawgie.context.data_dbs = args.context_data_dbs
     dawgie.context.data_log = args.context_data_log
+    dawgie.context.data_per = args.context_data_per
     dawgie.context.data_stg = args.context_data_stg
     dawgie.context.db_copy_path = args.context_db_copy_path
     dawgie.context.db_host = args.context_db_host
