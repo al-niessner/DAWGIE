@@ -39,6 +39,8 @@ NTR: 49811
 '''
 
 import dawgie
+import dawgie.db.util
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 
 
 class MetricStateVector(dawgie.StateVector):
@@ -89,8 +91,6 @@ class MetricStateVector(dawgie.StateVector):
             pass
         return
 
-    pass
-
 
 class MetricValue(dawgie.Value):
     def __init__(self, content=None):
@@ -105,7 +105,25 @@ class MetricValue(dawgie.Value):
     def value(self):
         return self.__content
 
-    pass
+
+class LazyMetricValue(MetricValue):
+    def __init__(self, bn: str):
+        MetricValue.__init__(self)
+        self.__blobname = bn
+        self.__real = None
+
+    def value(self):
+        if self.__real is None:
+            try:
+                self.__real = dawgie.db.util.decode(self.__blobname)
+            except FileNotFoundError:
+                log.error(
+                    'possible database corruption because cannot find '
+                    '__metric__ state vector value: %s',
+                    self.__blobname,
+                )
+                self.__real = MetricValue(-5)
+        return self.__real.value()
 
 
 def filled(value: int = 0) -> dawgie.METRIC:

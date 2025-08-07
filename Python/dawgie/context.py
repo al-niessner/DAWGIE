@@ -97,6 +97,7 @@ cpu_threshold = int(os.environ.get('DAWGIE_CPU_THRESH', 30))
 
 data_dbs = os.environ.get('DAWGIE_DATA_DBSTOR', '/proj/data/dbs')
 data_log = os.environ.get('DAWGIE_DATA_LOGDIR', '/proj/data/logs')
+data_per = os.environ.get('DAWGIE_DATA_PERSONAL', '/proj/data/db')
 data_stg = os.environ.get('DAWGIE_DATA_STAGED', '/proj/data/stg')
 
 db_host = os.environ.get('DAWGIE_DB_HOST', 'localhost')
@@ -258,6 +259,12 @@ def add_arguments(ap):
         default=data_log,
         required=False,
         help='location of the log files [%(default)s]',
+    )
+    ap.add_argument(
+        '--context-data-per',
+        default=data_per,
+        required=False,
+        help='location of the DB data store [%(default)s]',
     )
     ap.add_argument(
         '--context-data-stg',
@@ -495,6 +502,7 @@ def override(args):
     dawgie.context.cpu_threshold = args.context_cpu_threshold
     dawgie.context.data_dbs = args.context_data_dbs
     dawgie.context.data_log = args.context_data_log
+    dawgie.context.data_per = args.context_data_per
     dawgie.context.data_stg = args.context_data_stg
     dawgie.context.db_copy_path = args.context_db_copy_path
     dawgie.context.db_host = args.context_db_host

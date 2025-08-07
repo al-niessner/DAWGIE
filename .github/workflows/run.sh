@@ -150,6 +150,6 @@ EOF
         summary=1
     fi
 done
-[ -z "${KEEP_REPORTS+x}" ] && rm -f $root/.github/workflows/bandit_full.json
+[ -z "${KEEP_CHANGES+x}" ] && rm -f $root/.github/workflows/bandit_full.json
 [[ $summary -eq 0 ]] && echo "Summary: All test verifications were successful" || echo "Summary: Some or all test verifications failed." 
 trap - EXIT

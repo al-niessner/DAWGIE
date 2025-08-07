@@ -1476,51 +1476,38 @@ def metrics() -> '[dawgie.db.MetricData]':
         raise RuntimeError('called metrics before open')
 
     result = []
-    svs = {}
     conn = dawgie.db.post._conn()
     cur = dawgie.db.post._cur(conn)
     cur.execute('SELECT PK from StateVector WHERE name = %s;', ('__metric__',))
     sv_IDs = [t[0] for t in cur.fetchall()]
     cur.execute('SELECT * from Prime WHERE sv_ID = ANY(%s);', (sv_IDs,))
-    for row in cur.fetchall():
-        key = (row[1], row[2], row[3], row[4])
-        msv = (
-            svs[key]
-            if key in svs
-            else dawgie.util.MetricStateVector(
-                dawgie.util.metrics.filled(-2), dawgie.util.metrics.filled(-2)
-            )
+    rows = cur.fetchall()
+    md = dawgie.util.metrics.filled(-2)
+    svs = {
+        k: dawgie.util.MetricStateVector(md, md)
+        for k in {tuple(row[1:5]) for row in rows}
+    }
+    cur.execute('SELECT PK,name from Value;')
+    vt = dict(cur.fetchall())
+    for row in rows:
+        svs[tuple(row[1:5])][vt[row[6]]] = dawgie.util.metrics.LazyMetricValue(
+            row[7]
         )
-        cur.execute('SELECT name FROM Value WHERE PK = %s;', (row[6],))
-        vn = cur.fetchone()[0]
-        try:
-            msv[vn] = dawgie.db.util.decode(row[7])
-            svs[key] = msv
-        except FileNotFoundError:
-            log.error(
-                'possible database corruption because cannot find __metric__ state vector value: %s',
-                row[7],
-            )
-        pass
+    cur.execute('SELECT PK,name,design,implementation,bugfix FROM Algorithm;')
+    at = {t[0]: t[1:] for t in cur.fetchall()}
+    cur.execute('SELECT PK,name FROM Target;')
+    Tt = dict(cur.fetchall())
+    cur.execute('SELECT PK,name FROM Task;')
+    tt = dict(cur.fetchall())
     for key, msv in svs.items():
-        cur.execute('SELECT name FROM Target where PK = %s;', (key[2],))
-        target = cur.fetchone()[0]
-        cur.execute('SELECT name FROM Task where PK = %s;', (key[1],))
-        task = cur.fetchone()[0]
-        cur.execute(
-            'SELECT name,design,implementation,bugfix FROM Algorithm '
-            + 'where PK = %s;',
-            (key[3],),
-        )
-        alg = cur.fetchone()
         result.append(
             dawgie.db.MetricData(
-                alg_name=alg[0],
-                alg_ver=dawgie.VERSION(*alg[1:]),
+                alg_name=at[key[3]][0],
+                alg_ver=dawgie.VERSION(*at[key[3]][1:]),
                 run_id=key[0],
                 sv=msv,
-                target=target,
-                task=task,
+                target=Tt[key[2]],
+                task=tt[key[1]],
             )
         )
         pass

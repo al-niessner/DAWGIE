@@ -215,7 +215,9 @@ class DB:
         dawgie.db.close()
         self.assertRaises(RuntimeError, dawgie.db.metrics)
         dawgie.db.open()
-        self.assertEqual(dawgie.db.testdata.TSK_CNT, len(dawgie.db.metrics()))
+        metrics = dawgie.db.metrics()
+        self.assertEqual(dawgie.db.testdata.TSK_CNT, len(metrics))
+        self.assertEqual(-2, metrics[-1].sv['task_memory'].value())
         dawgie.db.close()
         return
 
