@@ -136,6 +136,7 @@ class Process:
         d.addCallback(self.step_1)
         d.addCallbacks(self.step_2, self.failure)
         d.addCallbacks(self.step_3, self.failure)
+        d.addErrback(self.failure)
         twisted.internet.reactor.callLater(0, d.callback, None)
         return
 
@@ -204,7 +205,7 @@ class Process:
     def step_3(self, _result):
         '''go back to running and respond with status'''
         if self.__failed:
-            return
+            return None
         dawgie.context.fsm.running_trigger()
         result = {
             'alert_status': 'success',
@@ -222,7 +223,7 @@ class Process:
         self.__clear()
         dawgie.context.fsm.set_submit_info(self.__changeset, self.__submission)
         dawgie.context.fsm.submit_crossroads()
-        return
+        return None
 
 
 class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
