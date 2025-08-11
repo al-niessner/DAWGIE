@@ -90,6 +90,7 @@ class Process:
         log.debug('Process.__submission %s', str(submission))
         self.__changeset = changeset
         self.__clear = clear
+        self.__failed = False
         self.__msg = {
             'alert_status': 'danger',
             'alert_message': 'unspecified',
@@ -101,7 +102,7 @@ class Process:
             self.__repo = os.path.dirname(self.__repo)
         return
 
-    def failure(self, fail):
+    def failure(self, _fail):
         if self.__request is not None:
             if dawgie.context.fsm.state == 'gitting':
                 dawgie.context.fsm.running_trigger()
@@ -111,23 +112,25 @@ class Process:
                     str(dawgie.context.fsm.state),
                 )
 
+            log.error(
+                'Failed to complete user submit request: %s',
+                str(self.__msg['alert_message']),
+            )
             self.__request.write(json.dumps(self.__msg).encode())
             try:
                 self.__request.finish()
             except:  # pylint: disable=bare-except # noqa: E722
-                log.exception(
-                    'Failed to complete an error message: %s',
-                    str(self.__msg['alert_message']),
-                )
-                pass
+                log.exception('Failed to respond to caller.')
             self.__clear()
+            self.__failed = True
             self.__request = None
             dawgie.tools.submit.mail_out(self.__msg['alert_message'])
         else:
             log.debug('Process.failure() self.__request is None')
-        return fail
+        return None
 
     def step_0(self):
+        '''setup the Defer steps to be run asynchronously'''
         dawgie.tools.submit.mail_list = dawgie.context.email_alerts_to
         d = twisted.internet.defer.Deferred()
         d.addCallback(self.step_1)
@@ -137,7 +140,14 @@ class Process:
         return
 
     def step_1(self, _result):
-        '''transition pipeline state to gitting'''
+        '''transition pipeline state to gitting
+
+        1. check that the pipeline is active and return failure message if not
+        2. check that the revision has not been applied already returning a
+           failure message if it has
+        3. call gitting_trigger() to move the FSM state to gitting
+           no other code is run during the trigger
+        '''
         if not dawgie.context.fsm.is_pipeline_active():
             log.warning("submit: pipeline is not active, cannot submit.")
             self.__msg = {
@@ -161,7 +171,16 @@ class Process:
         return None
 
     def step_2(self, _result):
-        '''prepare branch for deployment'''
+        '''prepare branch for deployment
+
+        The desire is that the stable branch is updated to the revision, dawgie
+        compliance is then used to validate the code should be successful, then
+        the operational branch is updated to the revision.
+
+        There should be no change of state out of gitting.
+        '''
+        if self.__failed:
+            return None
         self.__msg = {
             'alert_status': 'danger',
             'alert_message': f'The submit tool could not prepare {dawgie.context.ae_repository_branch_test}.',
@@ -184,6 +203,8 @@ class Process:
 
     def step_3(self, _result):
         '''go back to running and respond with status'''
+        if self.__failed:
+            return
         dawgie.context.fsm.running_trigger()
         result = {
             'alert_status': 'success',
