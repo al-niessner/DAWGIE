@@ -1584,8 +1584,17 @@ def open():
         + 'sv_ID bigserial references StateVector(PK), '
         + 'val_ID bigserial references Value(PK), '
         + 'blob_name varchar(100)'
-        + 'UNIQUE (run_ID, task_ID, tn_ID, alg_ID, sv_ID, val_ID));'
+        + 'UNIQUE (run_ID, task_ID, tn_ID, alg_ID, sv_ID, val_IDes));'
     )
+    conn.commit()
+    # these index have proven useful as the prime table gets large
+    cur.execute('CREATE INDEX prime_by_aid ON prime USING btree (alg_id);')
+    cur.execute('CREATE INDEX prime_by_bn ON prime USING btree (blob_name);')
+    cur.execute('CREATE INDEX prime_by_rid ON prime USING btree (run_id);')
+    cur.execute('CREATE INDEX prime_by_svid ON prime USING btree (sv_id);')
+    cur.execute('CREATE INDEX prime_by_tid ON prime USING btree (task_id);')
+    cur.execute('CREATE INDEX prime_by_tnid ON prime USING btree (tn_id);')
+    cur.execute('CREATE INDEX prime_by_vid ON prime USING btree (val_id);')
     conn.commit()
     try:
         # Make sure all autoincremented sequences are set correctly
