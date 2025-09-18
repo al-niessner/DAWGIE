@@ -1587,7 +1587,7 @@ def open():
         + 'UNIQUE (run_ID, task_ID, tn_ID, alg_ID, sv_ID, val_ID));'
     )
     conn.commit()
-    # these index have proven useful as the prime table gets largecat 
+    # these index have proven useful as the prime table gets large
     cur.execute('CREATE INDEX IF NOT EXISTS '
                 'prime_by_aid ON prime USING btree (alg_id);')
     cur.execute('CREATE INDEX IF NOT EXISTS '
