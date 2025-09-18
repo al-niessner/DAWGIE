@@ -1583,7 +1583,8 @@ def open():
         + 'alg_ID bigserial references Algorithm(PK), '
         + 'sv_ID bigserial references StateVector(PK), '
         + 'val_ID bigserial references Value(PK), '
-        + 'blob_name varchar(100));'
+        + 'blob_name varchar(100)'
+        + 'UNIQUE (run_ID, task_ID, tn_ID, alg_ID, sv_ID, val_ID));'
     )
     conn.commit()
     try:
