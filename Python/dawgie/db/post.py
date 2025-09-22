@@ -825,7 +825,9 @@ class Interface(
                 time.sleep(random.uniform(0.250, 0.750))
             except psycopg.errors.UniqueViolation:
                 conn.rollback()
-                log.exception('Trying to inssert a duplicate row in the prime table')
+                log.exception(
+                    'Trying to inssert a duplicate row in the prime table'
+                )
                 raise
             except psycopg.IntegrityError:
                 log.exception('Could not update because:')

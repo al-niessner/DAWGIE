@@ -508,23 +508,21 @@ class DB:
 
 # to test postgres:
 #   docker pull postgres:latest
-#   docker network create cit
-#   docker run --detach --env POSTGRES_PASSWORD=password --env POSTGRES_USER=tester --name postgres --network cit --rm  postgres:latest
+#   docker run --detach --env POSTGRES_PASSWORD=password --env POSTGRES_USER=tester --env POSTGRES_HOST_AUTH_METHOD=trust --name postgres --publish 5432:5432 --rm  postgres:latest
 #   docker exec -i postgres createdb -U tester testspace
-#   CIT_NETWORK=cit .ci/check_03.sh ; git checkout .ci/status.txt
-#   docker network rm cit
 #
 # notes:
 #   takes about 5 minutes to load the database
 #   once loaded it can simply be re-used (no reason to dump and start again)
 class Post(DB, unittest.TestCase):
     @classmethod
-    def setUpClass(cls):
-        cls.root = tempfile.mkdtemp()
-        os.mkdir(os.path.join(cls.root, 'db'))
-        os.mkdir(os.path.join(cls.root, 'dbs'))
-        os.mkdir(os.path.join(cls.root, 'logs'))
-        os.mkdir(os.path.join(cls.root, 'stg'))
+    def setUpClass(cls, root=None):
+        cls.root = root if root else tempfile.mkdtemp()
+        if not os.path.isdir(os.path.join(cls.root, 'db')):
+            os.mkdir(os.path.join(cls.root, 'db'))
+            os.mkdir(os.path.join(cls.root, 'dbs'))
+            os.mkdir(os.path.join(cls.root, 'logs'))
+            os.mkdir(os.path.join(cls.root, 'stg'))
         dawgie.context.db_host = 'localhost'
         dawgie.context.db_impl = 'post'
         dawgie.context.db_name = 'testspace'
@@ -534,7 +532,8 @@ class Post(DB, unittest.TestCase):
         dawgie.context.data_log = os.path.join(cls.root, 'logs')
         dawgie.context.data_stg = os.path.join(cls.root, 'stg')
         dawgie.db_rotate_path = os.path.join(cls.root, 'db')
-        DB.setup()
+        if not root:
+            DB.setup()
         return
 
     @classmethod
@@ -581,12 +580,13 @@ class Post(DB, unittest.TestCase):
 
 class Shelve(DB, unittest.TestCase):
     @classmethod
-    def setUpClass(cls):
-        cls.root = tempfile.mkdtemp()
-        os.mkdir(os.path.join(cls.root, 'db'))
-        os.mkdir(os.path.join(cls.root, 'dbs'))
-        os.mkdir(os.path.join(cls.root, 'logs'))
-        os.mkdir(os.path.join(cls.root, 'stg'))
+    def setUpClass(cls, root=None):
+        cls.root = root if root else tempfile.mkdtemp()
+        if not os.path.isdir(os.path.join(cls.root, 'db')):
+            os.mkdir(os.path.join(cls.root, 'db'))
+            os.mkdir(os.path.join(cls.root, 'dbs'))
+            os.mkdir(os.path.join(cls.root, 'logs'))
+            os.mkdir(os.path.join(cls.root, 'stg'))
         dawgie.context.db_impl = 'shelve'
         dawgie.context.db_name = 'testspace'
         dawgie.context.db_path = os.path.join(cls.root, 'db')
@@ -604,7 +604,8 @@ class Shelve(DB, unittest.TestCase):
         setattr(dawgie.db.shelve.comms.Connector, '_Connector__do', mock_do)
         setattr(dawgie.db.shelve.comms, 'release', mock_release)
         setattr(dawgie.db.shelve.comms.Worker, '_send', mock_send)
-        DB.setup()
+        if not root:
+            DB.setup()
         return
 
     @classmethod
