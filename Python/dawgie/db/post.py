@@ -1690,7 +1690,6 @@ def remove(runid: int, tn: str, tskn: str, algn: str, svn: str, vn: str):
     if not dawgie.db.post._db:
         raise RuntimeError('called remove before open')
 
-    import pdb ; pdb.set_trace()
     # Remove all rows with the given run ID from the primary table
     removed = tuple()
     conn = _conn()
@@ -1715,13 +1714,6 @@ def remove(runid: int, tn: str, tskn: str, algn: str, svn: str, vn: str):
     )
     val_ID = list({pk[0] for pk in cur.fetchall()})
 
-    cur.execute(
-        'SELECT FROM Prime WHERE run_ID = %s AND tn_ID = %s AND '
-        + 'task_ID = %s AND alg_ID = ANY(%s) AND sv_ID = ANY(%s) AND '
-        + 'val_ID = ANY(%s);',
-        [runid, tn_ID, task_ID, alg_ID, sv_ID, val_ID],
-    )
-    matching = list({pk[0] for pk in cur.fetchall()})
     cur.execute(
         'DELETE FROM Prime WHERE run_ID = %s AND tn_ID = %s AND '
         + 'task_ID = %s AND alg_ID = ANY(%s) AND sv_ID = ANY(%s) AND '

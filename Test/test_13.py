@@ -319,7 +319,13 @@ class DB:
             vn,
         )
         dawgie.db.open()
-        dawgie.db.remove(tsk._runid(), tgt, tsk._name(), alg.name(), svn, vn)
+        removed = 0
+        for sv in alg.state_vectors():
+            for vn in sv:
+                dawgie.db.remove(
+                    tsk._runid(), tgt, tsk._name(), alg.name(), sv.name(), vn
+                )
+                removed += 1
         keys = dawgie.db._prime_keys()
         self.assertEqual(
             (
@@ -327,7 +333,7 @@ class DB:
                 * dawgie.db.testdata.SVN_CNT
                 * dawgie.db.testdata.VAL_CNT
             )
-            - 1,
+            - removed,
             len(keys),
         )
         dawgie.db.connect(alg, tsk, tgt).update()
@@ -447,7 +453,13 @@ class DB:
             vn,
         )
         dawgie.db.open()
-        dawgie.db.remove(tsk._runid(), tgt, tsk._name(), alg.name(), svn, vn)
+        removed = 0
+        for sv in alg.state_vectors():
+            for vn in sv:
+                dawgie.db.remove(
+                    tsk._runid(), tgt, tsk._name(), alg.name(), sv.name(), vn
+                )
+                removed += 1
         keys = dawgie.db._prime_keys()
         self.assertEqual(
             (
@@ -455,7 +467,7 @@ class DB:
                 * dawgie.db.testdata.SVN_CNT
                 * dawgie.db.testdata.VAL_CNT
             )
-            - 1,
+            - removed,
             len(keys),
         )
         dawgie.db.connect(alg, tsk, tgt).update()
