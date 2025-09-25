@@ -327,7 +327,7 @@ class DB:
             len(keys),
         )
         dawgie.db.close()
-        
+
     def test_remove(self):
         dawgie.db.close()
         tgt, tsk, alg = dawgie.db.testdata.DATASETS[0]
