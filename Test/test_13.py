@@ -303,6 +303,31 @@ class DB:
         dawgie.db.close()
         return
 
+    def test_regressions(self):
+        '''update not insert regressions
+
+        Regressions use runid 0 to identify themselves. They do this because
+        they operate over runid so having a list of them is senseless - all of
+        them run over the entire past runids. It means that the same unique
+        prime key is needed everytime a regression is run. Hence, it needs to
+        update rather than insert.
+        '''
+        tgt = dawgie.db.testdata.TARGET
+        tsk, alg = dawgie.db.testdata.TIMELINES[0]
+        self.assertRaises(RuntimeError, dawgie.db.connect, alg, tsk, tgt)
+        dawgie.db.open()
+        dawgie.db.connect(alg, tsk, tgt).update()
+        keys = dawgie.db._prime_keys()
+        self.assertEqual(
+            (
+                dawgie.db.testdata.TSK_CNT
+                * dawgie.db.testdata.SVN_CNT
+                * dawgie.db.testdata.VAL_CNT
+            ),
+            len(keys),
+        )
+        dawgie.db.close()
+        
     def test_remove(self):
         dawgie.db.close()
         tgt, tsk, alg = dawgie.db.testdata.DATASETS[0]
