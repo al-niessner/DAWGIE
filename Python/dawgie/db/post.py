@@ -786,7 +786,12 @@ class Interface(
                     (
                         'INSERT into Prime (run_ID, task_ID, tn_ID, '
                         + 'alg_ID, sv_ID, val_ID, blob_name) values '
-                        + '(%s, %s, %s, %s, %s, %s, %s);',
+                        + '(%s, %s, %s, %s, %s, %s, %s)'
+                        + (
+                            ';'
+                            if self._runid()
+                            else ' ON CONFLICT ON CONSTRAINT prime_run_id_task_id_tn_id_alg_id_sv_id_val_id_key DO UPDATE SET blob_name = EXCLUDED.blob_name;'
+                        ),
                         (
                             self._runid(),
                             task_ID,
