@@ -303,6 +303,31 @@ class DB:
         dawgie.db.close()
         return
 
+    def test_regressions(self):
+        '''update not insert regressions
+
+        Regressions use runid 0 to identify themselves. They do this because
+        they operate over runid so having a list of them is senseless - all of
+        them run over the entire past runids. It means that the same unique
+        prime key is needed everytime a regression is run. Hence, it needs to
+        update rather than insert.
+        '''
+        tgt = dawgie.db.testdata.TARGET
+        tsk, alg = dawgie.db.testdata.TIMELINES[0]
+        self.assertRaises(RuntimeError, dawgie.db.connect, alg, tsk, tgt)
+        dawgie.db.open()
+        dawgie.db.connect(alg, tsk, tgt).update()
+        keys = dawgie.db._prime_keys()
+        self.assertEqual(
+            (
+                dawgie.db.testdata.TSK_CNT
+                * dawgie.db.testdata.SVN_CNT
+                * dawgie.db.testdata.VAL_CNT
+            ),
+            len(keys),
+        )
+        dawgie.db.close()
+
     def test_remove(self):
         dawgie.db.close()
         tgt, tsk, alg = dawgie.db.testdata.DATASETS[0]
@@ -319,7 +344,13 @@ class DB:
             vn,
         )
         dawgie.db.open()
-        dawgie.db.remove(tsk._runid(), tgt, tsk._name(), alg.name(), svn, vn)
+        removed = 0
+        for sv in alg.state_vectors():
+            for vn in sv:
+                dawgie.db.remove(
+                    tsk._runid(), tgt, tsk._name(), alg.name(), sv.name(), vn
+                )
+                removed += 1
         keys = dawgie.db._prime_keys()
         self.assertEqual(
             (
@@ -327,7 +358,7 @@ class DB:
                 * dawgie.db.testdata.SVN_CNT
                 * dawgie.db.testdata.VAL_CNT
             )
-            - 1,
+            - removed,
             len(keys),
         )
         dawgie.db.connect(alg, tsk, tgt).update()
@@ -447,7 +478,13 @@ class DB:
             vn,
         )
         dawgie.db.open()
-        dawgie.db.remove(tsk._runid(), tgt, tsk._name(), alg.name(), svn, vn)
+        removed = 0
+        for sv in alg.state_vectors():
+            for vn in sv:
+                dawgie.db.remove(
+                    tsk._runid(), tgt, tsk._name(), alg.name(), sv.name(), vn
+                )
+                removed += 1
         keys = dawgie.db._prime_keys()
         self.assertEqual(
             (
@@ -455,7 +492,7 @@ class DB:
                 * dawgie.db.testdata.SVN_CNT
                 * dawgie.db.testdata.VAL_CNT
             )
-            - 1,
+            - removed,
             len(keys),
         )
         dawgie.db.connect(alg, tsk, tgt).update()
@@ -508,23 +545,21 @@ class DB:
 
 # to test postgres:
 #   docker pull postgres:latest
-#   docker network create cit
-#   docker run --detach --env POSTGRES_PASSWORD=password --env POSTGRES_USER=tester --name postgres --network cit --rm  postgres:latest
+#   docker run --detach --env POSTGRES_PASSWORD=password --env POSTGRES_USER=tester --env POSTGRES_HOST_AUTH_METHOD=trust --name postgres --publish 5432:5432 --rm  postgres:latest
 #   docker exec -i postgres createdb -U tester testspace
-#   CIT_NETWORK=cit .ci/check_03.sh ; git checkout .ci/status.txt
-#   docker network rm cit
 #
 # notes:
 #   takes about 5 minutes to load the database
 #   once loaded it can simply be re-used (no reason to dump and start again)
 class Post(DB, unittest.TestCase):
     @classmethod
-    def setUpClass(cls):
-        cls.root = tempfile.mkdtemp()
-        os.mkdir(os.path.join(cls.root, 'db'))
-        os.mkdir(os.path.join(cls.root, 'dbs'))
-        os.mkdir(os.path.join(cls.root, 'logs'))
-        os.mkdir(os.path.join(cls.root, 'stg'))
+    def setUpClass(cls, root=None):
+        cls.root = root if root else tempfile.mkdtemp()
+        if not os.path.isdir(os.path.join(cls.root, 'db')):
+            os.mkdir(os.path.join(cls.root, 'db'))
+            os.mkdir(os.path.join(cls.root, 'dbs'))
+            os.mkdir(os.path.join(cls.root, 'logs'))
+            os.mkdir(os.path.join(cls.root, 'stg'))
         dawgie.context.db_host = 'localhost'
         dawgie.context.db_impl = 'post'
         dawgie.context.db_name = 'testspace'
@@ -534,7 +569,8 @@ class Post(DB, unittest.TestCase):
         dawgie.context.data_log = os.path.join(cls.root, 'logs')
         dawgie.context.data_stg = os.path.join(cls.root, 'stg')
         dawgie.db_rotate_path = os.path.join(cls.root, 'db')
-        DB.setup()
+        if not root:
+            DB.setup()
         return
 
     @classmethod
@@ -581,12 +617,13 @@ class Post(DB, unittest.TestCase):
 
 class Shelve(DB, unittest.TestCase):
     @classmethod
-    def setUpClass(cls):
-        cls.root = tempfile.mkdtemp()
-        os.mkdir(os.path.join(cls.root, 'db'))
-        os.mkdir(os.path.join(cls.root, 'dbs'))
-        os.mkdir(os.path.join(cls.root, 'logs'))
-        os.mkdir(os.path.join(cls.root, 'stg'))
+    def setUpClass(cls, root=None):
+        cls.root = root if root else tempfile.mkdtemp()
+        if not os.path.isdir(os.path.join(cls.root, 'db')):
+            os.mkdir(os.path.join(cls.root, 'db'))
+            os.mkdir(os.path.join(cls.root, 'dbs'))
+            os.mkdir(os.path.join(cls.root, 'logs'))
+            os.mkdir(os.path.join(cls.root, 'stg'))
         dawgie.context.db_impl = 'shelve'
         dawgie.context.db_name = 'testspace'
         dawgie.context.db_path = os.path.join(cls.root, 'db')
@@ -604,7 +641,8 @@ class Shelve(DB, unittest.TestCase):
         setattr(dawgie.db.shelve.comms.Connector, '_Connector__do', mock_do)
         setattr(dawgie.db.shelve.comms, 'release', mock_release)
         setattr(dawgie.db.shelve.comms.Worker, '_send', mock_send)
-        DB.setup()
+        if not root:
+            DB.setup()
         return
 
     @classmethod

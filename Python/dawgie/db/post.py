@@ -786,7 +786,12 @@ class Interface(
                     (
                         'INSERT into Prime (run_ID, task_ID, tn_ID, '
                         + 'alg_ID, sv_ID, val_ID, blob_name) values '
-                        + '(%s, %s, %s, %s, %s, %s, %s);',
+                        + '(%s, %s, %s, %s, %s, %s, %s)'
+                        + (
+                            ';'
+                            if self._runid()
+                            else ' ON CONFLICT ON CONSTRAINT prime_run_id_task_id_tn_id_alg_id_sv_id_val_id_key DO UPDATE SET blob_name = EXCLUDED.blob_name;'
+                        ),
                         (
                             self._runid(),
                             task_ID,
@@ -824,9 +829,11 @@ class Interface(
                 conn.rollback()
                 time.sleep(random.uniform(0.250, 0.750))
             except psycopg.errors.UniqueViolation:
-                log.warning('Update collision. Will try again')
                 conn.rollback()
-                time.sleep(random.uniform(0.250, 0.750))
+                log.exception(
+                    'Trying to inssert a duplicate row in the prime table'
+                )
+                raise
             except psycopg.IntegrityError:
                 log.exception('Could not update because:')
                 conn.rollback()
@@ -1583,7 +1590,8 @@ def open():
         + 'alg_ID bigserial references Algorithm(PK), '
         + 'sv_ID bigserial references StateVector(PK), '
         + 'val_ID bigserial references Value(PK), '
-        + 'blob_name varchar(100));'
+        + 'blob_name varchar(100),'
+        + 'UNIQUE (run_ID, task_ID, tn_ID, alg_ID, sv_ID, val_ID));'
     )
     conn.commit()
     try:
@@ -1701,12 +1709,12 @@ def remove(runid: int, tn: str, tskn: str, algn: str, svn: str, vn: str):
     )
     alg_ID = list({pk[0] for pk in cur.fetchall()})
     cur.execute(
-        'SELECT pk FROM StateVector WHERE name = %s AND ' + 'alg_ID = ANY(%s);',
+        'SELECT pk FROM StateVector WHERE name = %s AND alg_ID = ANY(%s);',
         [svn, alg_ID],
     )
     sv_ID = list({pk[0] for pk in cur.fetchall()})
     cur.execute(
-        'SELECT pk FROM Value WHERE name = %s AND ' + 'sv_ID = ANY(%s);',
+        'SELECT pk FROM Value WHERE name = %s AND sv_ID = ANY(%s);',
         [vn, sv_ID],
     )
     val_ID = list({pk[0] for pk in cur.fetchall()})

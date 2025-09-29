@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     UNIQUE_FN = '.'.join(['purge', getpass.getuser(), 'log'])
     ap = argparse.ArgumentParser(
-        description='Removes all of the files (md5_sha1) in the store that no longer have a key that references it. There is no undo of this operation and it must be done to a database that is not active (the pipeline is not running.'
+        description='Removes all of the files (md5_sha1) in the store that no longer have a key that references it. There is no undo of this operation and it must be done to a database that is not active (the pipeline is not running).'
     )
     ap.add_argument(
         '-l',
