@@ -167,7 +167,10 @@ class Interface(
     def __tn_id(self, cur, tn=None):
         tn = tn if tn else self._tn()
         # Get target id that matches target name or create it if not there
-        _insert('INSERT into Target (name) values (%s)', [tn])
+        _insert(
+            'INSERT INTO Target (name) VALUES (%s) ON CONFLICT (name) DO_NOTHING;',
+            [tn],
+        )
         cur.execute('SELECT * from Target WHERE name = %s;', [tn])
         tn_ID = _fetchone(cur, 'Dataset: Could not find target ID')
         return tn_ID
@@ -1911,7 +1914,10 @@ def update(tsk, alg, sv, vn, v):
     conn = _conn()
     cur = _cur(conn)
     # Add stuff. Check if they already exist in the tables first.
-    _insert('INSERT into Task(name) values (%s);', [tsk._name()])
+    _insert(
+        'INSERT INTO Task (name) VALUES (%s) ON CONFLICT (name) DO_NOTHING;',
+        [tsk._name()],
+    )
     cur.execute('SELECT pk from TASK WHERE name = %s;', [tsk._name()])
     task_ID = cur.fetchone()
     task_ID = task_ID[0]
