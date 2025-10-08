@@ -825,15 +825,20 @@ class Interface(
                 conn.commit()
                 primes.clear()
             except psycopg.errors.DeadlockDetected:
-                log.warning('Update had a shared lock detected. Trying again')
+                log.warning('Insert had a shared lock detected. Trying again')
                 conn.rollback()
                 time.sleep(random.uniform(0.250, 0.750))
-            except psycopg.errors.UniqueViolation:
+            except psycopg.errors.UniqueViolation as err:
                 conn.rollback()
-                log.exception(
-                    'Trying to inssert a duplicate row in the prime table'
-                )
-                raise
+                if err.diag.constrain_name == 'prime_pkey':
+                    log.warning(
+                        'Insertion collision with another worker. Trying again'
+                    )
+                else:
+                    log.exception(
+                        'Trying to insert a duplicate row in the prime table'
+                    )
+                    raise
             except psycopg.IntegrityError:
                 log.exception('Could not update because:')
                 conn.rollback()
