@@ -657,7 +657,7 @@ class Interface(
         return Interface(self._alg(), self._bot(), subname)
 
     def _update(self):
-        # pylint: disable=too-many-locals,too-many-statements
+        # pylint: disable=too-many-branches,too-many-locals,too-many-statements
         if self._alg().abort():
             raise dawgie.AbortAEError()
 
@@ -830,7 +830,7 @@ class Interface(
                 time.sleep(random.uniform(0.250, 0.750))
             except psycopg.errors.UniqueViolation as err:
                 conn.rollback()
-                if err.diag.constrain_name == 'prime_pkey':
+                if err.diag.constraint_name == 'prime_pkey':
                     log.warning(
                         'Insertion collision with another worker. Trying again'
                     )
