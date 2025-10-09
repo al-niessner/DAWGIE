@@ -168,7 +168,7 @@ class Interface(
         tn = tn if tn else self._tn()
         # Get target id that matches target name or create it if not there
         _insert(
-            'INSERT INTO Target (name) VALUES (%s) ON CONFLICT (name) DO_NOTHING;',
+            'INSERT INTO Target (name) VALUES (%s) ON CONFLICT (name) DO NOTHING;',
             [tn],
         )
         cur.execute('SELECT * from Target WHERE name = %s;', [tn])
@@ -1915,7 +1915,7 @@ def update(tsk, alg, sv, vn, v):
     cur = _cur(conn)
     # Add stuff. Check if they already exist in the tables first.
     _insert(
-        'INSERT INTO Task (name) VALUES (%s) ON CONFLICT (name) DO_NOTHING;',
+        'INSERT INTO Task (name) VALUES (%s) ON CONFLICT (name) DO NOTHING;',
         [tsk._name()],
     )
     cur.execute('SELECT pk from TASK WHERE name = %s;', [tsk._name()])
