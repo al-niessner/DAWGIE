@@ -834,7 +834,7 @@ class Interface(
             except psycopg.errors.UniqueViolation as err:
                 conn.rollback()
                 if err.diag.constraint_name == 'prime_pkey':
-                    log.warning(
+                    log.debug(
                         'Insertion collision with another worker. Trying again'
                     )
                 else:
@@ -1003,9 +1003,15 @@ class Interface(
                 conn.rollback()
                 time.sleep(random.uniform(0.250, 0.750))
             except psycopg.errors.UniqueViolation:
-                log.warning('Update collision. Will try again')
-                conn.rollback()
-                time.sleep(random.uniform(0.250, 0.750))
+                if err.diag.constraint_name == 'prime_pkey':
+                    log.debug(
+                        'Insertion collision with another worker. Trying again'
+                    )
+                else:
+                    log.exception(
+                        'Trying to insert a duplicate row in the prime table'
+                    )
+                    raise
             except psycopg.IntegrityError:
                 log.exception('Update MSV could not insert because:')
                 conn.rollback()
@@ -1689,6 +1695,16 @@ def promote(juncture: (), runid: int):
             again = True
             log.warning('Promotion detected shared lock. Trying again.')
             conn.rollback()
+        except psycopg.errors.UniqueViolation:
+            if err.diag.constraint_name == 'prime_pkey':
+                log.debug(
+                    'Insertion collision with another worker. Trying again'
+                )
+            else:
+                log.exception(
+                    'Trying to insert a duplicate row in the prime table'
+                )
+                raise
         except psycopg.IntegrityError:
             log.exception('Promotion failed:')
             conn.rollback()
