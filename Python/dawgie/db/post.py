@@ -850,7 +850,7 @@ class Interface(
         return
 
     def _update_msv(self, msv):
-        # pylint: disable=too-many-locals,too-many-statements
+        # pylint: disable=too-many-branches,too-many-locals,too-many-statements
         if self._alg().abort():
             raise dawgie.AbortAEError()
 
@@ -1002,7 +1002,7 @@ class Interface(
                 log.warning('Update MSV detected shared lock. Trying again')
                 conn.rollback()
                 time.sleep(random.uniform(0.250, 0.750))
-            except psycopg.errors.UniqueViolation:
+            except psycopg.errors.UniqueViolation as err:
                 if err.diag.constraint_name == 'prime_pkey':
                     log.debug(
                         'Insertion collision with another worker. Trying again'
@@ -1695,7 +1695,7 @@ def promote(juncture: (), runid: int):
             again = True
             log.warning('Promotion detected shared lock. Trying again.')
             conn.rollback()
-        except psycopg.errors.UniqueViolation:
+        except psycopg.errors.UniqueViolation as err:
             if err.diag.constraint_name == 'prime_pkey':
                 log.debug(
                     'Insertion collision with another worker. Trying again'
