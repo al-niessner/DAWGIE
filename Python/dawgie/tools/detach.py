@@ -166,24 +166,24 @@ ARGS = {
 }
 for runnable in args.runnables:
     try:
-        INSTANCE = None
+        instance = None
         mod_name, runnable_name = runnable.split('.')
         mod = importlib.import_module(
             '.'.join([dawgie.context.ae_base_package, mod_name])
         )
         for factory_method in dawgie.Factories:
             if factory_method.name in dir(mod):
-                INSTANCE = getattr(mod, factory_method.name)(
+                instance = getattr(mod, factory_method.name)(
                     mod_name, *ARGS[factory_method]
                 )
-                for r in INSTANCE.list():
+                for r in instance.list():
                     if r.name() == runnable_name:
-                        _copy(load[factory_method](INSTANCE, r))
+                        _copy(load[factory_method](instance, r))
                     pass
                 pass
             pass
 
-        if INSTANCE is None:
+        if instance is None:
             logging.warning('Could not locate runnable %s', runnable)
     except ImportError:
         logging.exception("Could not import runnable's module %s", runnable)
