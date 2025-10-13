@@ -416,7 +416,7 @@ def targets():
     if not DBI().is_open:
         raise RuntimeError('called next before open')
     return (
-        Connector().keys(Table.target)
+        Connector().dbkeys(Table.target)
         if DBI().is_reopened
         else list(DBI().tables.target)
     )
