@@ -997,6 +997,7 @@ class Interface(
 
         conn = _conn(False)
         cur = _cur(conn)
+        retry = 1
         while primes:
             try:
                 for args in primes:
@@ -1007,7 +1008,17 @@ class Interface(
                 log.warning('Update MSV detected shared lock. Trying again')
                 conn.rollback()
                 time.sleep(random.uniform(0.250, 0.750))
+            except psycopg.errors.InFailedSqlTransaction as err:
+                conn.rollback()
+                if retry:
+                    log.exception('No idea why this error')
+                    log.critical('Details: %s', err.diag)
+                    log.critical('sql: %s', primes)
+                    retry = 0
+                else:
+                    raise
             except psycopg.errors.UniqueViolation as err:
+                conn.rollback()
                 if err.diag.constraint_name == 'prime_pkey':
                     log.debug(
                         'Insertion collision with another worker. Trying again'
@@ -1701,6 +1712,7 @@ def promote(juncture: (), runid: int):
             log.warning('Promotion detected shared lock. Trying again.')
             conn.rollback()
         except psycopg.errors.UniqueViolation as err:
+            conn.rollback()
             if err.diag.constraint_name == 'prime_pkey':
                 log.debug(
                     'Insertion collision with another worker. Trying again'
