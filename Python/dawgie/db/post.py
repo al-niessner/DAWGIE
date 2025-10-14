@@ -167,7 +167,10 @@ class Interface(
     def __tn_id(self, cur, tn=None):
         tn = tn if tn else self._tn()
         # Get target id that matches target name or create it if not there
-        _insert('INSERT into Target (name) values (%s)', [tn])
+        _insert(
+            'INSERT INTO Target (name) VALUES (%s) ON CONFLICT (name) DO NOTHING;',
+            [tn],
+        )
         cur.execute('SELECT * from Target WHERE name = %s;', [tn])
         tn_ID = _fetchone(cur, 'Dataset: Could not find target ID')
         return tn_ID
@@ -657,7 +660,7 @@ class Interface(
         return Interface(self._alg(), self._bot(), subname)
 
     def _update(self):
-        # pylint: disable=too-many-locals,too-many-statements
+        # pylint: disable=too-many-branches,too-many-locals,too-many-statements
         if self._alg().abort():
             raise dawgie.AbortAEError()
 
@@ -825,15 +828,20 @@ class Interface(
                 conn.commit()
                 primes.clear()
             except psycopg.errors.DeadlockDetected:
-                log.warning('Update had a shared lock detected. Trying again')
+                log.warning('Insert had a shared lock detected. Trying again')
                 conn.rollback()
                 time.sleep(random.uniform(0.250, 0.750))
-            except psycopg.errors.UniqueViolation:
+            except psycopg.errors.UniqueViolation as err:
                 conn.rollback()
-                log.exception(
-                    'Trying to inssert a duplicate row in the prime table'
-                )
-                raise
+                if err.diag.constraint_name == 'prime_pkey':
+                    log.debug(
+                        'Insertion collision with another worker. Trying again'
+                    )
+                else:
+                    log.exception(
+                        'Trying to insert a duplicate row in the prime table'
+                    )
+                    raise
             except psycopg.IntegrityError:
                 log.exception('Could not update because:')
                 conn.rollback()
@@ -842,7 +850,7 @@ class Interface(
         return
 
     def _update_msv(self, msv):
-        # pylint: disable=too-many-locals,too-many-statements
+        # pylint: disable=too-many-branches,too-many-locals,too-many-statements
         if self._alg().abort():
             raise dawgie.AbortAEError()
 
@@ -959,7 +967,12 @@ class Interface(
                 (
                     'INSERT into Prime (run_ID, task_ID, tn_ID, '
                     + 'alg_ID, sv_ID, val_ID, blob_name) values '
-                    + '(%s, %s, %s, %s, %s, %s, %s);',
+                    + '(%s, %s, %s, %s, %s, %s, %s)'
+                    + (
+                        ';'
+                        if self._runid()
+                        else ' ON CONFLICT ON CONSTRAINT prime_run_id_task_id_tn_id_alg_id_sv_id_val_id_key DO UPDATE SET blob_name = EXCLUDED.blob_name;'
+                    ),
                     (
                         self._runid(),
                         task_ID,
@@ -994,10 +1007,17 @@ class Interface(
                 log.warning('Update MSV detected shared lock. Trying again')
                 conn.rollback()
                 time.sleep(random.uniform(0.250, 0.750))
-            except psycopg.errors.UniqueViolation:
-                log.warning('Update collision. Will try again')
+            except psycopg.errors.UniqueViolation as err:
                 conn.rollback()
-                time.sleep(random.uniform(0.250, 0.750))
+                if err.diag.constraint_name == 'prime_pkey':
+                    log.debug(
+                        'Insertion collision with another worker. Trying again'
+                    )
+                else:
+                    log.exception(
+                        'Trying to insert a duplicate row in the prime table'
+                    )
+                    raise
             except psycopg.IntegrityError:
                 log.exception('Update MSV could not insert because:')
                 conn.rollback()
@@ -1681,6 +1701,17 @@ def promote(juncture: (), runid: int):
             again = True
             log.warning('Promotion detected shared lock. Trying again.')
             conn.rollback()
+        except psycopg.errors.UniqueViolation as err:
+            conn.rollback()
+            if err.diag.constraint_name == 'prime_pkey':
+                log.debug(
+                    'Insertion collision with another worker. Trying again'
+                )
+            else:
+                log.exception(
+                    'Trying to insert a duplicate row in the prime table'
+                )
+                raise
         except psycopg.IntegrityError:
             log.exception('Promotion failed:')
             conn.rollback()
@@ -1906,7 +1937,10 @@ def update(tsk, alg, sv, vn, v):
     conn = _conn()
     cur = _cur(conn)
     # Add stuff. Check if they already exist in the tables first.
-    _insert('INSERT into Task(name) values (%s);', [tsk._name()])
+    _insert(
+        'INSERT INTO Task (name) VALUES (%s) ON CONFLICT (name) DO NOTHING;',
+        [tsk._name()],
+    )
     cur.execute('SELECT pk from TASK WHERE name = %s;', [tsk._name()])
     task_ID = cur.fetchone()
     task_ID = task_ID[0]

@@ -157,27 +157,27 @@ class Value(dawgie.Value):
 for tsk_idx in range(TSK_CNT):
     rem = tsk_idx % 3
     tidx = tsk_idx // 3
-    TSK = None
+    tsk = None
 
     if rem == 0:
-        TSK = Analysis(f'Analysis_{tidx:02d}', 0, RUNID)
+        tsk = Analysis(f'Analysis_{tidx:02d}', 0, RUNID)
     if rem == 1:
-        TSK = Regress(f'Regress_{tidx:02d}', 0, TARGET)
+        tsk = Regress(f'Regress_{tidx:02d}', 0, TARGET)
     if rem == 2:
-        TSK = Task(f'Task_{tidx:02d}', 0, RUNID, TARGET)
+        tsk = Task(f'Task_{tidx:02d}', 0, RUNID, TARGET)
 
     for ver_idx in range(VER_CNT):
         for alg_idx in range(ALG_CNT):
             if rem == 0:
-                BASE = 'Analyzer'
+                base = 'Analyzer'
             if rem == 1:
-                BASE = 'Regression'
+                base = 'Regression'
             if rem == 2:
-                BASE = 'Algorithm'
+                base = 'Algorithm'
 
-            BASE += '_{:02d}'
-            alg = Fake(BASE.format(alg_idx), ver_idx)
-            TSK.mylist.append(alg)
+            base += '_{:02d}'
+            alg = Fake(base.format(alg_idx), ver_idx)
+            tsk.mylist.append(alg)
             for svn_idx in range(SVN_CNT):
                 if svn_idx < SVN_CNT - 1:
                     sv = StateVector(f'StateVector_{svn_idx:02d}')
@@ -188,18 +188,18 @@ for tsk_idx in range(TSK_CNT):
                 for val_idx in range(VAL_CNT):
                     vn = f'Value_{val_idx:02d}'
                     sv[vn] = Value(-(len(KNOWNS) + 1))
-                    KNOWNS.append((TSK, alg, sv, vn, sv[vn]))
+                    KNOWNS.append((tsk, alg, sv, vn, sv[vn]))
                     pass
                 pass
             pass
         pass
 
     if rem == 0:
-        ASPECTS.append((TSK, alg))
+        ASPECTS.append((tsk, alg))
     if rem == 1:
-        TIMELINES.append((TSK, alg))
+        TIMELINES.append((tsk, alg))
     if rem == 2:
-        DATASETS.append((TARGET, TSK, alg))
+        DATASETS.append((TARGET, tsk, alg))
     pass
 
 # If these change, then will need to update
