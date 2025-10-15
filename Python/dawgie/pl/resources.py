@@ -44,6 +44,8 @@ import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # py
 import numpy
 import os
 import pickle
+import shutil
+import tempfile
 
 HINT = collections.namedtuple(
     'HINT', ['cpu', 'io', 'memory', 'pages', 'summary']
@@ -54,20 +56,25 @@ def _read_diary():
     fn = os.path.join(dawgie.context.data_per, 'diary.pkl')
     past = {}
     if os.path.isfile(fn):
-        with open(fn, 'br') as file:
-            past = pickle.load(file)
-        # make sure loaded context is an expected structure
-        if isinstance(past, dict) and all(
-            isinstance(k, str) and isinstance(v, dict) for k, v in past.items()
-        ):
-            for timelines in past.values():
-                if not all(
-                    isinstance(k, dict) and isinstance(v, (list, set))
-                    for k, v in timelines.items()
-                ):
-                    past = {}
-                    break
-        else:
+        try:
+            with open(fn, 'br') as file:
+                past = pickle.load(file)
+            # make sure loaded context is an expected structure
+            if isinstance(past, dict) and all(
+                isinstance(k, str) and isinstance(v, dict)
+                for k, v in past.items()
+            ):
+                for timelines in past.values():
+                    if not all(
+                        isinstance(k, dict) and isinstance(v, (list, set))
+                        for k, v in timelines.items()
+                    ):
+                        past = {}
+                        break
+            else:
+                past = {}
+        except pickle.UnpicklingError:
+            log.exception('Resetting memory')
             past = {}
     return past
 
@@ -75,8 +82,10 @@ def _read_diary():
 def _write_diary(known):
     fn = os.path.join(dawgie.context.data_per, 'diary.pkl')
     if os.path.isdir(dawgie.context.data_per):
-        with open(fn, 'bw') as file:
+        with tempfile.NamedTemporaryFile(mode='bw', delete=True) as file:
             pickle.dump(known, file)
+            file.flush()
+            shutil.copy(file.name, fn)
 
 
 def distribution(metric: [dawgie.db.MetricData]) -> {str: HINT}:
