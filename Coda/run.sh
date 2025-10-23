@@ -78,8 +78,8 @@ then
     exit -2
 fi
 expected_jobs=""
-root=$(realpath $(dirname $0)/../..)
-this=$(realpath $(dirname $0))
+root=$(realpath $(dirname $0)/..)
+this=${root}/.github/workflows
 wdir=$this/local
 cd $root
 rm -f $root/*.rpt.txt
