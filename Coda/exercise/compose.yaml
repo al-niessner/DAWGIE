@@ -1,0 +1,59 @@
+services:
+  base:
+    build:
+      context: ../..
+      dockerfile: Coda/exercise/Dockerfile.base
+    image: dex/base
+    networks:
+      - dex_domain
+
+  db:
+    container_name: dex_postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_PWD}
+      POSTGRES_USER: ${DB_USER}
+    image: postgres
+    networks:
+      - dex_domain
+    ports:
+      - "5432:5432"
+
+  pipeline:
+    build:
+      context: ../..
+      dockerfile: Coda/exercise/Dockerfile.pipeline
+    container_name: dex_pipeline
+    depends_on:
+      - base
+      - db
+    environment:
+      DAWGIE_DB_HOST: dex_postgres
+      DAWGIE_DB_IMPL: post
+      DAWGIE_DB_NAME: ${DB_NAME}
+      DAWGIE_DB_PATH: "${DB_USER}:${DB_PWD}"
+      DAWGIE_DB_PORT: 5432
+      DAWGIE_FE_PATH: /proj/data/fe
+      DAWGIE_GUEST_PUBLIC_KEYS: /proj/data/certs
+      DAWGIE_SSL_PEM_FILE: /proj/data/certs/server.pem
+      DAWGIE_SSL_PEM_MYNAME: exercise.dawgie
+      DAWGIE_SSL_PEM_MYSELF: /proj/data/certs/myself.pem
+      MPLCONFIGDIR: /tmp
+      USER: $DB_USER
+    image: dex/pipeline
+    networks:
+      - dex_domain
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "8082:8082"
+      - "8083:8083"
+      - "8084:8084"
+      - "8085:8085"
+    user: "${DEX_UID}"
+    volumes:
+      - ${DATA_ROOT}:/proj/data
+
+networks:
+  dex_domain:
+    driver: bridge
