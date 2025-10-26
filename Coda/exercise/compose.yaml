@@ -13,6 +13,12 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_PASSWORD: ${DB_PWD}
       POSTGRES_USER: ${DB_USER}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
     image: postgres
     networks:
       - dex_domain
@@ -21,12 +27,14 @@ services:
 
   pipeline:
     build:
+      additional_contexts:
+        dexbase: "service:base"
       context: ../..
       dockerfile: Coda/exercise/Dockerfile.pipeline
     container_name: dex_pipeline
     depends_on:
-      - base
-      - db
+      db:
+        condition: service_healthy
     environment:
       DAWGIE_DB_HOST: dex_postgres
       DAWGIE_DB_IMPL: post
@@ -40,6 +48,12 @@ services:
       DAWGIE_SSL_PEM_MYSELF: /proj/data/certs/myself.pem
       MPLCONFIGDIR: /tmp
       USER: $DB_USER
+    healthcheck:
+      test: ["CMD-SHELL", "curl --insecure _Ss 'https://localhost:8080/app/state/status' | grep -q 'running'"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
     image: dex/pipeline
     networks:
       - dex_domain
@@ -50,6 +64,44 @@ services:
       - "8083:8083"
       - "8084:8084"
       - "8085:8085"
+    user: "${DEX_UID}"
+    volumes:
+      - ${DATA_ROOT}:/proj/data
+
+  worker:
+    build:
+      additional_contexts:
+        dexbase: "service:base"
+      context: ../..
+      dockerfile: Coda/exercise/Dockerfile.worker
+    depends_on:
+      db:
+        condition: service_healthy
+      pipeline:
+        condition: service_healthy
+    deploy:
+      mode: replicated
+      replicas: 2
+      restart_policy:
+        condition: any
+        delay: 3s
+        window: 45s
+    environment:
+      DAWGIE_DB_HOST: dex_postgres
+      DAWGIE_DB_IMPL: post
+      DAWGIE_DB_NAME: ${DB_NAME}
+      DAWGIE_DB_PATH: "${DB_USER}:${DB_PWD}"
+      DAWGIE_DB_PORT: 5432
+      DAWGIE_FE_PATH: /proj/data/fe
+      DAWGIE_GUEST_PUBLIC_KEYS: /proj/data/certs
+      DAWGIE_SSL_PEM_FILE: /proj/data/certs/server.pem
+      DAWGIE_SSL_PEM_MYNAME: exercise.dawgie
+      DAWGIE_SSL_PEM_MYSELF: /proj/data/certs/myself.pem
+      MPLCONFIGDIR: /tmp
+      USER: $DB_USER
+    image: dex/worker
+    networks:
+      - dex_domain
     user: "${DEX_UID}"
     volumes:
       - ${DATA_ROOT}:/proj/data

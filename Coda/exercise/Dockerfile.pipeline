@@ -1,5 +1,5 @@
-FROM dex/base
-COPY ./Test/ae /proj/src/ae
+FROM dexbase
+COPY Test/ae /proj/src/ae
 # Normally, this ENV below is not required but it is for the exercise
 ENV DAWGIE_DOCKERIZED_AE_GIT_REVISION="FAKE-VERSION-FOR-EXERCISE"
 ENV PYTHONPATH=/proj/src

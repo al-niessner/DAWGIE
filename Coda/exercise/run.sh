@@ -79,22 +79,9 @@ docker compose \
        --file ${exdir}/compose.yaml \
        up --detach
 
-echo "waiting for system to boot"
-sleep 5
-python3 <<EOF
-import json
-import ssl
-import time
-import urllib.request
-
-ssl._create_default_https_context = ssl._create_unverified_context
-isRunning = False
-while not isRunning:
-    state = json.loads (urllib.request.urlopen ('https://localhost:8080/app/state/status').read())
-    print ('  pipeline state:', state)
-    isRunning = state['name'] == 'running' and state['status'] == 'active'
-    if not isRunning: time.sleep(5)
-EOF
+echo "Visit the site 'https://localhost:8080 to interact with the pipieline"
+echo "Press Enter to shut the pipeline down and clean up..."
+read
 
 # shut the system down and clean up
 docker compose \
