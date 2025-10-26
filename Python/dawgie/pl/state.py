@@ -223,8 +223,7 @@ class FSM:
             dawgie.db.open()
 
         self.open_again = False
-        log.info(f'prior state to archive: {self.__prior}')
-        getattr(self, self.__prior + '_trigger')()
+gg        getattr(self, self.__prior + '_trigger')()
         return
 
     def _gui(self):

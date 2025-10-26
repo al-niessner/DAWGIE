@@ -1,6 +1,10 @@
 FROM ubuntu:24.04
+ARG DB_PWD
+ARG DB_USER
+ARG UID
 ENV MPLCONFIGDIR=/tmp
 ENV PATH=/usr/local/dawgie/bin:$PATH
+ENV PGPASSFILE=/.pgpass
 RUN set -ex && \
     export DEBIAN_FRONTEND=noninteractive && \
     apt-get update && \
@@ -24,4 +28,6 @@ RUN set -ex && \
     ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
     /usr/bin/python3 -m venv /usr/local/dawgie && \
-    /usr/local/dawgie/bin/pip install dawgie scipy
+    /usr/local/dawgie/bin/pip install dawgie scipy && \
+    ( echo "dex_postgres:5432:*:${DB_USER}:${DB_PWD}" > /.pgpass ) && \
+    chmod 600 /.pgpass && chown $UID /.pgpass
