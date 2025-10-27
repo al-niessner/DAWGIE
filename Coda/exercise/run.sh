@@ -36,6 +36,21 @@
 #
 # NTR:
 
+abort() {
+    cleanup 1
+}
+
+cleanup () {
+    # shut the system down and clean up
+    docker compose \
+           --env-file ${exdir}/.env \
+           --file ${exdir}/compose.yaml \
+           down
+    docker image prune -f
+    rm -rf ${tempdir}
+    exit $1
+}
+
 make_cert () {
     # make CSR
     openssl req -newkey rsa:2048 -nodes -keyout device.key \
@@ -59,6 +74,28 @@ DNS.3 = server_ex" > v3.ext
     rm device.csr device.key v3.ext
 }
 
+if [[ $# -gt 1 ]]
+then
+    echo "usage: $(basename $0) [post|shelve]"
+    exit
+fi
+
+if [[ $# -eq 1 ]]
+then
+    if [[ "$1" == "shelve" ]]
+    then
+        EXERCISE_DB=$1
+        EXERCISE_PATH=/proj/data/db
+        export EXERCISE_DB EXERCISE_PATH
+    else if [[ "$1" != "post" ]]
+         then
+             echo "usage: $(basename $0) [post|shelve]"
+             exit
+         fi
+    fi
+fi
+
+trap abort SIGINT
 exdir=$(realpath $(dirname $0))
 export tempdir=$(mktemp -d /tmp/dex.XXXXXX) # will be deleted when fininshed
 mkdir -p ${tempdir}/{certs,db,dbs,fe,logs,stg}
@@ -106,11 +143,4 @@ echo
 echo "Visit the site 'https://localhost:8080 to interact with the pipieline"
 echo "Press Enter to shut the pipeline down and clean up..."
 read
-
-# shut the system down and clean up
-docker compose \
-       --env-file ${exdir}/.env \
-       --file ${exdir}/compose.yaml \
-       down
-docker image prune -f
-rm -rf ${tempdir}
+cleanup 0
