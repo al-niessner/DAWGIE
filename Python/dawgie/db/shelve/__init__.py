@@ -483,8 +483,8 @@ def update(tsk, alg, sv, vn, v):
     '''
     if not DBI().is_open:
         raise RuntimeError('called next before open')
-    if DBI().is_reopened:
-        raise RuntimeError('called outside of Foreman context')
+    # if DBI().is_reopened:
+    #     raise RuntimeError('called outside of Foreman context')
 
     tskid = util.append(
         tsk._name(),  # pylint: disable=protected-access
