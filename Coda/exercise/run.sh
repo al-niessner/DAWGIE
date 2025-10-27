@@ -85,6 +85,24 @@ docker compose \
        --file ${exdir}/compose.yaml \
        up --detach
 
+# While the network tree will run automatically, need to signal the feedback
+# tree to run for a complete exercise routine.
+#
+# In a more real world situation, the user would have copied the cert used
+# here into their browser and use the commanding page. However, using curl
+# shows that it is possible to script it as well.
+#
+# Wait until there is a target other than __all__, the request feedback tree
+# to begin its exercise.
+target="__all__"
+while [[ "$target" != "/tmp/"* ]]
+do
+    sleep 1
+    target=$(curl --insecure -Ss 'https://localhost:8080/app/db/targets' | jq -r .[0])
+done
+curl -XPOST --cert ${tempdir}/certs/guest.pem --insecure "https://localhost:8085/app/run?tasks=feedback.command&targets=${target}"
+echo
+
 echo "Visit the site 'https://localhost:8080 to interact with the pipieline"
 echo "Press Enter to shut the pipeline down and clean up..."
 read
