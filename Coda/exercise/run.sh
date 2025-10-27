@@ -68,8 +68,14 @@ make_cert ${tempdir}/certs/server.pem # for https
 # rename guest certificate to something dawgie will find
 cp ${tempdir}/certs/guest.pem.public ${tempdir}/certs/dawgie.public.pem.guest
 
+# make sure the user is well defined
+if [ -n "${UID}" ]
+then
+    UID=$(id -u)
+fi
+export UID
+   
 # build and start a pipeline to exercise the code
-export UID=$(id -u)
 docker compose \
        --env-file ${exdir}/.env \
        --file ${exdir}/compose.yaml \
