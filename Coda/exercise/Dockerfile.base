@@ -64,6 +64,6 @@ RUN set -ex && \
     ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
     /usr/bin/python3 -m venv /usr/local/dawgie && \
-    /usr/local/dawgie/bin/pip install dawgie scipy && \
+    /usr/local/dawgie/bin/pip install 'dawgie==2.0.2-rc02' scipy && \
     ( echo "dex_postgres:5432:*:${DB_USER}:${DB_PWD}" > /.pgpass ) && \
     chmod 600 /.pgpass && chown $UID /.pgpass

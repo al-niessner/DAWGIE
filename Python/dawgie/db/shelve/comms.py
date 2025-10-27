@@ -112,9 +112,11 @@ class Connector:  # pylint: disable=too-few-public-methods
         keyset = KEYSET(name, parent, ver)
         return self.__do(COMMAND(Func.upd, keyset, table, value))
 
-    # pylint: enable=too-many-arguments,too-many-positional-arguments
-
     # public methods for modules in this package
+
+    def append(self, table: Table, name):
+        return self.__do(COMMAND(Func.append, None, table, name))
+
     def copy(self, dst, method):
         '''public method for .impl'''
         return self._copy(dst, method)
@@ -256,6 +258,17 @@ class Worker(twisted.internet.protocol.Protocol):
                 self.__id_name, dawgie.db.lockview.LockRequest.lrqb
             )
             self.__looping_call.start(3)
+        elif request.func == Func.append:
+            parent, name, ver = util.dissect(request.value)
+            self._send(
+                util.append(
+                    name,
+                    DBI().tables[request.table.value],
+                    DBI().indices[request.table.value],
+                    parent,
+                    ver,
+                )
+            )
         elif request.func == Func.dbcopy:
             self._delay_copy(request.value)
         elif request.func == Func.get:
