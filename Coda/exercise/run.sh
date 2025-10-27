@@ -85,8 +85,10 @@ then
     if [[ "$1" == "shelve" ]]
     then
         EXERCISE_DB=$1
+        EXERCISE_HOST=dex_pipeline
         EXERCISE_PATH=/proj/data/db
-        export EXERCISE_DB EXERCISE_PATH
+        EXERCISE_PORT=8083
+        export EXERCISE_DB EXERCISE_HOST EXERCISE_PATH EXERCISE_PORT
     else if [[ "$1" != "post" ]]
          then
              echo "usage: $(basename $0) [post|shelve]"

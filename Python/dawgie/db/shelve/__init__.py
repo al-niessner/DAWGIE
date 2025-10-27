@@ -492,7 +492,7 @@ def update(tsk, alg, sv, vn, v):
         algid = foreman.append(
             Table.alg, util.construct(alg.name(), tskid, alg)
         )[1]
-        svid = foreman.append(Table.state, util.onstruct(sv.name(), algid, sv))[
+        svid = foreman.append(Table.state, util.construct(sv.name(), algid, sv))[
             1
         ]
         foreman.append(Table.value, util.construct(vn, svid, v))
