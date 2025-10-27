@@ -223,7 +223,7 @@ class FSM:
             dawgie.db.open()
 
         self.open_again = False
-gg        getattr(self, self.__prior + '_trigger')()
+        getattr(self, self.__prior + '_trigger')()
         return
 
     def _gui(self):
