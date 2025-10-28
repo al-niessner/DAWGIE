@@ -326,7 +326,14 @@ class Interface(Connector, Container, Dataset, Timeline):
                     alg, vn = self._alg(), k
                     vname = self.__to_key(runid, tn, task, alg, sv, vn)
                     isnew = not self._set_prime(vname, sv[k])
-                    self._bot().new_values((vname, isnew))
+                    self._bot().new_values(
+                        (
+                            '.'.join(
+                                [str(runid), tn, task, alg.name(), sv.name(), k]
+                            ),
+                            isnew,
+                        )
+                    )
                     pass
                 pass
         finally:
@@ -366,7 +373,14 @@ class Interface(Connector, Container, Dataset, Timeline):
                 alg = self._alg()
                 vname = self.__to_key(runid, tn, task, alg, msv, k)
                 isnew = not self._set_prime(vname, msv[k])
-                self._bot().new_values((vname, isnew))
+                self._bot().new_values(
+                    (
+                        '.'.join(
+                            [str(runid), tn, task, alg.name(), msv.name(), k]
+                        ),
+                        isnew,
+                    )
+                )
                 pass
         finally:
             self._log.debug("update: Releaseing for %s", name)
