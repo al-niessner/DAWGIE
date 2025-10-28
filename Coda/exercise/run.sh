@@ -139,7 +139,9 @@ do
     sleep 1
     target=$(curl --insecure -Ss 'https://localhost:8080/app/db/targets' | jq -r .[0])
 done
+echo "Requesting feeback on ${target}"
 curl -XPOST --cert ${tempdir}/certs/guest.pem --insecure "https://localhost:8085/app/run?tasks=feedback.command&targets=${target}"
+echo
 echo
 
 echo "Visit the site 'https://localhost:8080 to interact with the pipieline"
