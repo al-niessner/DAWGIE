@@ -484,20 +484,31 @@ def update(tsk, alg, sv, vn, v):
     if not DBI().is_open:
         raise RuntimeError('called next before open')
     if DBI().is_reopened:
-        raise RuntimeError('called outside of Foreman context')
-
-    tskid = util.append(
-        tsk._name(),  # pylint: disable=protected-access
-        DBI().tables.task,
-        DBI().indices.task,
-    )[1]
-    algid = util.append(
-        alg.name(), DBI().tables.alg, DBI().indices.alg, tskid, alg
-    )[1]
-    svid = util.append(
-        sv.name(), DBI().tables.state, DBI().indices.state, algid, sv
-    )[1]
-    util.append(vn, DBI().tables.value, DBI().indices.value, svid, v)
+        foreman = Connector()
+        tskid = foreman.append(
+            Table.task,
+            util.construct(tsk._name()),  # pylint: disable=protected-access
+        )[1]
+        algid = foreman.append(
+            Table.alg, util.construct(alg.name(), tskid, alg)
+        )[1]
+        svid = foreman.append(
+            Table.state, util.construct(sv.name(), algid, sv)
+        )[1]
+        foreman.append(Table.value, util.construct(vn, svid, v))
+    else:
+        tskid = util.append(
+            tsk._name(),  # pylint: disable=protected-access
+            DBI().tables.task,
+            DBI().indices.task,
+        )[1]
+        algid = util.append(
+            alg.name(), DBI().tables.alg, DBI().indices.alg, tskid, alg
+        )[1]
+        svid = util.append(
+            sv.name(), DBI().tables.state, DBI().indices.state, algid, sv
+        )[1]
+        util.append(vn, DBI().tables.value, DBI().indices.value, svid, v)
     return
 
 

@@ -1,0 +1,146 @@
+# COPYRIGHT:
+# Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+# U.S. Government sponsorship acknowledged.
+#
+# All rights reserved.
+#
+# LICENSE:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+#   - Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+#   - Redistributions in binary form must reproduce the above copyright
+# notice, this list of conditions and the following disclaimer in the
+# documentation and/or other materials provided with the distribution.
+#
+#   - Neither the name of Caltech nor its operating division, the Jet
+# Propulsion Laboratory, nor the names of its contributors may be used to
+# endorse or promote products derived from this software without specific
+# prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+# NTR:
+
+services:
+  base:
+    build:
+      args:
+        DB_PWD: ${DB_PWD}
+        DB_USER: ${DB_USER}
+        UID: ${DEX_UID}
+      context: ../..
+      dockerfile: Coda/exercise/Dockerfile.base
+      target: ${EXERCISE_MODE}  # asis|stable
+    image: dex/base
+    networks:
+      - dex_domain
+
+  db:
+    container_name: dex_postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: ${DB_PWD}
+      POSTGRES_USER: ${DB_USER}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    image: postgres:16
+    networks:
+      - dex_domain
+    ports:
+      - "5432:5432"
+
+  pipeline:
+    build:
+      additional_contexts:
+        dexbase: "service:base"
+      context: ../..
+      dockerfile: Coda/exercise/Dockerfile.pipeline
+    container_name: dex_pipeline
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DAWGIE_DB_HOST: ${DB_HOST}
+      DAWGIE_DB_IMPL: ${DB_IMPL}
+      DAWGIE_DB_NAME: ${DB_NAME}
+      DAWGIE_DB_PATH: ${DB_PATH}
+      DAWGIE_DB_PORT: ${DB_PORT}
+      DAWGIE_FE_PATH: /proj/data/fe
+      DAWGIE_GUEST_PUBLIC_KEYS: /proj/data/certs
+      DAWGIE_SSL_PEM_FILE: /proj/data/certs/server.pem
+      DAWGIE_SSL_PEM_MYNAME: exercise.dawgie
+      DAWGIE_SSL_PEM_MYSELF: /proj/data/certs/myself.pem
+      MPLCONFIGDIR: /tmp
+      USER: $DB_USER
+    healthcheck:
+      test: ["CMD-SHELL", "curl --insecure _Ss 'https://localhost:8080/app/state/status' | grep -q 'running'"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    image: dex/pipeline
+    networks:
+      - dex_domain
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "8082:8082"
+      - "8083:8083"
+      - "8084:8084"
+      - "8085:8085"
+    user: "${DEX_UID}"
+    volumes:
+      - ${DATA_ROOT}:/proj/data
+
+  worker:
+    build:
+      additional_contexts:
+        dexbase: "service:base"
+      context: ../..
+      dockerfile: Coda/exercise/Dockerfile.worker
+    depends_on:
+      db:
+        condition: service_healthy
+      pipeline:
+        condition: service_healthy
+    deploy:
+      mode: replicated
+      replicas: 2
+      restart_policy:
+        condition: any
+        delay: 3s
+        window: 45s
+    environment:
+      DAWGIE_GUEST_PUBLIC_KEYS: /proj/data/certs
+      DAWGIE_SSL_PEM_FILE: /proj/data/certs/server.pem
+      DAWGIE_SSL_PEM_MYNAME: exercise.dawgie
+      DAWGIE_SSL_PEM_MYSELF: /proj/data/certs/myself.pem
+      MPLCONFIGDIR: /tmp
+      USER: $DB_USER
+    image: dex/worker
+    networks:
+      - dex_domain
+    user: "${DEX_UID}"
+    volumes:
+      - ${DATA_ROOT}:/proj/data
+
+networks:
+  dex_domain:
+    driver: bridge

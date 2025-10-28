@@ -44,6 +44,7 @@ import enum
 class Func(enum.IntEnum):
     # enums should not scream at you so pylint: disable=invalid-name
     acquire = 0  # acquire a lock to the database
+    append = 7  # have the foreman run util.append() and return its results
     dbcopy = 1  # copy the database to a new location (backup)
     get = 2  # get the value of the table for the key
     table = 3  # get a table in the database
