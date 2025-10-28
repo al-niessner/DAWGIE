@@ -43,6 +43,7 @@ services:
         UID: ${DEX_UID}
       context: ../..
       dockerfile: Coda/exercise/Dockerfile.base
+      target: ${EXERCISE_MODE}  # asis|stable
     image: dex/base
     networks:
       - dex_domain

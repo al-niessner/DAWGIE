@@ -34,7 +34,7 @@
 #
 # NTR:
 
-FROM ubuntu:24.04
+FROM ubuntu:24.04 AS base
 ARG DB_PWD
 ARG DB_USER
 ARG UID
@@ -63,7 +63,14 @@ RUN set -ex && \
     apt-get clean && apt-get autoremove && \
     ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime && \
     dpkg-reconfigure --frontend noninteractive tzdata && \
-    /usr/bin/python3 -m venv /usr/local/dawgie && \
-    /usr/local/dawgie/bin/pip install 'dawgie==2.0.2-rc04' scipy && \
     ( echo "dex_postgres:5432:*:${DB_USER}:${DB_PWD}" > /.pgpass ) && \
-    chmod 600 /.pgpass && chown $UID /.pgpass
+    chmod 600 /.pgpass && chown $UID /.pgpass && \
+    /usr/bin/python3 -m venv /usr/local/dawgie && \
+    /usr/local/dawgie/bin/pip install scipy
+
+FROM base AS stable
+RUN /usr/local/dawgie/bin/pip install dawgie
+
+FROM base AS asis
+COPY . /tmp/build 
+RUN cd /tmp/build/Python && /usr/local/dawgie/bin/pip install .

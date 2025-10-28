@@ -108,12 +108,18 @@ make_cert ${tempdir}/certs/server.pem # for https
 cp ${tempdir}/certs/guest.pem.public ${tempdir}/certs/dawgie.public.pem.guest
 
 # make sure the user is well defined
-if [ -n "${UID}" ]
+if [ -z "${UID}" ]
 then
     UID=$(id -u)
 fi
 export UID
-   
+
+if [ -z "${EXERCISE_MODE}" ]
+then
+    EXERCISE_MODE=stable
+fi
+export EXERCISE_MODE
+
 # build and start a pipeline to exercise the code
 docker compose \
        --env-file ${exdir}/.env \
