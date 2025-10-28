@@ -325,7 +325,7 @@ class Interface(Connector, Container, Dataset, Timeline):
                     runid, tn, task = self._runid(), self._tn(), self._task()
                     alg, vn = self._alg(), k
                     vname = self.__to_key(runid, tn, task, alg, sv, vn)
-                    isnew = self._set_prime(vname, sv[k])
+                    isnew = not self._set_prime(vname, sv[k])
                     self._bot().new_values((vname, isnew))
                     pass
                 pass
@@ -365,7 +365,7 @@ class Interface(Connector, Container, Dataset, Timeline):
                 runid, tn, task = self._runid(), self._tn(), self._task()
                 alg = self._alg()
                 vname = self.__to_key(runid, tn, task, alg, msv, k)
-                isnew = self._set_prime(vname, msv[k])
+                isnew = not self._set_prime(vname, msv[k])
                 self._bot().new_values((vname, isnew))
                 pass
         finally:

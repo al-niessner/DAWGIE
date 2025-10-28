@@ -282,7 +282,7 @@ class Worker(twisted.internet.protocol.Protocol):
             self._do_release()
         elif request.func == Func.set:
             if request.table != Table.prime:
-                log.error('Cannot set non-prime table. Muse use updatt_cmd')
+                log.error('Cannot set non-prime table. Muse use update_cmd')
                 return
 
             value, exists = dawgie.db.util.move(*request.value)
