@@ -134,7 +134,7 @@ def schedule_reset(archive: [str] = 'false'):
             'alert_message': 'Triggered updating then load.',
         }
         log.critical('User requested pipeline reset')
-        dawgie.pl.farm.ARCHIVE = archive
+        dawgie.pl.farm.ARCHIVE |= archive
         dawgie.context.fsm.wait_for_nothing()
     return json.dumps(msg).encode()
 

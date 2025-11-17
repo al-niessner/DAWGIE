@@ -37,7 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-import mock
+import mock  # set up an FSM for dawgie
 
 import dawgie
 import dawgie.db
