@@ -44,6 +44,7 @@ import unittest
 
 from transitions.core import MachineError
 
+
 class StateTransitions(unittest.TestCase):
     '''verify that the FSM always changes states correctly
 
