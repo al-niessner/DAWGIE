@@ -309,9 +309,9 @@ class Interface(
                     pass
                 pass
             pass
-        conn.commit()
+        conn.commit()  # psycopg3 problem # pylint:disable=no-member
         cur.close()
-        conn.close()
+        conn.close()  # psycopg3 problem # pylint:disable=no-member
         self.__purge()
         return
 
@@ -333,9 +333,9 @@ class Interface(
             )
             value._set_ver(dawgie.VERSION(*cur.fetchone()))
             self.__span['table'][l1k][l2k][l3k] = value
-            conn.commit()
+            conn.commit()  # psycopg3 problem # pylint:disable=no-member
             cur.close()
-            conn.close()
+            conn.close()  # psycopg3 problem # pylint:disable=no-member
         else:
             value = self.__span['table'][l1k][l2k][l3k]
         return value
@@ -462,9 +462,9 @@ class Interface(
             self.msv = msv
             pass
 
-        conn.commit()
+        conn.commit()  # psycopg3 problem # pylint:disable=no-member
         cur.close()
-        conn.close()
+        conn.close()  # psycopg3 problem # pylint:disable=no-member
         return
 
     def _recede(self, refs: [(dawgie.SV_REF, dawgie.V_REF)]) -> None:
@@ -577,9 +577,9 @@ class Interface(
                     pass
                 pass
             pass
-        conn.commit()
+        conn.commit()  # psycopg3 problem # pylint:disable=no-member
         cur.close()
-        conn.close()
+        conn.close()  # psycopg3 problem # pylint:disable=no-member
         self.__purge()
         return
 
@@ -650,13 +650,13 @@ class Interface(
                         + '(%s, %s, %s, %s, %s, %s, %s);',
                         [rid, subname_ID, task_ID, alg_ID, sv_ID, val_ID, bn],
                     )
-                    conn.commit()
+                    conn.commit()  # psycopg3 problem # pylint:disable=no-member
                     pass
                 pass
             pass
-        conn.commit()
+        conn.commit()  # psycopg3 problem # pylint:disable=no-member
         cur.close()
-        conn.close()
+        conn.close()  # psycopg3 problem # pylint:disable=no-member
         return Interface(self._alg(), self._bot(), subname)
 
     def _update(self):
@@ -810,7 +810,7 @@ class Interface(
             pass
 
         cur.close()
-        conn.close()
+        conn.close()  # psycopg3 problem # pylint:disable=no-member
 
         if not valid:
             # exceptions always look the same; pylint: disable=duplicate-code
@@ -825,14 +825,14 @@ class Interface(
             try:
                 for args in primes:
                     cur.execute(*args)
-                conn.commit()
+                conn.commit()  # psycopg3 problem # pylint:disable=no-member
                 primes.clear()
             except psycopg.errors.DeadlockDetected:
                 log.warning('Insert had a shared lock detected. Trying again')
-                conn.rollback()
+                conn.rollback()  # psycopg3 problem # pylint:disable=no-member
                 time.sleep(random.uniform(0.250, 0.750))
             except psycopg.errors.UniqueViolation as err:
-                conn.rollback()
+                conn.rollback()  # psycopg3 problem # pylint:disable=no-member
                 if err.diag.constraint_name == 'prime_pkey':
                     log.debug(
                         'Insertion collision with another worker. Trying again'
@@ -844,9 +844,9 @@ class Interface(
                     raise
             except psycopg.IntegrityError:
                 log.exception('Could not update because:')
-                conn.rollback()
+                conn.rollback()  # psycopg3 problem # pylint:disable=no-member
         cur.close()
-        conn.close()
+        conn.close()  # psycopg3 problem # pylint:disable=no-member
         return
 
     def _update_msv(self, msv):
@@ -986,7 +986,7 @@ class Interface(
             )
             pass
         cur.close()
-        conn.close()
+        conn.close()  # psycopg3 problem # pylint:disable=no-member
 
         if not valid:
             # exceptions always look the same; pylint: disable=duplicate-code
@@ -1001,14 +1001,14 @@ class Interface(
             try:
                 for args in primes:
                     cur.execute(*args)
-                conn.commit()
+                conn.commit()  # psycopg3 problem # pylint:disable=no-member
                 primes.clear()
             except psycopg.errors.DeadlockDetected:
                 log.warning('Update MSV detected shared lock. Trying again')
-                conn.rollback()
+                conn.rollback()  # psycopg3 problem # pylint:disable=no-member
                 time.sleep(random.uniform(0.250, 0.750))
             except psycopg.errors.UniqueViolation as err:
-                conn.rollback()
+                conn.rollback()  # psycopg3 problem # pylint:disable=no-member
                 if err.diag.constraint_name == 'prime_pkey':
                     log.debug(
                         'Insertion collision with another worker. Trying again'
@@ -1020,10 +1020,10 @@ class Interface(
                     raise
             except psycopg.IntegrityError:
                 log.exception('Update MSV could not insert because:')
-                conn.rollback()
+                conn.rollback()  # psycopg3 problem # pylint:disable=no-member
             pass
         cur.close()
-        conn.close()
+        conn.close()  # psycopg3 problem # pylint:disable=no-member
         return
 
     def ds(self):
@@ -1100,23 +1100,23 @@ def _insert(*args):
         again = False
         try:
             cursor.execute(*args)
-            conn.commit()
+            conn.commit()  # psycopg3 problem # pylint:disable=no-member
             success = True
         except psycopg.errors.DeadlockDetected:
             log.warning('Shared lock problem failure. Trying again.')
             again = True
-            conn.rollback()
+            conn.rollback()  # psycopg3 problem # pylint:disable=no-member
             time.sleep(random.uniform(0.250, 0.750))
         except psycopg.errors.UniqueViolation:
-            conn.rollback()  # common practice here to let error not insert
+            conn.rollback()  # psycopg3 problem # pylint:disable=no-member  # common practice here to let error not insert
         except psycopg.IntegrityError:
             log.exception('Could not insert into database due to:')
-            conn.rollback()
+            conn.rollback()  # psycopg3 problem # pylint:disable=no-member
         except psycopg.ProgrammingError:
             log.exception('Program error during insertion:')
-            conn.rollback()
+            conn.rollback()  # psycopg3 problem # pylint:disable=no-member
     cursor.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     return success
 
 
@@ -1128,7 +1128,7 @@ def _prime_keys():
     cur = _cur(conn, True)
     cur.execute('SELECT * from Prime;')
     ids = cur.fetchall()
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     cur.close()
     cur = _cur(conn)
     cur.execute('SELECT PK,name from Target;')
@@ -1141,9 +1141,9 @@ def _prime_keys():
     svn = dict(cur.fetchall())
     cur.execute('SELECT PK,name from Value;')
     vn = dict(cur.fetchall())
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     keys = {
         (
             '.'.join(
@@ -1170,9 +1170,9 @@ def _prime_values():
     cur = _cur(conn)
     cur.execute('SELECT blob_name from Prime;')
     vals = cur.fetchall()
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     return [v[0] for v in vals]
 
 
@@ -1192,7 +1192,7 @@ def add(target_name: str) -> bool:
         exists = _insert('INSERT into Target (name) values (%s)', [target_name])
 
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     return exists
 
 
@@ -1322,7 +1322,7 @@ def consistent(inputs: [REF], outputs: [REF], target_name: str) -> ():
     # 2: If there are no run IDs with this output, then return empty tuple
     if not o_runids:
         cur.close()
-        conn.close()
+        conn.close()  # psycopg3 problem # pylint:disable=no-member
         log.debug('step 1: no run ids with this output')
         return tuple()
 
@@ -1380,7 +1380,7 @@ def consistent(inputs: [REF], outputs: [REF], target_name: str) -> ():
     # 4: If there are no run input IDs with version, then return empty tuple
     if any((not v for v in i_runids.values())):
         cur.close()
-        conn.close()
+        conn.close()  # psycopg3 problem # pylint:disable=no-member
         log.debug('Step 3: no input runids - %s %s', str(key), str(i_runids))
         return tuple()
 
@@ -1413,7 +1413,7 @@ def consistent(inputs: [REF], outputs: [REF], target_name: str) -> ():
     # 6: If no workable runID found, then return empty tuple
     if not runid:
         cur.close()
-        conn.close()
+        conn.close()  # psycopg3 problem # pylint:disable=no-member
         log.debug(
             'step 5: no run ids found -- %s %s', str(o_runids), str(i_runids)
         )
@@ -1484,7 +1484,7 @@ def consistent(inputs: [REF], outputs: [REF], target_name: str) -> ():
         juncture.append((tn_ID, task_ID, alg_ID, sv_ID, v_ID, bn))
         pass
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     return juncture
 
 
@@ -1539,7 +1539,7 @@ def metrics() -> '[dawgie.db.MetricData]':
         )
         pass
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     return result
 
 
@@ -1556,9 +1556,9 @@ def next():
     cur.execute('SELECT MAX(run_ID) from Prime;')
     runIDrow = cur.fetchone()
     runID = (runIDrow[0] if runIDrow and runIDrow[0] else 0) + 1
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     return runID
 
 
@@ -1572,12 +1572,12 @@ def open():
         'CREATE TABLE IF NOT EXISTS Target '
         + '(PK bigserial primary key, name varchar(80) UNIQUE);'
     )
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     cur.execute(
         'CREATE TABLE IF NOT EXISTS Task '
         + '(PK bigserial primary key, name varchar(80) UNIQUE);'
     )
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     cur.execute(
         'CREATE TABLE IF NOT EXISTS Algorithm '
         + '(PK bigserial primary key, name varchar(80), '
@@ -1585,7 +1585,7 @@ def open():
         + 'design integer, implementation integer, bugfix integer,'
         + 'UNIQUE (name, task_ID, design, implementation, bugfix));'
     )
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     cur.execute(
         'CREATE TABLE IF NOT EXISTS StateVector '
         + '(PK bigserial primary key, name varchar(80), '
@@ -1593,7 +1593,7 @@ def open():
         + 'design integer, implementation integer, bugfix integer,'
         + 'UNIQUE (name, alg_ID, design, implementation, bugfix));'
     )
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     cur.execute(
         'CREATE TABLE IF NOT EXISTS Value '
         + '(PK bigserial primary key, name varchar(80), '
@@ -1601,7 +1601,7 @@ def open():
         + 'design integer, implementation integer, bugfix integer,'
         + 'UNIQUE (name, sv_ID, design, implementation, bugfix));'
     )
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     cur.execute(
         'CREATE TABLE IF NOT EXISTS Prime '
         + '(PK bigserial primary key, run_ID integer, '
@@ -1613,7 +1613,7 @@ def open():
         + 'blob_name varchar(100),'
         + 'UNIQUE (run_ID, task_ID, tn_ID, alg_ID, sv_ID, val_ID));'
     )
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     try:
         # Make sure all autoincremented sequences are set correctly
         # (incase of failed insert)
@@ -1644,9 +1644,9 @@ def open():
         )
     except psycopg.ProgrammingError:
         pass
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     dawgie.db.post._db = True
     return
 
@@ -1676,7 +1676,7 @@ def promote(juncture: (), runid: int):
         entries.extend([e[0] if e else None for e in cur.fetchall()])
         pass
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
 
     if any((e is not None for e in entries)):
         return False
@@ -1696,13 +1696,13 @@ def promote(juncture: (), runid: int):
                     [runid, tn_ID, task_ID, alg_ID, sv_ID, v_ID, bn],
                 )
                 pass
-            conn.commit()
+            conn.commit()  # psycopg3 problem # pylint:disable=no-member
         except psycopg.errors.DeadlockDetected:
             again = True
             log.warning('Promotion detected shared lock. Trying again.')
-            conn.rollback()
+            conn.rollback()  # psycopg3 problem # pylint:disable=no-member
         except psycopg.errors.UniqueViolation as err:
-            conn.rollback()
+            conn.rollback()  # psycopg3 problem # pylint:disable=no-member
             if err.diag.constraint_name == 'prime_pkey':
                 log.debug(
                     'Insertion collision with another worker. Trying again'
@@ -1714,10 +1714,10 @@ def promote(juncture: (), runid: int):
                 raise
         except psycopg.IntegrityError:
             log.exception('Promotion failed:')
-            conn.rollback()
+            conn.rollback()  # psycopg3 problem # pylint:disable=no-member
             success = False
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     return success
 
 
@@ -1757,9 +1757,9 @@ def remove(runid: int, tn: str, tskn: str, algn: str, svn: str, vn: str):
         [runid, tn_ID, task_ID, alg_ID, sv_ID, val_ID],
     )
     removed = (runid, tn_ID, task_ID, alg_ID, sv_ID, val_ID)
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     return removed
 
 
@@ -1836,9 +1836,9 @@ def reset(runid: int, tn: str, tskn, alg) -> None:
             len(svv),
             '.'.join([str(runid), tn, tskn, alg.name()]),
         )
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     return
 
 
@@ -1858,7 +1858,7 @@ def targets():
     cur.execute('SELECT name from Target;')
     result = cur.fetchall()
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     return [r[0] for r in result]  # fmt: skip # need a list so pylint: disable=consider-using-generator
 
 
@@ -1996,7 +1996,7 @@ def update(tsk, alg, sv, vn, v):
         )
 
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     return
 
 
@@ -2063,9 +2063,9 @@ def versions():
             ),
             MyVersion(v['design'], v['implementation'], v['bugfix']).asstring(),
         )
-    conn.commit()
+    conn.commit()  # psycopg3 problem # pylint:disable=no-member
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     log.debug('versions() - starting')
     return task_ver, alg_ver, sv_ver, v_ver
 

@@ -129,13 +129,17 @@ def schedule_reset(archive: [str] = 'false'):
         'alert_message': 'Could not reset because the FSM is not defined.',
     }
     if 'fsm' in dir(dawgie.context):
-        msg = {
-            'alert_status': 'success',
-            'alert_message': 'Triggered updating then load.',
-        }
-        log.critical('User requested pipeline reset')
-        dawgie.pl.farm.ARCHIVE |= archive
-        dawgie.context.fsm.wait_for_nothing()
+        msg['alert_message'] = (
+            'Cannot reset a pipeline not actively in the running state.'
+        )
+        if dawgie.context.fsm.is_pipeline_active():
+            msg = {
+                'alert_status': 'success',
+                'alert_message': 'Triggered updating then load.',
+            }
+            log.critical('User requested pipeline reset')
+            dawgie.pl.farm.ARCHIVE |= archive
+            dawgie.context.fsm.wait_for_nothing()
     return json.dumps(msg).encode()
 
 
