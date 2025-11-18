@@ -172,7 +172,7 @@ class Interface(
             [tn],
         )
         cur.execute('SELECT * from Target WHERE name = %s;', [tn])
-        tn_ID = _fetchone(cur, 'Dataset: Could not find target ID')
+        tn_ID = _fetchone(cur, f'Dataset: Could not find target ID for "{tn}"')
         return tn_ID
 
     def _ckeys(self, l1k, l2k):
@@ -1069,6 +1069,7 @@ def _fetchone(cur, text):
     try:
         result = cur.fetchone()[0]
     except:  # noqa: E722
+        log.exception('recording real exception before masking it')
         # error msg should be text so pylint: disable=raise-missing-from
         raise RuntimeError(text)
     return result
@@ -1731,7 +1732,7 @@ def remove(runid: int, tn: str, tskn: str, algn: str, svn: str, vn: str):
     conn = _conn()
     cur = _cur(conn)
     cur.execute('SELECT * from Target WHERE name = %s;', [tn])
-    tn_ID = _fetchone(cur, 'Dataset: Could not find target ID')
+    tn_ID = _fetchone(cur, f'Dataset: Could not find target ID for "{tn}"')
     cur.execute('SELECT * from TASK WHERE name = %s;', [tskn])
     task_ID = _fetchone(cur, 'Dataset load: Could not find task ID')
     cur.execute(
@@ -1781,7 +1782,7 @@ def reset(runid: int, tn: str, tskn, alg) -> None:
     conn = dawgie.db.post._conn()
     cur = dawgie.db.post._cur(conn)
     cur.execute('SELECT * from Target WHERE name = %s;', [tn])
-    tn_ID = _fetchone(cur, 'Dataset: Could not find target ID')
+    tn_ID = _fetchone(cur, f'Dataset: Could not find target ID for "{tn}"')
     cur.execute('SELECT * from TASK WHERE name = %s;', [tskn])
     task_ID = _fetchone(cur, 'Dataset load: Could not find task ID')
     cur.execute(
