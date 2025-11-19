@@ -129,13 +129,12 @@ class RollbackImporter:
     pass
 
 
+@enum.unique
 class Status(enum.Enum):
     # enums should not scream at you so pylint: disable=invalid-name
-    done = 0
-    not_done = 1
-    crashed = 2
-    paused = 3
-    pass
+    active = enum.auto()
+    entering = enum.auto()
+    exiting = enum.auto()
 
 
 class FSM:
@@ -162,6 +161,7 @@ class FSM:
         self.inactive_color = "white"
         self.active_color = "green"
         self.time_machine = None
+        self.transitioning = Status.active
         self.__prior = None
         self.priority = None
         self.crew_thread = None
@@ -380,7 +380,7 @@ class FSM:
         return
 
     def is_pipeline_active(self):
-        return self.state == 'running'
+        return self.state == 'running' and self.transitioning == Status.active
 
     def is_todo_done(self):
         while dawgie.pl.schedule.que and self.waiting_on_todo():

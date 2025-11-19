@@ -37,11 +37,11 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+import mock  # set up an FSM for dawgie
+
 import base64
 import dawgie.context
 import dawgie.pl.state
-
-dawgie.context.fsm = dawgie.pl.state.FSM()
 import dawgie.pl.message
 import dawgie.pl.worker.aws
 import dawgie.security
