@@ -250,7 +250,7 @@ def main(all_vers, dpath):
     }
     log.info('-------------convert-----------')
     convert_prime_db(conn, f'{basefn}.prime', pk_translation, all_vers)
-    conn.close()
+    conn.close()  # psycopg3 problem # pylint:disable=no-member
     pass
 
 
