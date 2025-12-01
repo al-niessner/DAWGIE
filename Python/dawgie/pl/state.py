@@ -161,7 +161,7 @@ class FSM:
         self.inactive_color = "white"
         self.active_color = "green"
         self.time_machine = None
-        self.transitioning = Status.active
+        self.__transitioning = Status.active
         self.__prior = None
         self.priority = None
         self.crew_thread = None
@@ -223,6 +223,7 @@ class FSM:
             dawgie.db.open()
 
         self.open_again = False
+        self.transitioning = Status.active
         getattr(self, self.__prior + '_trigger')()
         return
 
@@ -284,6 +285,7 @@ class FSM:
             dawgie.db.metrics()
         )
         log.info('exiting state navel gaze')
+        self.transitioning = Status.active
         return
 
     def _pipeline(self, *_args, **_kwds):
@@ -340,7 +342,23 @@ class FSM:
             )
         return
 
+    @property
+    def transitioning(self):
+        return self.__transitioning
+
+    @transitioning.setter
+    def transitioning(self, status: Status):
+        if (
+            status in (Status.entering, Status.exiting)
+            and self.transitioning != Status.active
+        ):
+            raise transitions.MachineError(
+                f'While in {self.state} cannot be {status.name()} while {self.__transitioning.name}'
+            )
+        self.__transitioning = status
+
     def archive(self):
+        self.transitioning = Status.entering
         if self.__doctest:
             print('self.archive()')
             self._archive_done()
@@ -389,6 +407,7 @@ class FSM:
 
     def load(self):
         def done(*_args, **_kwds):
+            self.transitioning = Status.active
             self.running_trigger()
 
         log.info('entering state loading')
@@ -398,6 +417,7 @@ class FSM:
             self._pipeline()
             done()
         else:
+            self.transitioning = Status.entering
             log.info("Load the pipeline")
             dawgie.pl.farm.notify_all()
             dawgie.pl.farm.clear()
@@ -414,14 +434,17 @@ class FSM:
         return
 
     def navel_gaze(self):
+        self.transitioning = Status.exiting
         d = twisted.internet.threads.deferToThread(self._navel_gaze, 2)
         d.addErrback(dawgie.pl.LogFailure('while navel gazing', __name__).log)
         return
 
     def reload(self):
         def done(*_args, **_kwds):
+            self.transitioning = Status.active
             self.archiving_trigger()
 
+        self.transitioning = Status.exiting
         if self.__doctest:
             print('self.reload()')
             self._reload()
@@ -439,14 +462,18 @@ class FSM:
         return
 
     def reset(self):
+        self.transitioning = Status.exiting
         self.wait_on_crew.set()
         self.wait_on_doing.set()
         self.wait_on_todo.set()
         self.priority = None
+        self.transitioning = Status.active
         return
 
     def save_prior_state(self):
+        self.transitioning = Status.exiting
         self.__prior = self.state
+        self.transitioning = Status.active
         return
 
     def set_submit_info(self, changeset, priority):
@@ -469,6 +496,7 @@ class FSM:
         if self.__doctest:
             print('self.start()')
 
+        self.transitioning = Status.exiting
         log.info('entering state starting')
         self._security()
         self._gui()
@@ -477,6 +505,7 @@ class FSM:
         dawgie.pl.farm.plow()
         self.time_machine = RollbackImporter()
         log.info('exiting state starting')
+        self.transitioning = Status.active
         return
 
     def state_view(self):
