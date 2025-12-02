@@ -88,9 +88,13 @@ def log_messages():
     return json.dumps(dawgie.pl.logger.fe.remembered()).encode()
 
 
-def pl_state():
+def current_state():
     return json.dumps(
-        {'name': dawgie.context.fsm.state, 'status': 'active'}
+        {
+            'active': dawgie.context.fsm.is_pipeline_active(),
+            'name': dawgie.context.fsm.state,
+            'status': dawgie.context.fsm.transition.name,
+        }
     ).encode()
 
 
@@ -280,12 +284,6 @@ def start_changeset():
     return dawgie.context.git_rev.encode('utf-8')
 
 
-def start_state():
-    return json.dumps(
-        {'name': dawgie.context.fsm.state, 'status': 'active'}
-    ).encode()
-
-
 def versions():
     fn = os.path.join(os.path.dirname(__file__), 'requirements.txt')
     vers = {'dawgie': dawgie.__version__, 'python': sys.version}
@@ -314,7 +312,7 @@ DynamicContent(db_versions, '/app/db/versions')
 
 DynamicContent(log_messages, '/app/pl/log')
 
-DynamicContent(pl_state, '/app/pl/state')
+DynamicContent(current_state, '/app/pl/state')
 
 DynamicContent(schedule_crew, '/app/schedule/crew')
 DynamicContent(schedule_doing, '/app/schedule/doing')
@@ -337,6 +335,6 @@ DynamicContent(search_tn, '/app/search/tn')
 
 DynamicContent(start_changeset, '/app/changeset.txt')
 DynamicContent(snapshot, '/app/snapshot')
-DynamicContent(start_state, '/app/state/status')
+DynamicContent(current_state, '/app/state/status')
 DynamicContent(start_submit, '/app/submit', [HttpMethod.POST])
 DynamicContent(versions, '/app/versions')
