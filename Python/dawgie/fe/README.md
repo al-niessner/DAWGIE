@@ -212,7 +212,8 @@ None
 
 JSON object:
 - name: current state
-- status: active/inactive. When inactive, the name is indeterminate
+- ready: boolean indicating that the pipeline is ready to do work
+- status: active/entering/exiting
 
 ### Example
 
@@ -220,6 +221,7 @@ JSON object:
 curl -X GET "<URL base>/app/pl/state"
 {
   "name": "running",
+  "ready": true,
   "status": "active"
 }
 ```
@@ -412,6 +414,10 @@ abc
 
 ## `/app/state/status` (GET)
 ### Description
+** DEPRECATED **
+
+use /app/pl/state
+
 ### Inputs
 ### Outputs
 ### Example
