@@ -91,8 +91,8 @@ def log_messages():
 def current_state():
     return json.dumps(
         {
-            'active': dawgie.context.fsm.is_pipeline_active(),
             'name': dawgie.context.fsm.state,
+            'ready': dawgie.context.fsm.is_pipeline_active(),
             'status': dawgie.context.fsm.transition.name,
         }
     ).encode()
