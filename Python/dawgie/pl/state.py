@@ -286,6 +286,7 @@ class FSM:
         )
         log.info('exiting state navel gaze')
         self.transitioning = Status.active
+        self.running_trigger()
         return
 
     def _pipeline(self, *_args, **_kwds):
@@ -408,7 +409,7 @@ class FSM:
     def load(self):
         def done(*_args, **_kwds):
             self.transitioning = Status.active
-            self.running_trigger()
+            self.contemplation_trigger()
 
         log.info('entering state loading')
 
@@ -434,7 +435,7 @@ class FSM:
         return
 
     def navel_gaze(self):
-        self.transitioning = Status.exiting
+        self.transitioning = Status.entering
         d = twisted.internet.threads.deferToThread(self._navel_gaze, 2)
         d.addErrback(dawgie.pl.LogFailure('while navel gazing', __name__).log)
         return
