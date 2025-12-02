@@ -65,6 +65,16 @@ class Axis(enum.Enum):
     pass
 
 
+def current_state():
+    return json.dumps(
+        {
+            'name': dawgie.context.fsm.state,
+            'ready': dawgie.context.fsm.is_pipeline_active(),
+            'status': dawgie.context.fsm.transitioning.name,
+        }
+    ).encode()
+
+
 def db_lockview():
     return json.dumps(dawgie.db.view_locks()).encode()
 
@@ -86,16 +96,6 @@ def db_versions():
 
 def log_messages():
     return json.dumps(dawgie.pl.logger.fe.remembered()).encode()
-
-
-def current_state():
-    return json.dumps(
-        {
-            'name': dawgie.context.fsm.state,
-            'ready': dawgie.context.fsm.is_pipeline_active(),
-            'status': dawgie.context.fsm.transition.name,
-        }
-    ).encode()
 
 
 def schedule_crew():
