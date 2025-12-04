@@ -66,7 +66,7 @@ def _read_diary():
             ):
                 for timelines in past.values():
                     if not all(
-                        isinstance(k, dict) and isinstance(v, (list, set))
+                        isinstance(k, str) and isinstance(v, (list, set))
                         for k, v in timelines.items()
                     ):
                         past = {}
