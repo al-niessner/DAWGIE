@@ -284,7 +284,7 @@ class FSM:
         log.info('entering state navel gaze')
         if not self.__doctest:
             dawgie.pl.farm.insights = dawgie.pl.resources.distribution(
-                dawgie.db.metrics()
+                dawgie.db.metrics(dawgie.pl.resources.last_runid())
             )
         log.info('exiting state navel gaze')
         self.transitioning = Status.active

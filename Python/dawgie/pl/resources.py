@@ -128,6 +128,14 @@ def distribution(metric: [dawgie.db.MetricData]) -> {str: HINT}:
     return dst
 
 
+def last_runid() -> int:
+    reg = _read_diary()
+    runids = {-1}
+    for val in reg.values():
+        runids.update(val['rids'])
+    return max(runids)
+
+
 def regress(metric: [dawgie.db.MetricData]) -> {str: [dawgie.db.MetricData]}:
     log.debug('regress() - regress back across metric data %d', len(metric))
     keys = [
