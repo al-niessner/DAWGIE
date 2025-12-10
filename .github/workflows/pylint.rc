@@ -582,6 +582,7 @@ contextmanager-decorators=contextlib.contextmanager
 generated-members=dawgie.context.fsm,
                   logging.handlers.StreamHandler,
                   self.archiving_trigger,
+                  self.contemplation_trigger,
                   self.running_trigger,
                   self.state,
                   self.update_trigger,

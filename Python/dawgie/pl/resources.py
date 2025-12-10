@@ -66,7 +66,7 @@ def _read_diary():
             ):
                 for timelines in past.values():
                     if not all(
-                        isinstance(k, dict) and isinstance(v, (list, set))
+                        isinstance(k, str) and isinstance(v, (list, set))
                         for k, v in timelines.items()
                     ):
                         past = {}
@@ -126,6 +126,14 @@ def distribution(metric: [dawgie.db.MetricData]) -> {str: HINT}:
         dst[name] = HINT(cpu, io, memory, pages, dawgie.Distribution(summary))
         pass
     return dst
+
+
+def last_runid() -> int:
+    reg = _read_diary()
+    runids = {-1}
+    for val in reg.values():
+        runids.update(val['rids'])
+    return max(runids)
 
 
 def regress(metric: [dawgie.db.MetricData]) -> {str: [dawgie.db.MetricData]}:

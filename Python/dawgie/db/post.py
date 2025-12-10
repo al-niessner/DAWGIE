@@ -1499,7 +1499,7 @@ def gather(anz, ans):
     return Interface(anz, ans, '__all__')
 
 
-def metrics() -> '[dawgie.db.MetricData]':
+def metrics(after_runid: int = -1) -> '[dawgie.db.MetricData]':
     if not dawgie.db.post._db:
         raise RuntimeError('called metrics before open')
 
@@ -1508,7 +1508,15 @@ def metrics() -> '[dawgie.db.MetricData]':
     cur = dawgie.db.post._cur(conn)
     cur.execute('SELECT PK from StateVector WHERE name = %s;', ('__metric__',))
     sv_IDs = [t[0] for t in cur.fetchall()]
-    cur.execute('SELECT * from Prime WHERE sv_ID = ANY(%s);', (sv_IDs,))
+    if after_runid is None or after_runid < 0:
+        cur.execute('SELECT * from Prime WHERE sv_ID = ANY(%s);', (sv_IDs,))
+    else:
+        cur.execute(
+            'SELECT * from Prime WHERE sv_ID = ANY(%s) '
+            'AND (run_ID > %s OR run_ID = %s);',
+            (sv_IDs, after_runid, 0),
+        )
+
     rows = cur.fetchall()
     md = dawgie.util.metrics.filled(-2)
     svs = {

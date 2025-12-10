@@ -148,8 +148,8 @@ def gather(anz, ans) -> dawgie.Aspect:
     return _db_in_use().gather(anz, ans)
 
 
-def metrics() -> [MetricData]:
-    return _db_in_use().metrics()
+def metrics(after_runid: int = -1) -> [MetricData]:
+    return _db_in_use().metrics(after_runid)
 
 
 def next():

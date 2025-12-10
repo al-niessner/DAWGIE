@@ -142,6 +142,7 @@ class FSM:
     args = None
     states = [
         'archiving',
+        'contemplation',
         'gitting',
         'loading',
         'running',
@@ -281,11 +282,13 @@ class FSM:
 
     def _navel_gaze(self, *_args, **_kwds):
         log.info('entering state navel gaze')
-        dawgie.pl.farm.insights = dawgie.pl.resources.distribution(
-            dawgie.db.metrics()
-        )
+        if not self.__doctest:
+            dawgie.pl.farm.insights = dawgie.pl.resources.distribution(
+                dawgie.db.metrics(dawgie.pl.resources.last_runid())
+            )
         log.info('exiting state navel gaze')
         self.transitioning = Status.active
+        self.running_trigger()
         return
 
     def _pipeline(self, *_args, **_kwds):
@@ -408,7 +411,7 @@ class FSM:
     def load(self):
         def done(*_args, **_kwds):
             self.transitioning = Status.active
-            self.running_trigger()
+            self.contemplation_trigger()
 
         log.info('entering state loading')
 
@@ -434,9 +437,14 @@ class FSM:
         return
 
     def navel_gaze(self):
-        self.transitioning = Status.exiting
-        d = twisted.internet.threads.deferToThread(self._navel_gaze, 2)
-        d.addErrback(dawgie.pl.LogFailure('while navel gazing', __name__).log)
+        self.transitioning = Status.entering
+        if self.__doctest:
+            self._navel_gaze()
+        else:
+            d = twisted.internet.threads.deferToThread(self._navel_gaze, 2)
+            d.addErrback(
+                dawgie.pl.LogFailure('while navel gazing', __name__).log
+            )
         return
 
     def reload(self):

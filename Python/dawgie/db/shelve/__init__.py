@@ -211,7 +211,8 @@ def gather(anz, ans) -> dawgie.Aspect:
     return Interface(anz, ans, '__all__')
 
 
-def metrics() -> [dawgie.db.MetricData]:
+def metrics(after_runid: int = -1) -> [dawgie.db.MetricData]:
+    # pylint: disable=too-many-locals
     if not DBI().is_open:
         raise RuntimeError('called metrics before open')
     if DBI().is_reopened:
@@ -260,14 +261,17 @@ def metrics() -> [dawgie.db.MetricData]:
         mn = '.'.join([str(runid), target, task, alg[0], sv[0], val[0]])
         log.debug('metrics() - working on %s', mn)
 
-        if not result or any(
-            [
-                result[-1].run_id != runid,
-                result[-1].target != target,
-                result[-1].task != task,
-                result[-1].alg_name != alg[0],
-                result[-1].alg_ver != alg[1].version,
-            ]
+        if runid > after_runid and (
+            not result
+            or any(
+                [
+                    result[-1].run_id != runid,
+                    result[-1].target != target,
+                    result[-1].task != task,
+                    result[-1].alg_name != alg[0],
+                    result[-1].alg_ver != alg[1].version,
+                ]
+            )
         ):
             log.debug('metrics() - make new reuslt')
             msv = dawgie.util.MetricStateVector(

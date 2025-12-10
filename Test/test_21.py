@@ -62,6 +62,8 @@ class StateTransitions(unittest.TestCase):
         with self.assertRaises(MachineError):
             dawgie.context.fsm.archiving_trigger()
         with self.assertRaises(MachineError):
+            dawgie.context.fsm.contemplation_trigger()
+        with self.assertRaises(MachineError):
             dawgie.context.fsm.gitting_trigger()
         with self.assertRaises(MachineError):
             dawgie.context.fsm.loading_trigger()
@@ -83,6 +85,8 @@ class StateTransitions(unittest.TestCase):
         )
         with self.assertRaises(MachineError):
             dawgie.context.fsm.archiving_trigger()
+        with self.assertRaises(MachineError):
+            dawgie.context.fsm.contemplation_trigger()
         with self.assertRaises(MachineError):
             dawgie.context.fsm.gitting_trigger()
         with self.assertRaises(MachineError):
@@ -107,12 +111,14 @@ class StateTransitions(unittest.TestCase):
         with self.assertRaises(MachineError):
             dawgie.context.fsm.loading_trigger()
         with self.assertRaises(MachineError):
+            dawgie.context.fsm.running_trigger()
+        with self.assertRaises(MachineError):
             dawgie.context.fsm.starting_trigger()
         with self.assertRaises(MachineError):
             dawgie.context.fsm.update_trigger()
         with self.assertRaises(MachineError):
             dawgie.context.fsm.updating_trigger()
-        dawgie.context.fsm.running_trigger()
+        dawgie.context.fsm.contemplation_trigger()
         self.assertEqual('running', dawgie.context.fsm.state)
 
     def test_running(self):
@@ -147,6 +153,8 @@ class StateTransitions(unittest.TestCase):
         with self.assertRaises(MachineError):
             dawgie.context.fsm.archiving_trigger()
         with self.assertRaises(MachineError):
+            dawgie.context.fsm.contemplation_trigger()
+        with self.assertRaises(MachineError):
             dawgie.context.fsm.gitting_trigger()
         with self.assertRaises(MachineError):
             dawgie.context.fsm.loading_trigger()
@@ -163,6 +171,8 @@ class StateTransitions(unittest.TestCase):
         dawgie.context.fsm = dawgie.pl.state.FSM(
             doctest_=True, initial_state='updating'
         )
+        with self.assertRaises(MachineError):
+            dawgie.context.fsm.contemplation_trigger()
         with self.assertRaises(MachineError):
             dawgie.context.fsm.gitting_trigger()
         with self.assertRaises(MachineError):

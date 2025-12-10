@@ -38,25 +38,30 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 */
         node [shape = circle];
-        starting[id=starting]
+        starting[id=starting, label=start]
         loading[id=loading]
+        contemplation[id=contemplation, label="navel\ngazing"]
         updating[id=updating]
         running[id=running]
         gitting[id=gitting]
         archiving[id=archiving];
-        { rank=same loading updating }
+        { rank=same contemplation loading updating }
         rankdir=TB;
-        starting -> loading [label=start,
+        starting -> loading [label=boot,
                              trigger=starting_trigger,
                              source=starting,
                              dest=loading,
                              before=start,
                              after=load];
-        loading -> running[label=run,
-                           trigger=running_trigger,
-                           source=loading,
-                           dest=running,
-                           before=navel_gaze];
+        loading -> contemplation[label=introspect,
+                                 trigger=contemplation_trigger,
+                                 source=loading,
+                                 dest=contemplation,
+                                 after=navel_gaze];
+        contemplation -> running[label=run,
+                                 trigger=running_trigger,
+                                 source=contemplation,
+                                 dest=running];
         running -> gitting[label=submit,
                            trigger=gitting_trigger,
                            source=running,
@@ -74,14 +79,13 @@ NTR:
         archiving -> running[label=run,
                              trigger=running_trigger,
                              source=archiving,
-                             dest=running,
-                             before=navel_gaze];
+                             dest=running];
         running -> updating[label=update,
                             trigger=update_trigger,
                             source=running,
                             dest=updating,
                             after=reload];
-        updating -> loading[label=load,
+        updating -> loading[label=refresh,
                             trigger=loading_trigger,
                             source=updating,
                             dest=loading,
