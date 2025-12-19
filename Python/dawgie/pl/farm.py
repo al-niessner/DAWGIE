@@ -238,8 +238,14 @@ def _cluster_sort():
     def comparator(msg_a, msg_b):
         result = (msg_a.rid > msg_b.rid) - (msg_a.rid < msg_b.rid)
         if result == 0:
-            a = 0  # fetch time for a
-            b = 0  # fetch time for b
+            key = '.'.join(
+                [msg_a.target if msg_a.target else '__all__', msg_a.jid]
+            )
+            a = 0 if key not in insights else insights[key].cpu
+            key = '.'.join(
+                [msg_b.target if msg_b.target else '__all__', msg_b.jid]
+            )
+            b = 0 if key not in insights else insights[key].cpu
             result = (a > b) - (a < b)
         return result
 
