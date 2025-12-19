@@ -236,14 +236,14 @@ _repeat = []
 def _cluster_sort():
     # issue 203 FIXME: sort _cluster by expected processing time
     def comparator(msg_a, msg_b):
-        result = (msg_a.rid > msg_b.rid) - (msg_a.rid < msg_b.rid)
+        result = (msg_a.runid > msg_b.runid) - (msg_a.runid < msg_b.runid)
         if result == 0:
             key = '.'.join(
-                [msg_a.target if msg_a.target else '__all__', msg_a.jid]
+                [msg_a.target if msg_a.target else '__all__', msg_a.jobid]
             )
             a = 0 if key not in insights else insights[key].cpu
             key = '.'.join(
-                [msg_b.target if msg_b.target else '__all__', msg_b.jid]
+                [msg_b.target if msg_b.target else '__all__', msg_b.jobid]
             )
             b = 0 if key not in insights else insights[key].cpu
             result = (a > b) - (a < b)
@@ -289,17 +289,18 @@ def _put(job, runid: int, target: str, where: dawgie.Distribution):
     return
 
 
-def _worker_sort():
+def _workers_sort():
     # issue 255 FIXME: sort _workers from least to most busy
     wg = {wa: [] for wa in set(w.address[0] for w in _workers)}
+    wk = sorted(wg)
     for worker in _workers:
         wg[worker.address[0]].append(worker)
     _workers.clear()
     while sum(len(v) for v in wg.values()):
         longest = []
-        for v in wg.values:
-            if len(v) > len(longest):
-                longest = v
+        for k in wk:
+            if len(wg[k]) > len(longest):
+                longest = wg[k]
         _workers.append(longest.pop(0))
 
 

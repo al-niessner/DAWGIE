@@ -132,6 +132,50 @@ class Farm(unittest.TestCase):
             pass
         return
 
+    def test__cluster_sort(self):
+        dawgie.pl.farm._cluster.clear()
+        dawgie.pl.farm._cluster_sort()
+        self.assertFalse(dawgie.pl.farm._cluster)
+        msgs = [
+            dawgie.pl.message.make(jid='foo.a', rid=3, target='bar'),
+            dawgie.pl.message.make(jid='foo.b', rid=3, target='bar'),
+            dawgie.pl.message.make(jid='foo.c', rid=3, target='bar'),
+            dawgie.pl.message.make(jid='foo.a', rid=1, target='snafu'),
+            dawgie.pl.message.make(jid='foo.b', rid=1, target='snafu'),
+            dawgie.pl.message.make(jid='foo.c', rid=1, target='snafu'),
+        ]
+        dawgie.pl.farm._cluster.extend(msgs)
+        dawgie.pl.farm._cluster_sort()
+        self.assertListEqual(msgs[3:] + msgs[:3], dawgie.pl.farm._cluster)
+        dawgie.pl.farm.insights.update(
+            {f'{m.target}.{m.jobid}':dawgie.pl.resources.HINT(cpu=10-i,io=0,
+                                                              memory=0,pages=0,
+                                                              summary=0)
+             for i,m in enumerate(msgs)
+             })
+        dawgie.pl.farm._cluster.clear()
+        dawgie.pl.farm._cluster.extend(msgs)
+        dawgie.pl.farm._cluster_sort()
+        msgs.reverse()
+        self.assertListEqual(msgs, dawgie.pl.farm._cluster)
+        
+
+    def test__worker_sort(self):
+        dawgie.pl.farm._workers.clear()
+        dawgie.pl.farm._workers_sort()
+        self.assertFalse(dawgie.pl.farm._workers)
+        dawgie.pl.farm._workers.extend([
+            dawgie.pl.farm.Hand(('a',0)),
+            dawgie.pl.farm.Hand(('a',0)),
+            dawgie.pl.farm.Hand(('a',0)),
+            dawgie.pl.farm.Hand(('b',0)),
+            dawgie.pl.farm.Hand(('b',0)),
+            dawgie.pl.farm.Hand(('c',0)),
+            ])
+        dawgie.pl.farm._workers_sort()
+        self.assertListEqual(['a','a','b','a','b','c'],
+                             [w.address[0] for w in dawgie.pl.farm._workers])
+
     def test_rerunid(self):
         dawgie.db.open()
         n = dawgie.pl.dag.Node('a')
@@ -156,5 +200,3 @@ class Farm(unittest.TestCase):
         self.assertTrue(dawgie.pl.farm.something_to_do())
         dawgie.context.fsm.state = 'starting'
         return
-
-    pass
