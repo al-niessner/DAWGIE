@@ -43,6 +43,7 @@ import dawgie.pl.message
 import dawgie.pl.schedule
 import dawgie.security
 import dawgie.util
+import functools
 import importlib
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import math
@@ -160,6 +161,10 @@ class Hand(twisted.internet.protocol.Protocol):
             pass
         return
 
+    @property
+    def address(self):
+        return self.__address
+
     # pylint: disable=signature-differs
     def connectionLost(self, reason):
         while 0 < _workers.count(self):
@@ -228,6 +233,25 @@ _reject = []
 _repeat = []
 
 
+def _cluster_sort():
+    # issue 203 FIXME: sort _cluster by expected processing time
+    def comparator(msg_a, msg_b):
+        result = (msg_a.runid > msg_b.runid) - (msg_a.runid < msg_b.runid)
+        if result == 0:
+            key = '.'.join(
+                [msg_a.target if msg_a.target else '__all__', msg_a.jobid]
+            )
+            a = 0 if key not in insights else insights[key].cpu
+            key = '.'.join(
+                [msg_b.target if msg_b.target else '__all__', msg_b.jobid]
+            )
+            b = 0 if key not in insights else insights[key].cpu
+            result = (a > b) - (a < b)
+        return result
+
+    _cluster.sort(key=functools.cmp_to_key(comparator))
+
+
 def _move(job, try_again) -> None:
     if try_again:
         _repeat.append(job)
@@ -263,6 +287,21 @@ def _put(job, runid: int, target: str, where: dawgie.Distribution):
         else _cluster
     ).append(msg)
     return
+
+
+def _workers_sort():
+    # issue 255 FIXME: sort _workers from least to most busy
+    wg = {wa: [] for wa in set(w.address[0] for w in _workers)}
+    wk = sorted(wg)
+    for worker in _workers:
+        wg[worker.address[0]].append(worker)
+    _workers.clear()
+    while sum(len(v) for v in wg.values()):
+        longest = []
+        for k in wk:
+            if len(wg[k]) > len(longest):
+                longest = wg[k]
+        _workers.append(longest.pop(0))
 
 
 def clear():
@@ -366,6 +405,8 @@ def dispatch():
 
     _cluster.extend(_reject)
     _reject.clear()
+    _cluster_sort()
+    _workers_sort()
     for dummy in range(min(len(_cluster), len(_workers))):
         _workers.pop(0).do(_cluster.pop(0))
     notify_all()
