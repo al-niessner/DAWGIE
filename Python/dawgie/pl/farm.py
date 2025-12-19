@@ -406,7 +406,7 @@ def dispatch():
     _cluster.extend(_reject)
     _reject.clear()
     _cluster_sort()
-    _worker_sort()
+    _workers_sort()
     for dummy in range(min(len(_cluster), len(_workers))):
         _workers.pop(0).do(_cluster.pop(0))
     notify_all()
