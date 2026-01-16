@@ -492,6 +492,8 @@ def is_sanctioned(
             '/app/changeset.txt',
             '/app/state/status',
             '/app/versions',
+
+            '/api/ae/name',
         ]
         if cert is None and endpoint in all_access:
             return True
