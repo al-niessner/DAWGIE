@@ -38,8 +38,8 @@ NTR:
 '''
 
 from dawgie.fe.basis import DynamicContent, HttpMethod
-from . import submit
-from . import svrender
+from dawgie.fe import submit
+from dawgie.fe import svrender
 
 import dawgie
 import dawgie.context
@@ -70,6 +70,7 @@ DynamicContent(, )
 '/api/database/search/alg' --> no params returns full list
 '/api/database/search/sv' --> no params returns full list
 '/api/database/search/val' --> no params returns full list
+'/api/database/view'  --> given a full name, generate its view
 '/api/df_model/statistics'
 '/api/logs/recent?limit=3'
 '/api/rev/current'
