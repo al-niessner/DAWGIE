@@ -16,5 +16,5 @@ notes.txt
 .coverage*
 .cache/
 .DS_Store
-#*
-.#*
+\#*
+.\#*

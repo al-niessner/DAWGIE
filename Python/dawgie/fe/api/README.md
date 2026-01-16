@@ -31,124 +31,131 @@ A description of `content` for a successful request of the endpoint. Will includ
 #### Example
 An example of how to use the endpoint with curl including its output. All examples are done using an instance of exercise, which is created by running the `Coda/exercise/run.sh` script.
 
-`/api/ae/name`
-`/api/cmd/run`
-`/api/database/search`
-`/api/database/search/runid`  --> no params returns max value
-`/api/database/search/target` --> no params returns full list
-`/api/database/search/task` --> no params returns full list
-`/api/database/search/alg` --> no params returns full list
-`/api/database/search/sv` --> no params returns full list
-`/api/database/search/val` --> no params returns full list
-`/api/database/view`  --> given a full name, generate its view
-`/api/df_model/statistics`
-`/api/logs/recent?limit=3`
-`/api/rev/current`
-`/api/rev/submit`
-`/api/schedule/doing`
-`/api/schedule/failed`
-`/api/schedule/in-progress`
-`/api/schedule/stats`
-`/api/schedule/succeeded`
-`/api/schedule/to-do`
-`/api/state/pipeline`
+- [`/api/ae/name`](#apiaename-get)
+- [`/api/cmd/run`](#/api/cmd/run-get)
+- [`/api/database/search`](#/api/database/search-get)
+- [`/api/database/search/runid`](#/api/database/search/runid-get)
+- [`/api/database/search/target`](#/api/database/search/target-get)
+- [`/api/database/search/task`](#/api/database/search/task-get)
+- [`/api/database/search/alg`](#/api/database/search/alg-get)
+- [`/api/database/search/sv`](#/api/database/search/sv-get)
+- [`/api/database/search/val`](#/api/database/search/val-get)
+- [`/api/database/view`](#/api/database/view-get)
+- [`/api/df_model/statistics`](#/api/df_model/statistics-get)
+- [`/api/logs/recent?limit=3`](#/api/logs/recent?limit=3-get)
+- [`/api/rev/current`](#/api/rev/current-get)
+- [`/api/rev/submit`](#/api/rev/submit-get)
+- [`/api/schedule/doing`](#/api/schedule/doing-get)
+- [`/api/schedule/failed`](#/api/schedule/failed-get)
+- [`/api/schedule/in-progress`](#/api/schedule/in-progress-get)
+- [`/api/schedule/stats`](#/api/schedule/stats-get)
+- [`/api/schedule/succeeded`](#/api/schedule/succeeded-get)
+- [`/api/schedule/to-do`](#/api/schedule/to-do-get)
+- [`/api/state/pipeline`](#/api/state/pipeline-get)
 
-`/api/ae/name`
+### `/api/ae/name` (GET)
+#### Description
+DAWGIE is an agent that organizes and managers to workers to accomplish tasks defined by the AE. This endpoint returns the name of the AE, which is defined in dawgie.context.ae_base_package.
+#### Parameters
+_None_
+#### Content
+String representation of the AE name.
+#### Example
+```
+curl -X GET 'http://localhost:8080/api/ae/name'
+```
+
+### `/api/cmd/run` (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/cmd/run`
+### `/api/database/search` (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/database/search`
+### `/api/database/search/runid`  --> no params returns max value (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/database/search/runid`  --> no params returns max value
+### `/api/database/search/target` --> no params returns full list (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/database/search/target` --> no params returns full list
+### `/api/database/search/task` --> no params returns full list (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/database/search/task` --> no params returns full list
+### `/api/database/search/alg` --> no params returns full list (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/database/search/alg` --> no params returns full list
+### `/api/database/search/sv` --> no params returns full list (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/database/search/sv` --> no params returns full list
+### `/api/database/search/val` --> no params returns full list (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/database/search/val` --> no params returns full list
+### `/api/df_model/statistics` (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/df_model/statistics`
+### `/api/logs/recent?limit=3` (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/logs/recent?limit=3`
+### `/api/rev/current` (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/rev/current`
+### `/api/rev/submit` (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/rev/submit`
+### `/api/schedule/doing` (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/schedule/doing`
+### `/api/schedule/failed` (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/schedule/failed`
+### `/api/schedule/in-progress` (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/schedule/in-progress`
+### `/api/schedule/stats` (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/schedule/stats`
+### `/api/schedule/succeeded` (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/schedule/succeeded`
+### `/api/schedule/to-do` (GET)
 #### Description
 #### Parameters
 #### Content
 #### Example
-`/api/schedule/to-do`
-#### Description
-#### Parameters
-#### Content
-#### Example
-`/api/state/pipeline`
+### `/api/state/pipeline` (GET)
 #### Description
 #### Parameters
 #### Content
