@@ -106,6 +106,7 @@ setuptools.setup(
         'dawgie.db.util',
         'dawgie.de',
         'dawgie.fe',
+        'dawgie.fe.api',
         'dawgie.pl',
         'dawgie.pl.logger',
         'dawgie.pl.worker',
