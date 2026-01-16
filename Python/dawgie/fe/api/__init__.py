@@ -43,43 +43,56 @@ from dawgie.fe import svrender
 
 import dawgie
 import dawgie.context
+import datetime
 import enum
+import json
+
 
 @enum.unique
-class Status(enum):
-    error = enum.auto()
-    failure = enum.auto()
-    success = enum.auto()
+class Status(enum.Enum):
+    ERROR = enum.auto()
+    FAILURE = enum.auto()
+    SUCCESS = enum.auto()
 
-def _return_object(obj, status:Status=success, msg:str=''):
-    return json.dumps({'content':obj, 'message':msg, 'status':status.name})
+
+def _return_object(obj, status: Status = Status.SUCCESS, msg: str = ''):
+    if status != Status.SUCCESS:
+        obj = datetime.datetime.now(datetime.UTC).isoformat(timespec='seconds')
+    if msg is None:
+        msg = ''
+    if not msg and status != Status.SUCCESS:
+        msg = "was not successful, but no hints are being given to the reader"
+    return json.dumps(
+        {'content': obj, 'message': msg, 'status': status.name.lower()}
+    )
+
 
 def ae_name():
     return _return_object(dawgie.context.ae_base_package)
 
+
 DynamicContent(ae_name, '/api/ae/name')
-DynamicContent(, )
+# DynamicContent(, )
 
 
-'/api/ae/name'
-'/api/cmd/run'
-'/api/database/search'
-'/api/database/search/runid'  --> no params returns max value
-'/api/database/search/target' --> no params returns full list
-'/api/database/search/task' --> no params returns full list
-'/api/database/search/alg' --> no params returns full list
-'/api/database/search/sv' --> no params returns full list
-'/api/database/search/val' --> no params returns full list
-'/api/database/view'  --> given a full name, generate its view
-'/api/df_model/statistics'
-'/api/logs/recent?limit=3'
-'/api/rev/current'
-'/api/rev/submit'
-'/api/schedule/doing'
-'/api/schedule/failed'
-'/api/schedule/in-progress'
-'/api/schedule/stats'
-'/api/schedule/succeeded'
-'/api/schedule/to-do'
-'/api/state/pipeline'
-
+# '/api/ae/name'
+# '/api/cmd/run'
+# '/api/database/search'
+# '/api/database/search/runid'  --> no params returns max value
+# '/api/database/search/target' --> no params returns full list
+# '/api/database/search/task' --> no params returns full list
+# '/api/database/search/alg' --> no params returns full list
+# '/api/database/search/sv' --> no params returns full list
+# '/api/database/search/val' --> no params returns full list
+# '/api/database/view'  --> given a full name, generate its view
+# '/api/df_model/statistics'
+# '/api/logs/recent?limit=3'
+# '/api/rev/current'
+# '/api/rev/submit'
+# '/api/schedule/doing'
+# '/api/schedule/failed'
+# '/api/schedule/in-progress'
+# '/api/schedule/stats'
+# '/api/schedule/succeeded'
+# '/api/schedule/to-do'
+# '/api/state/pipeline'
