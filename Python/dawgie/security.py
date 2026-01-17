@@ -492,29 +492,28 @@ def is_sanctioned(
             '/app/changeset.txt',
             '/app/state/status',
             '/app/versions',
-
+            # FIXME: these need to worked out as the endpoints are developed.
             '/api/ae/name',
-# FIXME: these need to worked out as the endpoints are developed.
-# '/api/cmd/run'
-# '/api/database/search'
-# '/api/database/search/runid'
-# '/api/database/search/target'
-# '/api/database/search/task'
-# '/api/database/search/alg'
-# '/api/database/search/sv'
-# '/api/database/search/val'
-# '/api/database/view'
-# '/api/df_model/statistics'
-# '/api/logs/recent?limit=3'
-# '/api/rev/current'
-# '/api/rev/submit'
-# '/api/schedule/doing'
-# '/api/schedule/failed'
-# '/api/schedule/in-progress'
-# '/api/schedule/stats'
-# '/api/schedule/succeeded'
-# '/api/schedule/to-do'
-# '/api/state/pipeline'
+            # '/api/cmd/run',
+            # '/api/database/search',
+            # '/api/database/search/runid',
+            # '/api/database/search/target',
+            # '/api/database/search/task',
+            # '/api/database/search/alg',
+            # '/api/database/search/sv',
+            # '/api/database/search/val',
+            # '/api/database/view',
+            # '/api/df_model/statistics',
+            '/api/logs/recent',
+            '/api/pipeline/state',
+            # '/api/rev/current',
+            # '/api/rev/submit',
+            # '/api/schedule/doing',
+            # '/api/schedule/failed',
+            # '/api/schedule/in-progress',
+            '/api/schedule/stats',
+            # '/api/schedule/succeeded',
+            # '/api/schedule/to-do',
         ]
         if cert is None and endpoint in all_access:
             return True

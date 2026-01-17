@@ -37,10 +37,12 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+import datetime
 import dawgie.security
 import enum
 import inspect
 import json
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import twisted.web.resource
 
@@ -103,10 +105,11 @@ class DynamicContent(twisted.web.resource.Resource):
         return
 
     def __err(self, method: HttpMethod):
-        return (
-            '<h1>Dynamic Content Lookup Failed</h1><p>The uri "%(uri)s" is not mapped to HTTP method %(method)s</p>'
-            % {'method': str(method), 'uri': self.__uri}
-        ).encode()
+        return build_return_object(
+            None,
+            Status.FAILURE,
+            f'Dynamic Content Lookup Failed. The uri "{self.__uri}" is not mapped to HTTP method {method}.',
+        )
 
     def __render(self, request, method: HttpMethod):
         sig = inspect.signature(self.__fnc)
@@ -117,12 +120,15 @@ class DynamicContent(twisted.web.resource.Resource):
             cert = None
 
         if not dawgie.security.sanctioned(self.__uri, cert):
-            return json.dumps(
+            msg = f'The endpoint {self.__uri} requires a client certficate to be provided and that certificate be known to this service.'
+            response = build_return_object(None, Status.FAILURE, msg, False)
+            response.update(
                 {
                     'alert_status': 'danger',
-                    'alert_message': f'The endpoint {self.__uri} requires a client certficate to be provided and that certificate be known to this service.',
+                    'alert_message': msg,
                 }
-            ).encode()
+            )
+            return json.dumps(response).encode()
 
         for ak in request.args.keys():
             if ak.decode() in sig.parameters:
@@ -134,7 +140,11 @@ class DynamicContent(twisted.web.resource.Resource):
             self.__fnc.identity = dawgie.security.identity(cert)
             self.__fnc.request = request
         if 0 < self.__methods.count(method):
-            resp = self.__fnc(**kwds)
+            try:
+                resp = self.__fnc(**kwds)
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                log.exception('Unhandled dynamic front end excpetion')
+                resp = build_return_object(None, Status.ERROR, str(e))
         else:
             resp = self.__err(method)
 
@@ -183,4 +193,26 @@ class RoutePoint(twisted.web.resource.Resource):
     pass
 
 
+@enum.unique
+class Status(enum.Enum):
+    ERROR = enum.auto()
+    FAILURE = enum.auto()
+    SUCCESS = enum.auto()
+
+
 _root = RoutePoint('root')
+
+
+def build_return_object(
+    obj, status: Status = Status.SUCCESS, msg: str = '', encode=True
+):
+    if status != Status.SUCCESS:
+        obj = datetime.datetime.now(datetime.UTC).isoformat(timespec='seconds')
+    if msg is None:
+        msg = ''
+    if not msg and status != Status.SUCCESS:
+        msg = "was not successful, but no hints are being given to the reader"
+    response = {'content': obj, 'message': msg, 'status': status.name.lower()}
+    if encode:
+        return json.dumps(response).encode()
+    return response

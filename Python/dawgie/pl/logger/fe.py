@@ -70,9 +70,10 @@ class Handler(logging.handlers.BufferingHandler):
     pass
 
 
-def remembered():
+def remembered(limit: int = 0):
     history = []
-    for r in INSTANCE.buffer:
+    start = min([len(INSTANCE.buffer) - limit if limit else 0, 0])
+    for r in INSTANCE.buffer[start:]:
         details = INSTANCE.format(r).split(';\n;')
         history.append(
             {

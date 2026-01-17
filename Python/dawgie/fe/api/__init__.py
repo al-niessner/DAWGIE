@@ -37,62 +37,53 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-from dawgie.fe.basis import DynamicContent, HttpMethod
+from dawgie.fe.basis import DynamicContent, HttpMethod, build_return_object
 from dawgie.fe import submit
 from dawgie.fe import svrender
 
 import dawgie
 import dawgie.context
-import datetime
-import enum
-import json
+import dawgie.pl.logger.fe
 
-
-@enum.unique
-class Status(enum.Enum):
-    ERROR = enum.auto()
-    FAILURE = enum.auto()
-    SUCCESS = enum.auto()
-
-
-def _return_object(obj, status: Status = Status.SUCCESS, msg: str = ''):
-    if status != Status.SUCCESS:
-        obj = datetime.datetime.now(datetime.UTC).isoformat(timespec='seconds')
-    if msg is None:
-        msg = ''
-    if not msg and status != Status.SUCCESS:
-        msg = "was not successful, but no hints are being given to the reader"
-    return json.dumps(
-        {'content': obj, 'message': msg, 'status': status.name.lower()}
-    ).encode()
+from . import schedule
 
 
 def ae_name():
-    return _return_object(dawgie.context.ae_base_package)
+    return build_return_object(dawgie.context.ae_base_package)
+
+
+def logs_recent(limit: int = None):
+    return build_return_object(reversed(dawgie.pl.logger.fe.remembered(limit)))
+
+
+def pipeline_state():
+    return build_return_object(
+        {
+            'name': dawgie.context.fsm.state,
+            'ready': dawgie.context.fsm.is_pipeline_active(),
+            'status': dawgie.context.fsm.transitioning.name,
+        }
+    )
 
 
 DynamicContent(ae_name, '/api/ae/name')
-# DynamicContent(, )
-
-
-# '/api/ae/name'
-# '/api/cmd/run'
-# '/api/database/search'
-# '/api/database/search/runid'  --> no params returns max value
-# '/api/database/search/target' --> no params returns full list
-# '/api/database/search/task' --> no params returns full list
-# '/api/database/search/alg' --> no params returns full list
-# '/api/database/search/sv' --> no params returns full list
-# '/api/database/search/val' --> no params returns full list
-# '/api/database/view'  --> given a full name, generate its view
-# '/api/df_model/statistics'
-# '/api/logs/recent?limit=3'
-# '/api/rev/current'
-# '/api/rev/submit'
-# '/api/schedule/doing'
-# '/api/schedule/failed'
-# '/api/schedule/in-progress'
-# '/api/schedule/stats'
-# '/api/schedule/succeeded'
-# '/api/schedule/to-do'
-# '/api/state/pipeline'
+# DynamicContent(, '/api/cmd/run')
+# DynamicContent(database., '/api/database/search')
+# DynamicContent(database., '/api/database/search/runid')  --> no params returns max value
+# DynamicContent(database., '/api/database/search/target') --> no params returns full list
+# DynamicContent(database., '/api/database/search/task') --> no params returns full list
+# DynamicContent(database., '/api/database/search/alg') --> no params returns full list
+# DynamicContent(database., '/api/database/search/sv') --> no params returns full list
+# DynamicContent(database., '/api/database/search/val') --> no params returns full list
+# DynamicContent(database., '/api/database/view')  --> given a full name, generate its view
+# DynamicContent(, '/api/df_model/statistics')
+DynamicContent(logs_recent, '/api/logs/recent')
+DynamicContent(pipeline_state, '/api/pipeline/state')
+# DynamicContent(, '/api/rev/current')
+# DynamicContent(, '/api/rev/submit')
+# DynamicContent(schedule., '/api/schedule/doing')
+# DynamicContent(schedule., '/api/schedule/failed')
+# DynamicContent(schedule., '/api/schedule/in-progress')
+DynamicContent(schedule.stats, '/api/schedule/stats')
+# DynamicContent(schedule., '/api/schedule/succeeded')
+# DynamicContent(schedule., '/api/schedule/to-do')
