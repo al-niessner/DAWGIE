@@ -64,7 +64,7 @@ def _return_object(obj, status: Status = Status.SUCCESS, msg: str = ''):
         msg = "was not successful, but no hints are being given to the reader"
     return json.dumps(
         {'content': obj, 'message': msg, 'status': status.name.lower()}
-    )
+    ).encode()
 
 
 def ae_name():
