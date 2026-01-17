@@ -62,9 +62,14 @@ _None_
 String representation of the AE name.
 #### Example
 ```
-curl -kX GET 'https://localhost:8080/api/ae/name' | jq
+curl -ksX GET 'https://localhost:8080/api/ae/name' | jq
 ```
 ```
+{
+  "content": "ae",
+  "message": "",
+  "status": "success"
+}
 ```
 ### `/api/cmd/run` (GET)
 #### Description
