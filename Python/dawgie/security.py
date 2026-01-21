@@ -50,6 +50,7 @@ import getpass
 import gnupg
 import importlib
 import inspect
+
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import random

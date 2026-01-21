@@ -45,6 +45,7 @@ import dawgie.security
 import dawgie.util
 import functools
 import importlib
+
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import math
 import struct
@@ -291,10 +292,10 @@ def _put(job, runid: int, target: str, where: dawgie.Distribution):
 
 def _workers_sort():
     # issue 255 FIXME: sort _workers from least to most busy
-    wg = {wa: [] for wa in set(w.address[0] for w in _workers)}
+    wg = {wa: [] for wa in set(w.address.host for w in _workers)}
     wk = sorted(wg)
     for worker in _workers:
-        wg[worker.address[0]].append(worker)
+        wg[worker.address.host].append(worker)
     _workers.clear()
     while sum(len(v) for v in wg.values()):
         longest = []

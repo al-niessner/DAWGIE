@@ -70,11 +70,20 @@ class Handler(logging.handlers.BufferingHandler):
     pass
 
 
-def remembered(limit: int = 0):
+def remembered(levels: [str] = None, limit: int = 0):
+    if levels is None:
+        levels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+    if not levels:
+        return []
     history = []
-    start = min([len(INSTANCE.buffer) - limit if limit else 0, 0])
-    for r in INSTANCE.buffer[start:]:
+    subbuffer = []
+    for r in INSTANCE.buffer:
         details = INSTANCE.format(r).split(';\n;')
+        if details[2].strip() in levels:
+            subbuffer.append(details)
+    # FIXME: sort by date (details[0])
+    start = max([len(subbuffer) - limit if limit else 0, 0])
+    for details in subbuffer[start:]:
         history.append(
             {
                 'timeStamp': details[0],

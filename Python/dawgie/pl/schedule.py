@@ -100,6 +100,7 @@ import dawgie.pl.promotion
 import dawgie.pl.schedule
 import dawgie.pl.version
 import dawgie.util
+
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import twisted.internet.reactor
 

@@ -79,8 +79,7 @@ class Security(unittest.TestCase):
             dawgie.security.use_client_verification(), 'clear known serts'
         )
         with open(os.path.join(self.wdir, 'dawgie.public.pem'), 'tw') as file:
-            file.write(
-                '''-----BEGIN CERTIFICATE-----
+            file.write('''-----BEGIN CERTIFICATE-----
 MIID7DCCAtSgAwIBAgIUB0JGjlKNuRBhs1ElGrhsobOa+AMwDQYJKoZIhvcNAQEL
 BQAwTDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMQswCQYDVQQHDAJMQTENMAsG
 A1UECgwETm9uZTEUMBIGA1UEAwwLZXhhbXBsZS5jb20wHhcNMjQwNjE3MjI1NzA5
@@ -103,8 +102,7 @@ l18iXAzutefQoEIOBI0V3/m3fgh5AIRqOlTiruFPnO6yLVLtg2GpQc2ZHMNhSWyg
 P3pZlXKkWW0k5n3SG2+I4YIPrPHwxcSQ9fugdGrnC6Vk6lIvTImxe7ljYbnSsSVV
 V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
 -----END CERTIFICATE-----
-'''
-            )
+''')
         dawgie.security._tls_initialize(self.wdir)
         self.assertTrue(
             dawgie.security.use_client_verification(),
@@ -119,8 +117,7 @@ V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
         )
         self.assertFalse(dawgie.security.use_tls(), 'could not load')
         with open(base, 'tw') as file:
-            file.write(
-                '''-----BEGIN CERTIFICATE-----
+            file.write('''-----BEGIN CERTIFICATE-----
 MIID7DCCAtSgAwIBAgIUB0JGjlKNuRBhs1ElGrhsobOa+AMwDQYJKoZIhvcNAQEL
 BQAwTDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMQswCQYDVQQHDAJMQTENMAsG
 A1UECgwETm9uZTEUMBIGA1UEAwwLZXhhbXBsZS5jb20wHhcNMjQwNjE3MjI1NzA5
@@ -143,8 +140,7 @@ l18iXAzutefQoEIOBI0V3/m3fgh5AIRqOlTiruFPnO6yLVLtg2GpQc2ZHMNhSWyg
 P3pZlXKkWW0k5n3SG2+I4YIPrPHwxcSQ9fugdGrnC6Vk6lIvTImxe7ljYbnSsSVV
 V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
 -----END CERTIFICATE-----
-'''
-            )
+''')
         with self.assertRaises(OpenSSL.crypto.Error):
             dawgie.security._tls_initialize(self.wdir, 'example.com', base)
         self.assertTrue(
@@ -153,8 +149,7 @@ V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
         )
         self.assertFalse(dawgie.security.use_tls(), 'could not load')
         with open(base, 'tw') as file:
-            file.write(
-                '''-----BEGIN PRIVATE KEY-----
+            file.write('''-----BEGIN PRIVATE KEY-----
 MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCsHUBbz4USAXfS
 raguO9CXuwi81BOMUOw19QcSsqg5ISc7r2T9G0TMQ/OyUXE8JZlBLIH7xxchp+3K
 MYjddzKYe3bInNcrzbAbc+sZ6Ab8Cf8Bil11cvcx9dJcwfJBI0ZrU6UZCTyGNjPK
@@ -205,8 +200,7 @@ l18iXAzutefQoEIOBI0V3/m3fgh5AIRqOlTiruFPnO6yLVLtg2GpQc2ZHMNhSWyg
 P3pZlXKkWW0k5n3SG2+I4YIPrPHwxcSQ9fugdGrnC6Vk6lIvTImxe7ljYbnSsSVV
 V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
 -----END CERTIFICATE-----
-'''
-            )
+''')
         dawgie.security._tls_initialize(self.wdir, 'example.com', base)
         self.assertTrue(
             dawgie.security.use_client_verification(),

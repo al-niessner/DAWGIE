@@ -42,6 +42,7 @@ import dawgie.context
 import dawgie.db
 import dawgie.db.util
 import dawgie.util.metrics
+
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 

@@ -52,6 +52,7 @@ import dawgie.pl.snapshot
 import enum
 import importlib.metadata
 import json
+
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import sys

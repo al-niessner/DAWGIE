@@ -45,6 +45,8 @@ import dawgie
 import dawgie.context
 import dawgie.pl.logger.fe
 
+import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
+
 from . import schedule
 
 
@@ -52,8 +54,18 @@ def ae_name():
     return build_return_object(dawgie.context.ae_base_package)
 
 
-def logs_recent(limit: int = None):
-    return build_return_object(reversed(dawgie.pl.logger.fe.remembered(limit)))
+def logs_recent(levels: [str] = None, limit: [int] = None):
+    log.critical(f'/api/logs/recent?levels={levels}&limit={limit}')
+    if levels:
+        levels = [level.upper() for level in levels[0].split(',')]
+    else:
+        levels = ['WARNING', 'ERROR', 'CRITICAL']
+    if limit:
+        limit = int(limit[0])
+    else:
+        limit = 0
+    log.critical(f'remembered(levels={levels}, limit={limit})')
+    return build_return_object(dawgie.pl.logger.fe.remembered(levels, limit))
 
 
 def pipeline_state():
