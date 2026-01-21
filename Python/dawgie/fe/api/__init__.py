@@ -69,13 +69,13 @@ def pipeline_state():
 DynamicContent(ae_name, '/api/ae/name')
 # DynamicContent(, '/api/cmd/run')
 # DynamicContent(database., '/api/database/search')
-# DynamicContent(database., '/api/database/search/runid')  --> no params returns max value
-# DynamicContent(database., '/api/database/search/target') --> no params returns full list
-# DynamicContent(database., '/api/database/search/task') --> no params returns full list
-# DynamicContent(database., '/api/database/search/alg') --> no params returns full list
-# DynamicContent(database., '/api/database/search/sv') --> no params returns full list
-# DynamicContent(database., '/api/database/search/val') --> no params returns full list
-# DynamicContent(database., '/api/database/view')  --> given a full name, generate its view
+# DynamicContent(database., '/api/database/search/runid')  # no params returns max value
+# DynamicContent(database., '/api/database/search/target')  # no params returns full list
+# DynamicContent(database., '/api/database/search/task')  # no params returns full list
+# DynamicContent(database., '/api/database/search/alg')  # no params returns full list
+# DynamicContent(database., '/api/database/search/sv')  # no params returns full list
+# DynamicContent(database., '/api/database/search/val')  # no params returns full list
+# DynamicContent(database., '/api/database/view')  # given a full name, generate its view
 # DynamicContent(, '/api/df_model/statistics')
 DynamicContent(logs_recent, '/api/logs/recent')
 DynamicContent(pipeline_state, '/api/pipeline/state')
