@@ -504,7 +504,7 @@ def is_sanctioned(
             # '/api/database/search/sv',
             # '/api/database/search/val',
             # '/api/database/view',
-            # '/api/df_model/statistics',
+            '/api/df_model/statistics',
             '/api/logs/recent',
             '/api/pipeline/state',
             # '/api/rev/current',

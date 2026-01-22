@@ -37,7 +37,12 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-from dawgie.fe.basis import DynamicContent, HttpMethod, build_return_object
+from dawgie.fe.basis import (
+    DynamicContent,
+    HttpMethod,
+    Status,
+    build_return_object,
+)
 from dawgie.fe import submit
 from dawgie.fe import svrender
 
@@ -52,6 +57,46 @@ from . import schedule
 
 def ae_name():
     return build_return_object(dawgie.context.ae_base_package)
+
+
+def df_model_statistics(node_name: str):
+    node_name = node_name[0]
+    if not node_name:
+        build_return_object(
+            None, Status.FAILURE, "Node name was not given or is blank"
+        )
+    if node_name.count('.') > 1:
+        node_name = '.'.join(node_name.split('.')[:2])
+    if node_name in schedule.doing(True):
+        return build_return_object({'status': 'processing'})
+    if node_name in schedule.todo(True):
+        return build_return_object({'status': 'scheduled'})
+    matched = []
+    for known in schedule.failed(True):
+        if known['task'] == node_name:
+            known['status'] = 'failed'
+            matched.append(known)
+    for known in schedule.succeeded(True):
+        if known['task'] == node_name:
+            known['status'] = 'succeeded'
+            matched.append(known)
+    if not matched:
+        return build_return_object({})
+    runid = max(m['runid'] for m in matched)
+    matched = list(filter(lambda d, rid=runid: d['runid'] == rid, matched))
+    status = set(m['status'] for m in matched)
+    if len(status) > 1:
+        status = 'both'
+    else:
+        status = status.pop()
+    matched.sort(key=lambda d: d['timing']['completed'], reverse=True)
+    return build_return_object(
+        {
+            'date': matched[0]['timing']['completed'],
+            'runid': matched[0]['runid'],
+            'status': status,
+        }
+    )
 
 
 def logs_recent(levels: [str] = None, limit: [int] = None):
@@ -86,7 +131,7 @@ DynamicContent(ae_name, '/api/ae/name')
 # DynamicContent(database., '/api/database/search/sv')  # no params returns full list
 # DynamicContent(database., '/api/database/search/val')  # no params returns full list
 # DynamicContent(database., '/api/database/view')  # given a full name, generate its view
-# DynamicContent(, '/api/df_model/statistics')
+DynamicContent(df_model_statistics, '/api/df_model/statistics')
 DynamicContent(logs_recent, '/api/logs/recent')
 DynamicContent(pipeline_state, '/api/pipeline/state')
 # DynamicContent(, '/api/rev/current')
