@@ -55,7 +55,6 @@ def ae_name():
 
 
 def logs_recent(levels: [str] = None, limit: [int] = None):
-    log.critical(f'/api/logs/recent?levels={levels}&limit={limit}')
     if levels:
         levels = [level.upper() for level in levels[0].split(',')]
     else:
@@ -64,7 +63,6 @@ def logs_recent(levels: [str] = None, limit: [int] = None):
         limit = int(limit[0])
     else:
         limit = 0
-    log.critical(f'remembered(levels={levels}, limit={limit})')
     return build_return_object(dawgie.pl.logger.fe.remembered(levels, limit))
 
 

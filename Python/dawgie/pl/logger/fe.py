@@ -81,7 +81,7 @@ def remembered(levels: [str] = None, limit: int = 0):
         details = INSTANCE.format(r).split(';\n;')
         if details[2].strip() in levels:
             subbuffer.append(details)
-    # FIXME: sort by date (details[0])
+    subbuffer.sort(key=lambda d:d[0], reverse=True)
     start = max([len(subbuffer) - limit if limit else 0, 0])
     for details in subbuffer[start:]:
         history.append(
