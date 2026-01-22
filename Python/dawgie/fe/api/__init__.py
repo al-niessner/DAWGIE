@@ -52,6 +52,7 @@ import dawgie.pl.logger.fe
 
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 
+from . import database
 from . import schedule
 
 
@@ -121,8 +122,13 @@ def pipeline_state():
     )
 
 
+def rev_current():
+    return build_return_object(dawgie.context.git_rev)
+
+
 DynamicContent(ae_name, '/api/ae/name')
 # DynamicContent(, '/api/cmd/run')
+DynamicContent(database.runnables, '/api/database/runnables')
 # DynamicContent(database., '/api/database/search')
 # DynamicContent(database., '/api/database/search/runid')  # no params returns max value
 # DynamicContent(database., '/api/database/search/target')  # no params returns full list
@@ -130,11 +136,12 @@ DynamicContent(ae_name, '/api/ae/name')
 # DynamicContent(database., '/api/database/search/alg')  # no params returns full list
 # DynamicContent(database., '/api/database/search/sv')  # no params returns full list
 # DynamicContent(database., '/api/database/search/val')  # no params returns full list
+DynamicContent(database.targets, '/api/database/targets')
 # DynamicContent(database., '/api/database/view')  # given a full name, generate its view
 DynamicContent(df_model_statistics, '/api/df_model/statistics')
 DynamicContent(logs_recent, '/api/logs/recent')
 DynamicContent(pipeline_state, '/api/pipeline/state')
-# DynamicContent(, '/api/rev/current')
+DynamicContent(rev_current, '/api/rev/current')
 # DynamicContent(, '/api/rev/submit')
 # DynamicContent(schedule., '/api/schedule/doing')
 # DynamicContent(schedule., '/api/schedule/failed')

@@ -33,6 +33,7 @@ An example of how to use the endpoint with curl including its output. All exampl
 
 - [`/api/ae/name`](#apiaename-get)
 - [`/api/cmd/run`](#/api/cmd/run-get)
+- [`/api/database/runnables`](#/api/database/runnables-get)
 - [`/api/database/search`](#/api/database/search-get)
 - [`/api/database/search/runid`](#/api/database/search/runid-get)
 - [`/api/database/search/target`](#/api/database/search/target-get)
@@ -40,6 +41,7 @@ An example of how to use the endpoint with curl including its output. All exampl
 - [`/api/database/search/alg`](#/api/database/search/alg-get)
 - [`/api/database/search/sv`](#/api/database/search/sv-get)
 - [`/api/database/search/val`](#/api/database/search/val-get)
+- [`/api/database/targets`](#/api/database/targets-get)
 - [`/api/database/view`](#/api/database/view-get)
 - [`/api/df_model/statistics`](#/api/df_model/statistics-get)
 - [`/api/logs/recent?limit=3`](#/api/logs/recent?limit=3-get)
@@ -76,6 +78,37 @@ curl -ksX GET 'https://localhost:8080/api/ae/name' | jq
 #### Parameters
 #### Content
 #### Example
+### `/api/database/runnables` (GET)
+#### Description
+Get a list of known runnable entities in the pipeline.
+#### Parameters
+_None_
+#### Content
+A JSON list of case insensitive strings of known runnable `target.algorithm`.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/database/runnables' | jq
+```
+```
+{
+  "content": [
+    "disk.engine",
+    "feedback.command",
+    "feedback.control",
+    "feedback.model",
+    "feedback.output",
+    "feedback.sensor",
+    "feedback.sum",
+    "network.analyzer",
+    "network.engine",
+    "noio.engine",
+    "review.aspect",
+    "review.history"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
 ### `/api/database/search` (GET)
 #### Description
 #### Parameters
@@ -111,6 +144,27 @@ curl -ksX GET 'https://localhost:8080/api/ae/name' | jq
 #### Parameters
 #### Content
 #### Example
+### `/api/database/targets` (GET)
+#### Description
+Get a full list of known targets.
+#### Parameters
+_None_
+#### Content
+A JSON list of case insensitive sorted strings representing all of the known targets to the system.
+#### Example
+````
+curl -ksX GET 'https://localhost:8080/api/database/targets' | jq
+````
+````
+{
+  "content": [
+    "/tmp/tmpewb77f2m",
+    "__all__"
+  ],
+  "message": "",
+  "status": "success"
+}
+````
 ### `/api/df_model/statistics` (GET)
 #### Description
 Retrieve run statistics about a node in the data flow model.

@@ -48,7 +48,7 @@ def succeeded(asis: bool = False):
 
 def todo(asis: bool = False):
     reformatted = {
-        old['name']:old['targets'] for old in dawgie.pl.schedule.view_todo()
+        old['name']: old['targets'] for old in dawgie.pl.schedule.view_todo()
     }
     if asis:
         return reformatted
