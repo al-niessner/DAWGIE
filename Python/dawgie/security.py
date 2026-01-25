@@ -510,12 +510,12 @@ def is_sanctioned(
             '/api/pipeline/state',
             '/api/rev/current',
             # '/api/rev/submit',
-            # '/api/schedule/doing',
-            # '/api/schedule/failed',
-            # '/api/schedule/in-progress',
+            '/api/schedule/doing',
+            '/api/schedule/failed',
+            '/api/schedule/in-progress',
             '/api/schedule/stats',
-            # '/api/schedule/succeeded',
-            # '/api/schedule/to-do',
+            '/api/schedule/succeeded',
+            '/api/schedule/to-do',
         ]
         if cert is None and endpoint in all_access:
             return True

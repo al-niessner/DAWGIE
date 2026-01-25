@@ -269,7 +269,13 @@ def complete(job, runid, target, timing, status):
         pass
 
     history.append(
-        {'timing': timing, 'runid': runid, 'target': target, 'task': job.tag}
+        {
+            'timing': timing,
+            'runid': runid,
+            'target': target,
+            'task': job.tag,
+            'changeset': dawgie.context.git_rev,
+        }
     )
     return
 
@@ -529,9 +535,9 @@ def update(values: [(str, bool)], original: dawgie.pl.dag.Node, rid: int):
     return
 
 
-def view_doing() -> dict:
+def view_doing(index: int = 0, limit: int = None) -> dict:
     active = list(filter(lambda t: t.get('status') == State.running, que))
-    return {a.tag: sorted(list(a.get('doing'))) for a in active}
+    return {a.tag: sorted(list(a.get('doing'))) for a in active[index:limit]}
 
 
 def view_events() -> [{}]:
@@ -551,14 +557,14 @@ def view_events() -> [{}]:
 
 
 def view_failure() -> [dict]:
-    return err
+    return err.copy()
 
 
 def view_success() -> [dict]:
-    return suc
+    return suc.copy()
 
 
-def view_todo() -> [dict]:
+def view_todo(index: int = 0, limit: int = None) -> [dict]:
     wait = list(
         filter(
             lambda t: all(
@@ -572,5 +578,6 @@ def view_todo() -> [dict]:
     )  # prevents undefined
     wait.sort(key=lambda t: t.get('level'))
     return [
-        {'name': w.tag, 'targets': sorted(list(w.get('todo')))} for w in wait
+        {'name': w.tag, 'targets': sorted(list(w.get('todo')))}
+        for w in wait[index:limit]
     ]

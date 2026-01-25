@@ -308,9 +308,22 @@ curl -ksX GET 'https://localhost:8080/api/pipeline/state' | jq
 ```
 ### `/api/rev/current` (GET)
 #### Description
+Return the current revision identifier for the AE. For GIT, this is the current commit hash.
 #### Parameters
+_None_
 #### Content
+JSON string of the current revious number.
 #### Example
+```
+curl -ksX GET 'https://localhost:8080/api/rev/current' | jq
+```
+```
+{
+  "content": "FAKE-VERSION-FOR-EXERCISE",
+  "message": "",
+  "status": "success"
+}
+```
 ### `/api/rev/submit` (GET)
 #### Description
 #### Parameters
@@ -320,9 +333,24 @@ curl -ksX GET 'https://localhost:8080/api/pipeline/state' | jq
 #### Description
 #### Parameters
 #### Content
-A JSON object with the following content:
-```
-```
+#### Example
+### `/api/schedule/failed` (GET)
+#### Description
+#### Parameters
+#### Content
+#### Example
+### `/api/schedule/in-progress` (GET)
+#### Description
+#### Parameters
+#### Content
+#### Example
+### `/api/schedule/stats` (GET)
+#### Description
+Return statistics about the schedule and workers to get it done.
+#### Parameters
+_None_
+#### Content
+A JSON object with the following content.
 #### Example
 ```
 curl -ksX GET 'https://localhost:8080/api/schedule/stats' | jq
@@ -343,24 +371,6 @@ curl -ksX GET 'https://localhost:8080/api/schedule/stats' | jq
   "status": "success"
 }
 ```
-### `/api/schedule/failed` (GET)
-#### Description
-#### Parameters
-#### Content
-#### Example
-### `/api/schedule/in-progress` (GET)
-#### Description
-#### Parameters
-#### Content
-#### Example
-### `/api/schedule/stats` (GET)
-#### Description
-Return statistics about the schedule and workers to get it done.
-#### Parameters
-_None_
-#### Content
-
-#### Example
 ### `/api/schedule/succeeded` (GET)
 #### Description
 #### Parameters

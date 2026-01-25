@@ -7,16 +7,30 @@ import dawgie.pl.farm
 import dawgie.pl.schedule
 
 
-def doing(asis: bool = False):
+def doing(asis: bool = False, index: int = 0, limit: int = None):
     if asis:
-        return dawgie.pl.schedule.view_doing()
-    return build_return_object(dawgie.pl.schedule.view_doing())
+        return dawgie.pl.schedule.view_doing(index, limit)
+    index = int(index[0])
+    limit = limit[0] if limit else None
+    limit = (int(limit) + index) if limit else None
+    return build_return_object(dawgie.pl.schedule.view_doing(index, limit))
 
 
-def failed(asis: bool = False):
+def failed(asis: bool = False, index: int = 0, limit: int = None):
     if asis:
         return dawgie.pl.schedule.view_failure()
-    return build_return_object(dawgie.pl.schedule.view_failure())
+    f = dawgie.pl.schedule.view_failure()
+    index = int(index[0])
+    limit = limit[0] if limit else None
+    limit = (int(limit) + index) if limit else None
+    return build_return_object(f[index:limit])
+
+
+def inprogress(index: int = 0, limit: int = None):
+    index = int(index[0])
+    limit = limit[0] if limit else None
+    limit = (int(limit) + index) if limit else None
+    return build_return_object(dawgie.pl.farm.crew()['busy'][index:limit])
 
 
 def stats():
@@ -40,15 +54,25 @@ def stats():
     )
 
 
-def succeeded(asis: bool = False):
+def succeeded(asis: bool = False, index: int = 0, limit: int = None):
     if asis:
         return dawgie.pl.schedule.view_success()
-    return build_return_object(dawgie.pl.schedule.view_success())
+    index = int(index[0])
+    limit = limit[0] if limit else None
+    limit = (int(limit) + index) if limit else None
+    s = dawgie.pl.schedule.view_success()
+    s.reverse()
+    return build_return_object(s[index:limit])
 
 
-def todo(asis: bool = False):
+def todo(asis: bool = False, index: int = 0, limit: int = None):
+    if not asis:
+        index = int(index[0])
+        limit = limit[0] if limit else None
+        limit = (int(limit) + index) if limit else None
     reformatted = {
-        old['name']: old['targets'] for old in dawgie.pl.schedule.view_todo()
+        old['name']: old['targets']
+        for old in dawgie.pl.schedule.view_todo(index, limit)
     }
     if asis:
         return reformatted
