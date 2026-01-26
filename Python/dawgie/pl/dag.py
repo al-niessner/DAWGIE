@@ -109,7 +109,7 @@ class Construct:
         )
         log.info('Construct() - graph state vector tree')
         self._svv = self.graph(
-            pydot.Dot(graph_type='digraph', rank='same'), self._svt, 'svt.png'
+            pydot.Dot(graph_type='digraph', rank='same'), self._svt, 'svv.svg'
         )
         log.info('Construct() - graph task tree')
         self._tv = self.graph(
@@ -358,7 +358,8 @@ class Construct:
         idir = os.path.abspath(
             os.path.join(dawgie.context.fe_path, 'images/svg')
         )
-
+        # FIXME: when using new UI, use adir like idir but should be
+        # site://assets/ where site: is from dawgie.context.??
         if not os.path.isdir(idir):
             os.makedirs(idir)
 
