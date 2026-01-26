@@ -373,12 +373,80 @@ curl -ksX GET 'https://localhost:8080/api/schedule/stats' | jq
 ```
 ### `/api/schedule/succeeded` (GET)
 #### Description
+List of tasks that completed successfully.
 #### Parameters
+- _index_ : 0 is the first index and represents the most current task that succeeded.
+- _limit_ : number of successful tasks to return and if not given all of them.
 #### Content
+A JSON object with information about the runid, target, task, revision of the AE, and timing. With respect to timing, can only count on scheduled, started, and completed. The `load_*` and `start_*` identify when the algorthing name has its input data being loaded (`load_*`) vs when run() (`start_*`) is called.
 #### Example
+```
+curl -ksX GET 'https://localhost:8080/api/schedule/succeeded?index=0&limit=3' | jq
+```
+```
+{
+  "content": [
+    {
+      "timing": {
+        "scheduled": "2026-01-25 22:02:42.648946+00:00",
+        "started": "2026-01-25 22:02:42.940578+00:00",
+        "load_output": "2026-01-25 22:02:42.943931+00:00",
+        "start_output": "2026-01-25 22:02:43.264260+00:00",
+        "completed": "2026-01-25 22:02:43.610183+00:00"
+      },
+      "runid": 21,
+      "target": "/tmp/tmpz5ujy6cu",
+      "task": "feedback.output",
+      "changeset": "FAKE-VERSION-FOR-EXERCISE"
+    },
+    {
+      "timing": {
+        "scheduled": "2026-01-25 22:01:42.623334+00:00",
+        "started": "2026-01-25 22:02:37.955120+00:00",
+        "load_control": "2026-01-25 22:02:37.958406+00:00",
+        "start_control": "2026-01-25 22:02:38.744276+00:00",
+        "completed": "2026-01-25 22:02:39.183357+00:00"
+      },
+      "runid": 20,
+      "target": "/tmp/tmpz5ujy6cu",
+      "task": "feedback.control",
+      "changeset": "FAKE-VERSION-FOR-EXERCISE"
+    },
+    {
+      "timing": {
+        "scheduled": "2026-01-25 22:01:37.622043+00:00",
+        "started": "2026-01-25 22:01:37.911937+00:00",
+        "load_sum": "2026-01-25 22:01:37.915247+00:00",
+        "start_sum": "2026-01-25 22:01:38.593958+00:00",
+        "completed": "2026-01-25 22:01:38.940090+00:00"
+      },
+      "runid": 20,
+      "target": "/tmp/tmpz5ujy6cu",
+      "task": "feedback.sum",
+      "changeset": "FAKE-VERSION-FOR-EXERCISE"
+    }
+  ],
+  "message": "",
+  "status": "success"
+}
+```
 ### `/api/schedule/to-do` (GET)
 #### Description
 #### Parameters
 #### Content
+```
+curl -ksX GET 'https://localhost:8080/api/schedule/to-do' | jq
+```
+```
+{
+  "content": {
+    "disk.engine": [
+      "/tmp/tmpyjna68n5"
+    ]
+  },
+  "message": "",
+  "status": "success"
+}
+```
 #### Example
 

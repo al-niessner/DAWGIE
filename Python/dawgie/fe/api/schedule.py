@@ -6,13 +6,22 @@ import dawgie.context
 import dawgie.pl.farm
 import dawgie.pl.schedule
 
+def _legacy_arg_fixer(index: int, limit: int):
+    if index is None: index = 0;
+    if isinstance(index, list): index = index[0]
+    index = int(index)
+    if isinstance(limit, list) and limit: limit = limit[0]
+    try:
+        limit = int(limit)
+    except TypeError:
+        limit = None
+    return index,limit
+
 
 def doing(asis: bool = False, index: int = 0, limit: int = None):
     if asis:
         return dawgie.pl.schedule.view_doing(index, limit)
-    index = int(index[0])
-    limit = limit[0] if limit else None
-    limit = (int(limit) + index) if limit else None
+    index, limit = _legacy_arg_fixer(index, limit)
     return build_return_object(dawgie.pl.schedule.view_doing(index, limit))
 
 
@@ -20,16 +29,15 @@ def failed(asis: bool = False, index: int = 0, limit: int = None):
     if asis:
         return dawgie.pl.schedule.view_failure()
     f = dawgie.pl.schedule.view_failure()
-    index = int(index[0])
-    limit = limit[0] if limit else None
-    limit = (int(limit) + index) if limit else None
+    f.reverse()
+    index, limit = _legacy_arg_fixer(index, limit)
+    limit = (index + limit) if limit is not None else limit
     return build_return_object(f[index:limit])
 
 
 def inprogress(index: int = 0, limit: int = None):
-    index = int(index[0])
-    limit = limit[0] if limit else None
-    limit = (int(limit) + index) if limit else None
+    index, limit = _legacy_arg_fixer(index, limit)
+    limit = (index + limit) if limit is not None else limit
     return build_return_object(dawgie.pl.farm.crew()['busy'][index:limit])
 
 
@@ -57,19 +65,15 @@ def stats():
 def succeeded(asis: bool = False, index: int = 0, limit: int = None):
     if asis:
         return dawgie.pl.schedule.view_success()
-    index = int(index[0])
-    limit = limit[0] if limit else None
-    limit = (int(limit) + index) if limit else None
+    index, limit = _legacy_arg_fixer(index, limit)
+    limit = (index + limit) if limit is not None else limit
     s = dawgie.pl.schedule.view_success()
     s.reverse()
     return build_return_object(s[index:limit])
 
 
 def todo(asis: bool = False, index: int = 0, limit: int = None):
-    if not asis:
-        index = int(index[0])
-        limit = limit[0] if limit else None
-        limit = (int(limit) + index) if limit else None
+    index, limit = _legacy_arg_fixer(index, limit)
     reformatted = {
         old['name']: old['targets']
         for old in dawgie.pl.schedule.view_todo(index, limit)
