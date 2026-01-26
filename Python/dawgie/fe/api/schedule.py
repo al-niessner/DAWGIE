@@ -6,23 +6,36 @@ import dawgie.context
 import dawgie.pl.farm
 import dawgie.pl.schedule
 
+
 def _legacy_arg_fixer(index: int, limit: int):
-    if index is None: index = 0;
-    if isinstance(index, list): index = index[0]
+    if index is None:
+        index = 0
+    if isinstance(index, list):
+        index = index[0]
     index = int(index)
-    if isinstance(limit, list) and limit: limit = limit[0]
+    if isinstance(limit, list) and limit:
+        limit = limit[0]
     try:
         limit = int(limit)
     except TypeError:
         limit = None
-    return index,limit
+    return index, limit, (index + limit) if limit is not None else limit
 
 
 def doing(asis: bool = False, index: int = 0, limit: int = None):
     if asis:
         return dawgie.pl.schedule.view_doing(index, limit)
-    index, limit = _legacy_arg_fixer(index, limit)
+    index, limit = _legacy_arg_fixer(index, limit)[:2]
     return build_return_object(dawgie.pl.schedule.view_doing(index, limit))
+
+
+def events(index: int = 0, limit: int = None):
+    index, _limit, term = _legacy_arg_fixer(index, limit)
+    e = {
+        d['actor']: d['delays']
+        for d in dawgie.pl.schedule.view_events()[index:term]
+    }
+    return build_return_object(e)
 
 
 def failed(asis: bool = False, index: int = 0, limit: int = None):
@@ -30,15 +43,13 @@ def failed(asis: bool = False, index: int = 0, limit: int = None):
         return dawgie.pl.schedule.view_failure()
     f = dawgie.pl.schedule.view_failure()
     f.reverse()
-    index, limit = _legacy_arg_fixer(index, limit)
-    limit = (index + limit) if limit is not None else limit
-    return build_return_object(f[index:limit])
+    index, _limit, term = _legacy_arg_fixer(index, limit)
+    return build_return_object(f[index:term])
 
 
 def inprogress(index: int = 0, limit: int = None):
-    index, limit = _legacy_arg_fixer(index, limit)
-    limit = (index + limit) if limit is not None else limit
-    return build_return_object(dawgie.pl.farm.crew()['busy'][index:limit])
+    index, _limit, term = _legacy_arg_fixer(index, limit)
+    return build_return_object(dawgie.pl.farm.crew()['busy'][index:term])
 
 
 def stats():
@@ -65,15 +76,14 @@ def stats():
 def succeeded(asis: bool = False, index: int = 0, limit: int = None):
     if asis:
         return dawgie.pl.schedule.view_success()
-    index, limit = _legacy_arg_fixer(index, limit)
-    limit = (index + limit) if limit is not None else limit
+    index, _limit, term = _legacy_arg_fixer(index, limit)
     s = dawgie.pl.schedule.view_success()
     s.reverse()
-    return build_return_object(s[index:limit])
+    return build_return_object(s[index:term])
 
 
 def todo(asis: bool = False, index: int = 0, limit: int = None):
-    index, limit = _legacy_arg_fixer(index, limit)
+    index, limit = _legacy_arg_fixer(index, limit)[:2]
     reformatted = {
         old['name']: old['targets']
         for old in dawgie.pl.schedule.view_todo(index, limit)

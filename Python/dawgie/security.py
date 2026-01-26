@@ -511,6 +511,7 @@ def is_sanctioned(
             '/api/rev/current',
             # '/api/rev/submit',
             '/api/schedule/doing',
+            '/api/schedule/events',
             '/api/schedule/failed',
             '/api/schedule/in-progress',
             '/api/schedule/stats',

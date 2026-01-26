@@ -49,6 +49,7 @@ An example of how to use the endpoint with curl including its output. All exampl
 - [`/api/rev/current`](#/api/rev/current-get)
 - [`/api/rev/submit`](#/api/rev/submit-get)
 - [`/api/schedule/doing`](#/api/schedule/doing-get)
+- [`/api/schedule/events`](#/api/schedule/events-get)
 - [`/api/schedule/failed`](#/api/schedule/failed-get)
 - [`/api/schedule/in-progress`](#/api/schedule/in-progress-get)
 - [`/api/schedule/stats`](#/api/schedule/stats-get)
@@ -165,6 +166,15 @@ curl -ksX GET 'https://localhost:8080/api/database/targets' | jq
   "status": "success"
 }
 ````
+### `/api/database/view` (GET)
+#### Description
+A view of the specified state vector.
+#### Parameters
+- fullname : a string of the form runid.target.task.alg.sv.
+#### Content
+A webpage containing the view of the state vector.
+#### Example
+Not Applicable
 ### `/api/df_model/statistics` (GET)
 #### Description
 Retrieve run statistics about a node in the data flow model.
@@ -331,19 +341,133 @@ curl -ksX GET 'https://localhost:8080/api/rev/current' | jq
 #### Example
 ### `/api/schedule/doing` (GET)
 #### Description
+The tasks and targets that are currently queued and awaiting workers.
 #### Parameters
+- _index_ : 0 is the first index and default when not provided representing the most current task that failed.
+- _limit_ : number of failed tasks to return and if not given all of them.
 #### Content
+A JSON object where the key represents the task and the value a list of targets to be done.
 #### Example
+```
+curl -ksX GET 'https://localhost:8080/api/schedule/doing' | jq
+```
+```
+{
+  "content": {
+    "feedback.sum": [
+      "/tmp/tmp7192cc5u"
+    ]
+  },
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/schedule/events` (GET)
+#### Description
+The tasks and targets that are currently queued and awaiting workers.
+#### Parameters
+- _index_ : 0 is the first index and default when not provided representing the most current task that failed.
+- _limit_ : number of failed tasks to return and if not given all of them.
+#### Content
+A JSON object where the key represents the task and the value a list of targets to be done. If the delay is -9999, then it means "at boot".
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/schedule/events' | jq
+```
+```
+{
+  "content": [
+    {
+      "actor": "network.analyzer",
+      "delays": [
+        -9999
+      ]
+    }
+  ],
+  "message": "",
+  "status": "success"
+}
+```
 ### `/api/schedule/failed` (GET)
 #### Description
+List of tasks that completed successfully.
 #### Parameters
+- _index_ : 0 is the first index and default when not provided representing the most current task that failed.
+- _limit_ : number of failed tasks to return and if not given all of them.
 #### Content
+A JSON object with information about the runid, target, task, revision of the AE, and timing. With respect to timing, can only count on scheduled, started, and completed. The `load_*` and `start_*` identify when the algorthing name has its input data being loaded (`load_*`) vs when run() (`start_*`) is called.
 #### Example
+```
+curl -ksX GET 'https://localhost:8080/api/schedule/failed?index=0&limit=3' | jq
+```
+```
+{
+  "content": [
+    {
+      "timing": {
+        "scheduled": "2026-01-25 22:02:42.648946+00:00",
+        "started": "2026-01-25 22:02:42.940578+00:00",
+        "load_output": "2026-01-25 22:02:42.943931+00:00",
+        "start_output": "2026-01-25 22:02:43.264260+00:00",
+        "completed": "2026-01-25 22:02:43.610183+00:00"
+      },
+      "runid": 21,
+      "target": "/tmp/tmpz5ujy6cu",
+      "task": "feedback.output",
+      "changeset": "FAKE-VERSION-FOR-EXERCISE"
+    },
+    {
+      "timing": {
+        "scheduled": "2026-01-25 22:01:42.623334+00:00",
+        "started": "2026-01-25 22:02:37.955120+00:00",
+        "load_control": "2026-01-25 22:02:37.958406+00:00",
+        "start_control": "2026-01-25 22:02:38.744276+00:00",
+        "completed": "2026-01-25 22:02:39.183357+00:00"
+      },
+      "runid": 20,
+      "target": "/tmp/tmpz5ujy6cu",
+      "task": "feedback.control",
+      "changeset": "FAKE-VERSION-FOR-EXERCISE"
+    },
+    {
+      "timing": {
+        "scheduled": "2026-01-25 22:01:37.622043+00:00",
+        "started": "2026-01-25 22:01:37.911937+00:00",
+        "load_sum": "2026-01-25 22:01:37.915247+00:00",
+        "start_sum": "2026-01-25 22:01:38.593958+00:00",
+        "completed": "2026-01-25 22:01:38.940090+00:00"
+      },
+      "runid": 20,
+      "target": "/tmp/tmpz5ujy6cu",
+      "task": "feedback.sum",
+      "changeset": "FAKE-VERSION-FOR-EXERCISE"
+    }
+  ],
+  "message": "",
+  "status": "success"
+}
+```
 ### `/api/schedule/in-progress` (GET)
 #### Description
+List of tasks that are assigned to workers and how long the worker as been toiling at the task.
 #### Parameters
+- _index_ : 0 is the first index and default when not provided representing the tasks in the order they were assigned.
+- _limit_ : number of tasks to return and if not given all of them.
 #### Content
+JSON list of strings.
 #### Example
+```
+curl -ksX GET 'https://localhost:8080/api/schedule/in-progress' | jq
+```
+```
+{
+  "content": [
+    "network.analyzer[__all__] duration: 00:00:00"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
 ### `/api/schedule/stats` (GET)
 #### Description
 Return statistics about the schedule and workers to get it done.
@@ -375,7 +499,7 @@ curl -ksX GET 'https://localhost:8080/api/schedule/stats' | jq
 #### Description
 List of tasks that completed successfully.
 #### Parameters
-- _index_ : 0 is the first index and represents the most current task that succeeded.
+- _index_ : 0 is the first index and default when not provided representing the most current task that succeeded.
 - _limit_ : number of successful tasks to return and if not given all of them.
 #### Content
 A JSON object with information about the runid, target, task, revision of the AE, and timing. With respect to timing, can only count on scheduled, started, and completed. The `load_*` and `start_*` identify when the algorthing name has its input data being loaded (`load_*`) vs when run() (`start_*`) is called.
@@ -432,8 +556,12 @@ curl -ksX GET 'https://localhost:8080/api/schedule/succeeded?index=0&limit=3' | 
 ```
 ### `/api/schedule/to-do` (GET)
 #### Description
+List of tasks that are scheduled to run when tasks they depend on finish.
 #### Parameters
+- _index_ : 0 is the first index and default when index is not given representing the next task to be run
+- _limit_ : the maximum number of tasks to return defaulting to the entire list when not provided
 #### Content
+#### Example
 ```
 curl -ksX GET 'https://localhost:8080/api/schedule/to-do' | jq
 ```
@@ -448,5 +576,4 @@ curl -ksX GET 'https://localhost:8080/api/schedule/to-do' | jq
   "status": "success"
 }
 ```
-#### Example
 

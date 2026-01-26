@@ -537,7 +537,10 @@ def update(values: [(str, bool)], original: dawgie.pl.dag.Node, rid: int):
 
 def view_doing(index: int = 0, limit: int = None) -> dict:
     active = list(filter(lambda t: t.get('status') == State.running, que))
-    return {a.tag: sorted(list(a.get('doing'))) for a in active[index:(index+limit) if limit is not None else limit]}
+    return {
+        a.tag: sorted(list(a.get('doing')))
+        for a in active[index : (index + limit) if limit is not None else limit]
+    }
 
 
 def view_events() -> [{}]:
@@ -550,7 +553,7 @@ def view_events() -> [{}]:
             try:
                 result[p.tag].add(round(_delay(m).total_seconds()))
             except _DelayNotKnowableError:
-                result[p.tag].add(0)
+                result[p.tag].add(-9999)
             pass
         pass
     return [{'actor': k, 'delays': sorted(result[k])} for k in sorted(result)]
@@ -579,5 +582,5 @@ def view_todo(index: int = 0, limit: int = None) -> [dict]:
     wait.sort(key=lambda t: t.get('level'))
     return [
         {'name': w.tag, 'targets': sorted(list(w.get('todo')))}
-        for w in wait[index:(index+limit) if limit is not None else limit]
+        for w in wait[index : (index + limit) if limit is not None else limit]
     ]
