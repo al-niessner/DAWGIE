@@ -33,14 +33,14 @@ An example of how to use the endpoint with curl including its output. All exampl
 
 - [`/api/ae/name`](#apiaename-get)
 - [`/api/cmd/run`](#/api/cmd/run-get)
+- [`/api/database/filter/target`](#/api/database/filter/target-get)
+- [`/api/database/filter/task`](#/api/database/filter/task-get)
+- [`/api/database/filter/alg`](#/api/database/filter/alg-get)
+- [`/api/database/filter/sv`](#/api/database/filter/sv-get)
+- [`/api/database/filter/val`](#/api/database/filter/val-get)
+- [`/api/database/runid/max`](#/api/database//runid/max-get)
 - [`/api/database/runnables`](#/api/database/runnables-get)
 - [`/api/database/search`](#/api/database/search-get)
-- [`/api/database/search/runid`](#/api/database/search/runid-get)
-- [`/api/database/search/target`](#/api/database/search/target-get)
-- [`/api/database/search/task`](#/api/database/search/task-get)
-- [`/api/database/search/alg`](#/api/database/search/alg-get)
-- [`/api/database/search/sv`](#/api/database/search/sv-get)
-- [`/api/database/search/val`](#/api/database/search/val-get)
 - [`/api/database/targets`](#/api/database/targets-get)
 - [`/api/database/view`](#/api/database/view-get)
 - [`/api/df_model/statistics`](#/api/df_model/statistics-get)
@@ -79,6 +79,40 @@ curl -ksX GET 'https://localhost:8080/api/ae/name' | jq
 #### Parameters
 #### Content
 #### Example
+### `/api/database/filter/target` --> no params returns full list (GET)
+#### Description
+#### Parameters
+#### Content
+#### Example
+### `/api/database/filter/task` --> no params returns full list (GET)
+#### Description
+#### Parameters
+#### Content
+#### Example
+### `/api/database/filter/alg` --> no params returns full list (GET)
+#### Description
+#### Parameters
+#### Content
+#### Example
+### `/api/database/filter/sv` --> no params returns full list (GET)
+#### Description
+#### Parameters
+#### Content
+#### Example
+### `/api/database/filter/val` --> no params returns full list (GET)
+#### Description
+#### Parameters
+#### Content
+#### Example
+### `/api/database/runid/max`  --> no params returns max value (GET)
+#### Description
+The largest known runid in the system.
+#### Parameters
+_None_
+#### Content
+JSON int that is the largest known runid.
+#### Example
+
 ### `/api/database/runnables` (GET)
 #### Description
 Get a list of known runnable entities in the pipeline.
@@ -111,36 +145,6 @@ curl -ksX GET 'https://localhost:8080/api/database/runnables' | jq
 }
 ```
 ### `/api/database/search` (GET)
-#### Description
-#### Parameters
-#### Content
-#### Example
-### `/api/database/search/runid`  --> no params returns max value (GET)
-#### Description
-#### Parameters
-#### Content
-#### Example
-### `/api/database/search/target` --> no params returns full list (GET)
-#### Description
-#### Parameters
-#### Content
-#### Example
-### `/api/database/search/task` --> no params returns full list (GET)
-#### Description
-#### Parameters
-#### Content
-#### Example
-### `/api/database/search/alg` --> no params returns full list (GET)
-#### Description
-#### Parameters
-#### Content
-#### Example
-### `/api/database/search/sv` --> no params returns full list (GET)
-#### Description
-#### Parameters
-#### Content
-#### Example
-### `/api/database/search/val` --> no params returns full list (GET)
 #### Description
 #### Parameters
 #### Content

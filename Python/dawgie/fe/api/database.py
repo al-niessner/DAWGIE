@@ -6,6 +6,10 @@ import dawgie.db
 import dawgie.pl.schedule
 
 
+def runid_max():
+    return build_return_object(max([1, dawgie.db.next() - 1]))
+
+
 def runnables():
     return build_return_object(
         sorted(dawgie.pl.schedule.tasks(), key=str.casefold)
@@ -13,12 +17,12 @@ def runnables():
 
 
 def search(
-    runid: int = None,
-    target: str = None,
-    task: str = None,
-    alg: str = None,
-    sv: str = None,
-    val: str = None,
+    runids: str = None,
+    targets: str = None,
+    tasks: str = None,
+    algs: str = None,
+    svs: str = None,
+    vals: str = None,
 ):
     return
 

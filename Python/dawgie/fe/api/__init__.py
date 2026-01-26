@@ -128,14 +128,14 @@ def rev_current():
 
 DynamicContent(ae_name, '/api/ae/name')
 # DynamicContent(, '/api/cmd/run')
+# DynamicContent(database., '/api/database/filter/target')  # no params returns full list
+# DynamicContent(database., '/api/database/filter/task')  # no params returns full list
+# DynamicContent(database., '/api/database/filter/alg')  # no params returns full list
+# DynamicContent(database., '/api/database/filter/sv')  # no params returns full list
+# DynamicContent(database., '/api/database/filter/val')  # no params returns full list
+DynamicContent(database.runid_max, '/api/database/runid/max')
 DynamicContent(database.runnables, '/api/database/runnables')
 # DynamicContent(database., '/api/database/search')
-# DynamicContent(database., '/api/database/search/runid')  # no params returns max value
-# DynamicContent(database., '/api/database/search/target')  # no params returns full list
-# DynamicContent(database., '/api/database/search/task')  # no params returns full list
-# DynamicContent(database., '/api/database/search/alg')  # no params returns full list
-# DynamicContent(database., '/api/database/search/sv')  # no params returns full list
-# DynamicContent(database., '/api/database/search/val')  # no params returns full list
 DynamicContent(database.targets, '/api/database/targets')
 # DynamicContent(database., '/api/database/view')  # given a full name, generate its view
 DynamicContent(df_model_statistics, '/api/df_model/statistics')
