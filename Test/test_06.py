@@ -47,6 +47,7 @@ import dawgie.pl.scan
 import dawgie.pl.schedule
 import os
 import sys
+import tempfile
 import unittest
 
 
@@ -97,29 +98,30 @@ class Schedule(unittest.TestCase):
         return
 
     def test_complete(self):
-        self.assertEqual(0, len(dawgie.pl.schedule.que))
-        nodes = self._unravel(dawgie.pl.schedule.ae.at)
-        dei = [node.tag for node in nodes].index('disk.engine')
-        for node in nodes:
-            self.assertEqual(0, len(node.get('doing')) + len(node.get('todo')))
-            pass
-        nodes[dei].get('doing').add('b')
-        dawgie.pl.schedule.que.append(nodes[dei])
-        dawgie.pl.schedule.complete(
-            nodes[dei], 3, 'b', {}, dawgie.pl.jobinfo.State.success
-        )
-        self.assertEqual(0, len(dawgie.pl.schedule.que))
-        nodes[dei].get('doing').add('d')
-        nodes[dei].get('todo').add('f')
-        dawgie.pl.schedule.que.append(nodes[dei])
-        dawgie.pl.schedule.complete(
-            nodes[dei], 3, 'd', {}, dawgie.pl.jobinfo.State.success
-        )
-        self.assertEqual(1, len(dawgie.pl.schedule.que))
-        nodes[dei].get('doing').clear()
-        nodes[dei].get('todo').clear()
-        nodes[dei].set('status', State.success)
-        dawgie.pl.schedule.que.clear()
+        with tempfile.TemporaryDirectory() as data_dbs:
+            dawgie.context.data_dbs = data_dbs
+            self.assertEqual(0, len(dawgie.pl.schedule.que))
+            nodes = self._unravel(dawgie.pl.schedule.ae.at)
+            dei = [node.tag for node in nodes].index('disk.engine')
+            for node in nodes:
+                self.assertEqual(0, len(node.get('doing')) + len(node.get('todo')))
+            nodes[dei].get('doing').add('b')
+            dawgie.pl.schedule.que.append(nodes[dei])
+            dawgie.pl.schedule.complete(
+                nodes[dei], 3, 'b', {}, dawgie.pl.jobinfo.State.success
+            )
+            self.assertEqual(0, len(dawgie.pl.schedule.que))
+            nodes[dei].get('doing').add('d')
+            nodes[dei].get('todo').add('f')
+            dawgie.pl.schedule.que.append(nodes[dei])
+            dawgie.pl.schedule.complete(
+                nodes[dei], 3, 'd', {}, dawgie.pl.jobinfo.State.success
+            )
+            self.assertEqual(1, len(dawgie.pl.schedule.que))
+            nodes[dei].get('doing').clear()
+            nodes[dei].get('todo').clear()
+            nodes[dei].set('status', State.success)
+            dawgie.pl.schedule.que.clear()
         return
 
     def test_defer(self):
