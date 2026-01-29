@@ -40,10 +40,12 @@ NTR:
 import mock  # set up an FSM for dawgie
 
 import dawgie
+import dawgie.context
 import dawgie.db
 import dawgie.pl.schedule
 import dawgie.util
 import dawgie.util.names
+import tempfile
 import unittest
 
 
@@ -98,6 +100,7 @@ class Work(dawgie.Algorithm, dawgie.Analyzer, dawgie.Regression):
         dawgie.Algorithm.__init__(self)
         dawgie.Analyzer.__init__(self)
         dawgie.Regression.__init__(self)
+        self._version_ = dawgie.VERSION(-1,-2,-3)
         self._fb = fb
         self._name = name
         self._prev = prev
@@ -132,6 +135,8 @@ class Work(dawgie.Algorithm, dawgie.Analyzer, dawgie.Regression):
 class ScheduleRules(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls._data_dbs = tempfile.TemporaryDirectory()
+        dawgie.context.data_dbs = cls._data_dbs.name
         cls._targets_orig = getattr(dawgie.db, 'targets')
         cls._task_name_orig = getattr(dawgie.util.names, 'task_name')
         setattr(dawgie.db, 'targets', _mock_targets)
@@ -153,6 +158,7 @@ class ScheduleRules(unittest.TestCase):
         setattr(dawgie.db, 'targets', cls._targets_orig)
         setattr(dawgie.util, 'task_name', cls._task_name_orig)
         setattr(dawgie.util.names, 'task_name', cls._task_name_orig)
+        cls._data_dbs.cleanup()
         return
 
     def test_issue_194(self):
@@ -187,7 +193,7 @@ class ScheduleRules(unittest.TestCase):
         jobs[0].set('status', dawgie.pl.schedule.State.running)
         jobs[0].get('do').clear()
         dawgie.pl.schedule.complete(
-            jobs[0], 1, 'Target_3', {}, dawgie.pl.schedule.State.success
+            jobs[0], 1, 'Target_3', {'started':'11-13-17 23:29:31'}, dawgie.pl.schedule.State.success
         )
         self.assertNotIn('Target_3', jobs[0].get('doing'))
         dawgie.pl.schedule.update(
@@ -198,7 +204,7 @@ class ScheduleRules(unittest.TestCase):
         jobs[1].set('status', dawgie.pl.schedule.State.running)
         jobs[1].get('do').clear()
         dawgie.pl.schedule.complete(
-            jobs[1], 1, 'Target_3', {}, dawgie.pl.schedule.State.success
+            jobs[1], 1, 'Target_3', {'started':'11-13-17 23:29:31'}, dawgie.pl.schedule.State.success
         )
         self.assertNotIn('Target_3', jobs[1].get('doing'))
         self.assertEqual(0, len(jobs[1].get('doing')))
@@ -208,7 +214,7 @@ class ScheduleRules(unittest.TestCase):
         jobs[2].set('status', dawgie.pl.schedule.State.running)
         jobs[2].get('do').clear()
         dawgie.pl.schedule.complete(
-            jobs[2], 1, 'Target_3', {}, dawgie.pl.schedule.State.success
+            jobs[2], 1, 'Target_3', {'started':'11-13-17 23:29:31'}, dawgie.pl.schedule.State.success
         )
         self.assertNotIn('Target_3', jobs[2].get('doing'))
         self.assertEqual(0, len(jobs[1].get('doing')))
@@ -222,7 +228,7 @@ class ScheduleRules(unittest.TestCase):
         jobs[1].set('status', dawgie.pl.schedule.State.running)
         jobs[1].get('do').clear()
         dawgie.pl.schedule.complete(
-            jobs[1], 1, 'Target_3', {}, dawgie.pl.schedule.State.success
+            jobs[1], 1, 'Target_3', {'started':'11-13-17 23:29:31'}, dawgie.pl.schedule.State.success
         )
         self.assertNotIn('Target_3', jobs[1].get('doing'))
         self.assertEqual(0, len(jobs[1].get('doing')))
@@ -236,7 +242,7 @@ class ScheduleRules(unittest.TestCase):
         jobs[1].set('status', dawgie.pl.schedule.State.running)
         jobs[1].get('do').clear()
         dawgie.pl.schedule.complete(
-            jobs[1], 1, 'Target_3', {}, dawgie.pl.schedule.State.success
+            jobs[1], 1, 'Target_3', {'started':'11-13-17 23:29:31'}, dawgie.pl.schedule.State.success
         )
         self.assertNotIn('Target_3', jobs[1].get('doing'))
         self.assertEqual(0, len(jobs[1].get('doing')))
@@ -250,7 +256,7 @@ class ScheduleRules(unittest.TestCase):
         jobs[1].set('status', dawgie.pl.schedule.State.running)
         jobs[1].get('do').clear()
         dawgie.pl.schedule.complete(
-            jobs[1], 1, 'Target_3', {}, dawgie.pl.schedule.State.success
+            jobs[1], 1, 'Target_3', {'started':'11-13-17 23:29:31'}, dawgie.pl.schedule.State.success
         )
         self.assertNotIn('Target_3', jobs[1].get('doing'))
         self.assertEqual(0, len(jobs[1].get('doing')))
@@ -274,7 +280,7 @@ class ScheduleRules(unittest.TestCase):
         ]:
             print('target:', target)
             dawgie.pl.schedule.complete(
-                jobs[0], 1, target, {}, dawgie.pl.schedule.State.success
+                jobs[0], 1, target, {'started':'11-13-17 23:29:31'}, dawgie.pl.schedule.State.success
             )
             self.assertNotIn('Target_3', jobs[0].get('doing'))
             dawgie.pl.schedule.update(
@@ -287,7 +293,7 @@ class ScheduleRules(unittest.TestCase):
         jobs[0].set('status', dawgie.pl.schedule.State.running)
         jobs[0].get('do').clear()
         dawgie.pl.schedule.complete(
-            jobs[0], 1, '__all__', {}, dawgie.pl.schedule.State.success
+            jobs[0], 1, '__all__', {'started':'11-13-17 23:29:31'}, dawgie.pl.schedule.State.success
         )
         self.assertNotIn('__all__', jobs[0].get('doing'))
         dawgie.pl.schedule.update(
