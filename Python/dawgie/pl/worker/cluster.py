@@ -101,6 +101,7 @@ def execute(address: (str, int), inc: int, ps_hint: int, rev: str):
                 str(m.jobid),
                 str(m.runid),
                 str(m.target),
+                exc_info=True,
             )
             m = dawgie.pl.message.make(
                 typ=dawgie.pl.message.Type.response,

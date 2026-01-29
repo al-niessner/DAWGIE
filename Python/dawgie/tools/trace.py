@@ -88,13 +88,11 @@ def _trace(t, path=[], routes={}):
     if list(t):
         for c in filter(lambda n, this=t.tag: n.tag != this, t):
             _trace(c, path.copy(), routes)
-        pass
-    elif t.get('shape') != dawgie.pl.dag.Shape.rectangle:  # fmt: skip # pylint: disable=used-before-assignment
+    elif t.get('shape') != dawgie.pl.dag.Shape.rectangle:
         key = (path[0], path[-1])
         if key not in routes:
             routes[key] = []
         routes[key].append(path)
-        pass
     return routes
 
 

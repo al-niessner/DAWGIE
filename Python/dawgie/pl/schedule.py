@@ -276,7 +276,7 @@ def complete(job, runid, target, timing, status):
         {
             'changeset': dawgie.context.git_rev,
             'runid': runid,
-            status: status.name,
+            'status': status.name,
             'target': target,
             'task': job.tag,
             'timing': timing,
