@@ -50,9 +50,10 @@ import shutil
 import tempfile
 import unittest
 
+
 class Foo(dawgie.Version):
     def __init__(self):
-        self._version_ = dawgie.VERSION(-3,-2,-1)
+        self._version_ = dawgie.VERSION(-3, -2, -1)
 
 
 class Farm(unittest.TestCase):
@@ -125,7 +126,12 @@ class Farm(unittest.TestCase):
         dawgie.pl.schedule.que.extend([a, b, c, d, e, f])
         dawgie.pl.farm.Hand._res(
             dawgie.pl.message.make(
-                inc='B', jid='b', rid=42, suc=None, tim={'started':'11-13-17 23:29:31'}, val=[]
+                inc='B',
+                jid='b',
+                rid=42,
+                suc=None,
+                tim={'started': '11-13-17 23:29:31'},
+                val=[],
             )
         )
         for l in ['do', 'doing', 'todo']:

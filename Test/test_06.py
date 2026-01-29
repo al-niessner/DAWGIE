@@ -105,26 +105,38 @@ class Schedule(unittest.TestCase):
             nodes = self._unravel(dawgie.pl.schedule.ae.at)
             dei = [node.tag for node in nodes].index('disk.engine')
             for node in nodes:
-                self.assertEqual(0, len(node.get('doing')) + len(node.get('todo')))
+                self.assertEqual(
+                    0, len(node.get('doing')) + len(node.get('todo'))
+                )
             nodes[dei].get('doing').add('b')
             dawgie.pl.schedule.que.append(nodes[dei])
             dawgie.pl.schedule.complete(
-                nodes[dei], 3, 'b', {'started':'11-13-17 23:29:31'}, dawgie.pl.jobinfo.State.success
+                nodes[dei],
+                3,
+                'b',
+                {'started': '11-13-17 23:29:31'},
+                dawgie.pl.jobinfo.State.success,
             )
             self.assertEqual(0, len(dawgie.pl.schedule.que))
             nodes[dei].get('doing').add('d')
             nodes[dei].get('todo').add('f')
             dawgie.pl.schedule.que.append(nodes[dei])
             dawgie.pl.schedule.complete(
-                nodes[dei], 3, 'd', {'started':'11-13-17 23:29:31'}, dawgie.pl.jobinfo.State.success
+                nodes[dei],
+                3,
+                'd',
+                {'started': '11-13-17 23:29:31'},
+                dawgie.pl.jobinfo.State.success,
             )
             self.assertEqual(1, len(dawgie.pl.schedule.que))
             jf = os.path.join(
                 dawgie.context.data_dbs,
                 'chronicles',
-                '11','13','17',
+                '11',
+                '13',
+                '17',
                 '3.json',
-    )
+            )
             self.assertTrue(os.path.isfile(jf))
             with open(jf, 'rt', encoding='utf-8') as file:
                 entries = json.load(file)
