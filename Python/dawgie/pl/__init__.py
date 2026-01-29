@@ -8,7 +8,7 @@ The pipeline system has N goals:
   4. Distribute work across cores and nodes.
 
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
