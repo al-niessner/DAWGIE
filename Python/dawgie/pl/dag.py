@@ -43,6 +43,7 @@ import dawgie.context
 import dawgie.util
 import dawgie.util.fifo
 import enum
+
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import pydot

@@ -43,6 +43,7 @@ import dawgie.db.lockview
 import dawgie.context
 import dawgie.pl.message
 import dawgie.security
+
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import pickle

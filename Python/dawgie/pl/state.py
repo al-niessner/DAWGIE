@@ -85,6 +85,7 @@ import dawgie.tools.trace
 import doctest
 import enum
 import importlib
+
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import pydot

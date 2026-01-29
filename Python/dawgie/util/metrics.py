@@ -40,6 +40,7 @@ NTR: 49811
 
 import dawgie
 import dawgie.db.util
+
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 
 

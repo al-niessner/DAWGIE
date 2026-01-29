@@ -45,6 +45,7 @@ import dawgie.context
 import dawgie.pl.state
 import dawgie.util
 import logging
+
 import matplotlib; matplotlib.use("Agg")  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import twisted.internet
 import sys

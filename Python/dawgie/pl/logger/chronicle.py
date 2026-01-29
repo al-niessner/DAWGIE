@@ -1,4 +1,5 @@
 '''
+--
 COPYRIGHT:
 Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
@@ -33,61 +34,46 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-NTR:
+NTR: 49811
 '''
 
-import dawgie
-
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
-import importlib
+import datetime
+import dawgie.context
+import json
 import os
 
 
-def for_factories(ae, pkg):
-    factories = {e: [] for e in dawgie.Factories}
-    for pkg_name in filter(
-        lambda fn: os.path.isdir(os.path.join(ae, fn)) and fn != '__pycache__',
-        os.listdir(ae),
+def append(entry: {}):
+    if not all(
+        key in entry
+        for key in [
+            'changeset',
+            'runid',
+            'status',
+            'target',
+            'task',
+            'timing',
+            'version',
+        ]
     ):
-        fp = '.'.join([pkg, pkg_name])
-        mod = importlib.import_module(fp)
-        dm = dir(mod)
-        ignore = any(
-            [
-                (
-                    getattr(mod, 'dawgie_ignore')
-                    if 'dawgie_ignore' in dm
-                    else False
-                ),
-                (
-                    getattr(mod, 'DAWGIE_IGNORE')
-                    if 'DAWGIE_IGNORE' in dm
-                    else False
-                ),
-            ]
+        raise TypeError(
+            'does not look like an execution mesage because it is missing expected keys'
         )
-
-        if ignore:
-            log.warning('Ignoring package: %s', fp)
-            continue
-
-        log.info('Working on module %s', fp)
-
-        if not any((e.name in dm for e in dawgie.Factories)):
-            log.error(
-                'The directory %s %s %s %s',
-                os.path.join(ae, pkg_name),
-                'does not conform to the architecture and design.',
-                'It must have at least one analysis, events,',
-                'regression, or task factory. Ignoring the package.',
-            )
-            continue
-
-        for e in dawgie.Factories:
-            if e.name in dm:
-                factories[e].append(getattr(mod, e.name))
-            pass
-        pass
-    for e in dawgie.Factories:
-        log.info('%s: %d', e.name, len(factories[e]))
-    return factories
+    for key, value in entry['timing'].items():
+        if isinstance(value, datetime.datetime):
+            entry[key] = value.isoformat(sep=' ')
+    entries = []
+    journal = os.path.join(
+        dawgie.context.data_dbs,
+        'chronicles',
+        entry['timing']['started'].split(' ')[0].replace('-', os.path.sep),
+    )
+    if not os.path.isdir(journal):
+        os.makedirs(journal, 0o755, True)
+    journal = os.path.join(journal, f'{entry["runid"]}.json')
+    if os.path.isfile(journal):
+        with open(journal, 'rt', encoding='utf-8') as file:
+            entries = json.load(file)
+    entries.append(entry)
+    with open(journal, 'tw', encoding='utf-8') as file:
+        json.dump(entries, file, indent=2)
