@@ -2,7 +2,7 @@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -60,6 +60,7 @@ import dawgie.db.util
 import dawgie.db.util.wraps
 import dawgie.util
 import dawgie.util.metrics
+
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import random
@@ -1867,7 +1868,7 @@ def targets():
     cur.execute('SELECT name from Target;')
     result = cur.fetchall()
     cur.close()
-    conn.close()  # psycopg3 problem # pylint:disable=no-member
+    conn.close()  # psycopg3 problem # fmt: skip # pylint: disable=no-member
     return [r[0] for r in result]  # fmt: skip # need a list so pylint: disable=consider-using-generator
 
 

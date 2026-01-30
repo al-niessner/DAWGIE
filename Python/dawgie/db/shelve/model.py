@@ -2,7 +2,7 @@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -41,6 +41,7 @@ NTR:
 import collections
 import dawgie.util
 import dawgie.util.metrics
+
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 
 from dawgie import Dataset, Timeline

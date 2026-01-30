@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 '''
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -40,6 +40,7 @@ NTR:
 import dawgie
 import dawgie.pl.worker
 import importlib
+
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import signal
 
@@ -100,6 +101,7 @@ def execute(address: (str, int), inc: int, ps_hint: int, rev: str):
                 str(m.jobid),
                 str(m.runid),
                 str(m.target),
+                exc_info=True,
             )
             m = dawgie.pl.message.make(
                 typ=dawgie.pl.message.Type.response,

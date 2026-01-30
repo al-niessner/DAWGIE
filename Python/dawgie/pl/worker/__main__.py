@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 '''
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -42,11 +42,13 @@ NTR:
 
 import argparse
 import dawgie.context
+
 import dawgie.pl.state; dawgie.context.fsm = dawgie.pl.state.FSM()  # needs to be here for aws import # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import dawgie.pl.worker
 import dawgie.pl.worker.aws
 import dawgie.pl.worker.cluster
 import dawgie.security
+
 import matplotlib; matplotlib.use('Agg')  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 import sys

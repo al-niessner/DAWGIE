@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 '''
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -45,6 +45,7 @@ import dawgie.context
 import dawgie.pl.state
 import dawgie.util
 import logging
+
 import matplotlib; matplotlib.use("Agg")  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import twisted.internet
 import sys

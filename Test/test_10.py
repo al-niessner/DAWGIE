@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -39,6 +39,7 @@ NTR:
 
 import mock  # set up an FSM for dawgie
 
+import dawgie
 import dawgie.context
 import dawgie.pl.dag
 import dawgie.pl.farm
@@ -48,6 +49,11 @@ import os
 import shutil
 import tempfile
 import unittest
+
+
+class Foo(dawgie.Version):
+    def __init__(self):
+        self._version_ = dawgie.VERSION(-3, -2, -1)
 
 
 class Farm(unittest.TestCase):
@@ -100,6 +106,7 @@ class Farm(unittest.TestCase):
     def test_hand__res(self):
         a = dawgie.pl.dag.Node('a')
         b = dawgie.pl.dag.Node('b')
+        b.set('alg', Foo())
         c = dawgie.pl.dag.Node('c')
         d = dawgie.pl.dag.Node('d')
         e = dawgie.pl.dag.Node('e')
@@ -119,7 +126,12 @@ class Farm(unittest.TestCase):
         dawgie.pl.schedule.que.extend([a, b, c, d, e, f])
         dawgie.pl.farm.Hand._res(
             dawgie.pl.message.make(
-                inc='B', jid='b', rid=42, suc=None, tim={}, val=[]
+                inc='B',
+                jid='b',
+                rid=42,
+                suc=None,
+                tim={'started': '11-13-17 23:29:31'},
+                val=[],
             )
         )
         for l in ['do', 'doing', 'todo']:

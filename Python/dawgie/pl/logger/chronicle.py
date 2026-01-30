@@ -1,5 +1,4 @@
-'''Common utilities for the pipeline
-
+'''
 --
 COPYRIGHT:
 Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
@@ -38,13 +37,43 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR: 49811
 '''
 
-# Used to be a module and do not want to go and change legacy code since
-# it is working. However, want to add more items that would make the module
-# large and cumbersome. Moved it to a package with the old implementation
-# broken up into smaller modules. Therefore,
-# pylint: disable=unused-import
-# to allow the functions to be mapped to here were the legacy code expects it.
-from .args import log_level, set_ports  # noqa: F401
-from .metrics import MetricStateVector, MetricValue  # noqa: F401
-from .names import task_name, verify_name  # noqa: F401
-from .refs import algref2svref, as_vref, svref2vref, vref_as_name  # noqa: F401
+import datetime
+import dawgie.context
+import json
+import os
+
+
+def append(entry: {}):
+    if not all(
+        key in entry
+        for key in [
+            'changeset',
+            'runid',
+            'status',
+            'target',
+            'task',
+            'timing',
+            'version',
+        ]
+    ):
+        raise TypeError(
+            'does not look like an execution mesage because it is missing expected keys'
+        )
+    for key, value in entry['timing'].items():
+        if isinstance(value, datetime.datetime):
+            entry[key] = value.isoformat(sep=' ')
+    entries = []
+    journal = os.path.join(
+        dawgie.context.data_dbs,
+        'chronicles',
+        entry['timing']['started'].split(' ')[0].replace('-', os.path.sep),
+    )
+    if not os.path.isdir(journal):
+        os.makedirs(journal, 0o755, True)
+    journal = os.path.join(journal, f'{entry["runid"]}.json')
+    if os.path.isfile(journal):
+        with open(journal, 'rt', encoding='utf-8') as file:
+            entries = json.load(file)
+    entries.append(entry)
+    with open(journal, 'tw', encoding='utf-8') as file:
+        json.dump(entries, file, indent=2)
