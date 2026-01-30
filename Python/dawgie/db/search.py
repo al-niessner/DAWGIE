@@ -47,13 +47,7 @@ PARAMS = collections.namedtuple(
 )
 
 
-@dataclasses.dataclass
-class Range:
-    start: int
-    stop: int
-
-
-class Window(abc.ABC):
+class Facade(abc.ABC):
     '''
     Special values:
 
@@ -83,10 +77,11 @@ class Window(abc.ABC):
                     start, stop = val.split(':')
                     ranges.append(
                         Range(
-                            start=int(start), stop=int(stop) if stop else None
+                            start=int(start) if start else 0,
+                            stop=int(stop) if stop else None,
                         )
                     )
-                else:
+                elif val:
                     indices.add(int(val))
             runidset = [-1]
             if indices != {-1} or ranges:
@@ -98,13 +93,16 @@ class Window(abc.ABC):
                             continue
                         if r.start > merged[-1].stop:
                             merged.append(r)
-                        elif r.stop > merged[-1].stop:
+                        elif r.stop is None or r.stop > merged[-1].stop:
                             merged[-1].stop = r.stop
                     ranges = merged
                 runidset = ranges if ranges else []
                 idx = []
                 for i in indices:
-                    if not any(r.start <= i < r.stop for r in ranges):
+                    if not any(
+                        r.start <= i < (i + 1 if r.stop is None else r.stop)
+                        for r in ranges
+                    ):
                         idx.append(i)
                 indices = sorted(idx)
                 runidset.extend(indices)
@@ -129,7 +127,7 @@ class Window(abc.ABC):
         then the list will always be 0..1 strings. If 0, then no match. If 1,
         then it be first:last+1 even if the indices are not continuous.
         '''
-        return self._filter(Window._scrub(parameters))
+        return self._filter(Facade._scrub(parameters))
 
     def find(
         self, parameters: PARAMS, index: int = 0, limit: int = None
@@ -141,4 +139,10 @@ class Window(abc.ABC):
         as no caching is done for simplicity reasons. Hence large searches
         are expensive.
         '''
-        return self._find(Window._scrub(parameters), index, limit)
+        return self._find(Facade._scrub(parameters), index, limit)
+
+
+@dataclasses.dataclass
+class Range:
+    start: int
+    stop: int
