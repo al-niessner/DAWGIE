@@ -101,6 +101,7 @@ setuptools.setup(
     packages=[
         'dawgie',
         'dawgie.db',
+        'dawgie.db.post',
         'dawgie.db.shelve',
         'dawgie.db.tools',
         'dawgie.db.util',
