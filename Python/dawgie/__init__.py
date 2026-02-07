@@ -46,6 +46,9 @@ import logging
 import os
 import resource
 
+# 3.0.0 remove - this and cleanup code duplication
+# pylint: disable=duplicate-code
+
 
 # dawgie.scan will update this unit when it is more appropriate to have it
 # do something more meaningful.
