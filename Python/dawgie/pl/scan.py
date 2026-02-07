@@ -83,7 +83,7 @@ def advanced_factories(ae, pkg):
         setattr(dawgie, attrname, orignal)
     for tn, fs in REGISTRY.items():
         m = importlib.import_module('.'.join([pkg, tn]))
-        for fn in dawgie.Factories:
+        for f in dawgie.Factories:
             # This implementation allows users to override the factory/bot
             # pattern by defining their own factory functions at the task level
             # module. By utilizing dawgie.base classes directly along with their
@@ -91,6 +91,7 @@ def advanced_factories(ae, pkg):
             # to monkey patching. While the scanner will still detect all their
             # Algorithm/Analyzer/Regression classes, this redundancy is an
             # acceptable trade-off for a cleaner extension API.
+            fn = f.name
             if hasattr(m, fn):
                 LOG.warning(
                     'the module %s already contains the attribute %s. '
@@ -99,9 +100,13 @@ def advanced_factories(ae, pkg):
                     fn,
                 )
             else:
-                if getattr(fs, fn)():
-                    m.setattr(m, fn, getattr(fs, fn))
-                    factories[fn].append(getattr(m, fn))
+                setattr(m, fn, getattr(fs, fn))
+            if f == dawgie.Factories.events:
+                something = getattr(m, fn)()
+            else:
+                something = getattr(m, fn)().routines()
+            if something:
+                factories[f].append(getattr(m, fn))
     return factories
 
 

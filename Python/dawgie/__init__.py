@@ -94,6 +94,8 @@ METRIC = collections.namedtuple(
 MOMENT = collections.namedtuple('MOMENT', ['boot', 'day', 'dom', 'dow', 'time'])
 
 
+# 3.0.0 remove - factory and impl. Should return a moment instead of event then
+#                let dawgie.basis.Factories provide the factory and impl.
 def schedule(
     factory,
     impl,

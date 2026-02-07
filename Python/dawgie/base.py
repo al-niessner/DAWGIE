@@ -48,6 +48,7 @@ import logging
 import resource
 
 from dawgie import (
+    ALG_REF,
     EVENT,
     METRIC,
     AbortAEError,
@@ -169,7 +170,7 @@ class Analysis(_Metric):
         dawgie_db = importlib.import_module('dawgie.db')
         log = logging.getLogger(__name__ + '.Analysis')
         for step in filter(
-            lambda s: goto is None or s.name() == goto, self.list()
+            lambda s: goto is None or s.name() == goto, self.routines()
         ):
             if self.abort():
                 raise AbortAEError()
@@ -193,7 +194,7 @@ class Analysis(_Metric):
             setattr(step, 'caller', None)
         return
 
-    def list(self) -> Analyzer:
+    def routines(self) -> Analyzer:
         return [analyzer() for analyzer in self.__analyzers]
 
     def new_values(self, value: (str, bool) = None) -> [(str, bool)]:
@@ -256,7 +257,7 @@ class Regress(_Metric):
         dawgie_db = importlib.import_module('dawgie.db')
         log = logging.getLogger(__name__ + '.Regress')
         for step in filter(
-            lambda s: goto is None or s.name() == goto, self.list()
+            lambda s: goto is None or s.name() == goto, self.routines()
         ):
             if self.abort():
                 raise AbortAEError()
@@ -282,7 +283,7 @@ class Regress(_Metric):
             setattr(step, 'caller', None)
         return
 
-    def list(self) -> [Regression]:
+    def routines(self) -> [Regression]:
         return [regression() for regression in self.__regressions]
 
     def new_values(self, value: (str, bool) = None) -> [(str, bool)]:
@@ -359,7 +360,7 @@ class Task(_Metric):
         log = logging.getLogger(__name__ + '.Task')
         log.debug('Starting %s for %s', self.__name, self._target())
         for step in filter(
-            lambda s: goto is None or s.name() == goto, self.list()
+            lambda s: goto is None or s.name() == goto, self.routines()
         ):
             if self.abort():
                 raise AbortAEError()
@@ -388,7 +389,7 @@ class Task(_Metric):
         log.debug('Completed %s for %s', self.__name, self._target())
         return
 
-    def list(self) -> [Algorithm]:
+    def routines(self) -> [Algorithm]:
         return [algorithm() for algorithm in self.__algorithms]
 
     def new_values(self, value: (str, bool) = None) -> [(str, bool)]:
@@ -405,41 +406,66 @@ class Task(_Metric):
 class Factories:
     def __init__(self, name):
         self.__name = name
-        self.__algorithms = []
-        self.__analyzers = []
-        self.__events = []
-        self.__regressions = []
+        self.__algorithms = set()
+        self.__analyzers = set()
+        self.__events = {}
+        self.__regressions = set()
+
+    def __str__(self):
+        return f'''
+name: {self.__name}
+  algorithms:  {len(self.__algorithms)}
+  analyzers:   {len(self.__analyzers)}
+  events:      {len(self.__events)}
+  regressions: {len(self.__regressions)}
+'''
 
     @property
     def name(self):
         return self.__name
 
     def add(self, cls) -> Self:
-        for container, class_type in zip(
+        cn = '.'.join([cls.__module__, cls.__qualname__])
+        efs = []
+        for container, class_type, method in zip(
             [self.__algorithms, self.__analyzers, self.__regressions],
             [Algorithm, Analyzer, Regression],
+            [self.task, self.analysis, self.regress],
         ):
             if issubclass(cls, class_type):
-                container.append(cls)
-        self.__events.extend(getattr(cls, 'DAWGIE_SCHEDULE', []))
+                container.add(cls)
+                efs.append(method)
+        if cn not in self.__events:
+            self.__events[cn] = []
+            for ef in efs:
+                self.__events[cn].extend(
+                    EVENT(ALG_REF(ef, cls), e.moment)
+                    for e in getattr(cls, 'DAWGIE_SCHEDULE', [])
+                )
         return self
 
     def analysis(
-        self, _prefix: str, ps_hint: int = 0, runid: int = -1
+        self, _prefix: str = None, ps_hint: int = 0, runid: int = -1
     ) -> Analysis:
         return Analysis(self.__name, ps_hint, runid, self.__analyzers)
 
     def events(self) -> [EVENT]:
-        return self.__events
+        all_events = []
+        for events in self.__events.values():
+            all_events.extend(events)
+        return [
+            EVENT(ALG_REF(e.algref.factory, e.algref.impl()), e.moment)
+            for e in all_events
+        ]
 
     def regress(
-        self, _prefix: str, ps_hint: int = 0, target: str = '__none__'
+        self, _prefix: str = None, ps_hint: int = 0, target: str = '__none__'
     ) -> Regress:
         return Regress(self.__name, ps_hint, target, self.__regressions)
 
     def task(
         self,
-        _prefix: str,
+        _prefix: str = None,
         ps_hint: int = 0,
         runid: int = -1,
         target: str = '__none__',
