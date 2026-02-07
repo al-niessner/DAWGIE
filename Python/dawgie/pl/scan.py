@@ -83,7 +83,7 @@ def advanced_factories(ae, pkg):
         setattr(dawgie, attrname, orignal)
     for tn, fs in REGISTRY.items():
         m = importlib.import_module('.'.join([pkg, tn]))
-        for f in dawgie.Factories:
+        for f in factories:
             # This implementation allows users to override the factory/bot
             # pattern by defining their own factory functions at the task level
             # module. By utilizing dawgie.base classes directly along with their
