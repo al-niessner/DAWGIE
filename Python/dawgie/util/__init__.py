@@ -46,5 +46,5 @@ NTR: 49811
 # to allow the functions to be mapped to here were the legacy code expects it.
 from .args import log_level, set_ports  # noqa: F401
 from .metrics import MetricStateVector, MetricValue  # noqa: F401
-from .names import task_name, verify_name  # noqa: F401
+from .names import task_module, task_name, verify_name  # noqa: F401
 from .refs import algref2svref, as_vref, svref2vref, vref_as_name  # noqa: F401

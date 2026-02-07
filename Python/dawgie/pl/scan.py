@@ -49,6 +49,14 @@ LOG = logging.getLogger(__name__)
 REGISTRY = {}
 
 
+def _content(f: dawgie.Factories, fn: str, fs: dawgie.base.Factories) -> []:
+    if f == dawgie.Factories.events:
+        something = getattr(fs, fn)()
+    else:
+        something = getattr(fs, fn)(None).routines()
+    return something
+
+
 def _register(cls=None):
     ae_pkg = dawgie.context.ae_base_package
     tn_loc = len(ae_pkg.split('.'))
@@ -99,13 +107,9 @@ def advanced_factories(ae, pkg):
                     m.__name__,
                     fn,
                 )
-            else:
+            elif _content(f, fn, fs):
                 setattr(m, fn, getattr(fs, fn))
-            if f == dawgie.Factories.events:
-                something = getattr(m, fn)()
-            else:
-                something = getattr(m, fn)().routines()
-            if something:
+            if hasattr(m, fn):
                 factories[f].append(getattr(m, fn))
     return factories
 

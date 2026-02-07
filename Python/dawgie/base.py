@@ -445,7 +445,7 @@ name: {self.__name}
         return self
 
     def analysis(
-        self, _prefix: str = None, ps_hint: int = 0, runid: int = -1
+        self, _prefix: str, ps_hint: int = 0, runid: int = -1
     ) -> Analysis:
         return Analysis(self.__name, ps_hint, runid, self.__analyzers)
 
@@ -459,13 +459,13 @@ name: {self.__name}
         ]
 
     def regress(
-        self, _prefix: str = None, ps_hint: int = 0, target: str = '__none__'
+        self, _prefix: str, ps_hint: int = 0, target: str = '__none__'
     ) -> Regress:
         return Regress(self.__name, ps_hint, target, self.__regressions)
 
     def task(
         self,
-        _prefix: str = None,
+        _prefix: str,
         ps_hint: int = 0,
         runid: int = -1,
         target: str = '__none__',

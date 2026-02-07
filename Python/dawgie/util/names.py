@@ -42,15 +42,25 @@ import dawgie.context
 import logging
 
 
-def task_name(factory):
+def task_module(factory) -> str:
+    return '.'.join([dawgie.context.ae_base_package, task_name(factory)])
+
+
+def task_name(factory) -> str:
     '''Compute the pipeline specified prefix for any dawgie.Task
 
     Given the factory function for a list of dawgie.Task, compute the prefix
     to allow algorithms to share names sensibly. The rest of the name is just
     the index of the task in the list.
     '''
-    cnt = len(dawgie.context.ae_base_package.split('.'))
-    return '.'.join(factory.__module__.split('.')[cnt:])
+    if hasattr(factory, '__self__') and isinstance(
+        factory.__self__, dawgie.base.Factories
+    ):
+        tn = factory.__self__.name
+    else:
+        cnt = len(dawgie.context.ae_base_package.split('.'))
+        tn = '.'.join(factory.__module__.split('.')[cnt:])
+    return tn
 
 
 def verify_name(o, err=False):
