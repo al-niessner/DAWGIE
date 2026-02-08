@@ -48,24 +48,21 @@ import unittest
 
 
 class Logger(unittest.TestCase):
-    def __init__(self, *args):
-        unittest.TestCase.__init__(self, *args)
+    @classmethod
+    def setUpClass(self):
         fid, self.log_path = tempfile.mkstemp()
         os.close(fid)
         with open(self.log_path, 'tw') as file:
             file.write('yup\n')
         self.aborted = False
-        pass
 
     def _abort(self):
         self.aborted = True
         self._stop()
-        return
 
     def _log_msg(self):
         self.mylog.warning('some text %s', ', more text')
         twisted.internet.reactor.callLater(1, self._stop)
-        return
 
     def _start_logger(self):
         dawgie.pl.logger.start(self.log_path, dawgie.context.log_port)
@@ -76,11 +73,9 @@ class Logger(unittest.TestCase):
         logging.captureWarnings(True)
         self.mylog = logging.getLogger(__name__)
         self.mylog.addHandler(self.handler)
-        return
 
     def _stop(self):
         twisted.internet.reactor.stop()
-        return
 
     def test_issue_45(self):
         twisted.internet.reactor.callLater(0, self._start_logger)
@@ -93,13 +88,9 @@ class Logger(unittest.TestCase):
             text = f.read()
         self.assertTrue(text)
         self.assertLess(text.find('%s'), 0)
-        return
 
     def test_issue_236(self):
         self.assertEqual(10, dawgie.util.args.log_level('10'))
         self.assertEqual(
             logging.INFO, dawgie.util.args.log_level('logging.INFO')
         )
-        return
-
-    pass

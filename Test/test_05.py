@@ -45,8 +45,8 @@ import unittest
 
 
 class DAG(unittest.TestCase):
-    def __init__(self, *args):
-        unittest.TestCase.__init__(self, *args)
+    @classmethod
+    def setUpClass(self):
         self.__ae_dir = os.path.abspath(
             os.path.join(os.path.dirname(__file__), 'ae')
         )
