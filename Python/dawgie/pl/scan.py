@@ -166,11 +166,11 @@ def deprecated_factories(ae, pkg):
 
 def for_factories(ae, pkg):
     result = advanced_factories(ae, pkg)
-    print ('adv:', result)
+    print('adv:', result)
     if not result:
         LOG.critical(
             'The older factory/bot/alg pattern has been deprecated and is slated to be removed.'
         )
         result = deprecated_factories(ae, pkg)
-        print ('dep:', result)
+        print('dep:', result)
     return result
