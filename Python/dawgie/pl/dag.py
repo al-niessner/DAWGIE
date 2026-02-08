@@ -52,6 +52,7 @@ import xml.etree.ElementTree
 
 BOT_SET = (dawgie.Analysis, dawgie.Regress, dawgie.Task)
 
+
 class Construct:
     # pylint: disable=too-many-instance-attributes
     def __getitem__(self, key):
@@ -142,7 +143,9 @@ class Construct:
     def _build_tree(self, factories, shape, sub_algs, sub_dep):
         for factory in factories:
             bot = factory(dawgie.util.task_name(factory), -1)
-            for alg in bot.list() if isinstance(bot, BOT_SET) else bot.routines():
+            for alg in (
+                bot.list() if isinstance(bot, BOT_SET) else bot.routines()
+            ):
                 for sv in alg.state_vectors():
                     for vn in sv:
                         fn = '.'.join(
