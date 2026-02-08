@@ -149,6 +149,7 @@ class DBSerializer(twisted.internet.protocol.Factory):
                 # protocols are independent even if similar today
                 # pylint: disable=duplicate-code
                 log.critical('PGP support is deprecated and will be removed')
+                print('issue 323: shelve socket is not secure!!')
                 twisted.internet.reactor.listenTCP(
                     int(dawgie.context.db_port),
                     DBSerializer(),

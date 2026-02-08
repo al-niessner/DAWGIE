@@ -249,6 +249,7 @@ class FSM:
                     )
             else:
                 log.info('starting front end using HTTP')
+                print('issue 323: front-end socket is not secure!!')
                 twisted.internet.reactor.listenTCP(
                     dawgie.context.fe_port, factory
                 )

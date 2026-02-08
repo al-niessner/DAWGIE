@@ -593,6 +593,7 @@ def initialize():
         )
     else:
         logging.critical('PGP support is deprecated and will be removed')
+        print('issue 323: shelve socket is not secure!!')
         twisted.internet.reactor.listenTCP(
             int(dawgie.context.cloud_port),
             Company(),

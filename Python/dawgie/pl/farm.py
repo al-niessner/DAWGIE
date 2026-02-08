@@ -442,6 +442,7 @@ def plow():
         # protocols are independent even if similar today
         # pylint: disable=duplicate-code
         log.critical('PGP support is deprecated and will be removed')
+        print('issue 323: farm socket is not secure!!')
         twisted.internet.reactor.listenTCP(
             int(dawgie.context.farm_port),
             Foreman(),
