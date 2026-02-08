@@ -62,6 +62,7 @@ class Schedule(unittest.TestCase):
         sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
         dawgie.context.db_impl = 'test'
         dawgie.context.git_rev = 'test'
+        dawgie.pl.scan.reset(self.__ae_pkg)
         factories = dawgie.pl.scan.for_factories(self.__ae_dir, self.__ae_pkg)
         dawgie.pl.schedule.build(factories, [{}, {}, {}], [{}, {}, {}, {}])
         return

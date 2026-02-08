@@ -38,6 +38,7 @@ NTR:
 '''
 
 import dawgie.context
+import dawgie.pl.scan
 import dawgie.tools.compliant
 import os
 import unittest
@@ -49,6 +50,7 @@ class Compliant(unittest.TestCase):
             os.path.abspath(os.path.dirname(__file__)), 'ae'
         )
         dawgie.context.ae_base_package = 'ae'
+        dawgie.pl.scan.reset('ae')
         self.assertTrue(
             dawgie.tools.compliant._verify(
                 dawgie.tools.compliant._scan(), False, True
@@ -57,6 +59,7 @@ class Compliant(unittest.TestCase):
         return
 
     def test_bae(self):
+        dawgie.pl.scan.reset('bae')
         dawgie.context.ae_base_path = os.path.join(
             os.path.abspath(os.path.dirname(__file__)), 'bae'
         )
@@ -69,6 +72,7 @@ class Compliant(unittest.TestCase):
         return
 
     def test_nae(self):
+        dawgie.pl.scan.reset('nae')
         dawgie.context.ae_base_path = os.path.join(
             os.path.abspath(os.path.dirname(__file__)), 'nae'
         )

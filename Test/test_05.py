@@ -52,6 +52,7 @@ class DAG(unittest.TestCase):
         )
         self.__ae_pkg = 'ae'
         sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+        dawgie.pl.scan.reset(self.__ae_pkg)
         factories = dawgie.pl.scan.for_factories(self.__ae_dir, self.__ae_pkg)
         self.__dag = dawgie.pl.dag.Construct(factories)
         return

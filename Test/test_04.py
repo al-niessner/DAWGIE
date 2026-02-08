@@ -60,6 +60,7 @@ class Scan(unittest.TestCase):
         return
 
     def test_ae(self):
+        dawgie.pl.scan.reset(self.__ae_pkg)
         factories = dawgie.pl.scan.for_factories(self.__ae_dir, self.__ae_pkg)
         print('ae:')
         for k, v in factories.items():
@@ -80,6 +81,7 @@ class Scan(unittest.TestCase):
             self.assertTrue(isinstance(f('t', 0, 0, 0), dawgie.Task))
 
     def test_nae(self):
+        dawgie.pl.scan.reset(self.__nae_pkg)
         factories = dawgie.pl.scan.for_factories(self.__nae_dir, self.__nae_pkg)
         print('nae:')
         for k, v in factories.items():

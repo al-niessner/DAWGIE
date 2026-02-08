@@ -43,8 +43,9 @@ import logging
 import importlib
 import os
 import pkgutil
+import sys
 
-IGNORE = []
+IGNORE = set()
 LOG = logging.getLogger(__name__)
 REGISTRY = {}
 
@@ -82,7 +83,7 @@ def advanced_factories(ae, pkg):
             if not any(modinfo.name.startswith(ignore) for ignore in IGNORE):
                 m = importlib.import_module(modinfo.name)
                 if getattr(m, 'DAWGIE_IGNORE', False):
-                    IGNORE.append(modinfo.name)
+                    IGNORE.add(modinfo.name)
         if 'deprecated call' in REGISTRY:
             REGISTRY.clear()
         if not REGISTRY:
@@ -90,7 +91,7 @@ def advanced_factories(ae, pkg):
     finally:
         setattr(dawgie, attrname, orignal)
     for tn, fs in REGISTRY.items():
-        m = importlib.import_module('.'.join([pkg, tn]))
+        m = sys.modules['.'.join([pkg, tn])]
         for f in factories:
             # This implementation allows users to override the factory/bot
             # pattern by defining their own factory functions at the task level
@@ -100,7 +101,10 @@ def advanced_factories(ae, pkg):
             # Algorithm/Analyzer/Regression classes, this redundancy is an
             # acceptable trade-off for a cleaner extension API.
             fn = f.name
-            if hasattr(m, fn):
+            if hasattr(m, fn) and not (
+                hasattr(getattr(m, fn), '__self__')
+                and isinstance(getattr(m, fn).__self__, dawgie.base.Factories)
+            ):
                 LOG.warning(
                     'the module %s already contains the attribute %s. '
                     'Not overriding it.',
@@ -172,3 +176,13 @@ def for_factories(ae, pkg):
         )
         result = deprecated_factories(ae, pkg)
     return result
+
+
+def reset(pkg):
+    for key in filter(
+        lambda s, k=pkg + '.': s.startswith(k), list(sys.modules)
+    ):
+        del sys.modules[key]
+    REGISTRY.clear()
+    IGNORE.clear()
+    importlib.invalidate_caches()
