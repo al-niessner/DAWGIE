@@ -83,6 +83,7 @@ class Compliant(unittest.TestCase):
     def test_rule_10(self):
         self.assertTrue(dawgie.tools.compliant.rule_10('ae.network'))
         self.assertFalse(dawgie.tools.compliant.rule_10('bae.network'))
+        self.assertTrue(dawgie.tools.compliant.rule_10('nae.network'))
         return
 
     pass
