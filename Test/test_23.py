@@ -64,6 +64,13 @@ class Schedule(unittest.TestCase):
         dawgie.context.git_rev = 'test'
         dawgie.pl.scan.reset(self.__ae_pkg)
         factories = dawgie.pl.scan.for_factories(self.__ae_dir, self.__ae_pkg)
+        dawgie.pl.schedule.ae = None
+        dawgie.pl.schedule.pipeline_paused = None
+        dawgie.pl.schedule.booted.clear()
+        dawgie.pl.schedule.err.clear()
+        dawgie.pl.schedule.que.clear()
+        dawgie.pl.schedule.per.clear()
+        dawgie.pl.schedule.suc.clear()
         dawgie.pl.schedule.build(factories, [{}, {}, {}], [{}, {}, {}, {}])
         return
 
@@ -102,10 +109,13 @@ class Schedule(unittest.TestCase):
     def test_complete(self):
         with tempfile.TemporaryDirectory() as data_dbs:
             dawgie.context.data_dbs = data_dbs
+            dawgie.pl.schedule.que.clear()
             self.assertEqual(0, len(dawgie.pl.schedule.que))
             nodes = self._unravel(dawgie.pl.schedule.ae.at)
             dei = [node.tag for node in nodes].index('disk.engine')
             for node in nodes:
+                node.get('doing').clear()
+                node.get('todo').clear()
                 self.assertEqual(
                     0, len(node.get('doing')) + len(node.get('todo'))
                 )
