@@ -39,6 +39,7 @@ NTR:
 from dawgie.pl.jobinfo import State
 
 import dawgie
+import dawgie.base
 import dawgie.context
 import dawgie.util
 import dawgie.util.fifo
@@ -49,6 +50,7 @@ import os
 import pydot
 import xml.etree.ElementTree
 
+BOT_SET = (dawgie.Analysis, dawgie.Regress, dawgie.Task)
 
 class Construct:
     # pylint: disable=too-many-instance-attributes
@@ -140,7 +142,7 @@ class Construct:
     def _build_tree(self, factories, shape, sub_algs, sub_dep):
         for factory in factories:
             bot = factory(dawgie.util.task_name(factory), -1)
-            for alg in bot.list():
+            for alg in bot.list() if isinstance(bot, BOT_SET) else bot.routines():
                 for sv in alg.state_vectors():
                     for vn in sv:
                         fn = '.'.join(
