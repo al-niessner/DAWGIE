@@ -73,7 +73,6 @@ def _register(cls=None):
 
 
 def advanced_factories(ae, pkg):
-    REGISTRY.clear()
     attrname = '_master_registry'
     factories = {e: [] for e in dawgie.Factories}
     orignal = getattr(dawgie, attrname)
@@ -86,6 +85,7 @@ def advanced_factories(ae, pkg):
                     IGNORE.append(modinfo.name)
         if 'deprecated call' in REGISTRY:
             REGISTRY.clear()
+        if not REGISTRY:
             factories.clear()
     finally:
         setattr(dawgie, attrname, orignal)
@@ -166,11 +166,9 @@ def deprecated_factories(ae, pkg):
 
 def for_factories(ae, pkg):
     result = advanced_factories(ae, pkg)
-    print('adv:', result)
     if not result:
         LOG.critical(
             'The older factory/bot/alg pattern has been deprecated and is slated to be removed.'
         )
         result = deprecated_factories(ae, pkg)
-        print('dep:', result)
     return result
