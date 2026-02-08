@@ -126,7 +126,7 @@ class Analysis(_Metric):
 
     Abstract functions that all bots need to implement:
 
-    list() -> return a list of all analyzers
+    routines() -> return a list of all analyzers
     '''
 
     def __init__(
@@ -213,7 +213,7 @@ class Regress(_Metric):
 
     Abstract functions that all bots need to implement:
 
-    list() -> return a list of all analyzers
+    routines() -> return a list of all analyzers
     '''
 
     def __init__(
@@ -302,7 +302,7 @@ class Task(_Metric):
 
     Abstract functions that all bots need to implement:
 
-    list() -> return a list of all algorithms
+    routines() -> return a list of all algorithms
     '''
 
     # Need a lot of information to create this object

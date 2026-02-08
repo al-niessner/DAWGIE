@@ -557,6 +557,9 @@ class Analysis(_Metric):
             self.__nv.append(value)
         return self.__nv
 
+    def routines(self) -> '[Analyzer]':
+        return self.list()
+
     def timing(self):
         return self.__timing
 
@@ -898,6 +901,9 @@ class Regress(_Metric):
             self.__nv.append(value)
         return self.__nv
 
+    def routines(self) -> '[Regression]':
+        return self.list()
+
     def timing(self):
         return self.__timing
 
@@ -1129,6 +1135,9 @@ class Task(_Metric):
         if value:
             self.__nv.append(value)
         return self.__nv
+
+    def routines(self) -> [Algorithm]:
+        return self.list()
 
     def timing(self):
         return self.__timing

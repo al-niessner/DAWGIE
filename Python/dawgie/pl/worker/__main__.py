@@ -42,6 +42,7 @@ NTR:
 
 import argparse
 import dawgie.context
+import dawgie.pl.scan
 
 import dawgie.pl.state; dawgie.context.fsm = dawgie.pl.state.FSM()  # needs to be here for aws import # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import dawgie.pl.worker
@@ -105,6 +106,8 @@ ap.add_argument(
 args = ap.parse_args()
 dawgie.context.ae_base_path = args.ae_path
 dawgie.context.ae_base_package = args.ae_base_package
+# need to scan for factories to monkey patch the AE
+dawgie.pl.scan.for_factories(args.ae_path, args.ae_base_package)
 python_path = dawgie.context.ae_base_path
 for junk in dawgie.context.ae_base_package.split('.'):
     python_path = os.path.dirname(python_path)

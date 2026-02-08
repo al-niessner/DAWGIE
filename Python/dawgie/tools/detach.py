@@ -176,7 +176,7 @@ for runnable in args.runnables:
                 instance = getattr(mod, factory_method.name)(
                     mod_name, *ARGS[factory_method]
                 )
-                for r in instance.list():
+                for r in instance.routines():
                     if r.name() == runnable_name:
                         _copy(load[factory_method](instance, r))
                     pass

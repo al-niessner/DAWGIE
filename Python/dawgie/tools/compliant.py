@@ -141,7 +141,7 @@ def _walk(
         bot = f(*fargs[e])
         if e == dawgie.Factories.analysis:
             ifanl(bot)
-            for a in bot.list() if isinstance(bot, BOT_SET) else bot.routines():
+            for a in bot.routines():
                 ifanz(a)
                 for ref in a.feedback():
                     ifref(ref)
@@ -155,7 +155,7 @@ def _walk(
                 pass
         elif e == dawgie.Factories.task:
             ifbot(bot)
-            for a in bot.list() if isinstance(bot, BOT_SET) else bot.routines():
+            for a in bot.routines():
                 ifalg(a)
                 for ref in a.feedback():
                     ifref(ref)
@@ -172,7 +172,7 @@ def _walk(
                 ifmom(m)
         elif e == dawgie.Factories.regress:
             ifret(bot)
-            for r in bot.list() if isinstance(bot, BOT_SET) else bot.routines():
+            for r in bot.routines():
                 ifrec(r)
                 for ref in a.feedback():
                     ifref(ref)
@@ -454,10 +454,9 @@ def rule_03(task):
         return
 
     def _verify_analysis(a):
-        content = a.list() if isinstance(a, BOT_SET) else a.routines()
         return (
-            all((isinstance(az, dawgie.Analyzer) for az in content))
-            if content
+            all((isinstance(az, dawgie.Analyzer) for az in a.routines()))
+            if a.routines()
             else False
         )
 
@@ -520,10 +519,9 @@ def rule_03(task):
         )
 
     def _verify_regress(r):
-        content = r.list() if isinstance(r, BOT_SET) else r.routines()
         return (
-            all((isinstance(reg, dawgie.Regression) for reg in content))
-            if content
+            all((isinstance(reg, dawgie.Regression) for reg in r.routines()))
+            if r.routines()
             else False
         )
 
@@ -560,10 +558,9 @@ def rule_03(task):
         return _verify_version(sv)
 
     def _verify_task(t):
-        content = t.list() if isinstance(t, BOT_SET) else t.routines()
         return (
-            all((isinstance(a, dawgie.Algorithm) for a in content))
-            if content
+            all((isinstance(a, dawgie.Algorithm) for a in t.routines()))
+            if t.routines()
             else False
         )
 
@@ -666,7 +663,7 @@ def rule_06(task):
     if hasattr(mod, 'task'):
         f = getattr(mod, 'task')
         bot = f('test', -1, 1, 'TEST')
-        for step in bot.list() if isinstance(bot, BOT_SET) else bot.routines():
+        for step in bot.routines():
             for prev in step.previous():
                 findings.append(
                     prev.impl.__module__.startswith(
@@ -678,7 +675,7 @@ def rule_06(task):
                     logging.error(
                         'the previous implementation %s does not start with the factory package %s',
                         prev.impl.__module__,
-                        prev.factory.__module__,
+                        dawgie.util.task_module(prev.factory),
                     )
                 pass
             pass
@@ -826,7 +823,7 @@ def rule_11(task):
         fn = dawgie.util.task_name(ref.factory)
         resolved = [False]
         bot = ref.factory(fn)
-        for alg in bot.list() if isinstance(bot, BOT_SET) else bot.routines():
+        for alg in bot.routines():
             if alg.name() == ref.impl.name():
                 index = 0
                 resolved[0] = True
@@ -924,7 +921,6 @@ if __name__ == '__main__':
     import dawgie.tools.compliant
     import dawgie.util
 
-    BOT_SET = (dawgie.Analysis, dawgie.Regress, dawgie.Task)
     PASSED = main()
 
     if PASSED:
@@ -940,5 +936,3 @@ else:
     import dawgie.security
     import dawgie.tools.compliant
     import dawgie.util
-
-    BOT_SET = (dawgie.Analysis, dawgie.Regress, dawgie.Task)
