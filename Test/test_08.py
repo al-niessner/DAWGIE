@@ -38,6 +38,7 @@ NTR:
 '''
 
 import dawgie.context
+import dawgie.pl.scan
 import dawgie.tools.compliant
 import os
 import unittest
@@ -49,6 +50,7 @@ class Compliant(unittest.TestCase):
             os.path.abspath(os.path.dirname(__file__)), 'ae'
         )
         dawgie.context.ae_base_package = 'ae'
+        dawgie.pl.scan.reset('ae')
         self.assertTrue(
             dawgie.tools.compliant._verify(
                 dawgie.tools.compliant._scan(), False, True
@@ -57,6 +59,7 @@ class Compliant(unittest.TestCase):
         return
 
     def test_bae(self):
+        dawgie.pl.scan.reset('bae')
         dawgie.context.ae_base_path = os.path.join(
             os.path.abspath(os.path.dirname(__file__)), 'bae'
         )
@@ -68,9 +71,23 @@ class Compliant(unittest.TestCase):
         )
         return
 
+    def test_nae(self):
+        dawgie.pl.scan.reset('nae')
+        dawgie.context.ae_base_path = os.path.join(
+            os.path.abspath(os.path.dirname(__file__)), 'nae'
+        )
+        dawgie.context.ae_base_package = 'nae'
+        self.assertTrue(
+            dawgie.tools.compliant._verify(
+                dawgie.tools.compliant._scan(), False, True
+            )
+        )
+        return
+
     def test_rule_10(self):
         self.assertTrue(dawgie.tools.compliant.rule_10('ae.network'))
         self.assertFalse(dawgie.tools.compliant.rule_10('bae.network'))
+        self.assertTrue(dawgie.tools.compliant.rule_10('nae.network'))
         return
 
     pass

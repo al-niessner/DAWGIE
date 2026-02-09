@@ -39,6 +39,7 @@ NTR:
 
 import mock  # set up an FSM for dawgie
 
+import collections
 import dawgie
 import dawgie.context
 import dawgie.pl.dag
@@ -49,6 +50,9 @@ import os
 import shutil
 import tempfile
 import unittest
+
+# need to mock up the twisted IPV4Address class
+IPV4 = collections.namedtuple('IPV4', ['host', 'port'])
 
 
 class Foo(dawgie.Version):
@@ -179,12 +183,12 @@ class Farm(unittest.TestCase):
         self.assertFalse(dawgie.pl.farm._workers)
         dawgie.pl.farm._workers.extend(
             [
-                dawgie.pl.farm.Hand(('a', 0)),
-                dawgie.pl.farm.Hand(('a', 0)),
-                dawgie.pl.farm.Hand(('a', 0)),
-                dawgie.pl.farm.Hand(('b', 0)),
-                dawgie.pl.farm.Hand(('b', 0)),
-                dawgie.pl.farm.Hand(('c', 0)),
+                dawgie.pl.farm.Hand(IPV4('a', 0)),
+                dawgie.pl.farm.Hand(IPV4('a', 0)),
+                dawgie.pl.farm.Hand(IPV4('a', 0)),
+                dawgie.pl.farm.Hand(IPV4('b', 0)),
+                dawgie.pl.farm.Hand(IPV4('b', 0)),
+                dawgie.pl.farm.Hand(IPV4('c', 0)),
             ]
         )
         dawgie.pl.farm._workers_sort()

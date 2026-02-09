@@ -297,7 +297,7 @@ def view(visitor: dawgie.Visitor, cid, runid, tn, tskn, algn, svn):
         visitor.add_declaration(msg)
         return
 
-    alg = list(filter(lambda x: x.name() == algn, bot.list()))
+    alg = list(filter(lambda x: x.name() == algn, bot.routines()))
 
     if len(alg) == 1:
         alg = alg[0]

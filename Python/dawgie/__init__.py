@@ -46,6 +46,16 @@ import logging
 import os
 import resource
 
+# 3.0.0 remove - this and cleanup code duplication
+# pylint: disable=duplicate-code
+
+
+# dawgie.scan will update this unit when it is more appropriate to have it
+# do something more meaningful.
+def _master_registry(_cls=None):
+    pass
+
+
 # make datetime backward compatible
 if 'UTC' not in dir(datetime):
     datetime.UTC = datetime.timezone.utc
@@ -84,6 +94,8 @@ METRIC = collections.namedtuple(
 MOMENT = collections.namedtuple('MOMENT', ['boot', 'day', 'dom', 'dow', 'time'])
 
 
+# 3.0.0 remove - factory and impl. Should return a moment instead of event then
+#                let dawgie.basis.Factories provide the factory and impl.
 def schedule(
     factory,
     impl,
@@ -195,6 +207,9 @@ class Factories(enum.Enum):
 class _Metric:
     '''Interface used internally to measure process resource usage'''
 
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
+
     def __init__(self):
         self.__history = []
         self.msv = None
@@ -297,6 +312,9 @@ class Version:
     self._get_ver() and self._set_ver(). However, this should be done with
     extreme caution.
     '''
+
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
 
     def __eq__(self, other):
         return all(
@@ -416,6 +434,10 @@ class Algorithm(Version):
        - when called post to run() Values should contain current Value
     '''
 
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
+        _master_registry(cls)
+
     def __repr__(self):
         if 'caller' not in dir(self):
             self.caller = None
@@ -457,6 +479,13 @@ class Analysis(_Metric):
 
     list() -> return a list of all analyzers
     '''
+
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
+        logging.getLogger(__name__).critical(
+            'extending dawgie.Analysis has been deprecated'
+        )
+        _master_registry()
 
     def __init__(self, name, ps_hint, runid):
         _Metric.__init__(self)
@@ -528,6 +557,9 @@ class Analysis(_Metric):
             self.__nv.append(value)
         return self.__nv
 
+    def routines(self) -> '[Analyzer]':
+        return self.list()
+
     def timing(self):
         return self.__timing
 
@@ -563,6 +595,10 @@ class Analyzer(Version):
        - when called post to run() Values should contain current Value
     traits() -> list of traits to provide within an Aspect
     '''
+
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
+        _master_registry(cls)
 
     def __repr__(self):
         if 'caller' not in dir(self):
@@ -786,6 +822,13 @@ class Regress(_Metric):
     list() -> return a list of all analyzers
     '''
 
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
+        logging.getLogger(__name__).critical(
+            'extending dawgie.Regress has been deprecated'
+        )
+        _master_registry()
+
     def __init__(self, name, ps_hint, target):
         _Metric.__init__(self)
         self.__name = name
@@ -858,6 +901,9 @@ class Regress(_Metric):
             self.__nv.append(value)
         return self.__nv
 
+    def routines(self) -> '[Regression]':
+        return self.list()
+
     def timing(self):
         return self.__timing
 
@@ -893,6 +939,10 @@ class Regression(Version):
        - when called post to run() Values should contain current Value
     variables() -> list of variables to provide within a Timeline
     '''
+
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
+        _master_registry(cls)
 
     def __repr__(self):
         if 'caller' not in dir(self):
@@ -998,6 +1048,13 @@ class Task(_Metric):
     list() -> return a list of all algorithms
     '''
 
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
+        logging.getLogger(__name__).critical(
+            'extending dawgie.Task has been deprecated'
+        )
+        _master_registry()
+
     def __init__(self, name, ps_hint, runid, target='__all__'):
         _Metric.__init__(self)
         self.__name = name
@@ -1078,6 +1135,9 @@ class Task(_Metric):
         if value:
             self.__nv.append(value)
         return self.__nv
+
+    def routines(self) -> [Algorithm]:
+        return self.list()
 
     def timing(self):
         return self.__timing

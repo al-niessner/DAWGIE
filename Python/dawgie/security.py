@@ -313,6 +313,9 @@ def _pgp_initialize(path: str = None) -> None:
     path  : path to find the PGP keys dawgie.*.{pub,sec}
 
     '''
+    # cannot call logging from here because we are trying to start it
+    print('PGP support is deprecated and will be removed')
+
     # pylint: disable=import-outside-toplevel,import-self,protected-access
     import dawgie.security
 

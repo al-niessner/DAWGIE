@@ -1,6 +1,5 @@
-'''Common utilities for the pipeline
+'''
 
---
 COPYRIGHT:
 Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
@@ -35,16 +34,53 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-NTR: 49811
+NTR:
 '''
 
-# Used to be a module and do not want to go and change legacy code since
-# it is working. However, want to add more items that would make the module
-# large and cumbersome. Moved it to a package with the old implementation
-# broken up into smaller modules. Therefore,
-# pylint: disable=unused-import
-# to allow the functions to be mapped to here were the legacy code expects it.
-from .args import log_level, set_ports  # noqa: F401
-from .metrics import MetricStateVector, MetricValue  # noqa: F401
-from .names import task_module, task_name, verify_name  # noqa: F401
-from .refs import algref2svref, as_vref, svref2vref, vref_as_name  # noqa: F401
+# test code so who cares; pylint: disable=duplicate-code
+
+import nae
+import nae.network
+import nae.network.bot
+import dawgie
+import os
+import pickle
+import tempfile
+
+
+class Engine(dawgie.Algorithm):
+    def __init__(self):
+        dawgie.Algorithm.__init__(self)
+        self.__base = nae.network.bot.Engine()
+        self.__dirty = nae.StateVector()
+        self.__noise = nae.network.bot.Analyzer()
+        self._version_ = dawgie.VERSION(1, 0, 0)
+        return
+
+    def name(self):
+        return 'engine'
+
+    def previous(self):
+        return [
+            dawgie.ALG_REF(factory=nae.network.analysis, impl=self.__noise),
+            dawgie.ALG_REF(factory=nae.network.task, impl=self.__base),
+        ]
+
+    def run(self, ds, ps):
+        base = self.__base.sv_as_dict()['test']['image'].array()
+        dirt = self.__noise.sv_as_dict()['test']['image'].array()
+        for _i in range(10):
+            fid, fn = tempfile.mkstemp()
+            os.close(fid)
+            with open(fn, 'bw') as f:
+                pickle.dump(base, f)
+            os.unlink(fn)
+            pass
+        self.__dirty['image'] = nae.Value(array=base + dirt)
+        ds.update()
+        return
+
+    def state_vectors(self):
+        return [self.__dirty]
+
+    pass

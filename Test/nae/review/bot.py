@@ -1,6 +1,5 @@
-'''Common utilities for the pipeline
+'''
 
---
 COPYRIGHT:
 Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
@@ -35,16 +34,73 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-NTR: 49811
+NTR:
 '''
 
-# Used to be a module and do not want to go and change legacy code since
-# it is working. However, want to add more items that would make the module
-# large and cumbersome. Moved it to a package with the old implementation
-# broken up into smaller modules. Therefore,
-# pylint: disable=unused-import
-# to allow the functions to be mapped to here were the legacy code expects it.
-from .args import log_level, set_ports  # noqa: F401
-from .metrics import MetricStateVector, MetricValue  # noqa: F401
-from .names import task_module, task_name, verify_name  # noqa: F401
-from .refs import algref2svref, as_vref, svref2vref, vref_as_name  # noqa: F401
+import nae
+import nae.network
+import nae.network.bot
+import dawgie
+import dawgie.db
+
+
+class Analyzer(dawgie.Analyzer):
+    def __init__(self):
+        dawgie.Analyzer.__init__(self)
+        self.__base = nae.network.bot.Analyzer()
+        self.__data = nae.StateVector()
+        self._version_ = dawgie.VERSION(1, 0, 0)
+        return
+
+    def name(self):
+        return 'aspect'
+
+    def run(self, aspects):
+        self.__data['image'] = nae.Value('looks good')
+        aspects.ds().update()
+        return
+
+    def state_vectors(self):
+        return [self.__data]
+
+    def traits(self):
+        return [
+            dawgie.SV_REF(
+                factory=nae.network.analysis,
+                impl=self.__base,
+                item=self.__base.state_vectors()[0],
+            )
+        ]
+
+    pass
+
+
+class Regression(dawgie.Regression):
+    def __init__(self):
+        dawgie.Regression.__init__(self)
+        self.__base = nae.network.bot.Analyzer()
+        self.__data = nae.StateVector()
+        self._version_ = dawgie.VERSION(1, 0, 0)
+        return
+
+    def name(self):
+        return 'history'
+
+    def variables(self):
+        return [
+            dawgie.SV_REF(
+                factory=nae.network.analysis,
+                impl=self.__base,
+                item=self.__base.state_vectors()[0],
+            )
+        ]
+
+    def run(self, ps, timeline):
+        self.__data['image'] = nae.Value('history is always forgotten')
+        timeline.ds().update()
+        return
+
+    def state_vectors(self):
+        return [self.__data]
+
+    pass

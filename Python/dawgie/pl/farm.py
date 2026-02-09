@@ -275,7 +275,7 @@ def _put(job, runid: int, target: str, where: dawgie.Distribution):
     fac = job.get('factory')
     msg = dawgie.pl.message.make(
         ctxt=dawgie.context.dumps(),
-        fac=(fac.__module__, fac.__name__),
+        fac=(dawgie.util.task_module(fac), fac.__name__),
         jid=job.tag,
         rid=runid,
         target=target,
@@ -292,10 +292,10 @@ def _put(job, runid: int, target: str, where: dawgie.Distribution):
 
 def _workers_sort():
     # issue 255 FIXME: sort _workers from least to most busy
-    wg = {wa: [] for wa in set(w.address[0] for w in _workers)}
+    wg = {wa: [] for wa in set(w.address.host for w in _workers)}
     wk = sorted(wg)
     for worker in _workers:
-        wg[worker.address[0]].append(worker)
+        wg[worker.address.host].append(worker)
     _workers.clear()
     while sum(len(v) for v in wg.values()):
         longest = []
@@ -364,11 +364,11 @@ def dispatch():
         for j in _jobs.copy():
             runid = rerunid(j)
             j.set('status', dawgie.pl.schedule.State.running)
-            fm = j.get('factory').__module__
+            fm = dawgie.util.task_module(j.get('factory'))
             fn = j.get('factory').__name__
             factory = getattr(importlib.import_module(fm), fn)
             where = dawgie.Distribution.auto
-            for alg in factory(dawgie.util.task_name(factory)).list():
+            for alg in factory(dawgie.util.task_name(factory)).routines():
                 if alg.name() == j.tag.split('.')[-1]:
                     where = alg.where()
                 pass
@@ -442,6 +442,7 @@ def plow():
         # protocols are independent even if similar today
         # pylint: disable=duplicate-code
         log.critical('PGP support is deprecated and will be removed')
+        print('issue 323: farm socket is not secure!!')
         twisted.internet.reactor.listenTCP(
             int(dawgie.context.farm_port),
             Foreman(),
