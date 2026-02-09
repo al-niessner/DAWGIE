@@ -46,6 +46,8 @@ import logging
 import os
 import resource
 
+from deprecated import deprecated
+
 # 3.0.0 remove - this and cleanup code duplication
 # pylint: disable=duplicate-code
 
@@ -204,6 +206,11 @@ class Factories(enum.Enum):
 ###
 
 
+@deprecated(
+    version='2.1.0',
+    reason='Will be removed in 3.0.0 and has been moved to dawgie.base',
+    extra_stacklevel=1,
+)
 class _Metric:
     '''Interface used internally to measure process resource usage'''
 
@@ -472,6 +479,11 @@ class Algorithm(Version):
     pass
 
 
+@deprecated(
+    version='2.1.0',
+    reason='Will be removed in 3.0.0 and has been moved to dawgie.base',
+    extra_stacklevel=1,
+)
 class Analysis(_Metric):
     '''The Analysis is the base for all bots that analyze data across targets
 
@@ -549,6 +561,11 @@ class Analysis(_Metric):
             setattr(step, 'caller', None)
         return
 
+    @deprecated(
+        version='2.1.0',
+        reason='Will be removed in 3.0.0 because it collides with Python. Use routines() instead.',
+        extra_stacklevel=2,
+    )
     def list(self) -> '[Analyzer]':
         raise NotImplementedError()
 
@@ -814,6 +831,11 @@ class Feature:
     pass
 
 
+@deprecated(
+    version='2.1.0',
+    reason='Will be removed in 3.0.0 and has been moved to dawgie.base',
+    extra_stacklevel=1,
+)
 class Regress(_Metric):
     '''The Regress is the base for all bots that analyze data across runids
 
@@ -893,6 +915,11 @@ class Regress(_Metric):
             setattr(step, 'caller', None)
         return
 
+    @deprecated(
+        version='2.1.0',
+        reason='Will be removed in 3.0.0 because it collides with Python. Use routines() instead.',
+        extra_stacklevel=2,
+    )
     def list(self) -> '[Regression]':
         raise NotImplementedError()
 
@@ -1040,6 +1067,11 @@ class StateVector(Version, dict):
     pass
 
 
+@deprecated(
+    version='2.1.0',
+    reason='Will be removed in 3.0.0 and has been moved to dawgie.base',
+    extra_stacklevel=1,
+)
 class Task(_Metric):
     '''The Task is the base class for all bots which are to complete a task
 
@@ -1128,6 +1160,11 @@ class Task(_Metric):
         log.debug('Completed %s for %s', self.__name, self._target())
         return
 
+    @deprecated(
+        version='2.1.0',
+        reason='Will be removed in 3.0.0 because it collides with Python. Use routines() instead.',
+        extra_stacklevel=2,
+    )
     def list(self) -> [Algorithm]:
         raise NotImplementedError()
 
