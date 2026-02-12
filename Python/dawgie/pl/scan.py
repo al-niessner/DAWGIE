@@ -44,6 +44,7 @@ import importlib
 import os
 import pkgutil
 import sys
+import typing
 
 IGNORE = set()
 LOG = logging.getLogger(__name__)
@@ -56,6 +57,20 @@ def _content(f: dawgie.Factories, fn: str, fs: dawgie.base.Factories) -> []:
     else:
         something = getattr(fs, fn)(None).routines()
     return something
+
+
+def _is_auto(fnc: typing.Callable) -> bool:
+    return hasattr(fnc, '__self__') and isinstance(
+        fnc.__self__, dawgie.base.Factories
+    )
+
+
+def _is_placeholder(fnc: typing.Callable) -> bool:
+    hints = typing.get_type_hints(fnc, include_extras=True).get('return')
+    return (
+        hasattr(hints, '__metadata__')
+        and 'monkey_patch_me' in hints.__metadata__
+    )
 
 
 def _register(cls=None):
@@ -102,8 +117,7 @@ def advanced_factories(ae, pkg):
             # acceptable trade-off for a cleaner extension API.
             fn = f.name
             if hasattr(m, fn) and not (
-                hasattr(getattr(m, fn), '__self__')
-                and isinstance(getattr(m, fn).__self__, dawgie.base.Factories)
+                _is_auto(getattr(m, fn)) or _is_placeholder(getattr(m, fn))
             ):
                 LOG.warning(
                     'the module %s already contains the attribute %s. '

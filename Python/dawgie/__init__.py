@@ -45,6 +45,7 @@ import importlib
 import logging
 import os
 import resource
+import typing
 
 from deprecated import deprecated
 
@@ -179,10 +180,10 @@ class Distribution(enum.Enum):
 
 # An enumeration of allowable factories in ae/<task>/__init__.py
 # The should follow this form:
-#     analysis (prefix:str, ps_hint:int=0, runid:int=-1)
-#     events()
-#     regression (prefix:str, ps_hint:int=0, target:str='__none__')
-#     task (prefix:str, ps_hint:int=0, runid:int=-1, target:str='__none__')
+#     analysis (prefix:str, ps_hint:int=0, runid:int=-1) -> dawgie.FactoryPlaceholder[dawgie.base.Analysis]
+#     events() -> dawgie.FactoryPlaceholder[list[dawie.Event]]
+#     regress (prefix:str, ps_hint:int=0, target:str='__none__') -> dawgie.FactoryPlaceholder[dawgie.base.Regress]
+#     task (prefix:str, ps_hint:int=0, runid:int=-1, target:str='__none__') -> dawgie.FactoryPlaceholder[dawgie.base.Task]
 # where
 #     prefix must be supplied
 #     ps_hint is a pool size hint for multiprocessing and should default to 0
@@ -198,8 +199,8 @@ class Factories(enum.Enum):
     def resolve(reference):
         return Factories[reference.factory.__name__]
 
-    pass
 
+type FactoryPlaceholder[T] = typing.Annotated[T, 'monkey_patch_me']
 
 ###
 # Below are the interfaces that developers must use
@@ -826,8 +827,7 @@ class Dataset(_Metric):
     pass
 
 
-class Feature:
-    # pylint: disable=too-few-public-methods
+class Feature:  # pylint: disable=too-few-public-methods
     pass
 
 
@@ -1156,7 +1156,6 @@ class Task(_Metric):
             self.measure(step.run, args=(ds, self._ps_hint()), ds=ds)
             log.debug('Returned from %s', sname)
             setattr(step, 'caller', None)
-            pass
         log.debug('Completed %s for %s', self.__name, self._target())
         return
 
