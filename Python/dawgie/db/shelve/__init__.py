@@ -46,12 +46,14 @@ import dawgie.util.metrics
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 
+from ..search import Facade
 from . import util
 from .comms import Connector
 from .comms import DBSerializer
 from .enums import Method
 from .enums import Table
 from .model import Interface
+from .search import Backside
 from .state import DBI
 
 
@@ -415,6 +417,10 @@ def retreat(reg, ret) -> dawgie.Timeline:
     return Interface(
         reg, ret, ret._target()  # pylint: disable=protected-access
     )
+
+
+def search() -> Facade:
+    return Backside()
 
 
 def targets():

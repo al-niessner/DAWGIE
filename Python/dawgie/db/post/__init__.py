@@ -73,6 +73,9 @@ import twisted.internet.error
 import twisted.internet.protocol
 import twisted.internet.reactor
 
+from .search import Backside
+from ..search import Facade
+
 _db = None
 
 ENTRY = collections.namedtuple(
@@ -1856,6 +1859,12 @@ def retreat(reg, ret):
     if not dawgie.db.post._db:
         raise RuntimeError('called retreat before open')
     return Interface(reg, ret, ret._target())
+
+
+def search() -> Facade:
+    if not dawgie.db.post._db:
+        raise RuntimeError('called search before open')
+    return Backside(_conn, _cur)
 
 
 def targets():

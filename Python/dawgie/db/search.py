@@ -41,6 +41,7 @@ NTR: 49811
 import abc
 import collections
 import dataclasses
+import typing
 
 PARAMS = collections.namedtuple(
     'PARAMS', ['runids', 'targets', 'tasks', 'algs', 'svs', 'vals']
@@ -116,6 +117,7 @@ class Facade(abc.ABC):
             )
         return parameters
 
+    @typing.final
     def filter(self, parameters: PARAMS) -> [str]:
         '''Find the sublist(s) given some constraints
 
@@ -129,6 +131,7 @@ class Facade(abc.ABC):
         '''
         return self._filter(Facade._scrub(parameters))
 
+    @typing.final
     def find(
         self, parameters: PARAMS, index: int = 0, limit: int = None
     ) -> [str]:

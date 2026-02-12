@@ -54,7 +54,7 @@ import dawgie.util.metrics
 import importlib
 import logging
 
-from . import search
+from .search import Facade
 
 log = logging.getLogger(__name__)
 
@@ -216,7 +216,8 @@ def retreat(reg, ret) -> dawgie.Timeline:
     return _db_in_use().retreat(reg, ret)
 
 
-def search() -> search.Facade:
+def search() -> Facade:
+    '''Get an implementation of Facade for the specific DB to allow for search'''
     return _db_in_use().search()
 
 
