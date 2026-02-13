@@ -39,13 +39,23 @@ NTR: 49811
 '''
 
 import abc
-import collections
 import dataclasses
 import typing
 
-PARAMS = collections.namedtuple(
-    'PARAMS', ['runids', 'targets', 'tasks', 'algs', 'svs', 'vals']
-)
+
+@dataclasses.dataclass
+class Range:
+    start: int
+    stop: int
+
+
+class Params(typing.NamedTuple):
+    runids: list[int, Range] = None
+    targets: [str] = None
+    tasks: [str] = None
+    algs: [str] = None
+    svs: [str] = None
+    vals: [str] = None
 
 
 class Facade(abc.ABC):
@@ -56,15 +66,21 @@ class Facade(abc.ABC):
     '''
 
     @abc.abstractmethod
-    def _filter(self, parameters):
+    def _filter(self, parameters: Params) -> [str]:
         pass
 
     @abc.abstractmethod
-    def _find(self, parameters, index, limit):
+    def _find(
+        self, parameters: Params, index: int = 0, limit: int = None
+    ) -> [str]:
         pass
 
     @staticmethod
-    def _scrub(parameters: PARAMS):
+    def _isempty(value: list) -> bool:
+        return value is not None and not value
+
+    @staticmethod
+    def _scrub(parameters: Params):
         '''scrub the parameters from overly complex requests
 
         1. reduce the runid strings to ranges and individual values
@@ -107,7 +123,7 @@ class Facade(abc.ABC):
                         idx.append(i)
                 indices = sorted(idx)
                 runidset.extend(indices)
-            parameters = PARAMS(
+            parameters = Params(
                 runidset,
                 parameters.targets,
                 parameters.tasks,
@@ -118,22 +134,29 @@ class Facade(abc.ABC):
         return parameters
 
     @typing.final
-    def filter(self, parameters: PARAMS) -> [str]:
+    def filter(self, parameters: Params) -> [str]:
         '''Find the sublist(s) given some constraints
 
         If parameters.<key> is an empty list, then produce the sublist for that
         item. If parameters.<key> is None, then there are no constraints.
         Otherwise, use parameter.<key> to constrain the sublists to be produced.
 
+        Only one parameters.<key> should be an empty list.
+
         The return value is list of strings. If reducing filtering for run id,
         then the list will always be 0..1 strings. If 0, then no match. If 1,
         then it be first:last+1 even if the indices are not continuous.
         '''
+        empties = sum(
+            1 if Facade._isempty(value) else 0 for value in parameters
+        )
+        if empties != 1:
+            raise ValueError(f'One [] is required but found {empties} []s.')
         return self._filter(Facade._scrub(parameters))
 
     @typing.final
     def find(
-        self, parameters: PARAMS, index: int = 0, limit: int = None
+        self, parameters: Params, index: int = 0, limit: int = None
     ) -> [str]:
         '''Find all of the primary table entries that meet the constraints
 
@@ -143,9 +166,3 @@ class Facade(abc.ABC):
         are expensive.
         '''
         return self._find(Facade._scrub(parameters), index, limit)
-
-
-@dataclasses.dataclass
-class Range:
-    start: int
-    stop: int

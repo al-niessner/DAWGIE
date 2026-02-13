@@ -38,16 +38,23 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-from ..search import Facade
+import typing
+
+from ..search import Facade, Params
 
 
 class Backside(Facade):
+    CONSTRAINT = '{sql.fk} = ANY(%s)'
+    NAMES = 'SELECT name FROM {sql.table} WHERE pk = ANY(%s);'
+    PKS = 'SELECT {sql.fk} FROM {sql.table} WHERE {sql.constraints};'
+    RANGE = 'runid >= %s and runid < %s'
+
     def __init__(self, connection_factory, cursor_factory):
         Facade.__init__(self)
         self._conn = connection_factory
         self._cur = cursor_factory
 
-    def _filter(self, parameters):
+    def _filter(self, parameters: Params) -> [str]:
         '''Find the sublist(s) given some constraints
 
         If parameters.<key> is an empty list, then produce the sublist for that
@@ -60,7 +67,9 @@ class Backside(Facade):
         '''
         pass
 
-    def _find(self, parameters, index, limit):
+    def _find(
+        self, parameters: Params, index: int = 0, limit: int = None
+    ) -> [str]:
         '''Find all of the primary table entries that meet the constraints
 
         The return strings will be in runid order. For large lists, use the
@@ -69,3 +78,9 @@ class Backside(Facade):
         are expensive.
         '''
         pass
+
+
+class _SqlInfo(typing.NamedTuple):
+    constraints: [str] = []
+    fk: str = ''
+    table: str = ''
