@@ -40,15 +40,17 @@ NTR:
 
 import typing
 
-from ..search import Facade, Params
+from ..search import Facade, Params, Range
+
+_CONSTRAINT = '{sql.fk} = ANY(%s)'
+_FKS = 'SELECT pk FROM {sql.table} WHERE name = ANY(%s);'
+_NAMES_ALL = 'SELECT name FROM {sql.table};'
+_NAMES_SOME = 'SELECT name FROM {sql.table} WHERE pk = ANY(%s);'
+_PKS = 'SELECT {sql.fk} FROM {sql.table} WHERE {sql.constraints};'
+_RANGE = 'run_ID >= %s and run_ID < %s'
 
 
 class Backside(Facade):
-    CONSTRAINT = '{sql.fk} = ANY(%s)'
-    NAMES = 'SELECT name FROM {sql.table} WHERE pk = ANY(%s);'
-    PKS = 'SELECT {sql.fk} FROM {sql.table} WHERE {sql.constraints};'
-    RANGE = 'runid >= %s and runid < %s'
-
     def __init__(self, connection_factory, cursor_factory):
         Facade.__init__(self)
         self._conn = connection_factory
@@ -65,7 +67,35 @@ class Backside(Facade):
         then the list will always be 0..1 strings. If 0, then no match. If 1,
         then it be first:last+1 even if the indices are not continuous.
         '''
-        pass
+        args = []
+        constraints = []
+        sql_info = None
+        for k, v in filter(lambda t: bool(t[1]), parameters._asdict().items()):
+            sql_info = _SQL_TABLE[k]
+            if k == 'runids':
+                indices = []
+                for rid in filter(lambda i: i >= 0, v):
+                    if isinstance(rid, Range):
+                        constraints.append(_RANGE)
+                        args.append((rid.start, rid.stop))
+                    else:
+                        indices.append(rid)
+                if indices:
+                    constraints.append(_CONSTRAINT.format(sql=sql_info))
+                    args.append(indices)
+            else:
+                constraints.append(_CONSTRAINT.format(sql=sql_info))
+                args.append(v)
+        for k, v in parameters._asdict().items():
+            if Facade._isempty(v):
+                sql_info = _SQL_TABLE[k]
+                sql_info.constraints.extend(constraints)
+        if sql_info.constraints:
+            # FIXME - get fks from prime using _PKS then names from table using _NAMES_SOME
+            pass
+        else:
+            # FIXME - get all names from table using _NAMES_ALL
+            pass
 
     def _find(
         self, parameters: Params, index: int = 0, limit: int = None
@@ -81,6 +111,16 @@ class Backside(Facade):
 
 
 class _SqlInfo(typing.NamedTuple):
-    constraints: [str] = []
     fk: str = ''
     table: str = ''
+    constraints: [str] = []
+
+
+_SQL_TABLE = {
+    'runids': _SqlInfo('run_ID', 'Prime'),
+    'targets': _SqlInfo('tn_ID', 'Target'),
+    'tasks': _SqlInfo('task_ID', 'Task'),
+    'algs': _SqlInfo('alg_ID', 'Algorithm'),
+    'svs': _SqlInfo('sv_ID', 'StateVector'),
+    'vaks': _SqlInfo('val_ID', 'Value'),
+}
