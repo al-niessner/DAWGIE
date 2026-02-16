@@ -1,6 +1,5 @@
-'''Common utilities for the pipeline
+'''
 
---
 COPYRIGHT:
 Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
@@ -35,16 +34,63 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-NTR: 49811
+NTR:
 '''
 
-# Used to be a module and do not want to go and change legacy code since
-# it is working. However, want to add more items that would make the module
-# large and cumbersome. Moved it to a package with the old implementation
-# broken up into smaller modules. Therefore,
-# pylint: disable=unused-import
-# to allow the functions to be mapped to here were the legacy code expects it.
-from .args import log_level, set_ports  # noqa: F401
-from .metrics import MetricStateVector, MetricValue  # noqa: F401
-from .names import task_module, task_name, verify_name  # noqa: F401
-from .refs import algref2svref, as_vref, svref2vref, vref_as_name  # noqa: F401
+# test code so who cares; pylint: disable=duplicate-code
+
+import nae
+import nae.disk
+import nae.disk.bot
+import dawgie
+import logging
+
+log = logging.getLogger(__name__)
+import numpy
+import scipy.optimize
+
+
+class Engine(dawgie.Algorithm):
+    def __init__(self):
+        dawgie.Algorithm.__init__(self)
+        self.__base = nae.disk.bot.Engine()
+        self.__clean = nae.StateVector()
+        self._version_ = dawgie.VERSION(1, 0, 0)
+        return
+
+    @staticmethod
+    def _model(p, shape):
+        C, R = numpy.meshgrid(range(shape[1]), range(shape[0]))
+        return numpy.sin(R / p[0] + p[1]) * numpy.cos(C / p[2] + p[3])
+
+    @staticmethod
+    def _opt(p, known):
+        return numpy.abs(Engine._model(p, known.shape) - known).sum()
+
+    def name(self):
+        return 'engine'
+
+    def previous(self):
+        return [dawgie.ALG_REF(factory=nae.disk.task, impl=self.__base)]
+
+    def run(self, ds, ps):
+        image = self.__base.sv_as_dict()['test']['image'].array()
+        p = [750, 0, 500, 0]
+        res = scipy.optimize.minimize(
+            Engine._opt,
+            p,
+            (image,),
+            bounds=[(100, 1000), (-3.2, 3.2), (100, 1000), (-3.2, 3.2)],
+        )
+        log.critical('Coefficients: %s', str(res.x))
+        self.__clean['image'] = nae.Value(Engine._model(res.x, image.shape))
+        ds.update()
+        return
+
+    def state_vectors(self):
+        return [self.__clean]
+
+    def where(self):
+        return dawgie.Distribution.cloud
+
+    pass

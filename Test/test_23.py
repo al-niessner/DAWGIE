@@ -56,15 +56,16 @@ class Schedule(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.__ae_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), 'ae')
+            os.path.join(os.path.dirname(__file__), 'nae')
         )
-        self.__ae_pkg = 'ae'
+        self.__ae_pkg = 'nae'
         sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
         dawgie.context.db_impl = 'test'
         dawgie.context.git_rev = 'test'
         dawgie.pl.scan.reset(self.__ae_pkg)
         factories = dawgie.pl.scan.for_factories(self.__ae_dir, self.__ae_pkg)
         dawgie.pl.schedule.build(factories, [{}, {}, {}], [{}, {}, {}, {}])
+        print('done with class init')
 
     def _unravel(self, nodes) -> []:
         result = set()
@@ -82,13 +83,13 @@ class Schedule(unittest.TestCase):
         return list(result)
 
     def test__delay(self):
-        import ae.network
-        import ae.network.bot
+        import nae.network
+        import nae.network.bot
 
         a = dawgie.schedule(
-            ae.network.analysis, ae.network.bot.Analyzer(), True
+            nae.network.analysis, nae.network.bot.Analyzer(), True
         )
-        b = dawgie.schedule(ae.network.task, ae.network.bot.Engine(), True)
+        b = dawgie.schedule(nae.network.task, nae.network.bot.Engine(), True)
         self.assertEqual(0, dawgie.pl.schedule._delay(a).total_seconds())
         self.assertEqual(0, dawgie.pl.schedule._delay(b).total_seconds())
         self.assertRaises(
@@ -101,7 +102,7 @@ class Schedule(unittest.TestCase):
     def test_complete(self):
         with tempfile.TemporaryDirectory() as data_dbs:
             dawgie.context.data_dbs = data_dbs
-            self.assertEqual(0, len(dawgie.pl.schedule.que))
+            self.assertEqual([], dawgie.pl.schedule.que)
             nodes = self._unravel(dawgie.pl.schedule.ae.at)
             dei = [node.tag for node in nodes].index('disk.engine')
             for node in nodes:
@@ -183,7 +184,7 @@ class Schedule(unittest.TestCase):
         return
 
     def test_next(self):
-        self.assertEqual(0, len(dawgie.pl.schedule.que))
+        self.assertEqual([], dawgie.pl.schedule.que)
         nodes = self._unravel(dawgie.pl.schedule.ae.at)
         dei = [node.tag for node in nodes].index('disk.engine')
         na = [node.tag for node in nodes].index('network.analyzer')
@@ -331,24 +332,26 @@ class Schedule(unittest.TestCase):
         dawgie.pl.schedule.per.clear()
         return
 
+    pass
+
 
 def fake_events_defer():
-    import ae.disk
-    import ae.disk.bot
-    import ae.network
-    import ae.network.bot
+    import nae.disk
+    import nae.disk.bot
+    import nae.network
+    import nae.network.bot
 
     now = datetime.datetime.now(datetime.UTC)
     return [
         dawgie.schedule(
-            ae.disk.task,
-            ae.disk.bot.Engine(),
+            nae.disk.task,
+            nae.disk.bot.Engine(),
             dow=now.weekday(),
             time=now.time(),
         ),
         dawgie.schedule(
-            ae.network.analysis,
-            ae.network.bot.Analyzer(),
+            nae.network.analysis,
+            nae.network.bot.Analyzer(),
             dow=(now.weekday() + 1) % 7,
             time=now.time(),
         ),
@@ -356,26 +359,26 @@ def fake_events_defer():
 
 
 def fake_events_view():
-    import ae.disk
-    import ae.disk.bot
-    import ae.network
-    import ae.network.bot
+    import nae.disk
+    import nae.disk.bot
+    import nae.network
+    import nae.network.bot
 
     now = datetime.datetime.now(datetime.UTC)
     return [
         dawgie.schedule(
-            ae.disk.task,
-            ae.disk.bot.Engine(),
+            nae.disk.task,
+            nae.disk.bot.Engine(),
             dow=(now.weekday() + 1) % 7,
             time=now.time(),
         ),
         dawgie.schedule(
-            ae.disk.task,
-            ae.disk.bot.Engine(),
+            nae.disk.task,
+            nae.disk.bot.Engine(),
             dow=(now.weekday() - 1) % 7,
             time=now.time(),
         ),
         dawgie.schedule(
-            ae.network.analysis, ae.network.bot.Analyzer(), boot=True
+            nae.network.analysis, nae.network.bot.Analyzer(), boot=True
         ),
     ]

@@ -197,7 +197,7 @@ def start(path: str, port: int) -> None:
         )
     else:
         # cannot call logging from here because we are trying to start it
-        print('PGP support is deprecated and will be removed')
+        print('issue 323: log socket is not secure!!')
         twisted.internet.reactor.listenTCP(
             port, dawgie.pl.logger._ROOT, dawgie.context.worker_backlog
         )

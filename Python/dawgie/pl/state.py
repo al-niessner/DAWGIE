@@ -179,7 +179,7 @@ class FSM:
             os.path.join(
                 os.path.abspath(os.path.dirname(__file__)), self.dot_file_name
             )
-        )
+        )[0]
         idir = os.path.abspath(
             os.path.join(dawgie.context.fe_path, 'images/svg')
         )
@@ -249,6 +249,7 @@ class FSM:
                     )
             else:
                 log.info('starting front end using HTTP')
+                print('issue 323: front-end socket is not secure!!')
                 twisted.internet.reactor.listenTCP(
                     dawgie.context.fe_port, factory
                 )

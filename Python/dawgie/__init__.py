@@ -45,6 +45,19 @@ import importlib
 import logging
 import os
 import resource
+import typing
+
+from deprecated import deprecated
+
+# 3.0.0 remove - this and cleanup code duplication
+# pylint: disable=duplicate-code
+
+
+# dawgie.scan will update this unit when it is more appropriate to have it
+# do something more meaningful.
+def _master_registry(_cls=None):
+    pass
+
 
 # make datetime backward compatible
 if 'UTC' not in dir(datetime):
@@ -84,6 +97,8 @@ METRIC = collections.namedtuple(
 MOMENT = collections.namedtuple('MOMENT', ['boot', 'day', 'dom', 'dow', 'time'])
 
 
+# 3.0.0 remove - factory and impl. Should return a moment instead of event then
+#                let dawgie.basis.Factories provide the factory and impl.
 def schedule(
     factory,
     impl,
@@ -165,10 +180,10 @@ class Distribution(enum.Enum):
 
 # An enumeration of allowable factories in ae/<task>/__init__.py
 # The should follow this form:
-#     analysis (prefix:str, ps_hint:int=0, runid:int=-1)
-#     events()
-#     regression (prefix:str, ps_hint:int=0, target:str='__none__')
-#     task (prefix:str, ps_hint:int=0, runid:int=-1, target:str='__none__')
+#     analysis (prefix:str, ps_hint:int=0, runid:int=-1) -> dawgie.FactoryPlaceholder[dawgie.base.Analysis]
+#     events() -> dawgie.FactoryPlaceholder[list[dawie.Event]]
+#     regress (prefix:str, ps_hint:int=0, target:str='__none__') -> dawgie.FactoryPlaceholder[dawgie.base.Regress]
+#     task (prefix:str, ps_hint:int=0, runid:int=-1, target:str='__none__') -> dawgie.FactoryPlaceholder[dawgie.base.Task]
 # where
 #     prefix must be supplied
 #     ps_hint is a pool size hint for multiprocessing and should default to 0
@@ -184,16 +199,24 @@ class Factories(enum.Enum):
     def resolve(reference):
         return Factories[reference.factory.__name__]
 
-    pass
 
+type FactoryPlaceholder[T] = typing.Annotated[T, 'monkey_patch_me']
 
 ###
 # Below are the interfaces that developers must use
 ###
 
 
+@deprecated(
+    version='2.1.0',
+    reason='Will be removed in 3.0.0 and has been moved to dawgie.base',
+    extra_stacklevel=1,
+)
 class _Metric:
     '''Interface used internally to measure process resource usage'''
+
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
 
     def __init__(self):
         self.__history = []
@@ -297,6 +320,9 @@ class Version:
     self._get_ver() and self._set_ver(). However, this should be done with
     extreme caution.
     '''
+
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
 
     def __eq__(self, other):
         return all(
@@ -416,6 +442,10 @@ class Algorithm(Version):
        - when called post to run() Values should contain current Value
     '''
 
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
+        _master_registry(cls)
+
     def __repr__(self):
         if 'caller' not in dir(self):
             self.caller = None
@@ -450,6 +480,11 @@ class Algorithm(Version):
     pass
 
 
+@deprecated(
+    version='2.1.0',
+    reason='Will be removed in 3.0.0 and has been moved to dawgie.base',
+    extra_stacklevel=1,
+)
 class Analysis(_Metric):
     '''The Analysis is the base for all bots that analyze data across targets
 
@@ -457,6 +492,13 @@ class Analysis(_Metric):
 
     list() -> return a list of all analyzers
     '''
+
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
+        logging.getLogger(__name__).critical(
+            'extending dawgie.Analysis has been deprecated'
+        )
+        _master_registry()
 
     def __init__(self, name, ps_hint, runid):
         _Metric.__init__(self)
@@ -520,6 +562,11 @@ class Analysis(_Metric):
             setattr(step, 'caller', None)
         return
 
+    @deprecated(
+        version='2.1.0',
+        reason='Will be removed in 3.0.0 because it collides with Python. Use routines() instead.',
+        extra_stacklevel=2,
+    )
     def list(self) -> '[Analyzer]':
         raise NotImplementedError()
 
@@ -527,6 +574,9 @@ class Analysis(_Metric):
         if value:
             self.__nv.append(value)
         return self.__nv
+
+    def routines(self) -> '[Analyzer]':
+        return self.list()
 
     def timing(self):
         return self.__timing
@@ -563,6 +613,10 @@ class Analyzer(Version):
        - when called post to run() Values should contain current Value
     traits() -> list of traits to provide within an Aspect
     '''
+
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
+        _master_registry(cls)
 
     def __repr__(self):
         if 'caller' not in dir(self):
@@ -773,11 +827,15 @@ class Dataset(_Metric):
     pass
 
 
-class Feature:
-    # pylint: disable=too-few-public-methods
+class Feature:  # pylint: disable=too-few-public-methods
     pass
 
 
+@deprecated(
+    version='2.1.0',
+    reason='Will be removed in 3.0.0 and has been moved to dawgie.base',
+    extra_stacklevel=1,
+)
 class Regress(_Metric):
     '''The Regress is the base for all bots that analyze data across runids
 
@@ -785,6 +843,13 @@ class Regress(_Metric):
 
     list() -> return a list of all analyzers
     '''
+
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
+        logging.getLogger(__name__).critical(
+            'extending dawgie.Regress has been deprecated'
+        )
+        _master_registry()
 
     def __init__(self, name, ps_hint, target):
         _Metric.__init__(self)
@@ -850,6 +915,11 @@ class Regress(_Metric):
             setattr(step, 'caller', None)
         return
 
+    @deprecated(
+        version='2.1.0',
+        reason='Will be removed in 3.0.0 because it collides with Python. Use routines() instead.',
+        extra_stacklevel=2,
+    )
     def list(self) -> '[Regression]':
         raise NotImplementedError()
 
@@ -857,6 +927,9 @@ class Regress(_Metric):
         if value:
             self.__nv.append(value)
         return self.__nv
+
+    def routines(self) -> '[Regression]':
+        return self.list()
 
     def timing(self):
         return self.__timing
@@ -893,6 +966,10 @@ class Regression(Version):
        - when called post to run() Values should contain current Value
     variables() -> list of variables to provide within a Timeline
     '''
+
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
+        _master_registry(cls)
 
     def __repr__(self):
         if 'caller' not in dir(self):
@@ -990,6 +1067,11 @@ class StateVector(Version, dict):
     pass
 
 
+@deprecated(
+    version='2.1.0',
+    reason='Will be removed in 3.0.0 and has been moved to dawgie.base',
+    extra_stacklevel=1,
+)
 class Task(_Metric):
     '''The Task is the base class for all bots which are to complete a task
 
@@ -997,6 +1079,13 @@ class Task(_Metric):
 
     list() -> return a list of all algorithms
     '''
+
+    def __init_subclass__(cls, **kwds):
+        super().__init_subclass__(**kwds)
+        logging.getLogger(__name__).critical(
+            'extending dawgie.Task has been deprecated'
+        )
+        _master_registry()
 
     def __init__(self, name, ps_hint, runid, target='__all__'):
         _Metric.__init__(self)
@@ -1067,10 +1156,14 @@ class Task(_Metric):
             self.measure(step.run, args=(ds, self._ps_hint()), ds=ds)
             log.debug('Returned from %s', sname)
             setattr(step, 'caller', None)
-            pass
         log.debug('Completed %s for %s', self.__name, self._target())
         return
 
+    @deprecated(
+        version='2.1.0',
+        reason='Will be removed in 3.0.0 because it collides with Python. Use routines() instead.',
+        extra_stacklevel=2,
+    )
     def list(self) -> [Algorithm]:
         raise NotImplementedError()
 
@@ -1078,6 +1171,9 @@ class Task(_Metric):
         if value:
             self.__nv.append(value)
         return self.__nv
+
+    def routines(self) -> [Algorithm]:
+        return self.list()
 
     def timing(self):
         return self.__timing

@@ -48,7 +48,7 @@ def current(factories):
     tv = {}
     for f in factories:
         bot = f(dawgie.util.task_name(f))
-        for alg in bot.list():
+        for alg in bot.routines():
             name = '.'.join([bot._name(), alg.name()])  # fmt: skip # pylint: disable=protected-access
             if name not in talg:
                 talg[name] = alg.asstring()
@@ -78,7 +78,7 @@ def record(task, only=None):
     '''Record this version of the software'''
     if isinstance(task, (dawgie.Task, dawgie.Analysis, dawgie.Regress)):
         for alg in filter(
-            lambda a: only is None or a.name() == only, task.list()
+            lambda a: only is None or a.name() == only, task.routines()
         ):
             if not alg.state_vectors():
                 dawgie.db.update(task, alg, None, None, None)

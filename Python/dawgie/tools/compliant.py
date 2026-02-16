@@ -75,7 +75,7 @@ def _scan():
     all_factories = []
     for v in factories.values():
         all_factories.extend(v)
-    tasks = list({f.__module__ for f in all_factories})
+    tasks = list({dawgie.util.task_module(f) for f in all_factories})
     tasks.sort()
     return tasks
 
@@ -136,14 +136,12 @@ def _walk(
         dawgie.Factories.regress: ('test', 1, 'TEST'),
     }
     mod = importlib.import_module(task)
-    names = dir(mod)
-    for e in filter(lambda e: e.name in names, dawgie.Factories):
+    for e in filter(lambda e: hasattr(mod, e.name), dawgie.Factories):
         f = getattr(mod, e.name)
         bot = f(*fargs[e])
-
         if e == dawgie.Factories.analysis:
             ifanl(bot)
-            for a in bot.list():
+            for a in bot.routines():
                 ifanz(a)
                 for ref in a.feedback():
                     ifref(ref)
@@ -157,7 +155,7 @@ def _walk(
                 pass
         elif e == dawgie.Factories.task:
             ifbot(bot)
-            for a in bot.list():
+            for a in bot.routines():
                 ifalg(a)
                 for ref in a.feedback():
                     ifref(ref)
@@ -174,7 +172,7 @@ def _walk(
                 ifmom(m)
         elif e == dawgie.Factories.regress:
             ifret(bot)
-            for r in bot.list():
+            for r in bot.routines():
                 ifrec(r)
                 for ref in a.feedback():
                     ifref(ref)
@@ -339,27 +337,22 @@ def rule_01(task):
 
     if not findings[-1]:
         logging.error('No factory method in package %s', task)
+        raise ValueError(f'what?? {task}')
 
     for e in filter(lambda e: e.name in names, dawgie.Factories):
         f = getattr(mod, e.name)
-        findings.append(
-            inspect.isfunction(f)
-            and len(inspect.signature(f).parameters.keys()) == fargs[e][0]
-        )
+        p = inspect.signature(f).parameters if inspect.isroutine(f) else {}
+        findings.append(len(p) == fargs[e][0])
 
         if findings[-1]:
             findings.append(True)
-            for d, v in zip(
-                fargs[e][1], inspect.signature(f).parameters.values()
-            ):
+            for d, v in zip(fargs[e][1], p.values()):
                 findings[-1] &= v.default == d
                 pass
 
             if findings[-1]:
                 findings.append(True)
-                for a, v in zip(
-                    fargs[e][2], inspect.signature(f).parameters.values()
-                ):
+                for a, v in zip(fargs[e][2], p.values()):
                     findings[-1] &= v.annotation == a
                     pass
                 if not findings[-1]:
@@ -375,7 +368,11 @@ def rule_01(task):
                 )
         else:
             logging.error(
-                'Number of arguments for factory %s in package %s', e.name, task
+                'Number of arguments for factory %s in package %s (%d,%d)',
+                e.name,
+                task,
+                fargs[e][0],
+                len(p),
             )
         pass
     return all(findings)
@@ -408,15 +405,21 @@ def rule_02(task):
     findings = []
     _walk(
         task,
-        ifbot=lambda b: _signal(isinstance(b, dawgie.Task), 'Task'),
+        ifbot=lambda b: _signal(
+            isinstance(b, (dawgie.Task, dawgie.base.Task)), 'Task'
+        ),
         ifalg=lambda a: _signal(isinstance(a, dawgie.Algorithm), 'Algorithm'),
         ifsv=lambda sv: _signal(
             isinstance(sv, dawgie.StateVector), 'StateVector'
         ),
         ifv=lambda i: _signal(isinstance(i[1], dawgie.Value), 'Value', i[0]),
-        ifanl=lambda a: _signal(isinstance(a, dawgie.Analysis), 'Analysis'),
+        ifanl=lambda a: _signal(
+            isinstance(a, (dawgie.Analysis, dawgie.base.Analysis)), 'Analysis'
+        ),
         ifanz=lambda a: _signal(isinstance(a, dawgie.Analyzer), 'Analyzer'),
-        ifret=lambda a: _signal(isinstance(a, dawgie.Regress), 'Regress'),
+        ifret=lambda a: _signal(
+            isinstance(a, (dawgie.Regress, dawgie.base.Regress)), 'Regress'
+        ),
         ifrec=lambda a: _signal(isinstance(a, dawgie.Regression), 'Regression'),
         ifref=lambda ref: _signal(
             isinstance(ref, (dawgie.ALG_REF, dawgie.SV_REF, dawgie.V_REF)),
@@ -452,8 +455,8 @@ def rule_03(task):
 
     def _verify_analysis(a):
         return (
-            all((isinstance(az, dawgie.Analyzer) for az in a.list()))
-            if a.list()
+            all((isinstance(az, dawgie.Analyzer) for az in a.routines()))
+            if a.routines()
             else False
         )
 
@@ -517,8 +520,8 @@ def rule_03(task):
 
     def _verify_regress(r):
         return (
-            all((isinstance(reg, dawgie.Regression) for reg in r.list()))
-            if r.list()
+            all((isinstance(reg, dawgie.Regression) for reg in r.routines()))
+            if r.routines()
             else False
         )
 
@@ -556,8 +559,8 @@ def rule_03(task):
 
     def _verify_task(t):
         return (
-            all((isinstance(a, dawgie.Algorithm) for a in t.list()))
-            if t.list()
+            all((isinstance(a, dawgie.Algorithm) for a in t.routines()))
+            if t.routines()
             else False
         )
 
@@ -657,20 +660,22 @@ def rule_06(task):
     findings = [True]
     mod = importlib.import_module(task)
 
-    if 'task' in dir(mod):
+    if hasattr(mod, 'task'):
         f = getattr(mod, 'task')
         bot = f('test', -1, 1, 'TEST')
-        for step in bot.list():
+        for step in bot.routines():
             for prev in step.previous():
                 findings.append(
-                    prev.impl.__module__.startswith(prev.factory.__module__)
+                    prev.impl.__module__.startswith(
+                        dawgie.util.task_module(prev.factory)
+                    )
                 )
 
                 if not findings[-1]:
                     logging.error(
                         'the previous implementation %s does not start with the factory package %s',
                         prev.impl.__module__,
-                        prev.factory.__module__,
+                        dawgie.util.task_module(prev.factory),
                     )
                 pass
             pass
@@ -817,7 +822,8 @@ def rule_11(task):
     def _resolve(ref):
         fn = dawgie.util.task_name(ref.factory)
         resolved = [False]
-        for alg in ref.factory(fn).list():
+        bot = ref.factory(fn)
+        for alg in bot.routines():
             if alg.name() == ref.impl.name():
                 index = 0
                 resolved[0] = True
@@ -907,6 +913,7 @@ if __name__ == '__main__':
     sys.path.insert(0, root)
 
     import dawgie
+    import dawgie.base
     import dawgie.context
     import dawgie.pl.logger
     import dawgie.pl.scan
@@ -922,11 +929,10 @@ if __name__ == '__main__':
         sys.exit(-1)
 else:
     import dawgie
+    import dawgie.base
     import dawgie.context
     import dawgie.pl.logger
     import dawgie.pl.scan
     import dawgie.security
     import dawgie.tools.compliant
     import dawgie.util
-
-    pass

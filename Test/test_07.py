@@ -129,19 +129,19 @@ class Shelve(unittest.TestCase):
         setattr(dawgie.db.shelve.comms.Worker, '_send', mock_send)
         dawgie.db.update(
             base,
-            base.list()[0],
-            base.list()[0].state_vectors()[0],
+            base.routines()[0],
+            base.routines()[0].state_vectors()[0],
             'oops',
-            base.list()[0].state_vectors()[0]['oops'],
+            base.routines()[0].state_vectors()[0]['oops'],
         )
         dawgie.db.update(
             base,
-            base.list()[0],
-            base.list()[0].state_vectors()[0],
+            base.routines()[0],
+            base.routines()[0].state_vectors()[0],
             'snafu',
-            base.list()[0].state_vectors()[0]['snafu'],
+            base.routines()[0].state_vectors()[0]['snafu'],
         )
-        connection = dawgie.db.connect(base.list()[0], base, '__all__')
+        connection = dawgie.db.connect(base.routines()[0], base, '__all__')
         connection.update()
         return
 

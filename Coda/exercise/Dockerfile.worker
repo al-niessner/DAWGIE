@@ -35,13 +35,13 @@
 # NTR:
 
 FROM dexbase
-COPY Test/ae /proj/src/ae
+COPY Test/nae /proj/src/nae
 # Normally, this ENV below is not required but it is for the exercise
 ENV DAWGIE_DOCKERIZED_AE_GIT_REVISION="FAKE-VERSION-FOR-EXERCISE"
 ENV PYTHONPATH=/proj/src
 ENTRYPOINT ["python", "-m", "dawgie.pl.worker", \
-            "-a", "/proj/src/ae", \
-            "-b", "ae", \
+            "-a", "/proj/src/nae", \
+            "-b", "nae", \
             "-c", "cluster", \
             "-g", "/proj/gnupg", \
             "-i", "0", \

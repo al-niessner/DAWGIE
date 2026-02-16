@@ -35,7 +35,7 @@
 # NTR:
 
 FROM dexbase
-COPY Test/ae /proj/src/ae
+COPY Test/nae /proj/src/nae
 # Normally, this ENV below is not required but it is for the exercise
 ENV DAWGIE_DOCKERIZED_AE_GIT_REVISION="FAKE-VERSION-FOR-EXERCISE"
 ENV PYTHONPATH=/proj/src
