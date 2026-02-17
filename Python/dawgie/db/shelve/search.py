@@ -1,4 +1,4 @@
-'''Postgresql search.Facade implementation
+'''shelve ..basis.SearchFacade implementation
 
 --
 COPYRIGHT:
@@ -38,10 +38,10 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-from ..search import Facade, Params
+from ..basis import Params, SearchFacade
 
 
-class Backside(Facade):
+class Backside(SearchFacade):
     def _filter(self, parameters: Params) -> [str]:
         '''Find the sublist(s) given some constraints
 

@@ -45,12 +45,12 @@ import typing
 
 @dataclasses.dataclass
 class Range:
-    start: int
-    stop: int
+    start: int = 0
+    stop: int = None
 
 
 class Params(typing.NamedTuple):
-    runids: list[int, Range] = None
+    runids: [list[int, Range], str] = None
     targets: [str] = None
     tasks: [str] = None
     algs: [str] = None
@@ -58,7 +58,7 @@ class Params(typing.NamedTuple):
     vals: [str] = None
 
 
-class Facade(abc.ABC):
+class SearchFacade(abc.ABC):
     '''
     Special values:
 
@@ -80,15 +80,11 @@ class Facade(abc.ABC):
         return value is not None and not value
 
     @staticmethod
-    def _scrub(parameters: Params):
-        '''scrub the parameters from overly complex requests
-
-        1. reduce the runid strings to ranges and individual values
-        '''
-        if parameters.runids:
-            indices = set()
-            ranges = []
-            for val in parameters.runids.split(','):
+    def _divide(runids: [str, list[int, Range]]) -> (set, []):
+        indices = set()
+        ranges = []
+        if isinstance(runids, str):
+            for val in runids.split(','):
                 val = val.strip()
                 if ':' in val:
                     start, stop = val.split(':')
@@ -100,6 +96,22 @@ class Facade(abc.ABC):
                     )
                 elif val:
                     indices.add(int(val))
+        else:
+            for val in runids:
+                if isinstance(val, Range):
+                    ranges.append(val)
+                else:
+                    indices.add(val)
+        return indices, ranges
+
+    @staticmethod
+    def _scrub(parameters: Params):
+        '''scrub the parameters from overly complex requests
+
+        1. reduce the runid strings to ranges and individual values
+        '''
+        if parameters.runids is not None:
+            indices, ranges = SearchFacade._divide(parameters.runids)
             runidset = [-1]
             if indices != {-1} or ranges:
                 if ranges:
@@ -148,11 +160,11 @@ class Facade(abc.ABC):
         then it be first:last+1 even if the indices are not continuous.
         '''
         empties = sum(
-            1 if Facade._isempty(value) else 0 for value in parameters
+            1 if SearchFacade._isempty(value) else 0 for value in parameters
         )
         if empties != 1:
             raise ValueError(f'One [] is required but found {empties} []s.')
-        return self._filter(Facade._scrub(parameters))
+        return self._filter(SearchFacade._scrub(parameters))
 
     @typing.final
     def find(
@@ -165,4 +177,4 @@ class Facade(abc.ABC):
         as no caching is done for simplicity reasons. Hence large searches
         are expensive.
         '''
-        return self._find(Facade._scrub(parameters), index, limit)
+        return self._find(SearchFacade._scrub(parameters), index, limit)

@@ -74,7 +74,7 @@ import twisted.internet.protocol
 import twisted.internet.reactor
 
 from .search import Backside
-from ..search import Facade
+from ..basis import SearchFacade
 
 _db = None
 
@@ -1861,7 +1861,7 @@ def retreat(reg, ret):
     return Interface(reg, ret, ret._target())
 
 
-def search() -> Facade:
+def search() -> SearchFacade:
     if not dawgie.db.post._db:
         raise RuntimeError('called search before open')
     return Backside(_conn, _cur)

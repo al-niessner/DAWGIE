@@ -48,6 +48,7 @@ import tempfile
 import unittest
 
 from datetime import datetime as dt
+from dawgie.db.basis import Params, SearchFacade
 
 # Save the actual work for another day, but this shows how to write one set
 # of tests in DB then test each instance by two other objects that extend it.
@@ -428,6 +429,13 @@ class DB:
         self.assertEqual(0, len(tl))
         dawgie.db.close()
         return
+
+    def test_search(self):
+        search = dawgie.db.search()
+        self.assertIsInstance(search, SearchFacade)
+        self.assertListEqual([], search.filter(Params(3, [])))
+        self.assertListEqual(['test'], search.filter(Params(17, [])))
+        self.assertListEqual([], search.filter(Params(17, ['apple'], [])))
 
     def test_targets(self):
         dawgie.db.close()

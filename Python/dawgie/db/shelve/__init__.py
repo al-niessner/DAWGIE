@@ -46,7 +46,7 @@ import dawgie.util.metrics
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 
-from ..search import Facade
+from ..basis import SearchFacade
 from . import util
 from .comms import Connector
 from .comms import DBSerializer
@@ -419,7 +419,7 @@ def retreat(reg, ret) -> dawgie.Timeline:
     )
 
 
-def search() -> Facade:
+def search() -> SearchFacade:
     return Backside()
 
 

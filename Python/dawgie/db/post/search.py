@@ -1,4 +1,4 @@
-'''Postgresql search.Facade implementation
+'''Postgresql ..basis.SearchFacade implementation
 
 --
 COPYRIGHT:
@@ -40,7 +40,7 @@ NTR:
 
 import typing
 
-from ..search import Facade, Params, Range
+from ..basis import Params, Range, SearchFacade
 
 _CONSTRAINT = '{sql.fk} = ANY(%s)'
 _FKS = 'SELECT pk FROM {sql.table} WHERE name = ANY(%s);'
@@ -50,9 +50,9 @@ _PKS = 'SELECT {sql.fk} FROM {sql.table} WHERE {sql.constraints};'
 _RANGE = 'run_ID >= %s and run_ID < %s'
 
 
-class Backside(Facade):
+class Backside(SearchFacade):
     def __init__(self, connection_factory, cursor_factory):
-        Facade.__init__(self)
+        SearchFacade.__init__(self)
         self._conn = connection_factory
         self._cur = cursor_factory
 
@@ -69,6 +69,7 @@ class Backside(Facade):
         '''
         args = []
         constraints = []
+        results = []
         sql_info = None
         for k, v in filter(lambda t: bool(t[1]), parameters._asdict().items()):
             sql_info = _SQL_TABLE[k]
@@ -87,15 +88,28 @@ class Backside(Facade):
                 constraints.append(_CONSTRAINT.format(sql=sql_info))
                 args.append(v)
         for k, v in parameters._asdict().items():
-            if Facade._isempty(v):
+            if SearchFacade._isempty(v):
                 sql_info = _SQL_TABLE[k]
-                sql_info.constraints.extend(constraints)
-        if sql_info.constraints:
-            # FIXME - get fks from prime using _PKS then names from table using _NAMES_SOME
-            pass
-        else:
-            # FIXME - get all names from table using _NAMES_ALL
-            pass
+                sql_info = sql_info._replace(
+                    constraints=' AND '.join(constraints)
+                )
+        connection = self._conn()
+        cursor = self._cur(connection)
+        try:
+            if sql_info.constraints:
+                cursor.execute(_PKS.format(_PKS.format(sql=sql_info), **args))
+                cursor.execute(
+                    _NAMES_SOME.format(sql=sql_info),
+                    (row[0] for row in cursor.fetchall()),
+                )
+                results.extend(row[0] for row in cursor.fetchall())
+            else:
+                cursor.execute(_NAMES_ALL.format(sql_info))
+                results.extend(row[0] for row in cursor.fetchall())
+        finally:
+            cursor.close()
+            connection.close()
+        return sorted(set(results), key=str.casefold)
 
     def _find(
         self, parameters: Params, index: int = 0, limit: int = None
@@ -113,7 +127,7 @@ class Backside(Facade):
 class _SqlInfo(typing.NamedTuple):
     fk: str = ''
     table: str = ''
-    constraints: [str] = []
+    constraints: str = ''
 
 
 _SQL_TABLE = {
