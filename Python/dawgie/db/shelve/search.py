@@ -41,7 +41,7 @@ NTR:
 from ..basis import Params, SearchFacade
 
 
-class Backside(SearchFacade):
+class SearchImplementation(SearchFacade):
     def _filter(self, parameters: Params) -> [str]:
         '''Find the sublist(s) given some constraints
 

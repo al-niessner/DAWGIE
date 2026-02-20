@@ -46,11 +46,11 @@ _CONSTRAINT = '{sql.fk} = ANY(%s)'
 _FKS = 'SELECT pk FROM {sql.table} WHERE name = ANY(%s);'
 _NAMES_ALL = 'SELECT name FROM {sql.table};'
 _NAMES_SOME = 'SELECT name FROM {sql.table} WHERE pk = ANY(%s);'
-_PKS = 'SELECT {sql.fk} FROM {sql.table} WHERE {sql.constraints};'
+_PKS = 'SELECT {sql.fk} FROM Prime WHERE {sql.constraints};'
 _RANGE = 'run_ID >= %s and run_ID < %s'
 
 
-class Backside(SearchFacade):
+class SearchImplementation(SearchFacade):
     def __init__(self, connection_factory, cursor_factory):
         SearchFacade.__init__(self)
         self._conn = connection_factory
@@ -97,12 +97,11 @@ class Backside(SearchFacade):
         cursor = self._cur(connection)
         try:
             if sql_info.constraints:
-                cursor.execute(_PKS.format(_PKS.format(sql=sql_info), **args))
-                cursor.execute(
-                    _NAMES_SOME.format(sql=sql_info),
-                    (row[0] for row in cursor.fetchall()),
-                )
-                results.extend(row[0] for row in cursor.fetchall())
+                cursor.execute(_PKS.format(sql=sql_info), args)
+                pks = list(set(row[0] for row in cursor.fetchall()))
+                if pks:
+                    cursor.execute(_NAMES_SOME.format(sql=sql_info), (pks,))
+                    results.extend(row[0] for row in cursor.fetchall())
             else:
                 cursor.execute(_NAMES_ALL.format(sql_info))
                 results.extend(row[0] for row in cursor.fetchall())

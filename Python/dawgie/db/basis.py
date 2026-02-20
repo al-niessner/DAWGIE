@@ -97,11 +97,17 @@ class SearchFacade(abc.ABC):
                 elif val:
                     indices.add(int(val))
         else:
-            for val in runids:
-                if isinstance(val, Range):
-                    ranges.append(val)
+            try:
+                for val in runids:
+                    if isinstance(val, Range):
+                        ranges.append(val)
+                    else:
+                        indices.add(val)
+            except TypeError:
+                if isinstance(runids, Range):
+                    ranges.append(runids)
                 else:
-                    indices.add(val)
+                    indices.add(runids)
         return indices, ranges
 
     @staticmethod

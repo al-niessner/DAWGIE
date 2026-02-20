@@ -53,7 +53,7 @@ from .comms import DBSerializer
 from .enums import Method
 from .enums import Table
 from .model import Interface
-from .search import Backside
+from .search import SearchImplementation
 from .state import DBI
 
 
@@ -420,12 +420,14 @@ def retreat(reg, ret) -> dawgie.Timeline:
 
 
 def search() -> SearchFacade:
-    return Backside()
+    if not DBI().is_open:
+        raise RuntimeError('called search before open')
+    return SearchImplementation()
 
 
 def targets():
     if not DBI().is_open:
-        raise RuntimeError('called next before open')
+        raise RuntimeError('called targets before open')
     return (
         Connector().dbkeys(Table.target)
         if DBI().is_reopened
