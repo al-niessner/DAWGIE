@@ -52,11 +52,14 @@ REGISTRY = {}
 
 
 def _content(f: dawgie.Factories, fn: str, fs: dawgie.base.Factories) -> []:
-    if f == dawgie.Factories.events:
-        something = getattr(fs, fn)()
-    else:
-        something = getattr(fs, fn)(None).routines()
-    return something
+    try:
+        if f == dawgie.Factories.events:
+            something = getattr(fs, fn)()
+        else:
+            something = getattr(fs, fn)(None).routines()
+        return something
+    except NotImplementedError:
+        return None
 
 
 def _is_auto(fnc: typing.Callable) -> bool:
@@ -66,10 +69,11 @@ def _is_auto(fnc: typing.Callable) -> bool:
 
 
 def _is_placeholder(fnc: typing.Callable) -> bool:
-    hints = typing.get_type_hints(fnc, include_extras=True).get('return')
+    hints = typing.get_type_hints(fnc, include_extras=True).get('return', '')
     return (
-        hasattr(hints, '__metadata__')
-        and 'monkey_patch_me' in hints.__metadata__
+        hasattr(hints, '__value__')
+        and hasattr(hints.__value__, '__metadata__')
+        and 'monkey_patch_me' in hints.__value__.__metadata__
     )
 
 
@@ -127,6 +131,8 @@ def advanced_factories(ae, pkg):
                 )
             elif _content(f, fn, fs):
                 setattr(m, fn, getattr(fs, fn))
+            elif hasattr(m, fn):
+                delattr(m, fn)
             if hasattr(m, fn):
                 factories[f].append(getattr(m, fn))
     return factories
