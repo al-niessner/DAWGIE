@@ -52,7 +52,7 @@ REGISTRY = {}
 
 
 def _content(f: dawgie.Factories, fn: str, fs: dawgie.base.Factories) -> []:
-    try: 
+    try:
         if f == dawgie.Factories.events:
             something = getattr(fs, fn)()
         else:
@@ -131,7 +131,7 @@ def advanced_factories(ae, pkg):
                 )
             elif _content(f, fn, fs):
                 setattr(m, fn, getattr(fs, fn))
-            else:
+            elif hasattr(m, fn):
                 delattr(m, fn)
             if hasattr(m, fn):
                 factories[f].append(getattr(m, fn))
