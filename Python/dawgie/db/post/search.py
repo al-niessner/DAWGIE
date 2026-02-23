@@ -42,11 +42,11 @@ import typing
 
 from ..basis import Params, Range, SearchFacade, SearchResults
 
-_CONSTRAINT = '{sql.fk} = ANY(%s)'
+_CONSTRAINT = 'p.{sql.fk} = ANY(%s)'
 _FKS = 'SELECT pk FROM {sql.table} WHERE name = ANY(%s);'
 _NAMES_ALL = 'SELECT name FROM {sql.table};'
 _NAMES_SOME = 'SELECT name FROM {sql.table} WHERE pk = ANY(%s);'
-_PKS = 'SELECT {sql.fk} FROM Prime WHERE {sql.constraints};'
+_PKS = 'SELECT p.{sql.fk} FROM Prime p WHERE {sql.constraints};'
 _RANGE = 'run_ID >= %s and run_ID < %s'
 
 
@@ -150,21 +150,20 @@ class SearchImplementation(SearchFacade):
         cursor = self._cur(connection)
         try:
             cursor.execute(
-                f'SELECT count(*) FROM Prime WHERE {constraints};', args
+                f'SELECT count(*) FROM Prime p WHERE {constraints};', args
             )
-            total = cursor.scalar()
+            total = cursor.fetchone()[0]
             limit = total if limit is None else limit
             if limit:
                 args.extend([index, limit])
                 cursor.execute(
                     'SELECT '
-                    'p.run_ID, tn.name, task.name, alg.name, sv.name, val.name '
+                    'p.run_ID, tn.name, task.name, alg.name, sv.name '
                     'FROM Prime p '
                     'JOIN Target tn ON p.tn_ID = tn.PK '
                     'JOIN Task task ON p.task_ID = task.PK '
                     'JOIN Algorithm alg ON p.alg_ID = alg.PK '
                     'JOIN StateVector sv ON p.sv_ID = sv.PK '
-                    'JOIN Value val ON p.val_ID = val.PK '
                     f'WHERE {constraints} '
                     'ORDER BY p.PK DESC '
                     'LIMIT %s OFFSET %s;',

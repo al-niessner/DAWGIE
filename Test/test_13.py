@@ -48,7 +48,7 @@ import tempfile
 import unittest
 
 from datetime import datetime as dt
-from dawgie.db.basis import Params, SearchFacade
+from dawgie.db.basis import Params, SearchFacade, SearchResults
 
 # Save the actual work for another day, but this shows how to write one set
 # of tests in DB then test each instance by two other objects that extend it.
@@ -397,18 +397,31 @@ class DB:
         dawgie.db.open()
         search = dawgie.db.search()
         self.assertIsInstance(search, SearchFacade)
-        self.assertListEqual([], search.filter(Params(3, [])))
-        self.assertListEqual(['__all__', 'test'], search.filter(Params(17, [])))
-        self.assertListEqual([], search.filter(Params(17, ['apple'], [])))
+        self.assertEqual([], search.filter(Params(3, [])))
+        self.assertEqual(['__all__', 'test'], search.filter(Params(17, [])))
+        self.assertEqual([], search.filter(Params(17, ['apple'], [])))
         asps = list(a[0]._name() for a in dawgie.db.testdata.ASPECTS)
         dsts = list(d[1]._name() for d in dawgie.db.testdata.DATASETS)
         regs = list(t[0]._name() for t in dawgie.db.testdata.TIMELINES)
         asps.sort()
         dsts.sort()
         regs.sort()
-        self.assertListEqual(asps, search.filter(Params(17, ['__all__'], [])))
-        self.assertListEqual(dsts, search.filter(Params(17, ['test'], [])))
-        self.assertListEqual(regs, search.filter(Params([0], ['test'], [])))
+        self.assertEqual(asps, search.filter(Params(17, ['__all__'], [])))
+        self.assertEqual(dsts, search.filter(Params(17, ['test'], [])))
+        self.assertEqual(regs, search.filter(Params([0], ['test'], [])))
+        rest = SearchResults(['17.test.Task_03.Algorithm_10.StateVector_03'], 1)
+        self.assertEqual(
+            rest,
+            search.find(
+                Params(
+                    17,
+                    ['test'],
+                    ['Task_03'],
+                    ['Algorithm_10'],
+                    ['StateVector_03'],
+                )
+            ),
+        )
 
     def test_targets(self):
         dawgie.db.close()
