@@ -58,6 +58,11 @@ class Params(typing.NamedTuple):
     vals: [str] = None
 
 
+class SearchResults(typing.NamedTuple):
+    items: [str] = []
+    total: int = -1
+
+
 class SearchFacade(abc.ABC):
     '''
     Special values:
@@ -72,7 +77,7 @@ class SearchFacade(abc.ABC):
     @abc.abstractmethod
     def _find(
         self, parameters: Params, index: int = 0, limit: int = None
-    ) -> [str]:
+    ) -> SearchResults:
         pass
 
     @staticmethod
@@ -175,7 +180,7 @@ class SearchFacade(abc.ABC):
     @typing.final
     def find(
         self, parameters: Params, index: int = 0, limit: int = None
-    ) -> [str]:
+    ) -> SearchResults:
         '''Find all of the primary table entries that meet the constraints
 
         The return strings will be in runid order. For large lists, use the

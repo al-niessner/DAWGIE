@@ -40,7 +40,7 @@ NTR:
 
 import typing
 
-from ..basis import Params, Range, SearchFacade
+from ..basis import Params, Range, SearchFacade, SearchResults
 
 _CONSTRAINT = '{sql.fk} = ANY(%s)'
 _FKS = 'SELECT pk FROM {sql.table} WHERE name = ANY(%s);'
@@ -56,6 +56,40 @@ class SearchImplementation(SearchFacade):
         self._conn = connection_factory
         self._cur = cursor_factory
 
+    @staticmethod
+    def __add_runids(args: [], constraints: [], runids) -> []:
+        '''add ranges to args and contraints and return the runids'''
+        indices = []
+        for rid in filter(lambda i: i >= 0, runids):
+            if isinstance(rid, Range):
+                constraints.append(_RANGE)
+                args.append((rid.start, rid.stop))
+            else:
+                indices.append(rid)
+        return indices
+
+    def __args_n_constraints(self, parameters: Params) -> ([], []):
+        args = []
+        constraints = []
+        for k, v in filter(lambda t: bool(t[1]), parameters._asdict().items()):
+            sql_info = _SQL_TABLE[k]
+            if k == 'runids':
+                indices = self.__add_runids(args, constraints, v)
+                if indices:
+                    constraints.append(_CONSTRAINT.format(sql=sql_info))
+                    args.append(indices)
+            else:
+                connection = self._conn()
+                cursor = self._cur(connection)
+                try:
+                    cursor.execute(_FKS.format(sql=sql_info), (v,))
+                    args.append(list(row[0] for row in cursor.fetchall()))
+                    constraints.append(_CONSTRAINT.format(sql=sql_info))
+                finally:
+                    cursor.close()
+                    connection.close()
+        return args, constraints
+
     def _filter(self, parameters: Params) -> [str]:
         '''Find the sublist(s) given some constraints
 
@@ -67,26 +101,9 @@ class SearchImplementation(SearchFacade):
         then the list will always be 0..1 strings. If 0, then no match. If 1,
         then it be first:last+1 even if the indices are not continuous.
         '''
-        args = []
-        constraints = []
+        args, constraints = self.__args_n_constraints(parameters)
         results = []
         sql_info = None
-        for k, v in filter(lambda t: bool(t[1]), parameters._asdict().items()):
-            sql_info = _SQL_TABLE[k]
-            if k == 'runids':
-                indices = []
-                for rid in filter(lambda i: i >= 0, v):
-                    if isinstance(rid, Range):
-                        constraints.append(_RANGE)
-                        args.append((rid.start, rid.stop))
-                    else:
-                        indices.append(rid)
-                if indices:
-                    constraints.append(_CONSTRAINT.format(sql=sql_info))
-                    args.append(indices)
-            else:
-                constraints.append(_CONSTRAINT.format(sql=sql_info))
-                args.append(v)
         for k, v in parameters._asdict().items():
             if SearchFacade._isempty(v):
                 sql_info = _SQL_TABLE[k]
@@ -112,7 +129,7 @@ class SearchImplementation(SearchFacade):
 
     def _find(
         self, parameters: Params, index: int = 0, limit: int = None
-    ) -> [str]:
+    ) -> SearchResults:
         '''Find all of the primary table entries that meet the constraints
 
         The return strings will be in runid order. For large lists, use the
@@ -120,7 +137,46 @@ class SearchImplementation(SearchFacade):
         as no caching is done for simplicity reasons. Hence large searches
         are expensive.
         '''
-        pass
+        args, constraints = self.__args_n_constraints(parameters)
+        constraints = ' AND '.join(constraints)
+        items = []
+        total = -2
+        if not constraints:
+            raise ValueError(
+                'No constaints means the whole Prime table. '
+                'Apply some constraints and try again'
+            )
+        connection = self._conn()
+        cursor = self._cur(connection)
+        try:
+            cursor.execute(
+                f'SELECT count(*) FROM Prime WHERE {constraints};', args
+            )
+            total = cursor.scalar()
+            limit = total if limit is None else limit
+            if limit:
+                args.extend([index, limit])
+                cursor.execute(
+                    'SELECT '
+                    'p.run_ID, tn.name, task.name, alg.name, sv.name, val.name '
+                    'FROM Prime p '
+                    'JOIN Target tn ON p.tn_ID = tn.PK '
+                    'JOIN Task task ON p.task_ID = task.PK '
+                    'JOIN Algorithm alg ON p.alg_ID = alg.PK '
+                    'JOIN StateVector sv ON p.sv_ID = sv.PK '
+                    'JOIN Value val ON p.val_ID = val.PK '
+                    f'WHERE {constraints} '
+                    'ORDER BY p.PK DESC '
+                    'LIMIT %s OFFSET %s;',
+                    args,
+                )
+                items.extend(
+                    '.'.join(map(str, row)) for row in cursor.fetchall()
+                )
+        finally:
+            cursor.close()
+            connection.close()
+        return SearchResults(items, total)
 
 
 class _SqlInfo(typing.NamedTuple):
