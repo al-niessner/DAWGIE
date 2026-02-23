@@ -157,7 +157,7 @@ class SearchImplementation(SearchFacade):
             total = cursor.fetchone()[0]
             limit = total if limit is None else limit
             if limit:
-                args.extend([index, limit])
+                args.extend([limit, index])
                 cursor.execute(
                     'SELECT '
                     'p.run_ID, tn.name, task.name, alg.name, sv.name '
