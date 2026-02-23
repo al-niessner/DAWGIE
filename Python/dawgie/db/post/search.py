@@ -150,7 +150,9 @@ class SearchImplementation(SearchFacade):
         cursor = self._cur(connection)
         try:
             cursor.execute(
-                f'SELECT count(*) FROM Prime p WHERE {constraints};', args
+                'SELECT count(DISTINCT (p.run_ID, p.tn_ID, p.task_ID, '
+                f'p.alg_ID, p.sv_ID)) FROM Prime p WHERE {constraints};',
+                args,
             )
             total = cursor.fetchone()[0]
             limit = total if limit is None else limit
