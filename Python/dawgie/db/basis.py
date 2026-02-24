@@ -43,10 +43,15 @@ import dataclasses
 import typing
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Range:
     start: int = 0
     stop: int = None
+
+    def __contains__(self, member: int) -> bool:
+        if self.stop is None:
+            return self.start <= member
+        return self.start <= member < self.stop
 
 
 class Params(typing.NamedTuple):

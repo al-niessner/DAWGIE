@@ -38,10 +38,31 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-from ..basis import Params, SearchFacade
+from ..basis import Params, SearchFacade, SearchResults
+from .enums import Table
+from .state import DBI
+from .util import prime_keys, subset
 
 
 class SearchImplementation(SearchFacade):
+    def _prime_keys(self, parameters, keylen=5) -> [()]:
+        '''return all of the prime keys that match the constraints'''
+        # alignment of keys       runid  tgt    task   alg     sv     val
+        constraints: list[set] = [set(), set(), set(), set(), set(), set()]
+        results = set()
+        for k, v in filter(lambda t: bool(t[1]), parameters._asdict().items()):
+            if k == 'runids':
+                constraints[_align(k)].update(v)
+                constraints[_align(k)].discard(-1)
+            else:
+                table = DBI().tables[_table_index(k)]
+                for name in v:
+                    constraints[_align(k)].update(subset(table, name).values())
+        for pk in prime_keys(DBI().tables.prime):
+            if all(not c or e in c for c, e in zip(constraints, pk)):
+                results.add(pk[:keylen])
+        return sorted(results)
+
     def _filter(self, parameters: Params) -> [str]:
         '''Find the sublist(s) given some constraints
 
@@ -53,11 +74,19 @@ class SearchImplementation(SearchFacade):
         then the list will always be 0..1 strings. If 0, then no match. If 1,
         then it be first:last+1 even if the indices are not continuous.
         '''
-        pass
+        empty = [
+            k
+            for k, v in parameters._asdict().items()
+            if SearchFacade._isempty(v)
+        ][0]
+        idx = _align(empty)
+        pks = self._prime_keys(parameters)
+        table = DBI().indices[_table_index(empty)]
+        return sorted({table[pk[idx]] for pk in pks})
 
     def _find(
         self, parameters: Params, index: int = 0, limit: int = None
-    ) -> [str]:
+    ) -> SearchResults:
         '''Find all of the primary table entries that meet the constraints
 
         The return strings will be in runid order. For large lists, use the
@@ -65,4 +94,35 @@ class SearchImplementation(SearchFacade):
         as no caching is done for simplicity reasons. Hence large searches
         are expensive.
         '''
-        pass
+        items: [str] = []
+        pks: [()] = self._prime_keys(parameters)
+        for pk in pks[index:limit]:
+            rid = f'{pk[0]}'
+            tgt = DBI().indices[pk[1]]
+            tn = DBI().indices[pk[2]]
+            an = DBI().indices[pk[3]]
+            svn = DBI().indices[pk[4]]
+            items.append(f'{rid}.{tgt}.{tn}.{an}.{svn}')
+        return SearchResults(items=items, total=len(pks))
+
+
+def _align(param_name: str) -> int:
+    '''convert Params name to Table.prime key tuple index'''
+    return {
+        k: i
+        for i, k in enumerate(
+            ['runids', 'targets', 'tasks', 'algs', 'svs', 'vals']
+        )
+    }[param_name]
+
+
+def _table_index(param_name: str) -> int:
+    '''convert Params name to DBI indice/table index'''
+    return {
+        'runids': Table.prime,
+        'targets': Table.target,
+        'tasks': Table.task,
+        'algs': Table.alg,
+        'svs': Table.state,
+        'vals': Table.value,
+    }[param_name].value

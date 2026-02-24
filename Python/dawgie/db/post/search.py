@@ -167,7 +167,7 @@ class SearchImplementation(SearchFacade):
                     'JOIN Algorithm alg ON p.alg_ID = alg.PK '
                     'JOIN StateVector sv ON p.sv_ID = sv.PK '
                     f'WHERE {constraints} '
-                    'ORDER BY p.PK DESC '
+                    'ORDER BY p.PK ASC '
                     'LIMIT %s OFFSET %s;',
                     args,
                 )
