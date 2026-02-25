@@ -48,6 +48,7 @@ import tempfile
 import unittest
 
 from datetime import datetime as dt
+from dawgie.db.basis import Params, SearchFacade, SearchResults
 
 # Save the actual work for another day, but this shows how to write one set
 # of tests in DB then test each instance by two other objects that extend it.
@@ -60,18 +61,13 @@ class DB:
         dawgie.db.open()
         for tsk, alg, sv, vn, v in dawgie.db.testdata.KNOWNS:
             dawgie.db.update(tsk, alg, sv, vn, v)
-            pass
         for tgt, tsk, alg in dawgie.db.testdata.DATASETS:
             dawgie.db.connect(alg, tsk, tgt).update()
-            pass
         for tsk, alg in dawgie.db.testdata.ASPECTS:
             dawgie.db.gather(alg, tsk).ds().update()
-            pass
         for tsk, alg in dawgie.db.testdata.TIMELINES:
             dawgie.db.retreat(alg, tsk).ds().update()
-            pass
         dawgie.db.close()
-        return
 
     def test__prime_keys(self):
         dawgie.db.close()
@@ -86,7 +82,6 @@ class DB:
             ),
             len(keys),
         )
-        return
 
     def test__prime_values(self):
         dawgie.db.close()
@@ -101,7 +96,6 @@ class DB:
             ),
             len(values),
         )
-        return
 
     def test_add(self):
         dawgie.db.close()
@@ -110,11 +104,9 @@ class DB:
         )
         # actual testing of adding is done in test_targets because no way
         # to delete added targets
-        return
 
     def test_archive(self):
         self.assertTrue(True)  # not testable in a reasonable sense
-        return
 
     def test_connect(self):
         tgt, tsk, alg = dawgie.db.testdata.DATASETS[0]
@@ -123,7 +115,6 @@ class DB:
         dawgie.db.open()
         self.assertIsNotNone(dawgie.db.connect(alg, tsk, tgt))
         dawgie.db.close()
-        return
 
     def test_consistent(self):
         '''given a new data element, find all items after that can be promoted
@@ -158,9 +149,6 @@ class DB:
                             dawgie.db.ID(vn, v),
                         )
                     )
-                    pass
-                pass
-            pass
         tn, tsk, alg = dawgie.db.testdata.DATASETS[2]
         for sv in alg.sv:
             for vn, v in sv.items():
@@ -172,8 +160,6 @@ class DB:
                         dawgie.db.ID(vn, v),
                     )
                 )
-                pass
-            pass
         dawgie.db.close()
         self.assertRaises(RuntimeError, dawgie.db.consistent, ins, outs, tn)
         dawgie.db.open()
@@ -186,19 +172,16 @@ class DB:
             algs.add(algid)
             svs.add(svid)
             vs.add(vid)
-            pass
         self.assertEqual(len(tns), 1)
         self.assertEqual(len(tsks), 1)
         self.assertEqual(len(algs), 1)
         self.assertEqual(len(svs), len(alg.sv))
         self.assertEqual(len(vs), len(outs))
         dawgie.db.close()
-        return
 
     def test_copy(self):
         dawgie.db.close()
         self.assertRaises(RuntimeError, dawgie.db.copy, None, None, None)
-        return
 
     def test_gather(self):
         ans, anz = dawgie.db.testdata.ASPECTS[0]
@@ -209,7 +192,6 @@ class DB:
         self.assertIsNotNone(asp)
         self.assertEqual(0, len(asp))
         dawgie.db.close()
-        return
 
     def test_metrics(self):
         dawgie.db.close()
@@ -219,7 +201,6 @@ class DB:
         self.assertEqual(dawgie.db.testdata.TSK_CNT, len(metrics))
         self.assertEqual(-2, metrics[-1].sv['task_memory'].value())
         dawgie.db.close()
-        return
 
     def test_next(self):
         dawgie.db.close()
@@ -227,11 +208,9 @@ class DB:
         dawgie.db.open()
         self.assertEqual(dawgie.db.testdata.RUNID + 1, dawgie.db.next())
         dawgie.db.close()
-        return
 
     def test_open(self):
         self.assertFalse(True)
-        return
 
     def test_promote(self):
         ins = []
@@ -247,9 +226,6 @@ class DB:
                             dawgie.db.ID(vn, v),
                         )
                     )
-                    pass
-                pass
-            pass
         tn, tsk, alg = dawgie.db.testdata.DATASETS[2]
         for sv in alg.sv:
             for vn, v in sv.items():
@@ -261,8 +237,6 @@ class DB:
                         dawgie.db.ID(vn, v),
                     )
                 )
-                pass
-            pass
         dawgie.db.close()
         self.assertRaises(RuntimeError, dawgie.db.consistent, ins, outs, tn)
         self.assertRaises(RuntimeError, dawgie.db.promote, (1, 1, 1), 1)
@@ -276,7 +250,6 @@ class DB:
             algs.add(algid)
             svs.add(svid)
             vs.add(vid)
-            pass
         self.assertEqual(len(tns), 1)
         self.assertEqual(len(tsks), 1)
         self.assertEqual(len(algs), 1)
@@ -298,10 +271,7 @@ class DB:
                     sv.name(),
                     vn,
                 )
-                pass
-            pass
         dawgie.db.close()
-        return
 
     def test_regressions(self):
         '''update not insert regressions
@@ -372,11 +342,9 @@ class DB:
             len(keys),
         )
         dawgie.db.close()
-        return
 
     def test_reopen(self):
         self.assertFalse(True)
-        return
 
     def test_reset(self):
         tgt, tsk, alg = dawgie.db.testdata.DATASETS[-1]
@@ -386,8 +354,6 @@ class DB:
             sv._set_ver(dawgie.VERSION(200, 200, 200))
             for val in sv.values():
                 val._set_ver(dawgie.VERSION(400, 500, 600))
-                pass
-            pass
         print(type(alg.design()), alg.design())
         dawgie.db.close()
         self.assertRaises(
@@ -414,9 +380,6 @@ class DB:
                 self.assertEqual(val.design(), 400, 'design')
                 self.assertEqual(val.implementation(), 500, 'implementation')
                 self.assertEqual(val.bugfix(), 600, 'bugfix')
-                pass
-            pass
-        return
 
     def test_retreat(self):
         ret, reg = dawgie.db.testdata.TIMELINES[0]
@@ -427,7 +390,38 @@ class DB:
         self.assertIsNotNone(tl)
         self.assertEqual(0, len(tl))
         dawgie.db.close()
-        return
+
+    def test_search(self):
+        dawgie.db.close()
+        self.assertRaises(RuntimeError, dawgie.db.search)
+        dawgie.db.open()
+        search = dawgie.db.search()
+        self.assertIsInstance(search, SearchFacade)
+        self.assertEqual([], search.filter(Params(3, [])))
+        self.assertEqual(['__all__', 'test'], search.filter(Params(17, [])))
+        self.assertEqual([], search.filter(Params(17, ['apple'], [])))
+        asps = list(a[0]._name() for a in dawgie.db.testdata.ASPECTS)
+        dsts = list(d[1]._name() for d in dawgie.db.testdata.DATASETS)
+        regs = list(t[0]._name() for t in dawgie.db.testdata.TIMELINES)
+        asps.sort()
+        dsts.sort()
+        regs.sort()
+        self.assertEqual(asps, search.filter(Params(17, ['__all__'], [])))
+        self.assertEqual(dsts, search.filter(Params(17, ['test'], [])))
+        self.assertEqual(regs, search.filter(Params([0], ['test'], [])))
+        rest = SearchResults(['17.test.Task_03.Algorithm_10.StateVector_03'], 1)
+        self.assertEqual(
+            rest,
+            search.find(
+                Params(
+                    17,
+                    ['test'],
+                    ['Task_03'],
+                    ['Algorithm_10'],
+                    ['StateVector_03'],
+                )
+            ),
+        )
 
     def test_targets(self):
         dawgie.db.close()
@@ -439,7 +433,6 @@ class DB:
         self.assertTrue(dawgie.db.add(dawgie.db.testdata.TARGET))
         self.assertTrue(dawgie.db.add(dawgie.db.testdata.TARGET + '_a'))
         dawgie.db.close()
-        return
 
     def test_trace(self):
         dawgie.db.close()
@@ -460,7 +453,6 @@ class DB:
         self.assertEqual(17, runids[dawgie.db.testdata.TARGET][tans[0]])
         self.assertEqual(0, runids[dawgie.db.testdata.TARGET][tans[1]])
         self.assertEqual(17, runids[dawgie.db.testdata.TARGET][tans[2]])
-        return
 
     def test_update(self):
         dawgie.db.close()
@@ -506,7 +498,6 @@ class DB:
             len(keys),
         )
         dawgie.db.close()
-        return
 
     def test_versions(self):
         dawgie.db.close()
@@ -534,13 +525,9 @@ class DB:
             ),
             len(vv),
         )
-        return
 
     def test_locks(self):
         self.assertTrue(False)
-        return
-
-    pass
 
 
 # to test postgres:
@@ -571,12 +558,10 @@ class Post(DB, unittest.TestCase):
         dawgie.db_rotate_path = os.path.join(cls.root, 'db')
         if not root:
             DB.setup()
-        return
 
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.root, True)
-        return
 
     def test_close(self):
         dawgie.db.close()
@@ -584,15 +569,12 @@ class Post(DB, unittest.TestCase):
         dawgie.db.open()
         dawgie.db.close()
         self.assertFalse(dawgie.db.post._db)
-        return
 
     def test_copy(self):
         self.assertRaises(NotImplementedError, dawgie.db.copy, 1, 2, 3)
-        return
 
     def test_locks(self):
         self.assertTrue(True)  # locks not used in postgres
-        return
 
     def test_open(self):
         dawgie.db.close()
@@ -601,7 +583,6 @@ class Post(DB, unittest.TestCase):
         self.assertTrue(dawgie.db.post._db)
         dawgie.db.close()
         self.assertFalse(dawgie.db.post._db)
-        return
 
     def test_reopen(self):
         dawgie.db.close()
@@ -610,9 +591,6 @@ class Post(DB, unittest.TestCase):
         self.assertTrue(dawgie.db.post._db)
         dawgie.db.close()
         self.assertFalse(dawgie.db.post._db)
-        return
-
-    pass
 
 
 class Shelve(DB, unittest.TestCase):
@@ -643,7 +621,6 @@ class Shelve(DB, unittest.TestCase):
         setattr(dawgie.db.shelve.comms.Worker, '_send', mock_send)
         if not root:
             DB.setup()
-        return
 
     @classmethod
     def tearDownClass(cls):
@@ -653,7 +630,6 @@ class Shelve(DB, unittest.TestCase):
         setattr(dawgie.db.shelve.comms.Connector, '_Connector__do', cls._do)
         setattr(dawgie.db.shelve.comms, 'release', cls._release)
         setattr(dawgie.db.shelve.comms.Worker, '_send', cls._send)
-        return
 
     def test_close(self):
         dawgie.db.close()
@@ -661,11 +637,9 @@ class Shelve(DB, unittest.TestCase):
         dawgie.db.open()
         dawgie.db.close()
         self.assertFalse(dawgie.db.shelve.state.DBI().is_open)
-        return
 
     def test_consistent(self):
         self.assertRaises(NotImplementedError, dawgie.db.consistent, [], [], '')
-        return
 
     def test_copy(self):
         super().test_copy()
@@ -677,14 +651,12 @@ class Shelve(DB, unittest.TestCase):
         )
         self.assertEqual(0, retval)
         dawgie.db.close()
-        return
 
     def test_locks(self):
         dawgie.db.close()
         dawgie.db.open()
         self.assertEqual(dawgie.db.view_locks(), {'tasks': []})
         dawgie.db.close()
-        return
 
     def test_open(self):
         dawgie.db.close()
@@ -693,11 +665,9 @@ class Shelve(DB, unittest.TestCase):
         self.assertTrue(dawgie.db.shelve.state.DBI().is_open)
         dawgie.db.close()
         self.assertFalse(dawgie.db.shelve.state.DBI().is_open)
-        return
 
     def test_promote(self):
         self.assertRaises(NotImplementedError, dawgie.db.promote, [], 1)
-        return
 
     def test_reopen(self):
         dawgie.db.close()
@@ -707,9 +677,6 @@ class Shelve(DB, unittest.TestCase):
         self.assertTrue(dawgie.db.shelve.state.DBI().is_reopened)
         dawgie.db.close()
         self.assertFalse(dawgie.db.shelve.state.DBI().is_open)
-        return
-
-    pass
 
 
 def mock_acquire(name):
@@ -733,9 +700,7 @@ def mock_do(self, request):
 
 def mock_delay_copy(self, request_value):
     self._do_copy(request_value)
-    return
 
 
 def mock_send(self, response):
     do_response[0] = response
-    return

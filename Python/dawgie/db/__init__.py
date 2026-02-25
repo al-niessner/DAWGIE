@@ -54,6 +54,8 @@ import dawgie.util.metrics
 import importlib
 import logging
 
+from .basis import SearchFacade
+
 log = logging.getLogger(__name__)
 
 ID = collections.namedtuple(
@@ -212,6 +214,11 @@ def retreat(reg, ret) -> dawgie.Timeline:
     ret : instance of dawgie.Regress that creates the ret
     '''
     return _db_in_use().retreat(reg, ret)
+
+
+def search() -> SearchFacade:
+    '''Get an implementation of Facade for the specific DB to allow for search'''
+    return _db_in_use().search()
 
 
 def targets(fulllist: bool = False):

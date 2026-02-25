@@ -46,12 +46,14 @@ import dawgie.util.metrics
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 import os
 
+from ..basis import SearchFacade
 from . import util
 from .comms import Connector
 from .comms import DBSerializer
 from .enums import Method
 from .enums import Table
 from .model import Interface
+from .search import SearchImplementation
 from .state import DBI
 
 
@@ -417,9 +419,15 @@ def retreat(reg, ret) -> dawgie.Timeline:
     )
 
 
+def search() -> SearchFacade:
+    if not DBI().is_open:
+        raise RuntimeError('called search before open')
+    return SearchImplementation()
+
+
 def targets():
     if not DBI().is_open:
-        raise RuntimeError('called next before open')
+        raise RuntimeError('called targets before open')
     return (
         Connector().dbkeys(Table.target)
         if DBI().is_reopened
