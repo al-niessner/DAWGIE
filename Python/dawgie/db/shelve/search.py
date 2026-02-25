@@ -41,7 +41,7 @@ NTR:
 from ..basis import Params, SearchFacade, SearchResults
 from .enums import Table
 from .state import DBI
-from .util import prime_keys, subset
+from .util import dissect, prime_keys
 
 
 class SearchImplementation(SearchFacade):
@@ -57,7 +57,9 @@ class SearchImplementation(SearchFacade):
             else:
                 table = DBI().tables[_table_index(k)]
                 for name in v:
-                    constraints[_align(k)].update(subset(table, name).values())
+                    subtable = _subset(table, name)
+                    subvalues = subtable.values() if subtable else [-1]
+                    constraints[_align(k)].update(subvalues)
         for pk in prime_keys(DBI().tables.prime):
             if all(not c or e in c for c, e in zip(constraints, pk)):
                 results.add(pk[:keylen])
@@ -98,10 +100,10 @@ class SearchImplementation(SearchFacade):
         pks: [()] = self._prime_keys(parameters)
         for pk in pks[index:limit]:
             rid = f'{pk[0]}'
-            tgt = DBI().indices[pk[1]]
-            tn = DBI().indices[pk[2]]
-            an = DBI().indices[pk[3]]
-            svn = DBI().indices[pk[4]]
+            tgt = dissect(DBI().indices.target[pk[1]])[1]
+            tn = dissect(DBI().indices.task[pk[2]])[1]
+            an = dissect(DBI().indices.alg[pk[3]])[1]
+            svn = dissect(DBI().indices.state[pk[4]])[1]
             items.append(f'{rid}.{tgt}.{tn}.{an}.{svn}')
         return SearchResults(items=items, total=len(pks))
 
@@ -114,6 +116,13 @@ def _align(param_name: str) -> int:
             ['runids', 'targets', 'tasks', 'algs', 'svs', 'vals']
         )
     }[param_name]
+
+
+def _subset(from_table: {str: int}, name: str) -> {str: int}:
+    '''extract subset like .util.subset() but ignore parents and versions'''
+    return dict(
+        filter(lambda t, n=name: dissect(t[0])[1] == n, from_table.items())
+    )
 
 
 def _table_index(param_name: str) -> int:
