@@ -139,7 +139,9 @@ class SearchFacade(abc.ABC):
                         if r.start > merged[-1].stop:
                             merged.append(r)
                         elif r.stop is None or r.stop > merged[-1].stop:
-                            merged[-1].stop = r.stop
+                            merged[-1] = Range(
+                                start=merged[-1].start, stop=r.stop
+                            )
                     ranges = merged
                 runidset = ranges if ranges else []
                 idx = []
