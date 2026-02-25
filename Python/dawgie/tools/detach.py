@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -176,7 +176,7 @@ for runnable in args.runnables:
                 instance = getattr(mod, factory_method.name)(
                     mod_name, *ARGS[factory_method]
                 )
-                for r in instance.list():
+                for r in instance.routines():
                     if r.name() == runnable_name:
                         _copy(load[factory_method](instance, r))
                     pass

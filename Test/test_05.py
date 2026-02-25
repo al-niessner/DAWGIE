@@ -1,7 +1,7 @@
 '''
 
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -45,13 +45,14 @@ import unittest
 
 
 class DAG(unittest.TestCase):
-    def __init__(self, *args):
-        unittest.TestCase.__init__(self, *args)
+    @classmethod
+    def setUpClass(self):
         self.__ae_dir = os.path.abspath(
             os.path.join(os.path.dirname(__file__), 'ae')
         )
         self.__ae_pkg = 'ae'
         sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+        dawgie.pl.scan.reset(self.__ae_pkg)
         factories = dawgie.pl.scan.for_factories(self.__ae_dir, self.__ae_pkg)
         self.__dag = dawgie.pl.dag.Construct(factories)
         return

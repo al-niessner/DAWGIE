@@ -77,6 +77,8 @@ services:
       db:
         condition: service_healthy
     environment:
+      DAWGIE_AE_BASE_PACKAGE: 'nae'
+      DAWGIE_AE_BASE_PATH: '/proj/src/nae'
       DAWGIE_DB_HOST: ${DB_HOST}
       DAWGIE_DB_IMPL: ${DB_IMPL}
       DAWGIE_DB_NAME: ${DB_NAME}

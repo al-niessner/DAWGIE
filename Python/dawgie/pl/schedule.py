@@ -51,7 +51,7 @@ Flow:
 --
 
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -96,6 +96,7 @@ import dawgie
 import dawgie.context
 import dawgie.db
 import dawgie.pl.dag
+import dawgie.pl.logger.chronicle
 import dawgie.pl.promotion
 import dawgie.pl.schedule
 import dawgie.pl.version
@@ -106,10 +107,10 @@ import twisted.internet.reactor
 
 ae = None  # not a constant so pylint: disable=invalid-name
 booted = []
-err = []
+err = []  # 3.0.0 remove
 que = []
 per = []
-suc = []
+suc = []  # 3.0.0 remove
 
 pipeline_paused = False  # not a constant so pylint: disable=invalid-name
 promote = dawgie.pl.promotion.Engine()
@@ -275,6 +276,17 @@ def complete(job, runid, target, timing, status):
             'target': target,
             'task': job.tag,
             'changeset': dawgie.context.git_rev,
+        }
+    )
+    dawgie.pl.logger.chronicle.append(
+        {
+            'changeset': dawgie.context.git_rev,
+            'runid': runid,
+            'status': status.name,
+            'target': target,
+            'task': job.tag,
+            'timing': timing,
+            'version': job.get('alg').asstring(),
         }
     )
     return
@@ -559,12 +571,12 @@ def view_events() -> [{}]:
     return [{'actor': k, 'delays': sorted(result[k])} for k in sorted(result)]
 
 
-def view_failure() -> [dict]:
-    return err.copy()
+def view_failure() -> [dict]:  # 3.0.0 remove
+    return err
 
 
-def view_success() -> [dict]:
-    return suc.copy()
+def view_success() -> [dict]:  # 3.0.0 remove
+    return suc
 
 
 def view_todo(index: int = 0, limit: int = None) -> [dict]:

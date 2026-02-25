@@ -2,7 +2,7 @@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -46,5 +46,5 @@ NTR: 49811
 # to allow the functions to be mapped to here were the legacy code expects it.
 from .args import log_level, set_ports  # noqa: F401
 from .metrics import MetricStateVector, MetricValue  # noqa: F401
-from .names import task_name, verify_name  # noqa: F401
+from .names import task_module, task_name, verify_name  # noqa: F401
 from .refs import algref2svref, as_vref, svref2vref, vref_as_name  # noqa: F401

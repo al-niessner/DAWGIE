@@ -8,7 +8,7 @@ The database interface has N goals:
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -53,6 +53,8 @@ import dawgie.util
 import dawgie.util.metrics
 import importlib
 import logging
+
+from .basis import SearchFacade
 
 log = logging.getLogger(__name__)
 
@@ -214,6 +216,11 @@ def retreat(reg, ret) -> dawgie.Timeline:
     return _db_in_use().retreat(reg, ret)
 
 
+def search() -> SearchFacade:
+    '''Get an implementation of Facade for the specific DB to allow for search'''
+    return _db_in_use().search()
+
+
 def targets(fulllist: bool = False):
     return list(
         filter(
@@ -297,7 +304,7 @@ def view(visitor: dawgie.Visitor, cid, runid, tn, tskn, algn, svn):
         visitor.add_declaration(msg)
         return
 
-    alg = list(filter(lambda x: x.name() == algn, bot.list()))
+    alg = list(filter(lambda x: x.name() == algn, bot.routines()))
 
     if len(alg) == 1:
         alg = alg[0]

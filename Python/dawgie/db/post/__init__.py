@@ -2,7 +2,7 @@
 
 --
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -72,6 +72,9 @@ import time
 import twisted.internet.error
 import twisted.internet.protocol
 import twisted.internet.reactor
+
+from .search import SearchImplementation
+from ..basis import SearchFacade
 
 _db = None
 
@@ -1858,6 +1861,12 @@ def retreat(reg, ret):
     return Interface(reg, ret, ret._target())
 
 
+def search() -> SearchFacade:
+    if not dawgie.db.post._db:
+        raise RuntimeError('called search before open')
+    return SearchImplementation(_conn, _cur)
+
+
 def targets():
     if not dawgie.db.post._db:
         raise RuntimeError('called targets before open')
@@ -1868,7 +1877,8 @@ def targets():
     cur.execute('SELECT name from Target;')
     result = cur.fetchall()
     cur.close()
-    conn.close()
+    conn.close()  # psycopg3 problem # fmt: skip # pylint: disable=no-member
+
     return [r[0] for r in result]  # fmt: skip # need a list so pylint: disable=consider-using-generator
 
 

@@ -1,6 +1,6 @@
 '''
 COPYRIGHT:
-Copyright (c) 2015-2025, California Institute of Technology ("Caltech").
+Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
 All rights reserved.
@@ -39,6 +39,7 @@ NTR:
 from dawgie.pl.jobinfo import State
 
 import dawgie
+import dawgie.base
 import dawgie.context
 import dawgie.util
 import dawgie.util.fifo
@@ -140,7 +141,7 @@ class Construct:
     def _build_tree(self, factories, shape, sub_algs, sub_dep):
         for factory in factories:
             bot = factory(dawgie.util.task_name(factory), -1)
-            for alg in bot.list():
+            for alg in bot.routines():
                 for sv in alg.state_vectors():
                     for vn in sv:
                         fn = '.'.join(
