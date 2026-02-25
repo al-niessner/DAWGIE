@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "generated_at": "2025-08-07T22:45:20Z",
+  "generated_at": "2026-02-25T18:48:16Z",
   "metrics": {
     "Python/dawgie/__init__.py": {
       "CONFIDENCE.HIGH": 0,
@@ -11,7 +11,20 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 886,
+      "loc": 961,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "Python/dawgie/base.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 381,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -37,7 +50,20 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 269,
+      "loc": 273,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "Python/dawgie/db/basis.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 165,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -54,16 +80,29 @@
       "nosec": 0,
       "skipped_tests": 0
     },
-    "Python/dawgie/db/post.py": {
-      "CONFIDENCE.HIGH": 6,
+    "Python/dawgie/db/post/__init__.py": {
+      "CONFIDENCE.HIGH": 4,
       "CONFIDENCE.LOW": 4,
-      "CONFIDENCE.MEDIUM": 51,
+      "CONFIDENCE.MEDIUM": 49,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 6,
-      "SEVERITY.MEDIUM": 55,
+      "SEVERITY.LOW": 4,
+      "SEVERITY.MEDIUM": 53,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1765,
+      "loc": 1821,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "Python/dawgie/db/post/search.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 2,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 2,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 172,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -76,7 +115,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 449,
+      "loc": 470,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -89,7 +128,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 2,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 374,
+      "loc": 388,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -102,7 +141,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 59,
+      "loc": 60,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -115,7 +154,20 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 320,
+      "loc": 334,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "Python/dawgie/db/shelve/search.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 114,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -388,7 +440,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 248,
+      "loc": 252,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -414,7 +466,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 208,
+      "loc": 227,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -466,7 +518,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 452,
+      "loc": 453,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -479,7 +531,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 359,
+      "loc": 393,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -506,6 +558,19 @@
       "SEVERITY.MEDIUM": 1,
       "SEVERITY.UNDEFINED": 0,
       "loc": 158,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "Python/dawgie/pl/logger/chronicle.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 69,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -557,7 +622,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 1,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 135,
+      "loc": 150,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -570,7 +635,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 78,
+      "loc": 166,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -583,7 +648,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 472,
+      "loc": 484,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -609,7 +674,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 522,
+      "loc": 558,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -661,7 +726,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 123,
+      "loc": 125,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -674,7 +739,7 @@
       "SEVERITY.LOW": 6,
       "SEVERITY.MEDIUM": 2,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 529,
+      "loc": 530,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -687,7 +752,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 119,
+      "loc": 120,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -700,7 +765,7 @@
       "SEVERITY.LOW": 2,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 455,
+      "loc": 456,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -726,7 +791,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 1,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 798,
+      "loc": 806,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -804,7 +869,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 250,
+      "loc": 248,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -882,7 +947,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 69,
+      "loc": 77,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -900,15 +965,15 @@
       "skipped_tests": 0
     },
     "_totals": {
-      "CONFIDENCE.HIGH": 58,
+      "CONFIDENCE.HIGH": 56,
       "CONFIDENCE.LOW": 5,
       "CONFIDENCE.MEDIUM": 59,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 7,
-      "SEVERITY.LOW": 37,
+      "SEVERITY.LOW": 35,
       "SEVERITY.MEDIUM": 78,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 14600,
+      "loc": 15914,
       "nosec": 0,
       "skipped_tests": 0
     }
@@ -930,7 +995,7 @@
       "line_range": [
         47
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b403-import-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
@@ -950,7 +1015,7 @@
       "line_range": [
         48
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b404-import-subprocess",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess",
       "test_id": "B404",
       "test_name": "blacklist"
     },
@@ -970,7 +1035,7 @@
       "line_range": [
         111
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b108_hardcoded_tmp_directory.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b108_hardcoded_tmp_directory.html",
       "test_id": "B108",
       "test_name": "hardcoded_tmp_directory"
     },
@@ -990,7 +1055,7 @@
       "line_range": [
         123
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b108_hardcoded_tmp_directory.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b108_hardcoded_tmp_directory.html",
       "test_id": "B108",
       "test_name": "hardcoded_tmp_directory"
     },
@@ -1010,7 +1075,7 @@
       "line_range": [
         155
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b607_start_process_with_partial_path.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html",
       "test_id": "B607",
       "test_name": "start_process_with_partial_path"
     },
@@ -1030,7 +1095,7 @@
       "line_range": [
         155
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b603_subprocess_without_shell_equals_true.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html",
       "test_id": "B603",
       "test_name": "subprocess_without_shell_equals_true"
     },
@@ -1050,15 +1115,15 @@
       "line_range": [
         442
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
     {
-      "code": "65 import random\n66 import pickle\n67 import psycopg\n",
+      "code": "66 import random\n67 import pickle\n68 import psycopg\n",
       "col_offset": 0,
       "end_col_offset": 13,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 502,
@@ -1066,19 +1131,19 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Consider possible security implications associated with pickle module.",
-      "line_number": 66,
+      "line_number": 67,
       "line_range": [
-        66
+        67
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b403-import-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
     {
-      "code": "124         cur.execute(\n125             'SELECT val_ID,blob_name from Prime WHERE run_ID = %s '\n126             + 'and alg_ID = %s and tn_ID = %s '\n127             + 'and task_ID = %s and sv_ID = %s;',\n",
+      "code": "128         cur.execute(\n129             'SELECT val_ID,blob_name from Prime WHERE run_ID = %s '\n130             + 'and alg_ID = %s and tn_ID = %s '\n131             + 'and task_ID = %s and sv_ID = %s;',\n",
       "col_offset": 12,
       "end_col_offset": 67,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1086,20 +1151,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 125,
+      "line_number": 129,
       "line_range": [
-        125,
-        126
+        129,
+        130
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "211             cur.execute(\n212                 'SELECT PK from Algorithm WHERE name = %s and '\n213                 + 'task_ID = %s and '\n214                 + 'design = %s and implementation = %s and bugfix = %s;',\n",
+      "code": "218             cur.execute(\n219                 'SELECT PK from Algorithm WHERE name = %s and '\n220                 + 'task_ID = %s and '\n221                 + 'design = %s and implementation = %s and bugfix = %s;',\n",
       "col_offset": 16,
       "end_col_offset": 63,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1107,20 +1172,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 212,
+      "line_number": 219,
       "line_range": [
-        212,
-        213
+        219,
+        220
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "224             cur.execute(\n225                 'SELECT PK FROM StateVector WHERE name = %s and '\n226                 + 'alg_ID = %s and '\n227                 + 'design = %s and implementation = %s and bugfix = %s;',\n",
+      "code": "231             cur.execute(\n232                 'SELECT PK FROM StateVector WHERE name = %s and '\n233                 + 'alg_ID = %s and '\n234                 + 'design = %s and implementation = %s and bugfix = %s;',\n",
       "col_offset": 16,
       "end_col_offset": 65,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1128,20 +1193,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 225,
+      "line_number": 232,
       "line_range": [
-        225,
-        226
+        232,
+        233
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "245                 cur.execute(\n246                     'SELECT run_ID FROM Prime WHERE tn_ID = %s AND '\n247                     + 'task_ID = %s AND alg_ID = %s AND sv_ID = %s;',\n248                     [tn[0], task_ID, alg_ID, sv_ID],\n",
+      "code": "252                 cur.execute(\n253                     'SELECT run_ID FROM Prime WHERE tn_ID = %s AND '\n254                     + 'task_ID = %s AND alg_ID = %s AND sv_ID = %s;',\n255                     [tn[0], task_ID, alg_ID, sv_ID],\n",
       "col_offset": 20,
       "end_col_offset": 68,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1149,20 +1214,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 246,
+      "line_number": 253,
       "line_range": [
-        246,
-        247
+        253,
+        254
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "264                 cur.execute(\n265                     'SELECT val_ID from Prime WHERE run_ID = %s AND '\n266                     + 'alg_ID = %s AND tn_ID = %s and task_ID = %s and '\n267                     + 'sv_ID = %s;',\n",
+      "code": "271                 cur.execute(\n272                     'SELECT val_ID from Prime WHERE run_ID = %s AND '\n273                     + 'alg_ID = %s AND tn_ID = %s and task_ID = %s and '\n274                     + 'sv_ID = %s;',\n",
       "col_offset": 20,
       "end_col_offset": 69,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1170,20 +1235,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 265,
+      "line_number": 272,
       "line_range": [
-        265,
-        266
+        272,
+        273
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "319             cur.execute(\n320                 'SELECT blob_name from Prime WHERE run_ID = %s and '\n321                 + 'tn_ID = %s and task_ID = %s and alg_ID = %s and '\n322                 + 'sv_ID = %s and val_ID = %s;',\n",
+      "code": "326             cur.execute(\n327                 'SELECT blob_name from Prime WHERE run_ID = %s and '\n328                 + 'tn_ID = %s and task_ID = %s and alg_ID = %s and '\n329                 + 'sv_ID = %s and val_ID = %s;',\n",
       "col_offset": 16,
       "end_col_offset": 68,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1191,20 +1256,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 320,
+      "line_number": 327,
       "line_range": [
-        320,
-        321
+        327,
+        328
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "390             cur.execute(\n391                 'SELECT pk FROM Algorithm WHERE name = %s AND '\n392                 + 'task_ID = %s;',\n393                 [self._alg().name(), task_ID],\n",
+      "code": "397             cur.execute(\n398                 'SELECT pk FROM Algorithm WHERE name = %s AND '\n399                 + 'task_ID = %s;',\n400                 [self._alg().name(), task_ID],\n",
       "col_offset": 16,
       "end_col_offset": 63,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1212,20 +1277,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 391,
+      "line_number": 398,
       "line_range": [
-        391,
-        392
+        398,
+        399
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "400                 cur.execute(\n401                     'SELECT pk FROM StateVector WHERE name = %s AND '\n402                     + 'alg_ID = ANY(%s);',\n403                     [sv.name(), alg_ID],\n",
+      "code": "407                 cur.execute(\n408                     'SELECT pk FROM StateVector WHERE name = %s AND '\n409                     + 'alg_ID = ANY(%s);',\n410                     [sv.name(), alg_ID],\n",
       "col_offset": 20,
       "end_col_offset": 69,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1233,20 +1298,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 401,
+      "line_number": 408,
       "line_range": [
-        401,
-        402
+        408,
+        409
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "406                 cur.execute(\n407                     'SELECT run_ID FROM Prime WHERE tn_ID = %s AND '\n408                     + 'task_ID = %s AND alg_ID = ANY(%s) AND '\n409                     + 'sv_ID = ANY(%s);',\n",
+      "code": "413                 cur.execute(\n414                     'SELECT run_ID FROM Prime WHERE tn_ID = %s AND '\n415                     + 'task_ID = %s AND alg_ID = ANY(%s) AND '\n416                     + 'sv_ID = ANY(%s);',\n",
       "col_offset": 20,
       "end_col_offset": 68,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1254,20 +1319,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 407,
+      "line_number": 414,
       "line_range": [
-        407,
-        408
+        414,
+        415
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "425                 cur.execute(\n426                     'SELECT alg_ID,sv_ID FROM Prime WHERE '\n427                     + 'run_ID = %s AND tn_ID = %s AND task_ID = %s '\n428                     + ' AND alg_ID = ANY(%s) and sv_ID = ANY(%s);',\n",
+      "code": "432                 cur.execute(\n433                     'SELECT alg_ID,sv_ID FROM Prime WHERE '\n434                     + 'run_ID = %s AND tn_ID = %s AND task_ID = %s '\n435                     + ' AND alg_ID = ANY(%s) and sv_ID = ANY(%s);',\n",
       "col_offset": 20,
       "end_col_offset": 59,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1275,20 +1340,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 426,
+      "line_number": 433,
       "line_range": [
-        426,
-        427
+        433,
+        434
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "492             cur.execute(\n493                 'SELECT PK from Algorithm WHERE name = %s and '\n494                 + 'task_ID = %s;',\n495                 (\n",
+      "code": "499             cur.execute(\n500                 'SELECT PK from Algorithm WHERE name = %s and '\n501                 + 'task_ID = %s;',\n502                 (\n",
       "col_offset": 16,
       "end_col_offset": 63,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1296,20 +1361,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 493,
+      "line_number": 500,
       "line_range": [
-        493,
-        494
+        500,
+        501
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "501             cur.execute(\n502                 'SELECT PK FROM StateVector WHERE name = %s and '\n503                 + 'alg_ID = ANY(%s);',\n504                 (\n",
+      "code": "508             cur.execute(\n509                 'SELECT PK FROM StateVector WHERE name = %s and '\n510                 + 'alg_ID = ANY(%s);',\n511                 (\n",
       "col_offset": 16,
       "end_col_offset": 65,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1317,20 +1382,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 502,
+      "line_number": 509,
       "line_range": [
-        502,
-        503
+        509,
+        510
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "517             cur.execute(\n518                 'SELECT run_ID FROM Prime WHERE tn_ID = %s AND '\n519                 + 'task_ID = %s AND alg_ID = ANY(%s) AND '\n520                 + 'sv_ID = ANY(%s);',\n",
+      "code": "524             cur.execute(\n525                 'SELECT run_ID FROM Prime WHERE tn_ID = %s AND '\n526                 + 'task_ID = %s AND alg_ID = ANY(%s) AND '\n527                 + 'sv_ID = ANY(%s);',\n",
       "col_offset": 16,
       "end_col_offset": 64,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1338,20 +1403,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 518,
+      "line_number": 525,
       "line_range": [
-        518,
-        519
+        525,
+        526
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "525                 cur.execute(\n526                     'SELECT PK,alg_ID,sv_ID FROM Prime WHERE '\n527                     + 'run_ID = %s AND  tn_ID = %s AND '\n528                     + 'task_ID = %s AND alg_ID = ANY(%s) AND '\n",
+      "code": "532                 cur.execute(\n533                     'SELECT PK,alg_ID,sv_ID FROM Prime WHERE '\n534                     + 'run_ID = %s AND  tn_ID = %s AND '\n535                     + 'task_ID = %s AND alg_ID = ANY(%s) AND '\n",
       "col_offset": 20,
       "end_col_offset": 62,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1359,20 +1424,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 526,
+      "line_number": 533,
       "line_range": [
-        526,
-        527
+        533,
+        534
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "535                 cur.execute(\n536                     'SELECT val_ID from Prime WHERE run_ID = %s AND '\n537                     + 'alg_ID = %s AND tn_ID = %s and task_ID = %s and '\n538                     + 'sv_ID = %s;',\n",
+      "code": "542                 cur.execute(\n543                     'SELECT val_ID from Prime WHERE run_ID = %s AND '\n544                     + 'alg_ID = %s AND tn_ID = %s and task_ID = %s and '\n545                     + 'sv_ID = %s;',\n",
       "col_offset": 20,
       "end_col_offset": 69,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1380,20 +1445,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 536,
+      "line_number": 543,
       "line_range": [
-        536,
-        537
+        543,
+        544
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "603             cur.execute(\n604                 'SELECT PK from Algorithm WHERE name = %s and '\n605                 + 'task_ID = %s and '\n606                 + 'design = %s and implementation = %s and bugfix = %s;',\n",
+      "code": "610             cur.execute(\n611                 'SELECT PK from Algorithm WHERE name = %s and '\n612                 + 'task_ID = %s and '\n613                 + 'design = %s and implementation = %s and bugfix = %s;',\n",
       "col_offset": 16,
       "end_col_offset": 63,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1401,20 +1466,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 604,
+      "line_number": 611,
       "line_range": [
-        604,
-        605
+        611,
+        612
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "616             cur.execute(\n617                 'SELECT run_ID FROM Prime WHERE tn_ID = %s AND '\n618                 + 'task_ID = %s AND alg_ID = %s;',\n619                 [target_ID, task_ID, alg_ID],\n",
+      "code": "623             cur.execute(\n624                 'SELECT run_ID FROM Prime WHERE tn_ID = %s AND '\n625                 + 'task_ID = %s AND alg_ID = %s;',\n626                 [target_ID, task_ID, alg_ID],\n",
       "col_offset": 16,
       "end_col_offset": 64,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1422,41 +1487,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 617,
+      "line_number": 624,
       "line_range": [
-        617,
-        618
+        624,
+        625
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "622             cur.execute(\n623                 'SELECT sv_ID,val_ID,blob_name FROM Prime WHERE '\n624                 + 'run_ID = %s AND tn_ID = %s AND task_ID = %s AND '\n625                 + 'alg_ID = %s;',\n",
+      "code": "629             cur.execute(\n630                 'SELECT sv_ID,val_ID,blob_name FROM Prime WHERE '\n631                 + 'run_ID = %s AND tn_ID = %s AND task_ID = %s AND '\n632                 + 'alg_ID = %s;',\n",
       "col_offset": 16,
       "end_col_offset": 65,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 623,
-      "line_range": [
-        623,
-        624
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "629                 cur.execute(\n630                     'SELECT EXISTS (SELECT 1 FROM Prime WHERE '\n631                     + 'run_ID = %s AND tn_ID = %s AND task_ID = %s '\n632                     + 'AND alg_ID = %s AND sv_ID = %s AND val_ID = %s '\n",
-      "col_offset": 20,
-      "end_col_offset": 63,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1469,36 +1513,15 @@
         630,
         631
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "643                     cur.execute(\n644                         'INSERT INTO Prime '\n645                         + '(run_ID, tn_ID, task_ID, alg_ID, sv_ID, '\n646                         + 'val_ID, blob_name) values '\n",
-      "col_offset": 24,
-      "end_col_offset": 44,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 644,
-      "line_range": [
-        644,
-        645
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "674                 cur.execute(\n675                     'SELECT EXISTS (SELECT * from Prime where '\n676                     + 'blob_name = %s);',\n677                     [result],\n",
+      "code": "636                 cur.execute(\n637                     'SELECT EXISTS (SELECT 1 FROM Prime WHERE '\n638                     + 'run_ID = %s AND tn_ID = %s AND task_ID = %s '\n639                     + 'AND alg_ID = %s AND sv_ID = %s AND val_ID = %s '\n",
       "col_offset": 20,
       "end_col_offset": 63,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1506,20 +1529,62 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 675,
+      "line_number": 637,
       "line_range": [
-        675,
-        676
+        637,
+        638
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "711                 cur.execute(\n712                     'SELECT * from Algorithm WHERE name = %s and '\n713                     + 'task_ID = %s and '\n714                     + 'design = %s and bugfix = %s and implementation = %s;',\n",
+      "code": "650                     cur.execute(\n651                         'INSERT INTO Prime '\n652                         + '(run_ID, tn_ID, task_ID, alg_ID, sv_ID, '\n653                         + 'val_ID, blob_name) values '\n",
+      "col_offset": 24,
+      "end_col_offset": 44,
+      "filename": "Python/dawgie/db/post/__init__.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 651,
+      "line_range": [
+        651,
+        652
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "681                 cur.execute(\n682                     'SELECT EXISTS (SELECT * from Prime where '\n683                     + 'blob_name = %s);',\n684                     [result],\n",
+      "col_offset": 20,
+      "end_col_offset": 63,
+      "filename": "Python/dawgie/db/post/__init__.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 682,
+      "line_range": [
+        682,
+        683
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "718                 cur.execute(\n719                     'SELECT * from Algorithm WHERE name = %s and '\n720                     + 'task_ID = %s and '\n721                     + 'design = %s and bugfix = %s and implementation = %s;',\n",
       "col_offset": 20,
       "end_col_offset": 66,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1527,20 +1592,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 712,
+      "line_number": 719,
       "line_range": [
-        712,
-        713
+        719,
+        720
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "728                 cur.execute(\n729                     'SELECT * from StateVector WHERE name = %s and '\n730                     + 'alg_ID = %s and '\n731                     + 'design = %s and bugfix = %s and implementation = %s;',\n",
+      "code": "735                 cur.execute(\n736                     'SELECT * from StateVector WHERE name = %s and '\n737                     + 'alg_ID = %s and '\n738                     + 'design = %s and bugfix = %s and implementation = %s;',\n",
       "col_offset": 20,
       "end_col_offset": 68,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1548,20 +1613,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 729,
+      "line_number": 736,
       "line_range": [
-        729,
-        730
+        736,
+        737
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "755                 args = (\n756                     'SELECT * from value where name = %s and '\n757                     + 'sv_ID = %s and '\n758                     + 'design = %s and bugfix = %s and implementation = %s;',\n",
+      "code": "762                 args = (\n763                     'SELECT * from value where name = %s and '\n764                     + 'sv_ID = %s and '\n765                     + 'design = %s and bugfix = %s and implementation = %s;',\n",
       "col_offset": 20,
       "end_col_offset": 62,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "LOW",
       "issue_cwe": {
         "id": 89,
@@ -1569,20 +1634,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 756,
+      "line_number": 763,
       "line_range": [
-        756,
-        757
+        763,
+        764
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "824                 conn.rollback()\n825                 time.sleep(random.uniform(0.250, 0.750))\n826             except psycopg.errors.UniqueViolation:\n",
+      "code": "836                 conn.rollback()  # psycopg3 problem # pylint:disable=no-member\n837                 time.sleep(random.uniform(0.250, 0.750))\n838             except psycopg.errors.UniqueViolation as err:\n",
       "col_offset": 27,
       "end_col_offset": 55,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 330,
@@ -1590,39 +1655,19 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 825,
+      "line_number": 837,
       "line_range": [
-        825
+        837
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
       "test_name": "blacklist"
     },
     {
-      "code": "828                 conn.rollback()\n829                 time.sleep(random.uniform(0.250, 0.750))\n830             except psycopg.IntegrityError:\n",
-      "col_offset": 27,
-      "end_col_offset": 55,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 829,
-      "line_range": [
-        829
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "860             cur.execute(\n861                 'SELECT * from Algorithm WHERE name = %s and '\n862                 + 'task_ID = %s and '\n863                 + 'design = %s and bugfix = %s and implementation = %s;',\n",
+      "code": "879             cur.execute(\n880                 'SELECT * from Algorithm WHERE name = %s and '\n881                 + 'task_ID = %s and '\n882                 + 'design = %s and bugfix = %s and implementation = %s;',\n",
       "col_offset": 16,
       "end_col_offset": 62,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1630,20 +1675,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 861,
+      "line_number": 880,
       "line_range": [
-        861,
-        862
+        880,
+        881
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "877             args = (\n878                 'SELECT * from StateVector WHERE name = %s and '\n879                 + 'alg_ID = %s and '\n880                 + 'design = %s and bugfix = %s and implementation = %s;',\n",
+      "code": "896             args = (\n897                 'SELECT * from StateVector WHERE name = %s and '\n898                 + 'alg_ID = %s and '\n899                 + 'design = %s and bugfix = %s and implementation = %s;',\n",
       "col_offset": 16,
       "end_col_offset": 64,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "LOW",
       "issue_cwe": {
         "id": 89,
@@ -1651,20 +1696,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 878,
+      "line_number": 897,
       "line_range": [
-        878,
-        879
+        897,
+        898
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "893                 _insert(\n894                     'INSERT into StateVector '\n895                     + '(name, alg_ID, design, bugfix, '\n896                     + 'implementation) values (%s, %s, %s, %s, %s);',\n",
+      "code": "912                 _insert(\n913                     'INSERT into StateVector '\n914                     + '(name, alg_ID, design, bugfix, '\n915                     + 'implementation) values (%s, %s, %s, %s, %s);',\n",
       "col_offset": 20,
       "end_col_offset": 46,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "LOW",
       "issue_cwe": {
         "id": 89,
@@ -1672,20 +1717,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 894,
+      "line_number": 913,
       "line_range": [
-        894,
-        895
+        913,
+        914
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "920             args = (\n921                 'SELECT * from Value where name = %s and '\n922                 + 'sv_ID = %s and '\n923                 + 'design = %s and bugfix = %s and implementation = %s;',\n",
+      "code": "939             args = (\n940                 'SELECT * from Value where name = %s and '\n941                 + 'sv_ID = %s and '\n942                 + 'design = %s and bugfix = %s and implementation = %s;',\n",
       "col_offset": 16,
       "end_col_offset": 58,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "LOW",
       "issue_cwe": {
         "id": 89,
@@ -1693,20 +1738,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 921,
+      "line_number": 940,
       "line_range": [
-        921,
-        922
+        940,
+        941
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "988                 conn.rollback()\n989                 time.sleep(random.uniform(0.250, 0.750))\n990             except psycopg.errors.UniqueViolation:\n",
+      "code": "1012                 conn.rollback()  # psycopg3 problem # pylint:disable=no-member\n1013                 time.sleep(random.uniform(0.250, 0.750))\n1014             except psycopg.errors.UniqueViolation as err:\n",
       "col_offset": 27,
       "end_col_offset": 55,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 330,
@@ -1714,39 +1759,19 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 989,
+      "line_number": 1013,
       "line_range": [
-        989
+        1013
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
       "test_name": "blacklist"
     },
     {
-      "code": "992                 conn.rollback()\n993                 time.sleep(random.uniform(0.250, 0.750))\n994             except psycopg.IntegrityError:\n",
-      "col_offset": 27,
-      "end_col_offset": 55,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 993,
-      "line_range": [
-        993
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "1081             conn.rollback()\n1082             time.sleep(random.uniform(0.250, 0.750))\n1083         except psycopg.errors.UniqueViolation:\n",
+      "code": "1113             conn.rollback()  # psycopg3 problem # pylint:disable=no-member\n1114             time.sleep(random.uniform(0.250, 0.750))\n1115         except psycopg.errors.UniqueViolation:\n",
       "col_offset": 23,
       "end_col_offset": 51,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
         "id": 330,
@@ -1754,61 +1779,19 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 1082,
+      "line_number": 1114,
       "line_range": [
-        1082
+        1114
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
       "test_name": "blacklist"
     },
     {
-      "code": "1237         cur.execute(\n1238             'SELECT pk FROM Algorithm WHERE name = %s AND '\n1239             + 'task_ID = %s AND design = %s AND implementation = %s '\n1240             + 'AND bugfix = %s;',\n",
+      "code": "1269         cur.execute(\n1270             'SELECT pk FROM Algorithm WHERE name = %s AND '\n1271             + 'task_ID = %s AND design = %s AND implementation = %s '\n1272             + 'AND bugfix = %s;',\n",
       "col_offset": 12,
       "end_col_offset": 59,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1238,
-      "line_range": [
-        1238,
-        1239
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "1253         cur.execute(\n1254             'SELECT pk FROM StateVector WHERE name = %s AND '\n1255             + 'alg_ID = %s AND design = %s AND implementation = %s '\n1256             + 'AND bugfix = %s;',\n",
-      "col_offset": 12,
-      "end_col_offset": 61,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1254,
-      "line_range": [
-        1254,
-        1255
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "1269         cur.execute(\n1270             'SELECT pk FROM Value WHERE name = %s AND '\n1271             + 'sv_ID = %s AND design = %s AND implementation = %s '\n1272             + 'AND bugfix = %s;',\n",
-      "col_offset": 12,
-      "end_col_offset": 55,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1821,15 +1804,15 @@
         1270,
         1271
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1285         cur.execute(\n1286             'SELECT run_ID FROM Prime WHERE tn_ID = %s AND '\n1287             + 'task_ID = %s AND alg_ID = %s AND sv_ID = %s AND '\n1288             + 'val_ID = %s;',\n",
+      "code": "1285         cur.execute(\n1286             'SELECT pk FROM StateVector WHERE name = %s AND '\n1287             + 'alg_ID = %s AND design = %s AND implementation = %s '\n1288             + 'AND bugfix = %s;',\n",
       "col_offset": 12,
-      "end_col_offset": 60,
-      "filename": "Python/dawgie/db/post.py",
+      "end_col_offset": 61,
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1842,119 +1825,119 @@
         1286,
         1287
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1316         cur.execute(\n1317             'SELECT pk FROM Algorithm WHERE name = %s AND ' + 'task_ID = %s;',\n1318             (inp.aid.name, task_ID),\n",
-      "col_offset": 12,
-      "end_col_offset": 59,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1317,
-      "line_range": [
-        1317
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "1321         cur.execute(\n1322             'SELECT pk FROM StateVector WHERE name = %s AND '\n1323             + 'alg_ID = ANY(%s);',\n1324             [inp.sid.name, alg_IDs],\n",
-      "col_offset": 12,
-      "end_col_offset": 61,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1322,
-      "line_range": [
-        1322,
-        1323
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "1332         cur.execute(\n1333             'SELECT run_ID,blob_name FROM Prime WHERE tn_ID = %s AND '\n1334             + 'task_ID = %s AND alg_ID = ANY(%s) AND '\n1335             + 'sv_ID = ANY(%s) AND val_ID = ANY(%s);',\n",
-      "col_offset": 12,
-      "end_col_offset": 70,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1333,
-      "line_range": [
-        1333,
-        1334
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "1402         cur.execute(\n1403             'SELECT pk FROM Algorithm WHERE name = %s AND '\n1404             + 'task_ID = %s AND design = %s AND implementation = %s '\n1405             + 'AND bugfix = %s;',\n",
-      "col_offset": 12,
-      "end_col_offset": 59,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1403,
-      "line_range": [
-        1403,
-        1404
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "1418         cur.execute(\n1419             'SELECT pk FROM StateVector WHERE name = %s AND '\n1420             + 'alg_ID = %s AND design = %s AND implementation = %s '\n1421             + 'AND bugfix = %s;',\n",
-      "col_offset": 12,
-      "end_col_offset": 61,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1419,
-      "line_range": [
-        1419,
-        1420
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "1434         cur.execute(\n1435             'SELECT pk FROM Value WHERE name = %s AND '\n1436             + 'sv_ID = %s AND design = %s AND implementation = %s '\n1437             + 'AND bugfix = %s;',\n",
+      "code": "1301         cur.execute(\n1302             'SELECT pk FROM Value WHERE name = %s AND '\n1303             + 'sv_ID = %s AND design = %s AND implementation = %s '\n1304             + 'AND bugfix = %s;',\n",
       "col_offset": 12,
       "end_col_offset": 55,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 1302,
+      "line_range": [
+        1302,
+        1303
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "1317         cur.execute(\n1318             'SELECT run_ID FROM Prime WHERE tn_ID = %s AND '\n1319             + 'task_ID = %s AND alg_ID = %s AND sv_ID = %s AND '\n1320             + 'val_ID = %s;',\n",
+      "col_offset": 12,
+      "end_col_offset": 60,
+      "filename": "Python/dawgie/db/post/__init__.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 1318,
+      "line_range": [
+        1318,
+        1319
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "1348         cur.execute(\n1349             'SELECT pk FROM Algorithm WHERE name = %s AND ' + 'task_ID = %s;',\n1350             (inp.aid.name, task_ID),\n",
+      "col_offset": 12,
+      "end_col_offset": 59,
+      "filename": "Python/dawgie/db/post/__init__.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 1349,
+      "line_range": [
+        1349
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "1353         cur.execute(\n1354             'SELECT pk FROM StateVector WHERE name = %s AND '\n1355             + 'alg_ID = ANY(%s);',\n1356             [inp.sid.name, alg_IDs],\n",
+      "col_offset": 12,
+      "end_col_offset": 61,
+      "filename": "Python/dawgie/db/post/__init__.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 1354,
+      "line_range": [
+        1354,
+        1355
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "1364         cur.execute(\n1365             'SELECT run_ID,blob_name FROM Prime WHERE tn_ID = %s AND '\n1366             + 'task_ID = %s AND alg_ID = ANY(%s) AND '\n1367             + 'sv_ID = ANY(%s) AND val_ID = ANY(%s);',\n",
+      "col_offset": 12,
+      "end_col_offset": 70,
+      "filename": "Python/dawgie/db/post/__init__.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 1365,
+      "line_range": [
+        1365,
+        1366
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "1434         cur.execute(\n1435             'SELECT pk FROM Algorithm WHERE name = %s AND '\n1436             + 'task_ID = %s AND design = %s AND implementation = %s '\n1437             + 'AND bugfix = %s;',\n",
+      "col_offset": 12,
+      "end_col_offset": 59,
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1967,15 +1950,15 @@
         1435,
         1436
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1450         cur.execute(\n1451             'SELECT blob_name FROM Prime WHERE run_id = %s AND '\n1452             + 'tn_ID = %s AND task_ID = %s AND alg_ID = %s AND '\n1453             + 'sv_ID = %s AND val_ID = %s;',\n",
+      "code": "1450         cur.execute(\n1451             'SELECT pk FROM StateVector WHERE name = %s AND '\n1452             + 'alg_ID = %s AND design = %s AND implementation = %s '\n1453             + 'AND bugfix = %s;',\n",
       "col_offset": 12,
-      "end_col_offset": 64,
-      "filename": "Python/dawgie/db/post.py",
+      "end_col_offset": 61,
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -1988,15 +1971,15 @@
         1451,
         1452
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1593             \"SELECT pg_catalog.setval(pg_get_serial_sequence(\"\n1594             + \"'Prime', 'pk'), (SELECT MAX(PK) FROM Prime));\"\n1595         )\n1596         cur.execute(\n",
-      "col_offset": 14,
-      "end_col_offset": 61,
-      "filename": "Python/dawgie/db/post.py",
+      "code": "1466         cur.execute(\n1467             'SELECT pk FROM Value WHERE name = %s AND '\n1468             + 'sv_ID = %s AND design = %s AND implementation = %s '\n1469             + 'AND bugfix = %s;',\n",
+      "col_offset": 12,
+      "end_col_offset": 55,
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -2004,125 +1987,83 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1594,
+      "line_number": 1467,
       "line_range": [
-        1593,
-        1594
+        1467,
+        1468
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1597             \"SELECT pg_catalog.setval(pg_get_serial_sequence(\"\n1598             + \"'Target', 'pk'), (SELECT MAX(PK) FROM Target));\"\n1599         )\n1600         cur.execute(\n",
-      "col_offset": 14,
-      "end_col_offset": 63,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1598,
-      "line_range": [
-        1597,
-        1598
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "1601             \"SELECT pg_catalog.setval(pg_get_serial_sequence(\"\n1602             + \"'Algorithm', 'pk'), (SELECT MAX(PK) FROM Algorithm));\"\n1603         )\n1604         cur.execute(\n",
-      "col_offset": 14,
-      "end_col_offset": 69,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1602,
-      "line_range": [
-        1601,
-        1602
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "1605             \"SELECT pg_catalog.setval(pg_get_serial_sequence\"\n1606             + \"('StateVector', 'pk'), (SELECT MAX(PK) FROM \"\n1607             + \"StateVector));\"\n1608         )\n",
-      "col_offset": 14,
-      "end_col_offset": 60,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1606,
-      "line_range": [
-        1605,
-        1606
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "1610             \"SELECT pg_catalog.setval(pg_get_serial_sequence(\"\n1611             + \"'Value', 'pk'), (SELECT MAX(PK) FROM Value));\"\n1612         )\n1613         cur.execute(\n",
-      "col_offset": 14,
-      "end_col_offset": 61,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1611,
-      "line_range": [
-        1610,
-        1611
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "1614             \"SELECT pg_catalog.setval(pg_get_serial_sequence(\"\n1615             + \"'Task', 'pk'), (SELECT MAX(PK) FROM Task));\"\n1616         )\n1617     except psycopg.ProgrammingError:\n",
-      "col_offset": 14,
-      "end_col_offset": 59,
-      "filename": "Python/dawgie/db/post.py",
-      "issue_confidence": "MEDIUM",
-      "issue_cwe": {
-        "id": 89,
-        "link": "https://cwe.mitre.org/data/definitions/89.html"
-      },
-      "issue_severity": "MEDIUM",
-      "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1615,
-      "line_range": [
-        1614,
-        1615
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
-      "test_id": "B608",
-      "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "1642         cur.execute(\n1643             'SELECT blob_name FROM Prime WHERE run_ID = %s AND '\n1644             + 'tn_ID = %s AND task_ID = %s AND alg_ID = %s AND '\n1645             + 'sv_ID = %s AND val_ID = %s;',\n",
+      "code": "1482         cur.execute(\n1483             'SELECT blob_name FROM Prime WHERE run_id = %s AND '\n1484             + 'tn_ID = %s AND task_ID = %s AND alg_ID = %s AND '\n1485             + 'sv_ID = %s AND val_ID = %s;',\n",
       "col_offset": 12,
       "end_col_offset": 64,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 1483,
+      "line_range": [
+        1483,
+        1484
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "1634             \"SELECT pg_catalog.setval(pg_get_serial_sequence(\"\n1635             + \"'Prime', 'pk'), (SELECT MAX(PK) FROM Prime));\"\n1636         )\n1637         cur.execute(\n",
+      "col_offset": 14,
+      "end_col_offset": 61,
+      "filename": "Python/dawgie/db/post/__init__.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 1635,
+      "line_range": [
+        1634,
+        1635
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "1638             \"SELECT pg_catalog.setval(pg_get_serial_sequence(\"\n1639             + \"'Target', 'pk'), (SELECT MAX(PK) FROM Target));\"\n1640         )\n1641         cur.execute(\n",
+      "col_offset": 14,
+      "end_col_offset": 63,
+      "filename": "Python/dawgie/db/post/__init__.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 1639,
+      "line_range": [
+        1638,
+        1639
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "1642             \"SELECT pg_catalog.setval(pg_get_serial_sequence(\"\n1643             + \"'Algorithm', 'pk'), (SELECT MAX(PK) FROM Algorithm));\"\n1644         )\n1645         cur.execute(\n",
+      "col_offset": 14,
+      "end_col_offset": 69,
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -2132,18 +2073,18 @@
       "issue_text": "Possible SQL injection vector through string-based query construction.",
       "line_number": 1643,
       "line_range": [
-        1643,
-        1644
+        1642,
+        1643
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1703     cur.execute(\n1704         'SELECT pk FROM StateVector WHERE name = %s AND ' + 'alg_ID = ANY(%s);',\n1705         [svn, alg_ID],\n",
-      "col_offset": 8,
-      "end_col_offset": 57,
-      "filename": "Python/dawgie/db/post.py",
+      "code": "1646             \"SELECT pg_catalog.setval(pg_get_serial_sequence\"\n1647             + \"('StateVector', 'pk'), (SELECT MAX(PK) FROM \"\n1648             + \"StateVector));\"\n1649         )\n",
+      "col_offset": 14,
+      "end_col_offset": 60,
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -2151,19 +2092,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1704,
+      "line_number": 1647,
       "line_range": [
-        1704
+        1646,
+        1647
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1708     cur.execute(\n1709         'SELECT pk FROM Value WHERE name = %s AND ' + 'sv_ID = ANY(%s);',\n1710         [vn, sv_ID],\n",
-      "col_offset": 8,
-      "end_col_offset": 51,
-      "filename": "Python/dawgie/db/post.py",
+      "code": "1651             \"SELECT pg_catalog.setval(pg_get_serial_sequence(\"\n1652             + \"'Value', 'pk'), (SELECT MAX(PK) FROM Value));\"\n1653         )\n1654         cur.execute(\n",
+      "col_offset": 14,
+      "end_col_offset": 61,
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -2171,19 +2113,62 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1709,
+      "line_number": 1652,
       "line_range": [
-        1709
+        1651,
+        1652
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1714     cur.execute(\n1715         'DELETE FROM Prime WHERE run_ID = %s AND tn_ID = %s AND '\n1716         + 'task_ID = %s AND alg_ID = ANY(%s) AND sv_ID = ANY(%s) AND '\n1717         + 'val_ID = ANY(%s);',\n",
+      "code": "1655             \"SELECT pg_catalog.setval(pg_get_serial_sequence(\"\n1656             + \"'Task', 'pk'), (SELECT MAX(PK) FROM Task));\"\n1657         )\n1658     except psycopg.ProgrammingError:\n",
+      "col_offset": 14,
+      "end_col_offset": 59,
+      "filename": "Python/dawgie/db/post/__init__.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 1656,
+      "line_range": [
+        1655,
+        1656
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "1683         cur.execute(\n1684             'SELECT blob_name FROM Prime WHERE run_ID = %s AND '\n1685             + 'tn_ID = %s AND task_ID = %s AND alg_ID = %s AND '\n1686             + 'sv_ID = %s AND val_ID = %s;',\n",
+      "col_offset": 12,
+      "end_col_offset": 64,
+      "filename": "Python/dawgie/db/post/__init__.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 1684,
+      "line_range": [
+        1684,
+        1685
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "1766     cur.execute(\n1767         'DELETE FROM Prime WHERE run_ID = %s AND tn_ID = %s AND '\n1768         + 'task_ID = %s AND alg_ID = ANY(%s) AND sv_ID = ANY(%s) AND '\n1769         + 'val_ID = ANY(%s);',\n",
       "col_offset": 8,
       "end_col_offset": 65,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -2191,20 +2176,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1715,
+      "line_number": 1767,
       "line_range": [
-        1715,
-        1716
+        1767,
+        1768
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1755         cur.execute(\n1756             'SELECT pk FROM StateVector WHERE name = %s AND '\n1757             + 'alg_ID = ANY(%s);',\n1758             [sv.name(), alg_ID],\n",
+      "code": "1807         cur.execute(\n1808             'SELECT pk FROM StateVector WHERE name = %s AND '\n1809             + 'alg_ID = ANY(%s);',\n1810             [sv.name(), alg_ID],\n",
       "col_offset": 12,
       "end_col_offset": 61,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -2212,20 +2197,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1756,
+      "line_number": 1808,
       "line_range": [
-        1756,
-        1757
+        1808,
+        1809
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1761         cur.execute(\n1762             'SELECT alg_ID, sv_ID FROM Prime WHERE run_ID = %s AND '\n1763             + ' tn_ID = %s AND task_ID = %s AND alg_ID = ANY(%s) AND '\n1764             + 'sv_ID = ANY(%s);',\n",
+      "code": "1813         cur.execute(\n1814             'SELECT alg_ID, sv_ID FROM Prime WHERE run_ID = %s AND '\n1815             + ' tn_ID = %s AND task_ID = %s AND alg_ID = ANY(%s) AND '\n1816             + 'sv_ID = ANY(%s);',\n",
       "col_offset": 12,
       "end_col_offset": 68,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -2233,20 +2218,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1762,
+      "line_number": 1814,
       "line_range": [
-        1762,
-        1763
+        1814,
+        1815
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1865             cur.execute(\n1866                 'SELECT PK FROM Algorithm WHERE task_ID = %s AND '\n1867                 + 'name = %s AND design = %s AND implementation = %s '\n1868                 + 'AND bugfix = %s;',\n",
+      "code": "1923             cur.execute(\n1924                 'SELECT PK FROM Algorithm WHERE task_ID = %s AND '\n1925                 + 'name = %s AND design = %s AND implementation = %s '\n1926                 + 'AND bugfix = %s;',\n",
       "col_offset": 16,
       "end_col_offset": 66,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -2254,20 +2239,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1866,
+      "line_number": 1924,
       "line_range": [
-        1866,
-        1867
+        1924,
+        1925
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1872             cur.execute(\n1873                 'SELECT run_ID FROM Prime WHERE '\n1874                 + 'tn_ID = ANY(%s) AND task_ID = %s AND alg_ID = %s;',\n1875                 [tnids, tid, aid],\n",
+      "code": "1930             cur.execute(\n1931                 'SELECT run_ID FROM Prime WHERE '\n1932                 + 'tn_ID = ANY(%s) AND task_ID = %s AND alg_ID = %s;',\n1933                 [tnids, tid, aid],\n",
       "col_offset": 16,
       "end_col_offset": 49,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -2275,20 +2260,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1873,
+      "line_number": 1931,
       "line_range": [
-        1873,
-        1874
+        1931,
+        1932
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1919         cur.execute(\n1920             'SELECT pk from Algorithm WHERE name = %s and task_ID = %s'\n1921             + ' and design = %s and implementation = %s and bugfix = %s;',\n1922             (\n",
+      "code": "1980         cur.execute(\n1981             'SELECT pk from Algorithm WHERE name = %s and task_ID = %s'\n1982             + ' and design = %s and implementation = %s and bugfix = %s;',\n1983             (\n",
       "col_offset": 12,
       "end_col_offset": 71,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -2296,20 +2281,20 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1920,
+      "line_number": 1981,
       "line_range": [
-        1920,
-        1921
+        1981,
+        1982
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "1943         cur.execute(\n1944             'SELECT pk from StateVector WHERE name = %s and alg_ID = %s '\n1945             + 'and design = %s and implementation = %s and bugfix = %s;',\n1946             (sv.name(), alg_ID, sv.design(), sv.implementation(), sv.bugfix()),\n",
+      "code": "2004         cur.execute(\n2005             'SELECT pk from StateVector WHERE name = %s and alg_ID = %s '\n2006             + 'and design = %s and implementation = %s and bugfix = %s;',\n2007             (sv.name(), alg_ID, sv.design(), sv.implementation(), sv.bugfix()),\n",
       "col_offset": 12,
       "end_col_offset": 73,
-      "filename": "Python/dawgie/db/post.py",
+      "filename": "Python/dawgie/db/post/__init__.py",
       "issue_confidence": "MEDIUM",
       "issue_cwe": {
         "id": 89,
@@ -2317,17 +2302,67 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Possible SQL injection vector through string-based query construction.",
-      "line_number": 1944,
+      "line_number": 2005,
       "line_range": [
-        1944,
-        1945
+        2005,
+        2006
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
     },
     {
-      "code": "193     elif method == Method.rsync:\n194         status = os.system(f\"rsync --delete -ax {gateway}:{ret_value}/ {dst}/\")\n195     elif method == Method.scp:\n",
+      "code": "152             cursor.execute(\n153                 'SELECT count(DISTINCT (p.run_ID, p.tn_ID, p.task_ID, '\n154                 f'p.alg_ID, p.sv_ID)) FROM Prime p WHERE {constraints};',\n155                 args,\n",
+      "col_offset": 16,
+      "end_col_offset": 57,
+      "filename": "Python/dawgie/db/post/search.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 153,
+      "line_range": [
+        153,
+        154
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "161                 cursor.execute(\n162                     'SELECT '\n163                     'p.run_ID, tn.name, task.name, alg.name, sv.name '\n164                     'FROM Prime p '\n165                     'JOIN Target tn ON p.tn_ID = tn.PK '\n166                     'JOIN Task task ON p.task_ID = task.PK '\n167                     'JOIN Algorithm alg ON p.alg_ID = alg.PK '\n168                     'JOIN StateVector sv ON p.sv_ID = sv.PK '\n169                     f'WHERE {constraints} '\n170                     'ORDER BY p.PK ASC '\n171                     'LIMIT %s OFFSET %s;',\n172                     args,\n",
+      "col_offset": 20,
+      "end_col_offset": 28,
+      "filename": "Python/dawgie/db/post/search.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 89,
+        "link": "https://cwe.mitre.org/data/definitions/89.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Possible SQL injection vector through string-based query construction.",
+      "line_number": 162,
+      "line_range": [
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html",
+      "test_id": "B608",
+      "test_name": "hardcoded_sql_expressions"
+    },
+    {
+      "code": "196     elif method == Method.rsync:\n197         status = os.system(f\"rsync --delete -ax {gateway}:{ret_value}/ {dst}/\")\n198     elif method == Method.scp:\n",
       "col_offset": 17,
       "end_col_offset": 79,
       "filename": "Python/dawgie/db/shelve/__init__.py",
@@ -2338,16 +2373,16 @@
       },
       "issue_severity": "HIGH",
       "issue_text": "Starting a process with a shell, possible injection detected, security issue.",
-      "line_number": 194,
+      "line_number": 197,
       "line_range": [
-        194
+        197
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b605_start_process_with_a_shell.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b605_start_process_with_a_shell.html",
       "test_id": "B605",
       "test_name": "start_process_with_a_shell"
     },
     {
-      "code": "195     elif method == Method.scp:\n196         status = os.system(f\"scp -rp {gateway}:{ret_value}/* {dst}/\")\n197     elif method == Method.cp:\n",
+      "code": "198     elif method == Method.scp:\n199         status = os.system(f\"scp -rp {gateway}:{ret_value}/* {dst}/\")\n200     elif method == Method.cp:\n",
       "col_offset": 17,
       "end_col_offset": 69,
       "filename": "Python/dawgie/db/shelve/__init__.py",
@@ -2358,16 +2393,16 @@
       },
       "issue_severity": "HIGH",
       "issue_text": "Starting a process with a shell, possible injection detected, security issue.",
-      "line_number": 196,
+      "line_number": 199,
       "line_range": [
-        196
+        199
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b605_start_process_with_a_shell.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b605_start_process_with_a_shell.html",
       "test_id": "B605",
       "test_name": "start_process_with_a_shell"
     },
     {
-      "code": "197     elif method == Method.cp:\n198         status = os.system(f\"cp -rp {ret_value}/* {dst}/\")\n199 \n",
+      "code": "200     elif method == Method.cp:\n201         status = os.system(f\"cp -rp {ret_value}/* {dst}/\")\n202 \n",
       "col_offset": 17,
       "end_col_offset": 58,
       "filename": "Python/dawgie/db/shelve/__init__.py",
@@ -2378,16 +2413,16 @@
       },
       "issue_severity": "HIGH",
       "issue_text": "Starting a process with a shell, possible injection detected, security issue.",
-      "line_number": 198,
+      "line_number": 201,
       "line_range": [
-        198
+        201
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b605_start_process_with_a_shell.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b605_start_process_with_a_shell.html",
       "test_id": "B605",
       "test_name": "start_process_with_a_shell"
     },
     {
-      "code": "47 import os\n48 import pickle\n49 import struct\n",
+      "code": "48 import os\n49 import pickle\n50 import struct\n",
       "col_offset": 0,
       "end_col_offset": 13,
       "filename": "Python/dawgie/db/shelve/comms.py",
@@ -2398,16 +2433,16 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Consider possible security implications associated with pickle module.",
-      "line_number": 48,
+      "line_number": 49,
       "line_range": [
-        48
+        49
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b403-import-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
     {
-      "code": "89         s.close()\n90         return pickle.loads(buf)\n91 \n",
+      "code": "90         s.close()\n91         return pickle.loads(buf)\n92 \n",
       "col_offset": 15,
       "end_col_offset": 32,
       "filename": "Python/dawgie/db/shelve/comms.py",
@@ -2418,16 +2453,16 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
-      "line_number": 90,
+      "line_number": 91,
       "line_range": [
-        90
+        91
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
     {
-      "code": "215             else:\n216                 request = pickle.loads(self.__buf['data'][:length])\n217                 self.__buf['data'] = self.__buf['data'][length:]\n",
+      "code": "219             else:\n220                 request = pickle.loads(self.__buf['data'][:length])\n221                 self.__buf['data'] = self.__buf['data'][length:]\n",
       "col_offset": 26,
       "end_col_offset": 67,
       "filename": "Python/dawgie/db/shelve/comms.py",
@@ -2438,16 +2473,16 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
-      "line_number": 216,
+      "line_number": 220,
       "line_range": [
-        216
+        220
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
     {
-      "code": "360                 else:\n361                     r = os.system(f\"rsync --delete -ax {src}/ {tmpdst}/\")\n362                     ret_value = tmpdst if r == 0 else None\n",
+      "code": "375                 else:\n376                     r = os.system(f\"rsync --delete -ax {src}/ {tmpdst}/\")\n377                     ret_value = tmpdst if r == 0 else None\n",
       "col_offset": 24,
       "end_col_offset": 73,
       "filename": "Python/dawgie/db/shelve/comms.py",
@@ -2458,11 +2493,11 @@
       },
       "issue_severity": "HIGH",
       "issue_text": "Starting a process with a shell, possible injection detected, security issue.",
-      "line_number": 361,
+      "line_number": 376,
       "line_range": [
-        361
+        376
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b605_start_process_with_a_shell.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b605_start_process_with_a_shell.html",
       "test_id": "B605",
       "test_name": "start_process_with_a_shell"
     },
@@ -2482,7 +2517,7 @@
       "line_range": [
         45
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b403-import-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
@@ -2502,7 +2537,7 @@
       "line_range": [
         98
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
@@ -2522,7 +2557,7 @@
       "line_range": [
         116
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
@@ -2542,7 +2577,7 @@
       "line_range": [
         119
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b605_start_process_with_a_shell.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b605_start_process_with_a_shell.html",
       "test_id": "B605",
       "test_name": "start_process_with_a_shell"
     },
@@ -2562,7 +2597,7 @@
       "line_range": [
         125
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b307-eval",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b307-eval",
       "test_id": "B307",
       "test_name": "blacklist"
     },
@@ -2582,12 +2617,12 @@
       "line_range": [
         44
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b403-import-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
     {
-      "code": "43 import os\n44 import shelve\n45 import sys\n",
+      "code": "44 import os\n45 import shelve\n46 import sys\n",
       "col_offset": 0,
       "end_col_offset": 13,
       "filename": "Python/dawgie/db/tools/post2shelve.py",
@@ -2598,16 +2633,16 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Consider possible security implications associated with shelve module.",
-      "line_number": 44,
+      "line_number": 45,
       "line_range": [
-        44
+        45
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b403-import-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
     {
-      "code": "88     index = []\n89     table = shelve.open(fn)\n90     tdb = {}\n",
+      "code": "89     index = []\n90     table = shelve.open(fn)\n91     tdb = {}\n",
       "col_offset": 12,
       "end_col_offset": 27,
       "filename": "Python/dawgie/db/tools/post2shelve.py",
@@ -2618,16 +2653,16 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
-      "line_number": 89,
+      "line_number": 90,
       "line_range": [
-        89
+        90
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
     {
-      "code": "134     cur.close()\n135     with shelve.open(fn) as db:\n136         db.update(table)\n",
+      "code": "135     cur.close()\n136     with shelve.open(fn) as db:\n137         db.update(table)\n",
       "col_offset": 9,
       "end_col_offset": 24,
       "filename": "Python/dawgie/db/tools/post2shelve.py",
@@ -2638,16 +2673,16 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
-      "line_number": 135,
+      "line_number": 136,
       "line_range": [
-        135
+        136
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
     {
-      "code": "147     index = []\n148     table = shelve.open(fn)\n149     tdb = {}\n",
+      "code": "148     index = []\n149     table = shelve.open(fn)\n150     tdb = {}\n",
       "col_offset": 12,
       "end_col_offset": 27,
       "filename": "Python/dawgie/db/tools/post2shelve.py",
@@ -2658,16 +2693,16 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
-      "line_number": 148,
+      "line_number": 149,
       "line_range": [
-        148
+        149
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
     {
-      "code": "168     index = []\n169     table = shelve.open(fn)\n170     tdb = {}\n",
+      "code": "169     index = []\n170     table = shelve.open(fn)\n171     tdb = {}\n",
       "col_offset": 12,
       "end_col_offset": 27,
       "filename": "Python/dawgie/db/tools/post2shelve.py",
@@ -2678,16 +2713,16 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
-      "line_number": 169,
+      "line_number": 170,
       "line_range": [
-        169
+        170
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
     {
-      "code": "186     index = []\n187     table = shelve.open(fn)\n188     tdb = {}\n",
+      "code": "187     index = []\n188     table = shelve.open(fn)\n189     tdb = {}\n",
       "col_offset": 12,
       "end_col_offset": 27,
       "filename": "Python/dawgie/db/tools/post2shelve.py",
@@ -2698,16 +2733,16 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
-      "line_number": 187,
+      "line_number": 188,
       "line_range": [
-        187
+        188
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
     {
-      "code": "204     index = []\n205     table = shelve.open(fn)\n206     tdb = {}\n",
+      "code": "205     index = []\n206     table = shelve.open(fn)\n207     tdb = {}\n",
       "col_offset": 12,
       "end_col_offset": 27,
       "filename": "Python/dawgie/db/tools/post2shelve.py",
@@ -2718,16 +2753,16 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
-      "line_number": 205,
+      "line_number": 206,
       "line_range": [
-        205
+        206
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
     {
-      "code": "223     basefn = f'{dpath}/{dawgie.context.db_post2shelve_prefix}'\n224     os.system(f\"mkdir -p {dpath}\")\n225     for suffix in ['alg', 'prime', 'state', 'target', 'task', 'value']:\n",
+      "code": "224     basefn = f'{dpath}/{dawgie.context.db_post2shelve_prefix}'\n225     os.system(f\"mkdir -p {dpath}\")\n226     for suffix in ['alg', 'prime', 'state', 'target', 'task', 'value']:\n",
       "col_offset": 4,
       "end_col_offset": 34,
       "filename": "Python/dawgie/db/tools/post2shelve.py",
@@ -2738,11 +2773,11 @@
       },
       "issue_severity": "HIGH",
       "issue_text": "Starting a process with a shell, possible injection detected, security issue.",
-      "line_number": 224,
+      "line_number": 225,
       "line_range": [
-        224
+        225
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b605_start_process_with_a_shell.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b605_start_process_with_a_shell.html",
       "test_id": "B605",
       "test_name": "start_process_with_a_shell"
     },
@@ -2762,12 +2797,12 @@
       "line_range": [
         54
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b605_start_process_with_a_shell.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b605_start_process_with_a_shell.html",
       "test_id": "B605",
       "test_name": "start_process_with_a_shell"
     },
     {
-      "code": "41 import os\n42 import pickle\n43 import shutil\n",
+      "code": "42 import os\n43 import pickle\n44 import shutil\n",
       "col_offset": 0,
       "end_col_offset": 13,
       "filename": "Python/dawgie/db/util/__init__.py",
@@ -2778,16 +2813,16 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Consider possible security implications associated with pickle module.",
-      "line_number": 42,
+      "line_number": 43,
       "line_range": [
-        42
+        43
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b403-import-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
     {
-      "code": "43 import shutil\n44 import subprocess\n45 import tempfile\n",
+      "code": "44 import shutil\n45 import subprocess\n46 import tempfile\n",
       "col_offset": 0,
       "end_col_offset": 17,
       "filename": "Python/dawgie/db/util/__init__.py",
@@ -2798,16 +2833,16 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Consider possible security implications associated with the subprocess module.",
-      "line_number": 44,
+      "line_number": 45,
       "line_range": [
-        44
+        45
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b404-import-subprocess",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess",
       "test_id": "B404",
       "test_name": "blacklist"
     },
     {
-      "code": "60     with open(os.path.join(dawgie.context.data_dbs, entry), 'rb') as f:\n61         result = pickle.load(f)\n62         pass\n",
+      "code": "61     with open(os.path.join(dawgie.context.data_dbs, entry), 'rb') as f:\n62         result = pickle.load(f)\n63         pass\n",
       "col_offset": 17,
       "end_col_offset": 31,
       "filename": "Python/dawgie/db/util/__init__.py",
@@ -2818,58 +2853,18 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
-      "line_number": 61,
+      "line_number": 62,
       "line_range": [
-        61
+        62
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
     {
-      "code": "73     os.chmod(fn, int('0664', 8))  # -rw-rw-r--\n74     m = _extract(subprocess.check_output(['md5sum', '-b', fn]))\n75     s = _extract(subprocess.check_output(['sha1sum', '-b', fn]))\n",
+      "code": "74     os.chmod(fn, int('0664', 8))  # -rw-rw-r--\n75     m = _extract(subprocess.check_output(['md5sum', '-b', fn]))\n76     s = _extract(subprocess.check_output(['sha1sum', '-b', fn]))\n",
       "col_offset": 17,
       "end_col_offset": 62,
-      "filename": "Python/dawgie/db/util/__init__.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 78,
-        "link": "https://cwe.mitre.org/data/definitions/78.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Starting a process with a partial executable path",
-      "line_number": 74,
-      "line_range": [
-        74
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b607_start_process_with_partial_path.html",
-      "test_id": "B607",
-      "test_name": "start_process_with_partial_path"
-    },
-    {
-      "code": "73     os.chmod(fn, int('0664', 8))  # -rw-rw-r--\n74     m = _extract(subprocess.check_output(['md5sum', '-b', fn]))\n75     s = _extract(subprocess.check_output(['sha1sum', '-b', fn]))\n",
-      "col_offset": 17,
-      "end_col_offset": 62,
-      "filename": "Python/dawgie/db/util/__init__.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 78,
-        "link": "https://cwe.mitre.org/data/definitions/78.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "subprocess call - check for execution of untrusted input.",
-      "line_number": 74,
-      "line_range": [
-        74
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b603_subprocess_without_shell_equals_true.html",
-      "test_id": "B603",
-      "test_name": "subprocess_without_shell_equals_true"
-    },
-    {
-      "code": "74     m = _extract(subprocess.check_output(['md5sum', '-b', fn]))\n75     s = _extract(subprocess.check_output(['sha1sum', '-b', fn]))\n76     result = '_'.join([m, s])\n",
-      "col_offset": 17,
-      "end_col_offset": 63,
       "filename": "Python/dawgie/db/util/__init__.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
@@ -2882,14 +2877,14 @@
       "line_range": [
         75
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b607_start_process_with_partial_path.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html",
       "test_id": "B607",
       "test_name": "start_process_with_partial_path"
     },
     {
-      "code": "74     m = _extract(subprocess.check_output(['md5sum', '-b', fn]))\n75     s = _extract(subprocess.check_output(['sha1sum', '-b', fn]))\n76     result = '_'.join([m, s])\n",
+      "code": "74     os.chmod(fn, int('0664', 8))  # -rw-rw-r--\n75     m = _extract(subprocess.check_output(['md5sum', '-b', fn]))\n76     s = _extract(subprocess.check_output(['sha1sum', '-b', fn]))\n",
       "col_offset": 17,
-      "end_col_offset": 63,
+      "end_col_offset": 62,
       "filename": "Python/dawgie/db/util/__init__.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
@@ -2902,12 +2897,52 @@
       "line_range": [
         75
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b603_subprocess_without_shell_equals_true.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html",
       "test_id": "B603",
       "test_name": "subprocess_without_shell_equals_true"
     },
     {
-      "code": "131         result[3] = isinstance(value.implementation(), int)\n132     except:  # noqa: E722\n133         pass\n134     return all(result)\n",
+      "code": "75     m = _extract(subprocess.check_output(['md5sum', '-b', fn]))\n76     s = _extract(subprocess.check_output(['sha1sum', '-b', fn]))\n77     result = '_'.join([m, s])\n",
+      "col_offset": 17,
+      "end_col_offset": 63,
+      "filename": "Python/dawgie/db/util/__init__.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Starting a process with a partial executable path",
+      "line_number": 76,
+      "line_range": [
+        76
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b607_start_process_with_partial_path.html",
+      "test_id": "B607",
+      "test_name": "start_process_with_partial_path"
+    },
+    {
+      "code": "75     m = _extract(subprocess.check_output(['md5sum', '-b', fn]))\n76     s = _extract(subprocess.check_output(['sha1sum', '-b', fn]))\n77     result = '_'.join([m, s])\n",
+      "col_offset": 17,
+      "end_col_offset": 63,
+      "filename": "Python/dawgie/db/util/__init__.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 78,
+        "link": "https://cwe.mitre.org/data/definitions/78.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "subprocess call - check for execution of untrusted input.",
+      "line_number": 76,
+      "line_range": [
+        76
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html",
+      "test_id": "B603",
+      "test_name": "subprocess_without_shell_equals_true"
+    },
+    {
+      "code": "132         result[3] = isinstance(value.implementation(), int)\n133     except:  # noqa: E722\n134         pass\n135     return all(result)\n",
       "col_offset": 4,
       "end_col_offset": 12,
       "filename": "Python/dawgie/db/util/__init__.py",
@@ -2918,17 +2953,17 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 132,
+      "line_number": 133,
       "line_range": [
-        132,
-        133
+        133,
+        134
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b110_try_except_pass.html",
       "test_id": "B110",
       "test_name": "try_except_pass"
     },
     {
-      "code": "48 import pydot\n49 import xml.etree.ElementTree\n50 \n",
+      "code": "50 import pydot\n51 import xml.etree.ElementTree\n52 \n",
       "col_offset": 0,
       "end_col_offset": 28,
       "filename": "Python/dawgie/pl/dag.py",
@@ -2939,11 +2974,11 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Using xml.etree.ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
-      "line_number": 49,
+      "line_number": 51,
       "line_range": [
-        49
+        51
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b405-import-xml-etree",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b405-import-xml-etree",
       "test_id": "B405",
       "test_name": "blacklist"
     },
@@ -2963,7 +2998,7 @@
       "line_range": [
         43
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b403-import-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
@@ -2983,7 +3018,7 @@
       "line_range": [
         88
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
@@ -3003,7 +3038,7 @@
       "line_range": [
         41
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b403-import-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
@@ -3023,12 +3058,12 @@
       "line_range": [
         112
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
     {
-      "code": "45 import os\n46 import pickle\n47 \n",
+      "code": "46 import os\n47 import pickle\n48 import shutil\n",
       "col_offset": 0,
       "end_col_offset": 13,
       "filename": "Python/dawgie/pl/resources.py",
@@ -3039,18 +3074,18 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Consider possible security implications associated with pickle module.",
-      "line_number": 46,
+      "line_number": 47,
       "line_range": [
-        46
+        47
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b403-import-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
     {
-      "code": "57         with open(fn, 'br') as file:\n58             past = pickle.load(file)\n59         # make sure loaded context is an expected structure\n",
-      "col_offset": 19,
-      "end_col_offset": 36,
+      "code": "61             with open(fn, 'br') as file:\n62                 past = pickle.load(file)\n63             # make sure loaded context is an expected structure\n",
+      "col_offset": 23,
+      "end_col_offset": 40,
       "filename": "Python/dawgie/pl/resources.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
@@ -3059,11 +3094,11 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
-      "line_number": 58,
+      "line_number": 62,
       "line_range": [
-        58
+        62
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
@@ -3083,12 +3118,12 @@
       "line_range": [
         55
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b403-import-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
     {
-      "code": "197         }\n198         signed = self._pgp.sign(\n199             base64.b64encode(pickle.dumps(message)),\n200             keyid=self._kid,\n201             passphrase='1234567890',\n202         )\n203         response = _https_push(signed.data)  # pylint: disable=no-member\n",
+      "code": "200             keyid=self._kid,\n201             passphrase='1234567890',\n202         )\n203         response = _https_push(signed.data)  # pylint: disable=no-member\n204         self._log.debug('advertise: %s', response)\n205 \n206         if response != 'position posted':\n",
       "col_offset": 17,
       "end_col_offset": 9,
       "filename": "Python/dawgie/pl/worker/aws.py",
@@ -3099,7 +3134,7 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Possible hardcoded password: '1234567890'",
-      "line_number": 198,
+      "line_number": 201,
       "line_range": [
         198,
         199,
@@ -3107,12 +3142,12 @@
         201,
         202
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b106_hardcoded_password_funcarg.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b106_hardcoded_password_funcarg.html",
       "test_id": "B106",
       "test_name": "hardcoded_password_funcarg"
     },
     {
-      "code": "224         }\n225         signed = self._pgp.sign(\n226             base64.b64encode(pickle.dumps(message)),\n227             keyid=self._kid,\n228             passphrase='1234567890',\n229         )\n230         response = _https_push(signed.data)  # pylint: disable=no-member\n",
+      "code": "227             keyid=self._kid,\n228             passphrase='1234567890',\n229         )\n230         response = _https_push(signed.data)  # pylint: disable=no-member\n231         self._log.debug('interview: %s', response)\n232 \n233         if response == 'False':\n",
       "col_offset": 17,
       "end_col_offset": 9,
       "filename": "Python/dawgie/pl/worker/aws.py",
@@ -3123,7 +3158,7 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Possible hardcoded password: '1234567890'",
-      "line_number": 225,
+      "line_number": 228,
       "line_range": [
         225,
         226,
@@ -3131,12 +3166,12 @@
         228,
         229
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b106_hardcoded_password_funcarg.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b106_hardcoded_password_funcarg.html",
       "test_id": "B106",
       "test_name": "hardcoded_password_funcarg"
     },
     {
-      "code": "263         }\n264         signed = self._pgp.sign(\n265             base64.b64encode(pickle.dumps(message)),\n266             keyid=self._kid,\n267             passphrase='1234567890',\n268         )\n269         response = _https_push(signed.data)  # pylint: disable=no-member\n",
+      "code": "266             keyid=self._kid,\n267             passphrase='1234567890',\n268         )\n269         response = _https_push(signed.data)  # pylint: disable=no-member\n270         self._log.debug('hired')\n271         started = False\n272 \n",
       "col_offset": 17,
       "end_col_offset": 9,
       "filename": "Python/dawgie/pl/worker/aws.py",
@@ -3147,7 +3182,7 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Possible hardcoded password: '1234567890'",
-      "line_number": 264,
+      "line_number": 267,
       "line_range": [
         264,
         265,
@@ -3155,7 +3190,7 @@
         267,
         268
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b106_hardcoded_password_funcarg.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b106_hardcoded_password_funcarg.html",
       "test_id": "B106",
       "test_name": "hardcoded_password_funcarg"
     },
@@ -3177,7 +3212,7 @@
         351,
         352
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b113_request_without_timeout.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b113_request_without_timeout.html",
       "test_id": "B113",
       "test_name": "request_without_timeout"
     },
@@ -3199,12 +3234,12 @@
         411,
         412
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
     {
-      "code": "434                     pk = _pgp.export_keys([keys['fingerprint']])\n435                     sk = _pgp.export_keys(\n436                         [keys['fingerprint']],\n437                         secret=True,\n438                         passphrase='1234567890',\n439                     )\n440                     # Sign.data dynamic so pylint: disable=no-member\n",
+      "code": "437                         secret=True,\n438                         passphrase='1234567890',\n439                     )\n440                     # Sign.data dynamic so pylint: disable=no-member\n441                     signed = _pgp.sign(\n442                         pk, keyid=keys['fingerprint'], passphrase='1234567890'\n443                     ).data\n",
       "col_offset": 25,
       "end_col_offset": 21,
       "filename": "Python/dawgie/pl/worker/aws.py",
@@ -3215,7 +3250,7 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Possible hardcoded password: '1234567890'",
-      "line_number": 435,
+      "line_number": 438,
       "line_range": [
         435,
         436,
@@ -3223,12 +3258,12 @@
         438,
         439
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b106_hardcoded_password_funcarg.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b106_hardcoded_password_funcarg.html",
       "test_id": "B106",
       "test_name": "hardcoded_password_funcarg"
     },
     {
-      "code": "440                     # Sign.data dynamic so pylint: disable=no-member\n441                     signed = _pgp.sign(\n442                         pk, keyid=keys['fingerprint'], passphrase='1234567890'\n443                     ).data\n444                     # pylint: enable=no-member\n",
+      "code": "441                     signed = _pgp.sign(\n442                         pk, keyid=keys['fingerprint'], passphrase='1234567890'\n443                     ).data\n444                     # pylint: enable=no-member\n445                     print('exchange() - get IID')\n",
       "col_offset": 29,
       "end_col_offset": 21,
       "filename": "Python/dawgie/pl/worker/aws.py",
@@ -3239,18 +3274,18 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Possible hardcoded password: '1234567890'",
-      "line_number": 441,
+      "line_number": 442,
       "line_range": [
         441,
         442,
         443
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b106_hardcoded_password_funcarg.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b106_hardcoded_password_funcarg.html",
       "test_id": "B106",
       "test_name": "hardcoded_password_funcarg"
     },
     {
-      "code": "119             )\n120             self.__msg += '\\nunique id: ' + str(random.random())\n121             msg = struct.pack('>I', len(self.__msg)) + self.__msg.encode()\n",
+      "code": "120             )\n121             self.__msg += '\\nunique id: ' + str(random.random())\n122             msg = struct.pack('>I', len(self.__msg)) + self.__msg.encode()\n",
       "col_offset": 48,
       "end_col_offset": 63,
       "filename": "Python/dawgie/security.py",
@@ -3261,16 +3296,16 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 120,
+      "line_number": 121,
       "line_range": [
-        120
+        121
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
       "test_name": "blacklist"
     },
     {
-      "code": "215 def _send(s: socket.socket, message: str):\n216     signed = _PGP.sign(message, passphrase='1234567890', clearsign=True)\n217 \n",
+      "code": "216 def _send(s: socket.socket, message: str):\n217     signed = _PGP.sign(message, passphrase='1234567890', clearsign=True)\n218 \n",
       "col_offset": 13,
       "end_col_offset": 72,
       "filename": "Python/dawgie/security.py",
@@ -3281,11 +3316,11 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Possible hardcoded password: '1234567890'",
-      "line_number": 216,
+      "line_number": 217,
       "line_range": [
-        216
+        217
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b106_hardcoded_password_funcarg.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b106_hardcoded_password_funcarg.html",
       "test_id": "B106",
       "test_name": "hardcoded_password_funcarg"
     },
@@ -3305,12 +3340,12 @@
       "line_range": [
         50
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b403-import-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
     {
-      "code": "696             s = pickle.dumps(v)\n697             vp = pickle.loads(s)  # noqa: F841\n698             findings.append(True)\n",
+      "code": "701             s = pickle.dumps(v)\n702             vp = pickle.loads(s)  # noqa: F841\n703             findings.append(True)\n",
       "col_offset": 17,
       "end_col_offset": 32,
       "filename": "Python/dawgie/tools/compliant.py",
@@ -3321,11 +3356,11 @@
       },
       "issue_severity": "MEDIUM",
       "issue_text": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
-      "line_number": 697,
+      "line_number": 702,
       "line_range": [
-        697
+        702
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
@@ -3345,7 +3380,7 @@
       "line_range": [
         48
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b403-import-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle",
       "test_id": "B403",
       "test_name": "blacklist"
     },
@@ -3365,7 +3400,7 @@
       "line_range": [
         109
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b301-pickle",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle",
       "test_id": "B301",
       "test_name": "blacklist"
     },
@@ -3385,7 +3420,7 @@
       "line_range": [
         50
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_imports.html#b404-import-subprocess",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess",
       "test_id": "B404",
       "test_name": "blacklist"
     },
@@ -3405,7 +3440,7 @@
       "line_range": [
         148
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b603_subprocess_without_shell_equals_true.html",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html",
       "test_id": "B603",
       "test_name": "subprocess_without_shell_equals_true"
     },
@@ -3425,7 +3460,7 @@
       "line_range": [
         55
       ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b307-eval",
+      "more_info": "https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b307-eval",
       "test_id": "B307",
       "test_name": "blacklist"
     }
