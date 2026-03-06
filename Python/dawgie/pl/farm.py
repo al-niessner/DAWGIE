@@ -247,7 +247,7 @@ def _cluster_sort():
                 [msg_b.target if msg_b.target else '__all__', msg_b.jobid]
             )
             b = 0 if key not in insights else insights[key].cpu
-            result = (a > b) - (a < b)
+            result = int(a > b) - int(a < b)
         return result
 
     _cluster.sort(key=functools.cmp_to_key(comparator))
