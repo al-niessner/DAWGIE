@@ -135,7 +135,7 @@ DynamicContent(facet.alg, '/api/database/filter/alg')
 DynamicContent(facet.sv, '/api/database/filter/sv')
 DynamicContent(database.runid_max, '/api/database/runid/max')
 DynamicContent(database.runnables, '/api/database/runnables')
-# DynamicContent(database., '/api/database/search')
+DynamicContent(database.search, '/api/database/search')
 DynamicContent(database.list_targets, '/api/database/targets')
 # DynamicContent(database., '/api/database/view')  # given a full name, generate its view
 DynamicContent(df_model_statistics, '/api/df_model/statistics')
