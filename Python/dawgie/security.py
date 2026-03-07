@@ -502,6 +502,7 @@ def is_sanctioned(
             '/api/database/runid/max',
             '/api/database/runnables',
             '/api/database/search',
+            '/api/database/filter/target',
             '/api/database/filter/task',
             '/api/database/filter/alg',
             '/api/database/filter/sv',

@@ -217,3 +217,12 @@ def build_return_object(
     if encode:
         return json.dumps(response).encode()
     return response
+
+
+def db_param_convert(url_param: [str]) -> [None, [str]]:
+    '''convert URL style parameter to what the dawgie.db.search() wants'''
+    result = None
+    if url_param and url_param[0]:
+        p = url_param[0]
+        result = [s.strip() for s in p.split(',')] if p else None
+    return result

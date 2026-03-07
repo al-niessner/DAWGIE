@@ -81,24 +81,134 @@ curl -ksX GET 'https://localhost:8080/api/ae/name' | jq
 #### Example
 ### `/api/database/filter/target` --> no params returns full list (GET)
 #### Description
+Get a list of targets constrained by given full name elements
 #### Parameters
+All paraemters are optional. If none are given then the request will give the entire list of known target names.
+
+If an empty parameter is provided like `targets=`, then it is treated as though it was not given.
+
+- _runids_ : string of constraining runids
+- _tasks_ : comma separated list of constraining task names
+- _algs_ : comma separated list of constraining algorithm names
+- _svs_ : comma separated list of constraining state vector names
 #### Content
+Returns a list of possble target names.
 #### Example
+```
+curl -ksX GET 'https://localhost:8080/api/database/filter/target?runids=-1' | jq
+```
+```
+{
+  "content": [
+    "/tmp/tmpsjd_ilpo",
+    "__all__"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
 ### `/api/database/filter/task` --> no params returns full list (GET)
 #### Description
+Get the list of tasks constrained by given full name elements
 #### Parameters
+All paraemters are optional. If none are given then the request will give the entire list of known task names.
+
+If an empty parameter is provided like `targets=`, then it is treated as though it was not given.
+
+- _runids_ : string of constraining runids
+- _targets_ : comma separated list of constraining target names
+- _algs_ : comma separated list of constraining algorithm names
+- _svs_ : comma separated list of constraining state vector names
 #### Content
+Returns a list of possible task names
 #### Example
+```
+curl -ksX GET 'https://localhost:8080/api/database/filter/task?runids=-1&targets=__all__' | jq
+```
+```
+{
+  "content": [
+    "network",
+    "review"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
 ### `/api/database/filter/alg` --> no params returns full list (GET)
 #### Description
+Get the list of algorithms constrained by given full name elements
 #### Parameters
+All paraemters are optional. If none are given then the request will give the entire list of known algorithm names.
+
+If an empty parameter is provided like `targets=`, then it is treated as though it was not given.
+
+
+- _runids_ : string of constraining runids
+- _targets_ : comma separated list of constraining target names
+- _tasks_ : comma separated list of constraining task names
+- _svs_ : comma separated list of constraining state vector names
 #### Content
+Returns a list of possible algorithm names
 #### Example
+```
+curl -ksX GET 'https://localhost:8080/api/database/filter/alg?runids=-1&targets=&tasks=network,review&svs=' | jq
+```
+```
+{
+  "content": [
+    "analyzer",
+    "aspect",
+    "engine",
+    "history"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+```
+curl -ksX GET 'https://localhost:8080/api/database/filter/alg?runids=-1&targets=__all__,&tasks=network,review&svs=' | jq
+```
+```
+{
+  "content": [
+    "analyzer",
+    "aspect"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
 ### `/api/database/filter/sv` --> no params returns full list (GET)
 #### Description
+Get the list of state vectors constrained by given full name elements
 #### Parameters
+All paraemters are optional. If none are given then the request will give the entire list of known state vector names.
+
+If an empty parameter is provided like `targets=`, then it is treated as though it was not given.
+
+
+- _runids_ : string of constraining runids
+- _targets_ : comma separated list of constraining target names
+- _tasks_ : comma separated list of constraining task names
+- _algs_ : comma separated list of constraining algorithm names
 #### Content
+Returns a list of possible state vector names
 #### Example
+```
+curl -ksX GET 'https://localhost:8080/api/database/filter/sv?runids=-1&targets=__all__,&tasks=network,review&algs=' | jq
+```
+```
+{
+  "content": [
+    "__metric__",
+    "test"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+
 ### `/api/database/runid/max`  --> no params returns max value (GET)
 #### Description
 The largest known runid in the system.
@@ -141,9 +251,54 @@ curl -ksX GET 'https://localhost:8080/api/database/runnables' | jq
 ```
 ### `/api/database/search` (GET)
 #### Description
+Find data in the database from full name facets
 #### Parameters
+All paraemters are optional. If none are given the request equivalent to a database backup. It will be refused.
+
+If an empty parameter is provided like `targets=`, then it is treated as though it was not given.
+
+- _runids_ : string of constraining runids
+- _targets_ : comma separated list of constraining target names
+- _tasks_ : comma separated list of constraining task names
+- _algs_ : comma separated list of constraingin algorithm names
+- _svs_ : comma separated list of constraining state vector names
+
+pagination controls
+
+- _index_ : where to start in the lis of matching items with unspecified meaning 0
+- _limit_ : the maximum number of items to return in this page with unspecified meaning all of them. A limit=0 returns only the total with not items.
 #### Content
+A JSON object with two keys. The "total" key represents the total number of matches found in the database regardless of the number of items returned. The key "items" is a list of the full name of the object in the database that match.
 #### Example
+```
+curl -ksX GET 'https://localhost:8080/api/database/search?runids=-1&targets=__all__,&tasks=network,review&algs=&svs=__metric__' | jq
+```
+```
+{
+  "content": {
+    "items": [
+      "1.__all__.network.analyzer.__metric__",
+      "1.__all__.review.aspect.__metric__"
+    ],
+    "total": 2
+  },
+  "message": "",
+  "status": "success"
+}
+```
+```
+curl -ksX GET 'https://localhost:8080/api/database/search?runids=-1&targets=__all__,&tasks=network,review&algs=&svs=__metric__&limit=0' | jq
+```
+```
+{
+  "content": {
+    "items": [],
+    "total": 2
+  },
+  "message": "",
+  "status": "success"
+}
+```
 ### `/api/database/targets` (GET)
 #### Description
 Get a full list of known targets.

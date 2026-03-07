@@ -4,7 +4,7 @@ import dawgie.db
 import dawgie.pl.schedule
 
 from dawgie.db.basis import Params
-from dawgie.fe.basis import build_return_object
+from dawgie.fe.basis import build_return_object, db_param_convert
 
 
 def runid_max():
@@ -17,25 +17,33 @@ def runnables():
     )
 
 
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 def search(
     runids: str = None,
     targets: [str] = None,
     tasks: [str] = None,
     algs: [str] = None,
     svs: [str] = None,
+    index: int = 0,
+    limit: int = None,
 ):
     '''given the facets, find all corresponding state vectors'''
     # pylint: disable=duplicate-code
     parameters = Params(
-        runids=runids,
-        targets=targets,
-        tasks=tasks,
-        algs=algs,
-        svs=svs,
+        runids=runids[0],
+        targets=db_param_convert(targets),
+        tasks=db_param_convert(tasks),
+        algs=db_param_convert(algs),
+        svs=db_param_convert(svs),
         vals=None,
     )
-    results = dawgie.db.search().find(parameters)
+    index = int(index[0]) if index and index[0] else 0
+    limit = int(limit[0]) if limit and limit[0] else None
+    results = dawgie.db.search().find(parameters, index, limit)
     return build_return_object(results._asdict())
+
+
+# pylint: enable=too-many-arguments,too-many-positional-arguments
 
 
 def list_targets():

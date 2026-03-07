@@ -84,7 +84,7 @@ class SearchImplementation(SearchFacade):
         idx = _align(empty)
         pks = self._prime_keys(parameters)
         table = DBI().indices[_table_index(empty)]
-        return sorted({table[pk[idx]] for pk in pks})
+        return sorted({dissect(table[pk[idx]])[1] for pk in pks})
 
     def _find(
         self, parameters: Params, index: int = 0, limit: int = None

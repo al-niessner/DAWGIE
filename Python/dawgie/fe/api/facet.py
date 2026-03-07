@@ -3,10 +3,15 @@
 import dawgie.db
 
 from dawgie.db.basis import Params
-from dawgie.fe.basis import build_return_object
+from dawgie.fe.basis import build_return_object, db_param_convert
 
 
-def alg(runids: str, targets: [str], tasks: [str], svs: [str]):
+def alg(
+    runids: [str] = None,
+    targets: [str] = None,
+    tasks: [str] = None,
+    svs: [str] = None,
+):
     '''facet the algorithm name
 
     All parameters must be a string or list with content or None. An empty list
@@ -15,17 +20,22 @@ def alg(runids: str, targets: [str], tasks: [str], svs: [str]):
     # pylint: disable=duplicate-code
     engine = dawgie.db.search()
     parameters = Params(
-        runids=runids,
-        targets=targets,
-        tasks=tasks,
+        runids=runids[0] if runids and runids[0] else None,
+        targets=db_param_convert(targets),
+        tasks=db_param_convert(tasks),
         algs=[],
-        svns=svs,
+        svs=db_param_convert(svs),
         vals=None,
     )
     return build_return_object(engine.facet(parameters))
 
 
-def sv(runids: str, targets: [str], tasks: [str], algs: [str]):
+def sv(
+    runids: [str] = None,
+    targets: [str] = None,
+    tasks: [str] = None,
+    algs: [str] = None,
+):
     '''facet the state vector name
 
     All parameters must be a string or list with content or None. An empty list
@@ -34,17 +44,22 @@ def sv(runids: str, targets: [str], tasks: [str], algs: [str]):
     # pylint: disable=duplicate-code
     engine = dawgie.db.search()
     parameters = Params(
-        runids=runids,
-        targets=targets,
-        tasks=tasks,
-        algs=algs,
-        svns=[],
+        runids=runids[0] if runids and runids[0] else None,
+        targets=db_param_convert(targets),
+        tasks=db_param_convert(tasks),
+        algs=db_param_convert(algs),
+        svs=[],
         vals=None,
     )
     return build_return_object(engine.facet(parameters))
 
 
-def task(runids: str, targets: [str], algs: [str], svs: [str]):
+def task(
+    runids: [str] = None,
+    targets: [str] = None,
+    algs: [str] = None,
+    svs: [str] = None,
+):
     '''facet the task name
 
     All parameters must be a string or list with content or None. An empty list
@@ -53,12 +68,22 @@ def task(runids: str, targets: [str], algs: [str], svs: [str]):
     # pylint: disable=duplicate-code
     engine = dawgie.db.search()
     parameters = Params(
-        runids=runids, targets=targets, tasks=[], algs=algs, svns=svs, vals=None
+        runids=runids[0] if runids and runids[0] else None,
+        targets=db_param_convert(targets),
+        tasks=[],
+        algs=db_param_convert(algs),
+        svs=db_param_convert(svs),
+        vals=None,
     )
     return build_return_object(engine.facet(parameters))
 
 
-def target(runids: str, tasks: [str], algs: [str], svs: [str]):
+def target(
+    runids: [str] = None,
+    tasks: [str] = None,
+    algs: [str] = None,
+    svs: [str] = None,
+):
     '''facet the target name
 
     All parameters must be a string or list with content or None. An empty list
@@ -67,6 +92,11 @@ def target(runids: str, tasks: [str], algs: [str], svs: [str]):
     # pylint: disable=duplicate-code
     engine = dawgie.db.search()
     parameters = Params(
-        runids=runids, targets=[], tasks=tasks, algs=algs, svns=svs, vals=None
+        runids=runids[0] if runids and runids[0] else None,
+        targets=[],
+        tasks=db_param_convert(tasks),
+        algs=db_param_convert(algs),
+        svs=db_param_convert(svs),
+        vals=None,
     )
     return build_return_object(engine.facet(parameters))
