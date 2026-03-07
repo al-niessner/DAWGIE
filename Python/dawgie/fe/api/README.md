@@ -99,11 +99,6 @@ curl -ksX GET 'https://localhost:8080/api/ae/name' | jq
 #### Parameters
 #### Content
 #### Example
-### `/api/database/filter/val` --> no params returns full list (GET)
-#### Description
-#### Parameters
-#### Content
-#### Example
 ### `/api/database/runid/max`  --> no params returns max value (GET)
 #### Description
 The largest known runid in the system.

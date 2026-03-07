@@ -65,7 +65,7 @@ class SearchImplementation(SearchFacade):
                 results.add(pk[:keylen])
         return sorted(results)
 
-    def _filter(self, parameters: Params) -> [str]:
+    def _facet(self, parameters: Params) -> [str]:
         '''Find the sublist(s) given some constraints
 
         If parameters.<key> is an empty list, then produce the sublist for that

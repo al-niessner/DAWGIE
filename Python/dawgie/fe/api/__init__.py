@@ -53,6 +53,7 @@ import dawgie.pl.logger.fe
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 
 from . import database
+from . import facet
 from . import schedule
 
 
@@ -128,15 +129,14 @@ def rev_current():
 
 DynamicContent(ae_name, '/api/ae/name')
 # DynamicContent(, '/api/cmd/run')
-# DynamicContent(database., '/api/database/filter/target')  # no params returns full list
-# DynamicContent(database., '/api/database/filter/task')  # no params returns full list
-# DynamicContent(database., '/api/database/filter/alg')  # no params returns full list
-# DynamicContent(database., '/api/database/filter/sv')  # no params returns full list
-# DynamicContent(database., '/api/database/filter/val')  # no params returns full list
+DynamicContent(facet.target, '/api/database/filter/target')
+DynamicContent(facet.task, '/api/database/filter/task')
+DynamicContent(facet.alg, '/api/database/filter/alg')
+DynamicContent(facet.sv, '/api/database/filter/sv')
 DynamicContent(database.runid_max, '/api/database/runid/max')
 DynamicContent(database.runnables, '/api/database/runnables')
 # DynamicContent(database., '/api/database/search')
-DynamicContent(database.targets, '/api/database/targets')
+DynamicContent(database.list_targets, '/api/database/targets')
 # DynamicContent(database., '/api/database/view')  # given a full name, generate its view
 DynamicContent(df_model_statistics, '/api/df_model/statistics')
 DynamicContent(logs_recent, '/api/logs/recent')

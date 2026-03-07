@@ -76,7 +76,7 @@ class SearchFacade(abc.ABC):
     '''
 
     @abc.abstractmethod
-    def _filter(self, parameters: Params) -> [str]:
+    def _facet(self, parameters: Params) -> [str]:
         pass
 
     @abc.abstractmethod
@@ -164,7 +164,7 @@ class SearchFacade(abc.ABC):
         return parameters
 
     @typing.final
-    def filter(self, parameters: Params) -> [str]:
+    def facet(self, parameters: Params) -> [str]:
         '''Find the sublist(s) given some constraints
 
         If parameters.<key> is an empty list, then produce the sublist for that
@@ -182,7 +182,7 @@ class SearchFacade(abc.ABC):
         )
         if empties != 1:
             raise ValueError(f'One [] is required but found {empties} []s.')
-        return self._filter(SearchFacade._scrub(parameters))
+        return self._facet(SearchFacade._scrub(parameters))
 
     @typing.final
     def find(
