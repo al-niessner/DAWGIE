@@ -565,7 +565,6 @@ def view_events() -> [{}]:
             try:
                 result[p.tag].add(round(_delay(m).total_seconds()))
             except _DelayNotKnowableError:
-                print (m)
                 result[p.tag].add(-9999)
             pass
         pass
