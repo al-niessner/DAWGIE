@@ -32,7 +32,7 @@ A description of `content` for a successful request of the endpoint. Will includ
 An example of how to use the endpoint with curl including its output. All examples are done using an instance of exercise, which is created by running the `Coda/exercise/run.sh` script and the entire JSON object is shown not just `content`.
 
 - [`/api/ae/name`](#apiaename-get)
-- [`/api/cmd/run`](#/api/cmd/run-get)
+- [`/api/cmd/run`](#/api/cmd/run-put)
 - [`/api/database/filter/target`](#/api/database/filter/target-get)
 - [`/api/database/filter/task`](#/api/database/filter/task-get)
 - [`/api/database/filter/alg`](#/api/database/filter/alg-get)
@@ -74,12 +74,12 @@ curl -ksX GET 'https://localhost:8080/api/ae/name' | jq
   "status": "success"
 }
 ```
-### `/api/cmd/run` (GET)
+### `/api/cmd/run` (PUT)
 #### Description
 #### Parameters
 #### Content
 #### Example
-### `/api/database/filter/target` --> no params returns full list (GET)
+### `/api/database/filter/target` (GET)
 #### Description
 Get a list of targets constrained by given full name elements
 #### Parameters
@@ -107,7 +107,7 @@ curl -ksX GET 'https://localhost:8080/api/database/filter/target?runids=-1' | jq
   "status": "success"
 }
 ```
-### `/api/database/filter/task` --> no params returns full list (GET)
+### `/api/database/filter/task` (GET)
 #### Description
 Get the list of tasks constrained by given full name elements
 #### Parameters
@@ -135,7 +135,7 @@ curl -ksX GET 'https://localhost:8080/api/database/filter/task?runids=-1&targets
   "status": "success"
 }
 ```
-### `/api/database/filter/alg` --> no params returns full list (GET)
+### `/api/database/filter/alg` (GET)
 #### Description
 Get the list of algorithms constrained by given full name elements
 #### Parameters
@@ -179,7 +179,7 @@ curl -ksX GET 'https://localhost:8080/api/database/filter/alg?runids=-1&targets=
   "status": "success"
 }
 ```
-### `/api/database/filter/sv` --> no params returns full list (GET)
+### `/api/database/filter/sv` (GET)
 #### Description
 Get the list of state vectors constrained by given full name elements
 #### Parameters
@@ -209,7 +209,7 @@ curl -ksX GET 'https://localhost:8080/api/database/filter/sv?runids=-1&targets=_
 }
 ```
 
-### `/api/database/runid/max`  --> no params returns max value (GET)
+### `/api/database/runid/max` (GET)
 #### Description
 The largest known runid in the system.
 #### Parameters
