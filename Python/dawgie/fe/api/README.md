@@ -83,6 +83,16 @@ Request the pipeline reset. It can only be done while the pipeline is in the "ru
 #### Content
 Simple message indicating it did as asked.
 #### Example
+```
+curl -ksX POST 'https://localhost:8080/api/cmd/reset' | j
+```
+```
+{
+  "content": "Reset the pipeline as requested.",
+  "message": "",
+  "status": "success"
+}
+```
 ### `/api/cmd/run` (PUT)
 #### Description
 Request that runnables be scheduled to run with targets.
@@ -525,8 +535,11 @@ Request the pipeline update the AE to a new version (git changeset)
 - changeset : the hash that git uses to identify a commit
 - submission : one of the following strings: ??
 #### Content
-needs rewritten
+A simple string indicating success.
 #### Example
+```
+curl -ksX POST 'https://localhost:8080/api/rev/submit?changeset=apple&submission=now' | jq
+```
 ### `/api/schedule/doing` (GET)
 #### Description
 The tasks and targets that are currently queued and awaiting workers.

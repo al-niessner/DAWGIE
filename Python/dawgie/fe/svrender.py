@@ -37,6 +37,8 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+# 3.0.0 remove - this module should move to dawgie.fe.api
+
 from dawgie.fe.basis import DeferContainer, Status, build_return_object
 
 import dawgie

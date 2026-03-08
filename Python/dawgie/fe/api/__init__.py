@@ -66,7 +66,7 @@ def cmd_reset(archive: [str] = None):
     archive = archive[0] if archive and archive[0] else 'false'
     affirmative = ['true', 'tru', 'tr', 't', 'y', 'ye', 'yes', 'on']
     archive = archive.lower() in affirmative
-    if not hasattr(dawgie.context, 'fsn'):
+    if not hasattr(dawgie.context, 'fsm'):
         return build_return_object(
             None, Status.FAILURE, 'Resetting before FSM is defined.'
         )
