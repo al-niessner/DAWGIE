@@ -77,14 +77,31 @@ curl -ksX GET 'https://localhost:8080/api/ae/name' | jq
 ```
 ### `/api/cmd/reset` (PUT)
 #### Description
+Request the pipeline reset. It can only be done while the pipeline is in the "running" state.
 #### Parameters
+- _archive_ : archive the database during reset. The default is false. To archive use 'true', 'yes', or 'on'.
 #### Content
+Simple message indicating it did as asked.
 #### Example
 ### `/api/cmd/run` (PUT)
 #### Description
+Request that runnables be scheduled to run with targets.
 #### Parameters
+- runnables : the runnables that should be scheduled
+- targets : the targets that the runnables will use
 #### Content
+A siimple message indicating that requested runnables and targets have been scheduled.
 #### Example
+```
+curl -ksX POST 'https://localhost:8080/api/cmd/run?runnables=a.b&targets=foo' | jq
+```
+```
+{
+  "content": "Scheduled target.task(s) to run.",
+  "message": "",
+  "status": "success"
+}
+```
 ### `/api/database/filter/target` (GET)
 #### Description
 Get a list of targets constrained by given full name elements
@@ -503,8 +520,12 @@ curl -ksX GET 'https://localhost:8080/api/rev/current' | jq
 ```
 ### `/api/rev/submit` (GET)
 #### Description
+Request the pipeline update the AE to a new version (git changeset)
 #### Parameters
+- changeset : the hash that git uses to identify a commit
+- submission : one of the following strings: ??
 #### Content
+needs rewritten
 #### Example
 ### `/api/schedule/doing` (GET)
 #### Description

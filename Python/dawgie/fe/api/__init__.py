@@ -43,7 +43,6 @@ from dawgie.fe.basis import (
     Status,
     build_return_object,
 )
-from dawgie.fe import submit
 
 import dawgie
 import dawgie.context
@@ -53,6 +52,7 @@ import logging
 from . import database
 from . import facet
 from . import schedule
+from . import submit
 
 LOG = logging.getLogger(__name__)
 REV_SUBMIT = submit.Defer()
@@ -160,7 +160,7 @@ def rev_current():
 
 
 DynamicContent(ae_name, '/api/ae/name')
-DynamicContent(cmd_run, '/api/cmd/reset', [HttpMethod.POST])
+DynamicContent(cmd_reset, '/api/cmd/reset', [HttpMethod.POST])
 DynamicContent(cmd_run, '/api/cmd/run', [HttpMethod.POST])
 DynamicContent(cmd_snapshot, '/api/cmd/snapshot')
 DynamicContent(facet.target, '/api/database/filter/target')
