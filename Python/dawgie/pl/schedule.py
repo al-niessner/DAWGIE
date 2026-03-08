@@ -270,7 +270,13 @@ def complete(job, runid, target, timing, status):
         pass
 
     history.append(
-        {'timing': timing, 'runid': runid, 'target': target, 'task': job.tag}
+        {
+            'timing': timing,
+            'runid': runid,
+            'target': target,
+            'task': job.tag,
+            'changeset': dawgie.context.git_rev,
+        }
     )
     dawgie.pl.logger.chronicle.append(
         {
@@ -541,9 +547,12 @@ def update(values: [(str, bool)], original: dawgie.pl.dag.Node, rid: int):
     return
 
 
-def view_doing() -> dict:
+def view_doing(index: int = 0, limit: int = None) -> dict:
     active = list(filter(lambda t: t.get('status') == State.running, que))
-    return {a.tag: sorted(list(a.get('doing'))) for a in active}
+    return {
+        a.tag: sorted(list(a.get('doing')))
+        for a in active[index : (index + limit) if limit is not None else limit]
+    }
 
 
 def view_events() -> [{}]:
@@ -556,7 +565,7 @@ def view_events() -> [{}]:
             try:
                 result[p.tag].add(round(_delay(m).total_seconds()))
             except _DelayNotKnowableError:
-                result[p.tag].add(0)
+                result[p.tag].add(-9999)
             pass
         pass
     return [{'actor': k, 'delays': sorted(result[k])} for k in sorted(result)]
@@ -570,7 +579,7 @@ def view_success() -> [dict]:  # 3.0.0 remove
     return suc
 
 
-def view_todo() -> [dict]:
+def view_todo(index: int = 0, limit: int = None) -> [dict]:
     wait = list(
         filter(
             lambda t: all(
@@ -584,5 +593,6 @@ def view_todo() -> [dict]:
     )  # prevents undefined
     wait.sort(key=lambda t: t.get('level'))
     return [
-        {'name': w.tag, 'targets': sorted(list(w.get('todo')))} for w in wait
+        {'name': w.tag, 'targets': sorted(list(w.get('todo')))}
+        for w in wait[index : (index + limit) if limit is not None else limit]
     ]

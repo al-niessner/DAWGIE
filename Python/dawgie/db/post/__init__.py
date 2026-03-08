@@ -1878,6 +1878,7 @@ def targets():
     result = cur.fetchall()
     cur.close()
     conn.close()  # psycopg3 problem # fmt: skip # pylint: disable=no-member
+
     return [r[0] for r in result]  # fmt: skip # need a list so pylint: disable=consider-using-generator
 
 

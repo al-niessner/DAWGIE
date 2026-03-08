@@ -1,5 +1,5 @@
-'''
---
+'''The methods for /api/database
+
 COPYRIGHT:
 Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
@@ -34,63 +34,62 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-NTR: 49811
+NTR:
 '''
 
-import dawgie.context
-import logging.handlers
+import dawgie.db
+import dawgie.pl.schedule
+import logging
 
-INSTANCE = None
+from .. import svrender
 
+from dawgie.db.basis import Params
+from dawgie.fe.basis import build_return_object, db_param_convert
 
-class Handler(logging.handlers.BufferingHandler):
-    def __init__(self):
-        logging.handlers.BufferingHandler.__init__(
-            self, dawgie.context.log_capacity
-        )
-        self.setFormatter(
-            logging.Formatter(
-                '%(asctime)s;\n;'
-                + '%(name)s;\n;'
-                + '%(levelname)s;\n;'
-                + '%(message)s'
-            )
-        )
-        return
-
-    def emit(self, record):
-        self.buffer.insert(0, record)
-        while self.capacity <= len(self.buffer):
-            self.buffer.pop()
-        return
-
-    def shouldFlush(self, record):
-        return False
-
-    pass
+LOG = logging.getLogger(__name__)
+VIEW = svrender.Defer()
 
 
-def remembered(levels: [str] = None, limit: int = 0):
-    if levels is None:
-        levels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
-    if not levels:
-        return []
-    history = []
-    subbuffer = []
-    for r in INSTANCE.buffer:
-        details = INSTANCE.format(r).split(';\n;')
-        if details[2].strip() in levels:
-            subbuffer.append(details)
-    subbuffer.sort(key=lambda d: d[0], reverse=True)
-    start = max([len(subbuffer) - limit if limit else 0, 0])
-    for details in subbuffer[start:]:
-        history.append(
-            {
-                'timeStamp': details[0],
-                'name': details[1],
-                'level': details[2],
-                'message': '\n\n'.join(details[3:]),
-            }
-        )
-        pass
-    return history
+def runid_max():
+    return build_return_object(max([1, dawgie.db.next() - 1]))
+
+
+def runnables():
+    return build_return_object(
+        sorted(dawgie.pl.schedule.tasks(), key=str.casefold)
+    )
+
+
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+def search(
+    runids: [str] = None,
+    targets: [str] = None,
+    tasks: [str] = None,
+    algs: [str] = None,
+    svs: [str] = None,
+    index: int = 0,
+    limit: int = None,
+):
+    '''given the facets, find all corresponding state vectors'''
+    # pylint: disable=duplicate-code
+    parameters = Params(
+        runids=runids[0] if runids and runids[0] else None,
+        targets=db_param_convert(targets),
+        tasks=db_param_convert(tasks),
+        algs=db_param_convert(algs),
+        svs=db_param_convert(svs),
+        vals=None,
+    )
+    index = int(index[0]) if index and index[0] else 0
+    limit = int(limit[0]) if limit and limit[0] else None
+    results = dawgie.db.search().find(parameters, index, limit)
+    return build_return_object(results._asdict())
+
+
+# pylint: enable=too-many-arguments,too-many-positional-arguments
+
+
+def list_targets():
+    return build_return_object(
+        sorted(dawgie.db.targets(True), key=str.casefold)
+    )

@@ -1,0 +1,780 @@
+# API Documentation
+
+
+## Endpoints
+
+DAWGIE front end (FE) endpoints do not use HTTP status codes. If the status code is not 200, then it is a real connection problem and not an FE problem.
+
+FE endpoints all return the same JSON object:
+```
+{
+    "content" : <endpoint specific>,
+    "message" : "string of why/how things went awry",
+    "status"  : "error"|"failure"|"success"
+}
+```
+
+When `status` is `success`, the value of `content` will be valid and `message` is undefined. Each endpoint returns different `content` and is described in the endpoint documentation.
+
+When `status` is `failure`, the value of `message` will be a string attempting to explain why/how the failure occurred and prevented the request from being completed successfully. The value of `content` will be an UTC date and time string to align this message with the log file contents for further illuminating the problem that occurred.
+
+When `status` is `error`, the value of `message` will be the exception message. The value of `content` will be an UTC date and time string to align this message with teh log file contents where the full stack trace can be found.
+
+Each endpoint will be detailed with the following information:
+### `/api/unit/request` (GET|PUSH|PUT)
+#### Description
+A brief description of endpiont.
+#### Parameters
+A list of allowable paraemters and if they are optional
+#### Content
+A description of `content` for a successful request of the endpoint. Will included JSON examples.
+#### Example
+An example of how to use the endpoint with curl including its output. All examples are done using an instance of exercise, which is created by running the `Coda/exercise/run.sh` script and the entire JSON object is shown not just `content`.
+
+- [`/api/ae/name`](#apiaename-get)
+- [`/api/cmd/reset`](#/api/cmd/reset-put)
+- [`/api/cmd/run`](#/api/cmd/run-put)
+- [`/api/database/filter/target`](#/api/database/filter/target-get)
+- [`/api/database/filter/task`](#/api/database/filter/task-get)
+- [`/api/database/filter/alg`](#/api/database/filter/alg-get)
+- [`/api/database/filter/sv`](#/api/database/filter/sv-get)
+- [`/api/database/filter/val`](#/api/database/filter/val-get)
+- [`/api/database/runid/max`](#/api/database//runid/max-get)
+- [`/api/database/runnables`](#/api/database/runnables-get)
+- [`/api/database/search`](#/api/database/search-get)
+- [`/api/database/targets`](#/api/database/targets-get)
+- [`/api/database/view`](#/api/database/view-get)
+- [`/api/df_model/statistics`](#/api/df_model/statistics-get)
+- [`/api/logs/recent?limit=3`](#/api/logs/recent?limit=3-get)
+- [`/api/pipeline/state`](#/apipipelinestate-get)
+- [`/api/rev/current`](#/api/rev/current-get)
+- [`/api/rev/submit`](#/api/rev/submit-get)
+- [`/api/schedule/doing`](#/api/schedule/doing-get)
+- [`/api/schedule/events`](#/api/schedule/events-get)
+- [`/api/schedule/failed`](#/api/schedule/failed-get)
+- [`/api/schedule/in-progress`](#/api/schedule/in-progress-get)
+- [`/api/schedule/stats`](#/api/schedule/stats-get)
+- [`/api/schedule/succeeded`](#/api/schedule/succeeded-get)
+- [`/api/schedule/to-do`](#/api/schedule/to-do-get)
+
+### `/api/ae/name` (GET)
+#### Description
+DAWGIE is an agent that organizes and managers to workers to accomplish tasks defined by the AE. This endpoint returns the name of the AE, which is defined in dawgie.context.ae_base_package.
+#### Parameters
+_None_
+#### Content
+String representation of the AE name.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/ae/name' | jq
+```
+```
+{
+  "content": "ae",
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/cmd/reset` (PUT)
+#### Description
+Request the pipeline reset. It can only be done while the pipeline is in the "running" state.
+#### Parameters
+- _archive_ : archive the database during reset. The default is false. To archive use 'true', 'yes', or 'on'.
+#### Content
+Simple message indicating it did as asked.
+#### Example
+```
+curl -ksX POST 'https://localhost:8080/api/cmd/reset' | j
+```
+```
+{
+  "content": "Reset the pipeline as requested.",
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/cmd/run` (PUT)
+#### Description
+Request that runnables be scheduled to run with targets.
+#### Parameters
+- runnables : the runnables that should be scheduled
+- targets : the targets that the runnables will use
+#### Content
+A siimple message indicating that requested runnables and targets have been scheduled.
+#### Example
+```
+curl -ksX POST 'https://localhost:8080/api/cmd/run?runnables=a.b&targets=foo' | jq
+```
+```
+{
+  "content": "Scheduled target.task(s) to run.",
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/database/filter/target` (GET)
+#### Description
+Get a list of targets constrained by given full name elements
+#### Parameters
+All paraemters are optional. If none are given then the request will give the entire list of known target names.
+
+If an empty parameter is provided like `targets=`, then it is treated as though it was not given.
+
+- _runids_ : string of constraining runids
+- _tasks_ : comma separated list of constraining task names
+- _algs_ : comma separated list of constraining algorithm names
+- _svs_ : comma separated list of constraining state vector names
+#### Content
+Returns a list of possble target names.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/database/filter/target?runids=-1' | jq
+```
+```
+{
+  "content": [
+    "/tmp/tmpsjd_ilpo",
+    "__all__"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/database/filter/task` (GET)
+#### Description
+Get the list of tasks constrained by given full name elements
+#### Parameters
+All paraemters are optional. If none are given then the request will give the entire list of known task names.
+
+If an empty parameter is provided like `targets=`, then it is treated as though it was not given.
+
+- _runids_ : string of constraining runids
+- _targets_ : comma separated list of constraining target names
+- _algs_ : comma separated list of constraining algorithm names
+- _svs_ : comma separated list of constraining state vector names
+#### Content
+Returns a list of possible task names
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/database/filter/task?runids=-1&targets=__all__' | jq
+```
+```
+{
+  "content": [
+    "network",
+    "review"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/database/filter/alg` (GET)
+#### Description
+Get the list of algorithms constrained by given full name elements
+#### Parameters
+All paraemters are optional. If none are given then the request will give the entire list of known algorithm names.
+
+If an empty parameter is provided like `targets=`, then it is treated as though it was not given.
+
+
+- _runids_ : string of constraining runids
+- _targets_ : comma separated list of constraining target names
+- _tasks_ : comma separated list of constraining task names
+- _svs_ : comma separated list of constraining state vector names
+#### Content
+Returns a list of possible algorithm names
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/database/filter/alg?runids=-1&targets=&tasks=network,review&svs=' | jq
+```
+```
+{
+  "content": [
+    "analyzer",
+    "aspect",
+    "engine",
+    "history"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+```
+curl -ksX GET 'https://localhost:8080/api/database/filter/alg?runids=-1&targets=__all__,&tasks=network,review&svs=' | jq
+```
+```
+{
+  "content": [
+    "analyzer",
+    "aspect"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/database/filter/sv` (GET)
+#### Description
+Get the list of state vectors constrained by given full name elements
+#### Parameters
+All paraemters are optional. If none are given then the request will give the entire list of known state vector names.
+
+If an empty parameter is provided like `targets=`, then it is treated as though it was not given.
+
+
+- _runids_ : string of constraining runids
+- _targets_ : comma separated list of constraining target names
+- _tasks_ : comma separated list of constraining task names
+- _algs_ : comma separated list of constraining algorithm names
+#### Content
+Returns a list of possible state vector names
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/database/filter/sv?runids=-1&targets=__all__,&tasks=network,review&algs=' | jq
+```
+```
+{
+  "content": [
+    "__metric__",
+    "test"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+
+### `/api/database/runid/max` (GET)
+#### Description
+The largest known runid in the system.
+#### Parameters
+_None_
+#### Content
+JSON int that is the largest known runid.
+#### Example
+
+### `/api/database/runnables` (GET)
+#### Description
+Get a list of known runnable entities in the pipeline.
+#### Parameters
+_None_
+#### Content
+A JSON list of case insensitive strings of known runnable `target.algorithm`.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/database/runnables' | jq
+```
+```
+{
+  "content": [
+    "disk.engine",
+    "feedback.command",
+    "feedback.control",
+    "feedback.model",
+    "feedback.output",
+    "feedback.sensor",
+    "feedback.sum",
+    "network.analyzer",
+    "network.engine",
+    "noio.engine",
+    "review.aspect",
+    "review.history"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/database/search` (GET)
+#### Description
+Find data in the database from full name facets
+#### Parameters
+All paraemters are optional. If none are given the request equivalent to a database backup. It will be refused.
+
+If an empty parameter is provided like `targets=`, then it is treated as though it was not given.
+
+- _runids_ : string of constraining runids
+- _targets_ : comma separated list of constraining target names
+- _tasks_ : comma separated list of constraining task names
+- _algs_ : comma separated list of constraingin algorithm names
+- _svs_ : comma separated list of constraining state vector names
+
+pagination controls
+
+- _index_ : where to start in the lis of matching items with unspecified meaning 0
+- _limit_ : the maximum number of items to return in this page with unspecified meaning all of them. A limit=0 returns only the total with not items.
+#### Content
+A JSON object with two keys. The "total" key represents the total number of matches found in the database regardless of the number of items returned. The key "items" is a list of the full name of the object in the database that match.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/database/search?runids=-1&targets=__all__,&tasks=network,review&algs=&svs=__metric__' | jq
+```
+```
+{
+  "content": {
+    "items": [
+      "1.__all__.network.analyzer.__metric__",
+      "1.__all__.review.aspect.__metric__"
+    ],
+    "total": 2
+  },
+  "message": "",
+  "status": "success"
+}
+```
+```
+curl -ksX GET 'https://localhost:8080/api/database/search?runids=-1&targets=__all__,&tasks=network,review&algs=&svs=__metric__&limit=0' | jq
+```
+```
+{
+  "content": {
+    "items": [],
+    "total": 2
+  },
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/database/targets` (GET)
+#### Description
+Get a full list of known targets.
+#### Parameters
+_None_
+#### Content
+A JSON list of case insensitive sorted strings representing all of the known targets to the system.
+#### Example
+````
+curl -ksX GET 'https://localhost:8080/api/database/targets' | jq
+````
+````
+{
+  "content": [
+    "/tmp/tmpewb77f2m",
+    "__all__"
+  ],
+  "message": "",
+  "status": "success"
+}
+````
+### `/api/database/view` (GET)
+#### Description
+A view of the specified state vector.
+#### Parameters
+- fullname : a string of the form runid.target.task.alg.sv.
+- _form_ : a string representing the return format. Only `html` is supported.
+#### Content
+When full successful, the content or error content will be returned in the desired format.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/database/view?path=1.__all__.network.analyzer.__metric__'
+```
+```
+<!DOCTYPE HTML><html lang="en-US">    <head>        <meta charset="UTF-8">        <title>View of 1.__all__.network.analyzer.__metric__</title>        <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-3.8.2.min.js"></script>        <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-widgets-3.8.2.min.js"></script>        <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-tables-3.8.2.min.js"></script>    </head>    <body><h1>Viewing State Vector:</h1><h3>Run ID:    1</h3><h3>Target:    __all__</h3><h3>Task:      network</h3><h3>Algorithm: analyzer</h3><h3>State Vec: __metric__</h3><table style="border: 5px solid black; border-collapse: collapse"><caption style="text-align:left">Process Metrics</caption><tr><th style="border: 2px solid black; border-collapse: collapse; padding: 5px;"></th><th style="border: 2px solid black; border-collapse: collapse; padding: 5px;">DB</th><th style="border: 2px solid black; border-collapse: collapse; padding: 5px;">Task</th></tr><tr><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>input (block)</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>0</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>0</p></td></tr><tr><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>memory (Kbytes)</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>128344</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>254460</p></td></tr><tr><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>output (block)</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>250008</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>250008</p></td></tr><tr><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>pages (page)</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>0</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>0</p></td></tr><tr><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>system (s)</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>0.04401899999999998</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>0.063826</p></td></tr><tr><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>user (s)</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>0.24004899999999937</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>0.4637079999999999</p></td></tr><tr><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>wall (s)</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>0.322324</p></td><td align="center" style="border: 2px solid black; border-collapse: collapse; padding: 5px;"><p>0.63449</p></td></tr></table>    </body></html>
+```
+Not Applicable
+### `/api/df_model/statistics` (GET)
+#### Description
+Retrieve run statistics about a node in the data flow model.
+#### Parameters
+- node_name : the name task.algorithm for which to collect the statistics
+#### Content
+A JSON object where all keys can be missing which indicate default values of "unknown" for status or "-" for runid and date should be used.
+```
+{
+  "date"   : "last completion UTC",
+  "runid"  : <integer of last runid>,
+  "status" : "both"|"failed"|"processing"|"scheduled"|"succeeded"
+}
+```
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/df_model/statistics?node_name=disk.engine | jq'
+```
+```
+{
+  "content": {
+    "status": "scheduled"
+  },
+  "message": "",
+  "status": "success"
+}
+```
+
+Then sometime later...
+
+```
+curl -ksX GET 'https://localhost:8080/api/df_model/statistics?node_name=disk.engine | jq'
+```
+```
+{
+  "content": {
+    "date": "2026-01-22 18:42:50.375502+00:00",
+    "runid": 1,
+    "status": "succeeded"
+  },
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/logs/recent` (GET)
+#### Description
+Retrieve the logs from the pipelines memory. The pipeline keeps track of logged messages for some configurable amount defined by `dawgie.context.log_capacity` that defaults to 100 messages of `dawgie.context.log_level` or higher. These messages do not include those generated by workers. For full logs, the server plus workers, see the log file.
+#### Parameters
+- _levels_ : the desired levels in a comma separated list with full list being `debug,info,warning,error,critical`.
+- _limit_ : the number of messages to return with 0 or not being given to mean the pipeline's entire memory.
+#### Content
+A JSON list of the messages with the smallest index of the list the newest message. In other words, a JSON list sorted in time descending order.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/logs/recent?limit=3' | jq
+```
+```
+{
+  "content": [
+    {
+      "timeStamp": "2026-01-22 10:20:36,400",
+      "name": "dawgie.pl.farm",
+      "level": "CRITICAL",
+      "message": "New run ID (3) for algorithm feedback.sensor trigger by the event: following feedback loop"
+    },
+    {
+      "timeStamp": "2026-01-22 10:19:56,399",
+      "name": "dawgie.pl.farm",
+      "level": "CRITICAL",
+      "message": "New run ID (2) for algorithm feedback.command trigger by the event: command-run requested by user"
+    },
+    {
+      "timeStamp": "2026-01-22 10:19:46,398",
+      "name": "dawgie.pl.farm",
+      "level": "CRITICAL",
+      "message": "New run ID (1) for algorithm network.analyzer trigger by the event: New software changeset FAKE-VERSION-FOR-EXERCISE"
+    }
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+```
+curl -ksX GET 'https://localhost:8080/api/logs/recent?levels=critical,info&limit=3' | jq
+```
+```
+{
+  "content": [
+    {
+      "timeStamp": "2026-01-22 10:19:41,397",
+      "name": "transitions.core",
+      "level": "INFO",
+      "message": "Executed callback 'start'"
+    },
+    {
+      "timeStamp": "2026-01-22 10:19:41,397",
+      "name": "dawgie.pl.state",
+      "level": "INFO",
+      "message": "exiting state starting"
+    },
+    {
+      "timeStamp": "2026-01-22 10:19:41,396",
+      "name": "dawgie.pl.state",
+      "level": "INFO",
+      "message": "Starting the pipeline"
+    }
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/pipeline/state` (GET)
+#### Description
+Return the current state of the pipeline.
+#### Parameters
+_None_
+#### Content
+A JSON object with the following information:
+```
+{
+    "name"   : "archiving"|"contemplation"|"gitting"|"loading"|"running"|"starting"| "updating",
+    "ready"  : false|true,
+    "status" : "active"|"entering"|"exiting"
+}
+```
+Where `ready` means the pipeline is ready to do work.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/pipeline/state' | jq
+```
+```
+{
+  "content": {
+    "name": "running",
+    "ready": true,
+    "status": "active"
+  },
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/rev/current` (GET)
+#### Description
+Return the current revision identifier for the AE. For GIT, this is the current commit hash.
+#### Parameters
+_None_
+#### Content
+JSON string of the current revious number.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/rev/current' | jq
+```
+```
+{
+  "content": "FAKE-VERSION-FOR-EXERCISE",
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/rev/submit` (GET)
+#### Description
+Request the pipeline update the AE to a new version (git changeset)
+#### Parameters
+- changeset : the hash that git uses to identify a commit
+- submission : one of the following strings: ??
+#### Content
+A simple string indicating success.
+#### Example
+```
+curl -ksX POST 'https://localhost:8080/api/rev/submit?changeset=apple&submission=now' | jq
+```
+### `/api/schedule/doing` (GET)
+#### Description
+The tasks and targets that are currently queued and awaiting workers.
+#### Parameters
+- _index_ : 0 is the first index and default when not provided representing the most current task that failed.
+- _limit_ : number of failed tasks to return and if not given all of them.
+#### Content
+A JSON object where the key represents the task and the value a list of targets to be done.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/schedule/doing' | jq
+```
+```
+{
+  "content": {
+    "feedback.sum": [
+      "/tmp/tmp7192cc5u"
+    ]
+  },
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/schedule/events` (GET)
+#### Description
+The tasks and targets that are currently queued and awaiting workers.
+#### Parameters
+- _index_ : 0 is the first index and default when not provided representing the most current task that failed.
+- _limit_ : number of failed tasks to return and if not given all of them.
+#### Content
+A JSON object where the key represents the task and the value a list of targets to be done. If the delay is -9999, then it means "at boot".
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/schedule/events' | jq
+```
+```
+{
+  "content": [
+    {
+      "actor": "network.analyzer",
+      "delays": [
+        -9999
+      ]
+    }
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/schedule/failed` (GET)
+#### Description
+List of tasks that completed successfully.
+#### Parameters
+- _index_ : 0 is the first index and default when not provided representing the most current task that failed.
+- _limit_ : number of failed tasks to return and if not given all of them.
+#### Content
+A JSON object with information about the runid, target, task, revision of the AE, and timing. With respect to timing, can only count on scheduled, started, and completed. The `load_*` and `start_*` identify when the algorthing name has its input data being loaded (`load_*`) vs when run() (`start_*`) is called.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/schedule/failed?index=0&limit=3' | jq
+```
+```
+{
+  "content": [
+    {
+      "timing": {
+        "scheduled": "2026-01-25 22:02:42.648946+00:00",
+        "started": "2026-01-25 22:02:42.940578+00:00",
+        "load_output": "2026-01-25 22:02:42.943931+00:00",
+        "start_output": "2026-01-25 22:02:43.264260+00:00",
+        "completed": "2026-01-25 22:02:43.610183+00:00"
+      },
+      "runid": 21,
+      "target": "/tmp/tmpz5ujy6cu",
+      "task": "feedback.output",
+      "changeset": "FAKE-VERSION-FOR-EXERCISE"
+    },
+    {
+      "timing": {
+        "scheduled": "2026-01-25 22:01:42.623334+00:00",
+        "started": "2026-01-25 22:02:37.955120+00:00",
+        "load_control": "2026-01-25 22:02:37.958406+00:00",
+        "start_control": "2026-01-25 22:02:38.744276+00:00",
+        "completed": "2026-01-25 22:02:39.183357+00:00"
+      },
+      "runid": 20,
+      "target": "/tmp/tmpz5ujy6cu",
+      "task": "feedback.control",
+      "changeset": "FAKE-VERSION-FOR-EXERCISE"
+    },
+    {
+      "timing": {
+        "scheduled": "2026-01-25 22:01:37.622043+00:00",
+        "started": "2026-01-25 22:01:37.911937+00:00",
+        "load_sum": "2026-01-25 22:01:37.915247+00:00",
+        "start_sum": "2026-01-25 22:01:38.593958+00:00",
+        "completed": "2026-01-25 22:01:38.940090+00:00"
+      },
+      "runid": 20,
+      "target": "/tmp/tmpz5ujy6cu",
+      "task": "feedback.sum",
+      "changeset": "FAKE-VERSION-FOR-EXERCISE"
+    }
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/schedule/in-progress` (GET)
+#### Description
+List of tasks that are assigned to workers and how long the worker as been toiling at the task.
+#### Parameters
+- _index_ : 0 is the first index and default when not provided representing the tasks in the order they were assigned.
+- _limit_ : number of tasks to return and if not given all of them.
+#### Content
+JSON list of strings.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/schedule/in-progress' | jq
+```
+```
+{
+  "content": [
+    "network.analyzer[__all__] duration: 00:00:00"
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/schedule/stats` (GET)
+#### Description
+Return statistics about the schedule and workers to get it done.
+#### Parameters
+_None_
+#### Content
+A JSON object with the following content.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/schedule/stats' | jq
+```
+```
+{
+  "content": {
+    "jobs": {
+      "doing": 1,
+      "todo": 1
+    },
+    "workers": {
+      "busy": 0,
+      "idle": 2
+    }
+  },
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/schedule/succeeded` (GET)
+#### Description
+List of tasks that completed successfully.
+#### Parameters
+- _index_ : 0 is the first index and default when not provided representing the most current task that succeeded.
+- _limit_ : number of successful tasks to return and if not given all of them.
+#### Content
+A JSON object with information about the runid, target, task, revision of the AE, and timing. With respect to timing, can only count on scheduled, started, and completed. The `load_*` and `start_*` identify when the algorthing name has its input data being loaded (`load_*`) vs when run() (`start_*`) is called.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/schedule/succeeded?index=0&limit=3' | jq
+```
+```
+{
+  "content": [
+    {
+      "timing": {
+        "scheduled": "2026-01-25 22:02:42.648946+00:00",
+        "started": "2026-01-25 22:02:42.940578+00:00",
+        "load_output": "2026-01-25 22:02:42.943931+00:00",
+        "start_output": "2026-01-25 22:02:43.264260+00:00",
+        "completed": "2026-01-25 22:02:43.610183+00:00"
+      },
+      "runid": 21,
+      "target": "/tmp/tmpz5ujy6cu",
+      "task": "feedback.output",
+      "changeset": "FAKE-VERSION-FOR-EXERCISE"
+    },
+    {
+      "timing": {
+        "scheduled": "2026-01-25 22:01:42.623334+00:00",
+        "started": "2026-01-25 22:02:37.955120+00:00",
+        "load_control": "2026-01-25 22:02:37.958406+00:00",
+        "start_control": "2026-01-25 22:02:38.744276+00:00",
+        "completed": "2026-01-25 22:02:39.183357+00:00"
+      },
+      "runid": 20,
+      "target": "/tmp/tmpz5ujy6cu",
+      "task": "feedback.control",
+      "changeset": "FAKE-VERSION-FOR-EXERCISE"
+    },
+    {
+      "timing": {
+        "scheduled": "2026-01-25 22:01:37.622043+00:00",
+        "started": "2026-01-25 22:01:37.911937+00:00",
+        "load_sum": "2026-01-25 22:01:37.915247+00:00",
+        "start_sum": "2026-01-25 22:01:38.593958+00:00",
+        "completed": "2026-01-25 22:01:38.940090+00:00"
+      },
+      "runid": 20,
+      "target": "/tmp/tmpz5ujy6cu",
+      "task": "feedback.sum",
+      "changeset": "FAKE-VERSION-FOR-EXERCISE"
+    }
+  ],
+  "message": "",
+  "status": "success"
+}
+```
+### `/api/schedule/to-do` (GET)
+#### Description
+List of tasks that are scheduled to run when tasks they depend on finish.
+#### Parameters
+- _index_ : 0 is the first index and default when index is not given representing the next task to be run
+- _limit_ : the maximum number of tasks to return defaulting to the entire list when not provided
+#### Content
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/schedule/to-do' | jq
+```
+```
+{
+  "content": {
+    "disk.engine": [
+      "/tmp/tmpyjna68n5"
+    ]
+  },
+  "message": "",
+  "status": "success"
+}
+```
+

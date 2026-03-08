@@ -327,7 +327,7 @@ class Schedule(unittest.TestCase):
         self.assertAlmostEqual(518400, events['disk.engine'][1], -1)
         self.assertTrue('network.analyzer' in events)
         self.assertEqual(1, len(events['network.analyzer']))
-        self.assertEqual(0, events['network.analyzer'][0])
+        self.assertEqual(-9999, events['network.analyzer'][0])
         dawgie.pl.schedule.per.clear()
         return
 

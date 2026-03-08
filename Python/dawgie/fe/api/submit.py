@@ -37,24 +37,24 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-# 3.0.0 remove - when this file is deleted, can clean up the
+# 3.0.0 remove - when dawgie.fe.submit is removed the can cleanup line below
 # pylint: disable=duplicate-code
 
-from dawgie.fe.basis import DeferContainer
+from dawgie.fe.basis import DeferContainer, Status, build_return_object
 
 import dawgie.context
 import dawgie.tools.submit
-import json
-
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
+import logging
 import os
 import twisted.internet.reactor
 import twisted.web.server
 
+LOG = logging.getLogger(__name__)
+
 
 class Defer(DeferContainer):
     def __call__(self, changeset: [str], submission: [str]):
-        if changeset[0].lower() != '':
+        if changeset[0].lower().strip():
             if not self.__busy:
                 self.__busy = True
                 process = Process(
@@ -62,17 +62,12 @@ class Defer(DeferContainer):
                 )
                 process.step_0()
                 return twisted.web.server.NOT_DONE_YET
-
-            result = {
-                'alert_status': 'danger',
-                'alert_message': 'Submission already in progress',
-            }
-        else:
-            result = {
-                'alert_status': 'danger',
-                'alert_message': 'Cannot submit a blank changeset',
-            }
-        return json.dumps(result).encode()
+            return build_return_object(
+                None, Status.FAILURE, 'Submission already in progress'
+            )
+        return build_return_object(
+            None, Status.FAILURE, 'Cannot submit a blank changeset'
+        )
 
     def __init__(self):
         DeferContainer.__init__(self)
@@ -82,55 +77,56 @@ class Defer(DeferContainer):
     def clear(self):
         self.__busy = False
 
-    pass
-
 
 class Process:
     def __init__(self, changeset, clear, request, submission):
         object.__init__(self)
-        log.debug('Process.__changeset %s', str(changeset))
-        log.debug('Process.__clear %s', str(clear))
-        log.debug('Process.__request %s', str(request))
-        log.debug('Process.__submission %s', str(submission))
+        LOG.debug('Process.__changeset %s', str(changeset))
+        LOG.debug('Process.__clear %s', str(clear))
+        LOG.debug('Process.__request %s', str(request))
+        LOG.debug('Process.__submission %s', str(submission))
         self.__changeset = changeset
         self.__clear = clear
         self.__failed = False
-        self.__msg = {
-            'alert_status': 'danger',
-            'alert_message': 'unspecified',
-        }
+        self.__msg = 'unspecified'
         self.__request = request
         self.__repo = dawgie.context.ae_base_path
         self.__submission = submission
         while not os.path.isdir(os.path.join(self.__repo, '.git')):
             self.__repo = os.path.dirname(self.__repo)
-        return
+            if not self.__repo or self.__repo == '/':
+                raise ValueError(
+                    f'the given repo dir "{dawgie.context.ae_base_path}" is '
+                    'not a git repository'
+                )
 
     def failure(self, _fail):
         if self.__request is not None:
             if dawgie.context.fsm.state == 'gitting':
                 dawgie.context.fsm.running_trigger()
             else:
-                log.debug(
+                LOG.debug(
                     'Process.failure() state is not gitting: %s',
                     str(dawgie.context.fsm.state),
                 )
 
-            log.error(
+            LOG.error(
                 'Failed to complete user submit request: %s',
-                str(self.__msg['alert_message']),
+                self.__msg,
             )
-            self.__request.write(json.dumps(self.__msg).encode())
+            self.__request.write(
+                build_return_object(None, Status.FAILURE, self.__msg)
+            )
             try:
                 self.__request.finish()
             except:  # pylint: disable=bare-except # noqa: E722
-                log.exception('Failed to respond to caller.')
+                LOG.exception('Failed to respond to caller.')
             self.__clear()
             self.__failed = True
             self.__request = None
-            dawgie.tools.submit.mail_out(self.__msg['alert_message'])
+            dawgie.tools.submit.mail_out(self.__msg)
         else:
-            log.debug('Process.failure() self.__request is None')
+            LOG.debug('Process.failure() self.__request is None')
         return None
 
     def step_0(self):
@@ -142,7 +138,6 @@ class Process:
         d.addCallbacks(self.step_3, self.failure)
         d.addErrback(self.failure)
         twisted.internet.reactor.callLater(0, d.callback, None)
-        return
 
     def step_1(self, _result):
         '''transition pipeline state to gitting
@@ -154,21 +149,15 @@ class Process:
            no other code is run during the trigger
         '''
         if not dawgie.context.fsm.is_pipeline_active():
-            log.warning("submit: pipeline is not active, cannot submit.")
-            self.__msg = {
-                'alert_status': 'danger',
-                'alert_message': 'The pipeline is not active so cannot submit.',
-            }
+            LOG.warning("submit: pipeline is not active, cannot submit.")
+            self.__msg = 'The pipeline is not active so cannot submit.'
             return twisted.python.failure.Failure(Exception())
 
         if dawgie.tools.submit.already_applied(self.__changeset, self.__repo):
-            log.warning(
+            LOG.warning(
                 "submit: changeset %s already in history", self.__changeset
             )
-            self.__msg = {
-                'alert_status': 'danger',
-                'alert_message': f'The changeset {self.__changeset} is already in history.',
-            }
+            self.__msg = f'The changeset {self.__changeset} is in history.'
             return twisted.python.failure.Failure(Exception())
 
         # Go To: gitting state
@@ -186,10 +175,7 @@ class Process:
         '''
         if self.__failed:
             return None
-        self.__msg = {
-            'alert_status': 'danger',
-            'alert_message': f'The submit tool could not prepare {dawgie.context.ae_repository_branch_test}.',
-        }
+        self.__msg = f'The submit tool could not prepare {dawgie.context.ae_repository_branch_test}.'
         status = dawgie.tools.submit.automatic(
             changeset=self.__changeset,
             loc=dawgie.context.ae_repository_remote,
@@ -211,19 +197,14 @@ class Process:
         if self.__failed:
             return None
         dawgie.context.fsm.running_trigger()
-        result = {
-            'alert_status': 'success',
-            'alert_message': 'Submission successful scheduling update.',
-        }
-        log.debug("Going to the crossroads.")
-        self.__request.write(json.dumps(result).encode())
+        LOG.debug("Going to the crossroads.")
+        self.__request.write(
+            build_return_object('Submission successful scheduling update.')
+        )
         try:
             self.__request.finish()
         except:  # pylint: disable=bare-except # noqa: E722
-            log.exception(
-                'Failed to complete a successful message: %s', str(result)
-            )
-            pass
+            LOG.exception('Failed to complete a successful message')
         self.__clear()
         dawgie.context.fsm.set_submit_info(self.__changeset, self.__submission)
         dawgie.context.fsm.submit_crossroads()
@@ -234,15 +215,13 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
     def __init__(self, process: Process):
         self.__command = 'unknown'
         self.__process = process
-        return
 
     def childDataReceived(self, childFD, data):
-        log.debug('VerifyHandler.childDataReceived() %s', str(data))
-        return
+        LOG.debug('VerifyHandler.childDataReceived() %s', str(data))
 
     def processEnded(self, reason):
         if isinstance(reason.value, twisted.internet.error.ProcessTerminated):
-            log.critical(
+            LOG.critical(
                 'Error while running compliant.py.    EXIT CODE: %s   SIGNAL: %s    STATUS: %s   COMMAND: "%s"',
                 str(reason.value.exitCode),
                 str(reason.value.signal),
@@ -254,12 +233,10 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
             d = twisted.internet.defer.Deferred()
             d.addCallbacks(self.__process.step_3)
             twisted.internet.reactor.callLater(0, d.callback, None)
-            pass
-        return
 
     def spawn_off(self, cmd: [str]):
         self.__command = ' '.join(cmd)
-        log.debug('VerifyHandler.spawn_off (%s)', self.__command)
+        LOG.debug('VerifyHandler.spawn_off (%s)', self.__command)
         twisted.internet.reactor.spawnProcess(
             self, cmd[0], args=cmd, env=os.environ, usePTY=True
         )

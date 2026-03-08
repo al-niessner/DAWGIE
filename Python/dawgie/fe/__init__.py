@@ -39,7 +39,8 @@ NTR:
 
 import dawgie.context
 import dawgie.de
-import dawgie.fe.app
+import dawgie.fe.api  # loads the api endpoints into the twisted server
+import dawgie.fe.app  # loads the app endpoints into the twisted server
 import dawgie.fe.basis
 import dawgie.security
 
