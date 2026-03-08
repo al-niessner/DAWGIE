@@ -471,6 +471,7 @@ def is_sanctioned(
     '''
     if clients():
         all_access = [
+            # 3.0.0 remove - endpoints from here
             '/app/db/item',
             '/app/db/lockview',
             '/app/db/prime',
@@ -496,11 +497,11 @@ def is_sanctioned(
             '/app/changeset.txt',
             '/app/state/status',
             '/app/versions',
-            # FIXME: these need to worked out as the endpoints are developed.
+            # 3.0.0 remove - to here
             '/api/ae/name',
-            '/api/cmd/reset',
-            '/api/cmd/run',
-            '/api/cmd/snapshot',
+            # '/api/cmd/reset',  # should require client cert (trusted)
+            # '/api/cmd/run',  # should require client cert (any)
+            # '/api/cmd/snapshot',  # should require client cert (admin)
             '/api/database/runid/max',
             '/api/database/runnables',
             '/api/database/search',
@@ -514,7 +515,7 @@ def is_sanctioned(
             '/api/logs/recent',
             '/api/pipeline/state',
             '/api/rev/current',
-            '/api/rev/submit',
+            # '/api/rev/submit',  # should require client cert (any)
             '/api/schedule/doing',
             '/api/schedule/events',
             '/api/schedule/failed',

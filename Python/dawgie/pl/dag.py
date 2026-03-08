@@ -359,7 +359,8 @@ class Construct:
         idir = os.path.abspath(
             os.path.join(dawgie.context.fe_path, 'images/svg')
         )
-        # FIXME: when using new UI, use adir like idir but should be
+        # FIXME: see next comments # pylint: disable=fixme
+        # when using new UI, use adir like idir but should be
         # site://assets/ where site: is from dawgie.context.??
         if not os.path.isdir(idir):
             os.makedirs(idir)
