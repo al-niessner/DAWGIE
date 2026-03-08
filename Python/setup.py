@@ -125,6 +125,7 @@ setuptools.setup(
             'deprecated/images/*.jpg',
             'deprecated/images/*.gif',
             'deprecated/images/svg/*',
+            'deprecated/index.html',
             'deprecated/javascripts/*.js',
             'deprecated/javascripts/templates/*',
             'deprecated/pages/index.html',

@@ -43,9 +43,11 @@ import enum
 import inspect
 import json
 
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
+import logging
 import os
 import twisted.web.resource
+
+LOG = logging.getLogger(__name__)
 
 
 class HttpMethod(enum.Enum):
@@ -53,7 +55,6 @@ class HttpMethod(enum.Enum):
     POST = 1
     PUT = 2
     DEL = 3
-    pass
 
 
 class DeferContainer:
@@ -77,8 +78,6 @@ class DeferContainer:
     def request(self, req):
         self.__request = req
 
-    pass
-
 
 class DynamicContent(twisted.web.resource.Resource):
     # pylint: disable=dangerous-default-value
@@ -95,15 +94,11 @@ class DynamicContent(twisted.web.resource.Resource):
         for node in uri.split('/')[:-1]:
             if node.encode() not in point.children:
                 point.putChild(node.encode(), RoutePoint(node))
-                pass
-
             point = point.children[node.encode()]
-            pass
         node = uri.split('/')[-1].encode()
 
         if node not in point.children:
             point.putChild(node, self)
-        return
 
     def __err(self, method: HttpMethod):
         return build_return_object(
@@ -134,8 +129,6 @@ class DynamicContent(twisted.web.resource.Resource):
         for ak in request.args.keys():
             if ak.decode() in sig.parameters:
                 kwds[ak.decode()] = [a.decode() for a in request.args[ak]]
-                pass
-            pass
 
         if isinstance(self.__fnc, DeferContainer):
             self.__fnc.identity = dawgie.security.identity(cert)
@@ -144,7 +137,7 @@ class DynamicContent(twisted.web.resource.Resource):
             try:
                 resp = self.__fnc(**kwds)
             except Exception as e:  # pylint: disable=broad-exception-caught
-                log.exception('Unhandled dynamic front end excpetion')
+                LOG.exception('Unhandled dynamic front end excpetion')
                 resp = build_return_object(None, Status.ERROR, str(e))
         else:
             resp = self.__err(method)
@@ -163,8 +156,6 @@ class DynamicContent(twisted.web.resource.Resource):
     def render_DELETE(self, req):  # pylint: disable=invalid-name
         return self.__render(req, HttpMethod.DEL)
 
-    pass
-
 
 class RoutePoint(twisted.web.resource.Resource):
     isLeaf = False
@@ -172,9 +163,13 @@ class RoutePoint(twisted.web.resource.Resource):
     def __init__(self, name):
         twisted.web.resource.Resource.__init__(self)
         self.__name = name
+        self.__sp = None
         return
 
     def getChild(self, path, request):
+        if self.__sp is not None:
+            return self.__sp
+
         msg = (
             request.uri.decode()
             if os.environ.get('DAWGIE_FE_DEBUG', '')
@@ -191,7 +186,13 @@ class RoutePoint(twisted.web.resource.Resource):
             % {'my_name': self.__name, 'name': dpath, 'uri': msg},
         )
 
-    pass
+    @property
+    def static_pages(self) -> twisted.web.resource.Resource:
+        return self.__sp
+
+    @static_pages.setter
+    def static_pages(self, resource: twisted.web.resource.Resource):
+        self.__sp = resource
 
 
 @enum.unique
