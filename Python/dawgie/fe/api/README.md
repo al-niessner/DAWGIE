@@ -32,6 +32,7 @@ A description of `content` for a successful request of the endpoint. Will includ
 An example of how to use the endpoint with curl including its output. All examples are done using an instance of exercise, which is created by running the `Coda/exercise/run.sh` script and the entire JSON object is shown not just `content`.
 
 - [`/api/ae/name`](#apiaename-get)
+- [`/api/cmd/reset`](#/api/cmd/reset-put)
 - [`/api/cmd/run`](#/api/cmd/run-put)
 - [`/api/database/filter/target`](#/api/database/filter/target-get)
 - [`/api/database/filter/task`](#/api/database/filter/task-get)
@@ -74,6 +75,11 @@ curl -ksX GET 'https://localhost:8080/api/ae/name' | jq
   "status": "success"
 }
 ```
+### `/api/cmd/reset` (PUT)
+#### Description
+#### Parameters
+#### Content
+#### Example
 ### `/api/cmd/run` (PUT)
 #### Description
 #### Parameters

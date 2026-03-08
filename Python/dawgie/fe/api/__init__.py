@@ -48,21 +48,56 @@ from dawgie.fe import submit
 import dawgie
 import dawgie.context
 import dawgie.pl.logger.fe
+import logging
 
 from . import database
 from . import facet
 from . import schedule
+
+LOG = logging.getLogger(__name__)
+REV_SUBMIT = submit.Defer()
 
 
 def ae_name():
     return build_return_object(dawgie.context.ae_base_package)
 
 
+def cmd_reset(archive: [str] = None):
+    archive = archive[0] if archive and archive[0] else 'false'
+    affirmative = ['true', 'tru', 'tr', 't', 'y', 'ye', 'yes', 'on']
+    archive = archive.lower() in affirmative
+    if not hasattr(dawgie.context, 'fsn'):
+        return build_return_object(
+            None, Status.FAILURE, 'Resetting before FSM is defined.'
+        )
+    if not dawgie.context.fsm.is_pipeline_active():
+        return build_return_object(
+            None, Status.FAILURE, 'Cannot reset a pipeline that is not active.'
+        )
+    LOG.critical('User requested pipeline reset')
+    dawgie.pl.farm.ARCHIVE |= archive
+    dawgie.context.fsm.wait_for_nothing()
+    return build_return_object('Reset the pipeline as requested.')
+
+
+def cmd_run(runnables: [str], targets: [str]):
+    dawgie.pl.schedule.organize(
+        task_names=set(runnables),
+        targets=set(targets),
+        event='command-run requested by user',
+    )
+    return build_return_object('Scheduled target.task(s) to run.')
+
+
+def cmd_snapshot():
+    return build_return_object(dawgie.pl.snapshot.grab())
+
+
 def df_model_statistics(node_name: str):
     node_name = node_name[0]
     if not node_name:
         build_return_object(
-            None, Status.FAILURE, "Node name was not given or is blank"
+            None, Status.FAILURE, 'Node name was not given or is blank'
         )
     if node_name.count('.') > 1:
         node_name = '.'.join(node_name.split('.')[:2])
@@ -125,7 +160,9 @@ def rev_current():
 
 
 DynamicContent(ae_name, '/api/ae/name')
-# DynamicContent(, '/api/cmd/run')
+DynamicContent(cmd_run, '/api/cmd/reset', [HttpMethod.POST])
+DynamicContent(cmd_run, '/api/cmd/run', [HttpMethod.POST])
+DynamicContent(cmd_snapshot, '/api/cmd/snapshot')
 DynamicContent(facet.target, '/api/database/filter/target')
 DynamicContent(facet.task, '/api/database/filter/task')
 DynamicContent(facet.alg, '/api/database/filter/alg')
@@ -139,7 +176,7 @@ DynamicContent(df_model_statistics, '/api/df_model/statistics')
 DynamicContent(logs_recent, '/api/logs/recent')
 DynamicContent(pipeline_state, '/api/pipeline/state')
 DynamicContent(rev_current, '/api/rev/current')
-# DynamicContent(, '/api/rev/submit')
+DynamicContent(REV_SUBMIT, '/api/rev/submit', [HttpMethod.POST])
 DynamicContent(schedule.doing, '/api/schedule/doing')
 DynamicContent(schedule.events, '/api/schedule/events')
 DynamicContent(schedule.failed, '/api/schedule/failed')
