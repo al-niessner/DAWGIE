@@ -94,7 +94,11 @@ class Process:
         self.__submission = submission
         while not os.path.isdir(os.path.join(self.__repo, '.git')):
             self.__repo = os.path.dirname(self.__repo)
-        return
+            if not self.__repo or self.__repo == '/':
+                raise ValueError(
+                    f'the given repo dir "{dawgie.context.ae_base_path}" is '
+                    'not a git repository'
+                )
 
     def failure(self, _fail):
         if self.__request is not None:
@@ -134,7 +138,6 @@ class Process:
         d.addCallbacks(self.step_3, self.failure)
         d.addErrback(self.failure)
         twisted.internet.reactor.callLater(0, d.callback, None)
-        return
 
     def step_1(self, _result):
         '''transition pipeline state to gitting
@@ -202,7 +205,6 @@ class Process:
             self.__request.finish()
         except:  # pylint: disable=bare-except # noqa: E722
             LOG.exception('Failed to complete a successful message')
-            pass
         self.__clear()
         dawgie.context.fsm.set_submit_info(self.__changeset, self.__submission)
         dawgie.context.fsm.submit_crossroads()
@@ -213,11 +215,9 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
     def __init__(self, process: Process):
         self.__command = 'unknown'
         self.__process = process
-        return
 
     def childDataReceived(self, childFD, data):
         LOG.debug('VerifyHandler.childDataReceived() %s', str(data))
-        return
 
     def processEnded(self, reason):
         if isinstance(reason.value, twisted.internet.error.ProcessTerminated):
@@ -233,8 +233,6 @@ class VerifyHandler(twisted.internet.protocol.ProcessProtocol):
             d = twisted.internet.defer.Deferred()
             d.addCallbacks(self.__process.step_3)
             twisted.internet.reactor.callLater(0, d.callback, None)
-            pass
-        return
 
     def spawn_off(self, cmd: [str]):
         self.__command = ' '.join(cmd)
