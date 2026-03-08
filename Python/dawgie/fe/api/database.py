@@ -2,9 +2,15 @@
 
 import dawgie.db
 import dawgie.pl.schedule
+import logging
+
+from .. import svrender
 
 from dawgie.db.basis import Params
 from dawgie.fe.basis import build_return_object, db_param_convert
+
+LOG = logging.getLogger(__name__)
+VIEW = svrender.Defer()
 
 
 def runid_max():
@@ -19,7 +25,7 @@ def runnables():
 
 # pylint: disable=too-many-arguments,too-many-positional-arguments
 def search(
-    runids: str = None,
+    runids: [str] = None,
     targets: [str] = None,
     tasks: [str] = None,
     algs: [str] = None,
@@ -30,7 +36,7 @@ def search(
     '''given the facets, find all corresponding state vectors'''
     # pylint: disable=duplicate-code
     parameters = Params(
-        runids=runids[0],
+        runids=runids[0] if runids and runids[0] else None,
         targets=db_param_convert(targets),
         tasks=db_param_convert(tasks),
         algs=db_param_convert(algs),

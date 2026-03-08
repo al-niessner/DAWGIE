@@ -37,62 +37,100 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-from dawgie.fe.basis import Defer as absDefer
+from dawgie.fe.basis import DeferContainer, Status, build_return_object
 
 import dawgie
 
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
+import logging
 import twisted.internet.threads
 
+LOG = logging.getLogger(__name__)
 
-class Defer(absDefer):
+
+class Defer(DeferContainer):
     @staticmethod
-    def _db_item(display: dawgie.Visitor, identity, path: str) -> None:
-        runid, tn, task, alg, sv = path[0].split('.')
+    def _db_item(display: dawgie.Visitor, identity, fullname: str) -> None:
+        LOG.info('Translating state vector %s to view', fullname)
+        runid, tn, task, alg, sv = fullname.split('.')
         dawgie.db.view(display, identity, int(runid), tn, task, alg, sv)
+        LOG.info('Translated state vector %s to view', fullname)
         return
 
-    def __call__(self, path: str):
-        display = dawgie.de.factory()
+    def __call__(
+        self, path: [str] = None, form: [str] = None, fullname: [str] = None
+    ):
+        form = form[0].lower() if form and form[0] else 'html'
+        fullname = fullname[0] if fullname and fullname[0] else None
+        path = path[0] if path and path[0] else None
+        if path == fullname:
+            path = None
+        if path and fullname:
+            return build_return_object(
+                None,
+                Status.FAILURE,
+                f'both path={path} and fullname={fullname} were given but '
+                'not the same. Use fullname because psth is deprecated.',
+            )
+        if not path and not fullname:
+            return build_return_object(
+                None,
+                Status.FAILURE,
+                'Neither path nor fullname were given. Use fullname because '
+                'psth is deprecated.',
+            )
+        fullname = path if path else fullname
+        known = ['html']
+        if form.lower() not in known:
+            return build_return_object(
+                None,
+                Status.FAILURE,
+                f'form={form} is not one of the known display types: {known}',
+            )
+        LOG.info('Request to dispaly %s in %s', fullname, form)
+        display = dawgie.de.factory(form)
         d = twisted.internet.threads.deferToThread(
-            self._db_item, display=display, identity=self.identity, path=path
+            self._db_item,
+            display=display,
+            identity=self.identity,
+            fullname=fullname,
         )
-        h = Renderer(display, self.request)
+        h = Renderer(display, fullname, self.request)
         d.addCallbacks(h.success, h.failure)
         return twisted.web.server.NOT_DONE_YET
 
-    pass
-
 
 class Renderer:
-    def __init__(self, display, request):
+    def __init__(self, display, fullname, request):
         object.__init__(self)
         self.__display = display
+        self.__fullname = fullname
         self.__request = request
         return
 
     def failure(self, result):
-        # pylint: disable=bare-except
         self.__request.write(
             b'<h1>Dynamic Content Generation Failed</h1><p>'
             + str(result).replace('\n', '<br/>').encode()
             + b'</p>'
         )
         try:
+            LOG.info('try to call finish with error: %s', str(self.__request))
             self.__request.finish()
-        except:  # noqa: E722
-            log.exception('Failed to complete an error page: %s', str(result))
+            LOG.info(
+                'completed view for state vector %s with error', self.__fullname
+            )
+        except:  # noqa: E722 # pylint: disable=bare-except
+            LOG.exception('Failed to complete an error page: %s', str(result))
         return
 
     def success(self, result):
-        # pylint: disable=bare-except
         self.__request.write(self.__display.render().encode())
         try:
+            LOG.info('try to call finish: %s', str(self.__request))
             self.__request.finish()
-        except:  # noqa: E722
-            log.exception(
+            LOG.info('completed view for state vector %s', self.__fullname)
+        except:  # noqa: E722 # pylint: disable=bare-except
+            LOG.exception(
                 'Failed to complete a successful page: %s', str(result)
             )
         return
-
-    pass

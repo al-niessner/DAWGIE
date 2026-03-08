@@ -37,7 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-from dawgie.fe.basis import Defer as absDefer
+from dawgie.fe.basis import DeferContainer
 
 import dawgie.context
 import dawgie.tools.submit
@@ -49,7 +49,7 @@ import twisted.internet.reactor
 import twisted.web.server
 
 
-class Defer(absDefer):
+class Defer(DeferContainer):
     def __call__(self, changeset: [str], submission: [str]):
         if changeset[0].lower() != '':
             if not self.__busy:
@@ -72,7 +72,7 @@ class Defer(absDefer):
         return json.dumps(result).encode()
 
     def __init__(self):
-        absDefer.__init__(self)
+        DeferContainer.__init__(self)
         self.__busy = False
         return
 

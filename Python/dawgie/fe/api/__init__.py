@@ -44,13 +44,10 @@ from dawgie.fe.basis import (
     build_return_object,
 )
 from dawgie.fe import submit
-from dawgie.fe import svrender
 
 import dawgie
 import dawgie.context
 import dawgie.pl.logger.fe
-
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
 
 from . import database
 from . import facet
@@ -137,7 +134,7 @@ DynamicContent(database.runid_max, '/api/database/runid/max')
 DynamicContent(database.runnables, '/api/database/runnables')
 DynamicContent(database.search, '/api/database/search')
 DynamicContent(database.list_targets, '/api/database/targets')
-# DynamicContent(database., '/api/database/view')  # given a full name, generate its view
+DynamicContent(database.VIEW, '/api/database/view')
 DynamicContent(df_model_statistics, '/api/df_model/statistics')
 DynamicContent(logs_recent, '/api/logs/recent')
 DynamicContent(pipeline_state, '/api/pipeline/state')
