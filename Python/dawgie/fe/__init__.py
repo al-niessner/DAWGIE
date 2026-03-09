@@ -49,6 +49,7 @@ import os
 import twisted.web.resource
 import twisted.web.util
 
+from dawgie.util import resolve_site
 from pathlib import Path
 
 LOG = logging.getLogger(__name__)
@@ -71,17 +72,7 @@ class StaticContent(twisted.web.resource.Resource):
 
     def __init__(self):
         twisted.web.resource.Resource.__init__(self)
-        self.__bdir = dawgie.context.site_path
-        self.__isdep = False
-        if self.__bdir and not os.path.isdir(self.__bdir):
-            LOG.error(
-                'using deprecated UI because the path %s does not exist',
-                self.__bdir,
-            )
-            self.__bdir = ''
-        if not self.__bdir:
-            self.__bdir = (Path(__file__).parent / 'deprecated').resolve()
-            self.__isdep = True
+        self.__bdir, self.__isdep = resolve_site()
 
     def render_GET(self, request):  # pylint: disable=invalid-name
         return _static(request.uri.decode(), self.__bdir, self.__isdep, request)
@@ -109,7 +100,7 @@ def _static(
 
         if not ffn.is_relative_to(d):
             result += b'attempted jail break'
-            LOG.error('tried a jailbreak with %s from %s')
+            LOG.error('tried a jailbreak with %s from %s', ffn, d)
             continue
         if ffn.is_dir():
             ffn = ffn / 'index.html'

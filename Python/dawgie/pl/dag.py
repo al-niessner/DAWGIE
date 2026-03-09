@@ -45,10 +45,13 @@ import dawgie.util
 import dawgie.util.fifo
 import enum
 
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
-import os
+import logging
 import pydot
 import xml.etree.ElementTree
+
+from pathlib import Path
+
+LOG = logging.getLogger(__name__)
 
 
 class Construct:
@@ -70,21 +73,21 @@ class Construct:
     def __init__(self, factories):
         self._flat = {}
         self._roots = set()
-        log.info('Construct() - build aspect tree')
+        LOG.info('Construct() - build aspect tree')
         self._build_tree(
             factories[dawgie.Factories.analysis],
             Shape.rectangle,
             self._sub_analysis,
             'traits',
         )
-        log.info('Construct() - build regression tree')
+        LOG.info('Construct() - build regression tree')
         self._build_tree(
             factories[dawgie.Factories.regress],
             Shape.octagon,
             self._sub_regression,
             'variables',
         )
-        log.info('Construct() - build task tree')
+        LOG.info('Construct() - build task tree')
         self._build_tree(
             factories[dawgie.Factories.task],
             Shape.ellipse,
@@ -93,30 +96,30 @@ class Construct:
         )
         self._feedbacks = {}
         self._feedback()
-        log.info('Construct() - build parents')
+        LOG.info('Construct() - build parents')
         self._parents(self._roots, set())
-        log.info('Construct() - build ancestry')
+        LOG.info('Construct() - build ancestry')
         self._ancestry()
-        log.info('Construct() - trim tree to algorithms')
+        LOG.info('Construct() - trim tree to algorithms')
         self._at = self._trim_trees(2)
-        log.info('Construct() - trim tree to state vectors')
+        LOG.info('Construct() - trim tree to state vectors')
         self._svt = self._trim_trees(3)
-        log.info('Construct() - trim tree to tasks')
+        LOG.info('Construct() - trim tree to tasks')
         self._tt = self._trim_trees(1)
         self._vt = self._roots
-        log.info('Construct() - graph algorithm tree')
+        LOG.info('Construct() - graph algorithm tree')
         self._av = self.graph(
             pydot.Dot(graph_type='digraph', rank='same'), self._at, 'av.svg'
         )
-        log.info('Construct() - graph state vector tree')
+        LOG.info('Construct() - graph state vector tree')
         self._svv = self.graph(
             pydot.Dot(graph_type='digraph', rank='same'), self._svt, 'svv.svg'
         )
-        log.info('Construct() - graph task tree')
+        LOG.info('Construct() - graph task tree')
         self._tv = self.graph(
             pydot.Dot(graph_type='digraph', rank='same'), self._tt, 'tv.svg'
         )
-        log.info('Construct() - graph value tree')
+        LOG.info('Construct() - graph value tree')
         self._vv = self.graph(
             pydot.Dot(graph_type='digraph', rank='same'), self._vt, 'vv.svg'
         )
@@ -356,16 +359,16 @@ class Construct:
     def graph(dot: pydot.Dot, roots: set, name: str):
         for root in roots:
             root.graph(dot)
-        idir = os.path.abspath(
-            os.path.join(dawgie.context.fe_path, 'images/svg')
-        )
-        # FIXME: see next comments # pylint: disable=fixme
-        # when using new UI, use adir like idir but should be
-        # site://assets/ where site: is from dawgie.context.??
-        if not os.path.isdir(idir):
-            os.makedirs(idir)
-
-        fn = os.path.join(idir, name)
+        # 3.0.0 remove - clean this back up and do assets (adir) only
+        # pylint: disable=duplicate-code
+        sdir, isdep = dawgie.util.resolve_site()
+        if isdep:
+            sdir = Path(dawgie.context.fe_path) / 'images' / 'svg'
+            sdir.mkdir(parents=True, exist_ok=True)
+        else:
+            sdir = sdir / 'assets'
+        # pylint: enable=duplicate-code
+        fn = sdir / name
         dot.write_svg(fn)
         with open(fn, 'rb') as f:
             data = f.read()

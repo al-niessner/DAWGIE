@@ -48,3 +48,26 @@ from .args import log_level, set_ports  # noqa: F401
 from .metrics import MetricStateVector, MetricValue  # noqa: F401
 from .names import task_module, task_name, verify_name  # noqa: F401
 from .refs import algref2svref, as_vref, svref2vref, vref_as_name  # noqa: F401
+
+# 3.0.0 remove - get rid of resolve_site() and all that calls to it
+import dawgie.context
+import logging
+import os
+from pathlib import Path
+
+LOG = logging.getLogger(__name__)
+
+
+def resolve_site() -> (Path, bool):
+    sdir = dawgie.context.site_path
+    isdep = False
+    if sdir and not os.path.isdir(sdir):
+        LOG.error('the UI path %s does not exist', sdir)
+        sdir = ''
+    if not sdir:
+        LOG.warning('using deprecated UI')
+        sdir = (Path(__file__).parent / 'deprecated').resolve()
+        isdep = True
+    else:
+        sdir = Path(sdir).resolve()
+    return sdir, isdep
