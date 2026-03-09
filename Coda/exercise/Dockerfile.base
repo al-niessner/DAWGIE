@@ -34,10 +34,18 @@
 #
 # NTR:
 
+FROM alpine:latest AS ui-fetcher
+WORKDIR /ui-source
+RUN apk add --no-cache git
+RUN git clone https://github.com/al-niessner/DAWGIE-UI .
+RUN rm -rf node_modules .git .gitignore .idea package* proxy.config.js
+
 FROM ubuntu:24.04 AS base
 ARG DB_PWD
 ARG DB_USER
+ARG SITE_PATH
 ARG UID
+COPY --from=ui-fetcher /ui-source/ ${SITE_PATH}
 ENV MPLCONFIGDIR=/tmp
 ENV PATH=/usr/local/dawgie/bin:$PATH
 ENV PGPASSFILE=/.pgpass

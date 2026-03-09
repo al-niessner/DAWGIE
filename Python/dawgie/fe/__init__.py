@@ -72,6 +72,7 @@ class StaticContent(twisted.web.resource.Resource):
     def __init__(self):
         twisted.web.resource.Resource.__init__(self)
         self.__bdir = dawgie.context.site_path
+        self.__isdep = False
         if self.__bdir and not os.path.isdir(self.__bdir):
             LOG.error(
                 'using deprecated UI because the path %s does not exist',
@@ -80,9 +81,10 @@ class StaticContent(twisted.web.resource.Resource):
             self.__bdir = ''
         if not self.__bdir:
             self.__bdir = (Path(__file__).parent / 'deprecated').resolve()
+            self.__isdep = True
 
     def render_GET(self, request):  # pylint: disable=invalid-name
-        return _static(request.uri.decode(), self.__bdir, request)
+        return _static(request.uri.decode(), self.__bdir, self.__isdep, request)
 
 
 def _is_active(fn):
@@ -97,25 +99,26 @@ def _is_active(fn):
 def _static(
     fn: str,
     bdir: str,
+    isdep: bool,  # 3.0.0 remove - and anything that uses this
     request=None,
 ) -> bytes:
-    if -1 < fn.find('..'):
-        return ('Error: path must be absolute and not relative.').encode()
-
-    while fn.startswith('/'):
-        fn = fn[1:]
     result = ('Error: could not find static files ').encode()
-    for d in [dawgie.context.fe_path, bdir]:
-        ffn = os.path.join(d, fn)
+    fn = fn.lstrip('/')  # since a URL, remove all leading /
+    for d in [Path(dawgie.context.fe_path).resolve(), Path(bdir).resolve()]:
+        ffn = (d / fn).resolve()
 
-        if os.path.isdir(ffn):
-            ffn = os.path.join(ffn, 'index.html')
-        if os.path.isfile(ffn):
+        if not ffn.is_relative_to(d):
+            result += b'attempted jail break'
+            LOG.error('tried a jailbreak with %s from %s')
+            continue
+        if ffn.is_dir():
+            ffn = ffn / 'index.html'
+        if ffn.is_file():
             break
-        result += ffn.encode() + b'     '
+        result += bytes(ffn) + b'     '
 
-    if os.path.isfile(ffn):
-        if ffn.endswith('.html'):
+    if ffn.is_file():
+        if isdep and ffn.suffix.lower() == '.html':
             with open(ffn, 'rt', encoding='utf-8') as f:
                 html = f.read()
             idx = html.find("<link href='/stylesheets")
@@ -144,8 +147,12 @@ def _static(
                 else html.encode()
             )
         else:
-            if request is not None and ffn.endswith('.svg'):
+            if request is not None and ffn.suffix.lower() == '.svg':
                 request.setHeader(b'Content-Type', b'image/svg+xml')
+            if request is not None and ffn.suffix.lower() == '.css':
+                request.setHeader(b'Content-Type', b'text/css')
+            if request is not None and ffn.suffix.lower() == '.js':
+                request.setHeader(b'Content-Type', b'application/javascript')
             with open(ffn, 'rb') as f:
                 result = f.read()
     else:
