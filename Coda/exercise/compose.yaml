@@ -40,6 +40,7 @@ services:
       args:
         DB_PWD: ${DB_PWD}
         DB_USER: ${DB_USER}
+        SITE_PATH: ${DAWGIE_SITE_PATH}
         UID: ${DEX_UID}
       context: ../..
       dockerfile: Coda/exercise/Dockerfile.base
@@ -86,6 +87,7 @@ services:
       DAWGIE_DB_PORT: ${DB_PORT}
       DAWGIE_FE_PATH: /proj/data/fe
       DAWGIE_GUEST_PUBLIC_KEYS: /proj/data/certs
+      DAWGIE_SITE_PATH: ${DAWGIE_SITE_PATH}
       DAWGIE_SSL_PEM_FILE: /proj/data/certs/server.pem
       DAWGIE_SSL_PEM_MYNAME: exercise.dawgie
       DAWGIE_SSL_PEM_MYSELF: /proj/data/certs/myself.pem

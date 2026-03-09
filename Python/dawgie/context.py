@@ -139,6 +139,7 @@ log_port = int(os.environ.get('DAWGIE_LOG_PORT', 8080 + PortOffset.log.value))
 sanction_override = os.environ.get(
     'DAWGIE_SECURITY_IS_SANCTIONED', 'dawgie.security.is_sanctioned'
 )
+site_path = os.environ.get('DAWGIE_SITE_PATH', '')
 ssl_pem_file = os.environ.get('DAWGIE_SSL_PEM_FILE', '')
 ssl_pem_myname = os.environ.get('DAWGIE_SSL_PEM_MYNAME', 'dawgie')
 ssl_pem_myself = os.environ.get('DAWGIE_SSL_PEM_MYSELF', '')
@@ -395,6 +396,12 @@ def add_arguments(ap):
         help='determine if a client has access to the endpoint [%(default)s]',
     )
     ap.add_argument(
+        '--context-site-path',
+        default=site_path,
+        required=False,
+        help='location of the site that dawgie should publish with blank or empty or a non-existent site publishing the deprecated site [%(default)s]',
+    )
+    ap.add_argument(
         '--context-ssl-pem-file',
         default=ssl_pem_file,
         required=False,
@@ -524,6 +531,7 @@ def override(args):
     dawgie.context.log_capacity = args.context_log_capacity
     dawgie.context.log_port = args.context_log_port
     dawgie.context.sanction_override = args.context_security_is_sanctioned
+    dawgie.context.site_path = args.context_site_path
     dawgie.context.ssl_pem_file = args.context_ssl_pem_file
     dawgie.context.ssl_pem_myname = args.context_ssl_pem_myname
     dawgie.context.ssl_pem_myself = args.context_ssl_pem_myself

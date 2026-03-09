@@ -98,6 +98,9 @@ import twisted.internet.ssl
 import twisted.web.resource
 import twisted.web.server
 
+from dawgie.util import resolve_site
+from pathlib import Path
+
 
 class RollbackImporter:
     # pylint: disable=redefined-builtin,too-few-public-methods,too-many-arguments,too-many-positional-arguments,too-many-public-methods
@@ -180,14 +183,16 @@ class FSM:
                 os.path.abspath(os.path.dirname(__file__)), self.dot_file_name
             )
         )[0]
-        idir = os.path.abspath(
-            os.path.join(dawgie.context.fe_path, 'images/svg')
-        )
-
-        if not os.path.isdir(idir):
-            os.makedirs(idir)
-
-        fn = os.path.join(idir, 'state.svg')
+        # 3.0.0 remove - clean this back up and do assets (adir) only
+        # pylint: disable=duplicate-code
+        sdir, isdep = resolve_site()
+        if isdep:
+            sdir = Path(dawgie.context.fe_path) / 'images' / 'svg'
+            sdir.mkdir(parents=True, exist_ok=True)
+        else:
+            sdir = sdir / 'assets'
+        # pylint: enable=duplicate-code
+        fn = sdir / 'state.svg'
         self.graph.write_svg(fn)
         for edge in self.graph.get_edges():
             self.machine.add_transition(

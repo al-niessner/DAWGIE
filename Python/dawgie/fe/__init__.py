@@ -44,10 +44,15 @@ import dawgie.fe.app  # loads the app endpoints into the twisted server
 import dawgie.fe.basis
 import dawgie.security
 
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
+import logging
 import os
 import twisted.web.resource
 import twisted.web.util
+
+from dawgie.util import resolve_site
+from pathlib import Path
+
+LOG = logging.getLogger(__name__)
 
 
 class RedirectContent(twisted.web.resource.Resource):
@@ -57,26 +62,20 @@ class RedirectContent(twisted.web.resource.Resource):
     def __init__(self, url):
         twisted.web.resource.Resource.__init__(self)
         self.__url = url
-        pass
 
     def render_GET(self, request):  # pylint: disable=invalid-name
         return twisted.web.util.redirectTo(self.__url.encode(), request)
-
-    pass
 
 
 class StaticContent(twisted.web.resource.Resource):
     isLeaf = True
 
-    def __init__(self, bdir=os.path.dirname(os.path.abspath(__file__))):
+    def __init__(self):
         twisted.web.resource.Resource.__init__(self)
-        self.__bdir = bdir
-        pass
+        self.__bdir, self.__isdep = resolve_site()
 
     def render_GET(self, request):  # pylint: disable=invalid-name
-        return _static(request.uri.decode(), self.__bdir, request)
-
-    pass
+        return _static(request.uri.decode(), self.__bdir, self.__isdep, request)
 
 
 def _is_active(fn):
@@ -90,27 +89,27 @@ def _is_active(fn):
 
 def _static(
     fn: str,
-    bdir: str = os.path.dirname(os.path.abspath(__file__)),
+    bdir: str,
+    isdep: bool,  # 3.0.0 remove - and anything that uses this
     request=None,
 ) -> bytes:
-    if -1 < fn.find('..'):
-        return ('Error: path must be absolute and not relative.').encode()
-
-    while fn.startswith('/'):
-        fn = fn[1:]
     result = ('Error: could not find static files ').encode()
-    for d in [dawgie.context.fe_path, bdir]:
-        ffn = os.path.join(d, fn)
+    fn = fn.lstrip('/')  # since a URL, remove all leading /
+    for d in [Path(dawgie.context.fe_path).resolve(), Path(bdir).resolve()]:
+        ffn = (d / fn).resolve()
 
-        if os.path.isdir(ffn):
-            ffn = os.path.join(ffn, 'index.html')
-        if os.path.isfile(ffn):
+        if not ffn.is_relative_to(d):
+            result += b'attempted jail break'
+            LOG.error('tried a jailbreak with %s from %s', ffn, d)
+            continue
+        if ffn.is_dir():
+            ffn = ffn / 'index.html'
+        if ffn.is_file():
             break
-        result += ffn.encode() + b'     '
-        pass
+        result += bytes(ffn) + b'     '
 
-    if os.path.isfile(ffn):
-        if ffn.endswith('.html'):
+    if ffn.is_file():
+        if isdep and ffn.suffix.lower() == '.html':
             with open(ffn, 'rt', encoding='utf-8') as f:
                 html = f.read()
             idx = html.find("<link href='/stylesheets")
@@ -133,34 +132,28 @@ def _static(
                     html[:idx] + '<style>' + css + '</style>' + html[end + 1 :]
                 )
                 idx = html.find("<link href='/stylesheets")
-                pass
             result = (
                 twisted.web.util.redirectTo(b'/pages/pipelines', request)
                 if not is_ready
                 else html.encode()
             )
         else:
-            if request is not None and ffn.endswith('.svg'):
+            if request is not None and ffn.suffix.lower() == '.svg':
                 request.setHeader(b'Content-Type', b'image/svg+xml')
-                pass
+            if request is not None and ffn.suffix.lower() == '.css':
+                request.setHeader(b'Content-Type', b'text/css')
+            if request is not None and ffn.suffix.lower() == '.js':
+                request.setHeader(b'Content-Type', b'application/javascript')
             with open(ffn, 'rb') as f:
                 result = f.read()
     else:
-        log.warning('request for the non-existent file %s', ffn)
+        LOG.warning('request for the non-existent file %s', ffn)
 
     return result
 
 
-def root() -> "dawgie.fe.basis.RoutePoint":
+def root() -> 'dawgie.fe.basis.RoutePoint':
     # shared private variable
     # pylint: disable=protected-access
-    dawgie.fe.basis._root.putChild(b'', RedirectContent('/pages/index.html'))
-    dawgie.fe.basis._root.putChild(b'fonts', StaticContent())
-    dawgie.fe.basis._root.putChild(b'images', StaticContent())
-    dawgie.fe.basis._root.putChild(b'javascripts', StaticContent())
-    dawgie.fe.basis._root.putChild(b'markdown', StaticContent())
-    dawgie.fe.basis._root.putChild(b'pages', StaticContent())
-    dawgie.fe.basis._root.putChild(b'partials', StaticContent())
-    dawgie.fe.basis._root.putChild(b'scripts', StaticContent())
-    dawgie.fe.basis._root.putChild(b'stylesheets', StaticContent())
+    dawgie.fe.basis._root.static_pages = StaticContent()
     return dawgie.fe.basis._root

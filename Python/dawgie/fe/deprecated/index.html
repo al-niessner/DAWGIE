@@ -1,7 +1,8 @@
-'''Common utilities for the pipeline
-
---
-COPYRIGHT:
+<!DOCTYPE html>
+<html>
+<head>
+    <!--
+      COPYRIGHT:
 Copyright (c) 2015-2026, California Institute of Technology ("Caltech").
 U.S. Government sponsorship acknowledged.
 
@@ -35,39 +36,12 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-NTR: 49811
-'''
-
-# Used to be a module and do not want to go and change legacy code since
-# it is working. However, want to add more items that would make the module
-# large and cumbersome. Moved it to a package with the old implementation
-# broken up into smaller modules. Therefore,
-# pylint: disable=unused-import
-# to allow the functions to be mapped to here were the legacy code expects it.
-from .args import log_level, set_ports  # noqa: F401
-from .metrics import MetricStateVector, MetricValue  # noqa: F401
-from .names import task_module, task_name, verify_name  # noqa: F401
-from .refs import algref2svref, as_vref, svref2vref, vref_as_name  # noqa: F401
-
-# 3.0.0 remove - get rid of resolve_site() and all that calls to it
-import dawgie.context
-import logging
-import os
-from pathlib import Path
-
-LOG = logging.getLogger(__name__)
-
-
-def resolve_site() -> (Path, bool):
-    sdir = dawgie.context.site_path
-    isdep = False
-    if sdir and not os.path.isdir(sdir):
-        LOG.error('the UI path %s does not exist', sdir)
-        sdir = ''
-    if not sdir:
-        LOG.warning('using deprecated UI')
-        sdir = (Path(__file__).parent / 'deprecated').resolve()
-        isdep = True
-    else:
-        sdir = Path(sdir).resolve()
-    return sdir, isdep
+NTR:
+    -->
+    <title>Redirecting...</title>
+    <meta http-equiv="refresh" content="0; url=pages/index.html">
+</head>
+<body>
+    <p>If you are not redirected automatically, follow this <a href="pages/index.html">link to the new page</a>.</p>
+</body>
+</html>
