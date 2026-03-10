@@ -66,7 +66,7 @@ def resolve_site() -> (Path, bool):
         sdir = ''
     if not sdir:
         LOG.warning('using deprecated UI')
-        sdir = (Path(__file__).parent / 'deprecated').resolve()
+        sdir = (Path(__file__).parent / 'fe' / 'deprecated').resolve()
         isdep = True
     else:
         sdir = Path(sdir).resolve()
