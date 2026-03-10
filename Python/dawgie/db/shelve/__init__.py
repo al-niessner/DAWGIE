@@ -90,7 +90,7 @@ def add(target_name: str) -> bool:
            False otherwise
     '''
     if DBI().is_reopened:
-        result = Connector().set(target_name, None, Table.target, None, None)
+        result = Connector().append(Table.target, target_name)
     elif DBI().is_open:
         result = util.append(
             target_name, DBI().tables.target, DBI().indices.target
