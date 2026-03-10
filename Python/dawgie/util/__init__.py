@@ -53,6 +53,7 @@ from .refs import algref2svref, as_vref, svref2vref, vref_as_name  # noqa: F401
 import dawgie.context
 import logging
 import os
+from importlib.resources import files
 from pathlib import Path
 
 LOG = logging.getLogger(__name__)
@@ -66,7 +67,7 @@ def resolve_site() -> (Path, bool):
         sdir = ''
     if not sdir:
         LOG.warning('using deprecated UI')
-        sdir = (Path(__file__).parent / 'fe' / 'deprecated').resolve()
+        sdir = (files('dawgie.fe') / 'deprecated').resolve()
         isdep = True
     else:
         sdir = Path(sdir).resolve()
