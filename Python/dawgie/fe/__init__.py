@@ -121,7 +121,7 @@ def _static(
                     0 < html.find('/javascripts/welcome.js'),
                 ]
             )
-            is_ready = _is_active(ffn) if dynamic else not dynamic
+            is_ready = _is_active(str(ffn)) if dynamic else not dynamic
             while 0 < idx:
                 end = html.find('>', idx)
                 fn = html[idx + 13 : html.find("'", idx + 13)]
