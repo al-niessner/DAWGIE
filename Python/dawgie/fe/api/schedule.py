@@ -59,6 +59,9 @@ def _legacy_arg_fixer(index: int, limit: int):
     return index, limit, (index + limit) if limit is not None else limit
 
 
+def _legacy_sort(msg):
+    return (msg['timing']['completed'], int(msg['runid']), msg['target'], msg['task'])
+
 def doing(asis: bool = False, index: int = 0, limit: int = None):
     if asis:
         return dawgie.pl.schedule.view_doing(index, limit)
@@ -79,7 +82,7 @@ def failed(asis: bool = False, index: int = 0, limit: int = None):
     if asis:
         return dawgie.pl.schedule.view_failure()
     f = dawgie.pl.schedule.view_failure()
-    f.reverse()
+    f.sort(key=_legacy_sort, reverse=True)
     index, _limit, term = _legacy_arg_fixer(index, limit)
     return build_return_object(f[index:term])
 
@@ -115,7 +118,7 @@ def succeeded(asis: bool = False, index: int = 0, limit: int = None):
         return dawgie.pl.schedule.view_success()
     index, _limit, term = _legacy_arg_fixer(index, limit)
     s = dawgie.pl.schedule.view_success()
-    s.reverse()
+    s.sort(key=_legacy_sort, reverse=True)
     return build_return_object(s[index:term])
 
 
