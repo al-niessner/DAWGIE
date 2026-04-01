@@ -37,6 +37,7 @@ NTR:
 '''
 
 import dawgie
+import dawgie.base
 import dawgie.db
 import dawgie.util
 
@@ -76,7 +77,18 @@ def persistent():
 
 def record(task, only=None):
     '''Record this version of the software'''
-    if isinstance(task, (dawgie.Task, dawgie.Analysis, dawgie.Regress)):
+    # 3.0.0 remove - the dawgie.A/R/T should be removed from the list
+    if isinstance(
+        task,
+        (
+            dawgie.Analysis,
+            dawgie.Regress,
+            dawgie.Task,
+            dawgie.base.Analysis,
+            dawgie.base.Regress,
+            dawgie.base.Task,
+        ),
+    ):
         for alg in filter(
             lambda a: only is None or a.name() == only, task.routines()
         ):
