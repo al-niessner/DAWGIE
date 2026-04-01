@@ -120,7 +120,7 @@ class SearchImplementation(SearchFacade):
                     cursor.execute(_NAMES_SOME.format(sql=sql_info), (pks,))
                     results.extend(row[0] for row in cursor.fetchall())
             else:
-                cursor.execute(_NAMES_ALL.format(sql_info))
+                cursor.execute(_NAMES_ALL.format(sql=sql_info))
                 results.extend(row[0] for row in cursor.fetchall())
         finally:
             cursor.close()
@@ -159,7 +159,8 @@ class SearchImplementation(SearchFacade):
             if limit:
                 args.extend([limit, index])
                 cursor.execute(
-                    'SELECT '
+                    'SELECT DISTINCT ON '
+                    '(p.run_ID, p.tn_ID, p.task_ID, p.alg_ID, p.sv_ID) '
                     'p.run_ID, tn.name, task.name, alg.name, sv.name '
                     'FROM Prime p '
                     'JOIN Target tn ON p.tn_ID = tn.PK '
@@ -167,7 +168,7 @@ class SearchImplementation(SearchFacade):
                     'JOIN Algorithm alg ON p.alg_ID = alg.PK '
                     'JOIN StateVector sv ON p.sv_ID = sv.PK '
                     f'WHERE {constraints} '
-                    'ORDER BY p.PK ASC '
+                    'ORDER BY p.run_ID, p.tn_ID, p.task_ID, p.alg_ID, p.sv_ID '
                     'LIMIT %s OFFSET %s;',
                     args,
                 )
