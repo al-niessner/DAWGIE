@@ -53,6 +53,9 @@ class Range:
             return self.start <= member
         return self.start <= member < self.stop
 
+    def __ge__(self, other: int) -> bool:
+        return self.start >= other
+
 
 class Params(typing.NamedTuple):
     runids: [list[int, Range], str] = None
