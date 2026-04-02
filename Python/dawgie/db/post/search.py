@@ -48,6 +48,7 @@ _NAMES_ALL = 'SELECT name FROM {sql.table};'
 _NAMES_SOME = 'SELECT name FROM {sql.table} WHERE pk = ANY(%s);'
 _PKS = 'SELECT p.{sql.fk} FROM Prime p WHERE {sql.constraints};'
 _RANGE = 'run_ID >= %s and run_ID < %s'
+_RANGE_UE = 'run_ID >= %s'
 
 
 class SearchImplementation(SearchFacade):
@@ -62,8 +63,9 @@ class SearchImplementation(SearchFacade):
         indices = []
         for rid in filter(lambda i: i >= 0, runids):
             if isinstance(rid, Range):
-                constraints.append(_RANGE)
-                args.append((rid.start, rid.stop))
+                if rid.stop:
+                    constraints.append(_RANGE)
+                    args.extend((rid.start, rid.stop))
             else:
                 indices.append(rid)
         return indices
