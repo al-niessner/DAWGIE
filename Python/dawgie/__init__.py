@@ -794,6 +794,15 @@ class Dataset(_Metric):
                   sub-target element. Meaning A(b)(c) would become A(b) and
                   A(b) would become A.
 
+        upstream - rename targets that already ran (upstream with data
+                   processing flowing downstream) under the original name.
+                   If this is not necessary, empty list. For instance,
+                   given target foo and retarget to foo(bar) and the algorithm
+                   sna.fu that depends on the output (upstream) of oh.geez,
+                   then the upstream would contain the ALG_REF for oh.geez
+                   resulting in the conent for foo.oh.geez being copied to
+                   foo(bar).oh.geez. Thus dependencies can be found.
+
         returns a new Dataset that using the target_name(subname) as its target
         '''
         is_not_subnamed = '(' not in self._tn()
