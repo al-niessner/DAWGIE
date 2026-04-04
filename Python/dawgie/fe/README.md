@@ -201,13 +201,29 @@ abc
 
 ## `/app/pl/state` (GET)
 ### Description
+
+Returns the current state of the pipeline FSM
+
 ### Inputs
+
+None
+
 ### Outputs
+
+JSON object:
+- name: current state
+- ready: boolean indicating that the pipeline is ready to do work
+- status: active/entering/exiting
+
 ### Example
 
 ```
 curl -X GET "<URL base>/app/pl/state"
-abc
+{
+  "name": "running",
+  "ready": true,
+  "status": "active"
+}
 ```
 
 ## `/app/run`, (POST)
@@ -244,13 +260,35 @@ curl -X POST "<URL base>/app/run?target=G,task=a.b"
 
 ## `/app/schedule/crew` (GET)
 ### Description
+
+Reports back what part of the schedule the work crew is currently busy accomplishing.
+
 ### Inputs
+
+None
+
 ### Outputs
+
+JSON object that contains a busy list and the number of workers in the crew that are idle.
+
+- busy: each JSON string in the list represents a busy crew member. It states what task is being processed and how long they have been doing the task.
+- idle: the number of workers that need a task
+
 ### Example
 
 ```
 curl -X GET "<URL base>/app/schedule/crew"
-abc
+{
+  "busy": [
+    "data.collect[WASP-90] duration: 137:33:07",
+    "data.collect[WASP-81] duration: 137:30:22",
+    "data.calibration[L 98-59] duration: 67:10:02",
+    "cerberus.atmos[TOI-178] duration: 42:42:07",
+    "cerberus.atmos[TOI-1136] duration: 42:38:32",
+    "cerberus.atmos[TRAPPIST-1] duration: 41:07:22"
+  ],
+  "idle": "124"
+}
 ```
 
 ## `/app/schedule/doing` (GET)
@@ -376,6 +414,10 @@ abc
 
 ## `/app/state/status` (GET)
 ### Description
+** DEPRECATED **
+
+use /app/pl/state
+
 ### Inputs
 ### Outputs
 ### Example
