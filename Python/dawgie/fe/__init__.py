@@ -50,6 +50,7 @@ import twisted.web.resource
 import twisted.web.util
 
 from dawgie.util import resolve_site
+from .decor import internal_error_handler
 from pathlib import Path
 
 LOG = logging.getLogger(__name__)
@@ -63,6 +64,7 @@ class RedirectContent(twisted.web.resource.Resource):
         twisted.web.resource.Resource.__init__(self)
         self.__url = url
 
+    @internal_error_handler
     def render_GET(self, request):  # pylint: disable=invalid-name
         return twisted.web.util.redirectTo(self.__url.encode(), request)
 
@@ -74,6 +76,7 @@ class StaticContent(twisted.web.resource.Resource):
         twisted.web.resource.Resource.__init__(self)
         self.__bdir, self.__isdep = resolve_site()
 
+    @internal_error_handler
     def render_GET(self, request):  # pylint: disable=invalid-name
         return _static(request.uri.decode(), self.__bdir, self.__isdep, request)
 
@@ -93,7 +96,7 @@ def _static(
     isdep: bool,  # 3.0.0 remove - and anything that uses this
     request=None,
 ) -> bytes:
-    result = ('Error: could not find static files ').encode()
+    result = b'Error: could not find static files '
     fn = fn.lstrip('/')  # since a URL, remove all leading /
     for d in [Path(dawgie.context.fe_path).resolve(), Path(bdir).resolve()]:
         ffn = (d / fn).resolve()
