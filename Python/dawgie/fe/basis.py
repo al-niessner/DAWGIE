@@ -47,6 +47,8 @@ import logging
 import os
 import twisted.web.resource
 
+from .decor import internal_error_handler
+
 LOG = logging.getLogger(__name__)
 
 
@@ -144,15 +146,19 @@ class DynamicContent(twisted.web.resource.Resource):
 
         return resp
 
+    @internal_error_handler
     def render_GET(self, req):  # pylint: disable=invalid-name
         return self.__render(req, HttpMethod.GET)
 
+    @internal_error_handler
     def render_POST(self, req):  # pylint: disable=invalid-name
         return self.__render(req, HttpMethod.POST)
 
+    @internal_error_handler
     def render_PUT(self, req):  # pylint: disable=invalid-name
         return self.__render(req, HttpMethod.PUT)
 
+    @internal_error_handler
     def render_DELETE(self, req):  # pylint: disable=invalid-name
         return self.__render(req, HttpMethod.DEL)
 
