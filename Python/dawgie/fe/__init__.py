@@ -59,7 +59,7 @@ LOG = logging.getLogger(__name__)
 class RedirectContent(twisted.web.resource.Resource):
 
     isLeaf = True
-    allowedMethods = (b'GET')
+    allowedMethods = b'GET'
 
     def __init__(self, url):
         twisted.web.resource.Resource.__init__(self)
@@ -72,7 +72,7 @@ class RedirectContent(twisted.web.resource.Resource):
 
 class StaticContent(twisted.web.resource.Resource):
     isLeaf = True
-    allowedMethods = (b'GET')
+    allowedMethods = b'GET'
 
     def __init__(self):
         twisted.web.resource.Resource.__init__(self)
