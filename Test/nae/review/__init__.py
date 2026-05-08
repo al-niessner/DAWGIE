@@ -40,6 +40,7 @@ NTR:
 import dawgie
 import dawgie.base
 
+
 def analysis(
     prefix: str, ps_hint: int = 0, runid: int = -1
 ) -> dawgie.FactoryPlaceholder[dawgie.base.Analysis]:
