@@ -84,6 +84,7 @@ class DeferContainer:
 class DynamicContent(twisted.web.resource.Resource):
     # pylint: disable=dangerous-default-value
     isLeaf = True
+    allowedMethods = (b'GET', b'POST', b'PUT', b'DELETE')
 
     def __init__(self, fnc, uri: str, methods: [HttpMethod] = [HttpMethod.GET]):
         twisted.web.resource.Resource.__init__(self)
