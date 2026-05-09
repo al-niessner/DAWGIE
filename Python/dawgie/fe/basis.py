@@ -47,8 +47,6 @@ import logging
 import os
 import twisted.web.resource
 
-from .decor import internal_error_handler
-
 LOG = logging.getLogger(__name__)
 
 
@@ -81,15 +79,30 @@ class DeferContainer:
         self.__request = req
 
 
-class DynamicContent(twisted.web.resource.Resource):
-    # pylint: disable=dangerous-default-value
-    isLeaf = True
-    allowedMethods = (b'GET', b'POST', b'PUT', b'DELETE')
+# pylint: disable=too-few-public-methods
+class BaseResource(twisted.web.resource.Resource):
+    '''cleanly handle Internal Server Errors without crashing twisted'''
 
-    def __init__(self, fnc, uri: str, methods: [HttpMethod] = [HttpMethod.GET]):
-        twisted.web.resource.Resource.__init__(self)
+    def render(self, request):
+        try:
+            return super().render(request)
+        except Exception:  # pylint: disable=broad-exception-caught
+            LOG.exception('Internal front-end problem:')
+            request.setResponseCode(twisted.web.http.INTERNAL_SERVER_ERROR)
+            request.setHeader(b"content-type", b"text/plain; charset=utf-8")
+            return b'500 Internal Service Error: render logged details'
+
+
+# pylint: enable=too-few-public-methods
+
+
+class DynamicContent(BaseResource):
+    isLeaf = True
+
+    def __init__(self, fnc, uri: str, methods: [HttpMethod] = None):
+        super().__init__()
         self.__fnc = fnc
-        self.__methods = methods
+        self.__methods = methods if methods else [HttpMethod.GET]
         self.__uri = uri
         while uri.startswith('/'):
             uri = uri[1:]
@@ -147,19 +160,15 @@ class DynamicContent(twisted.web.resource.Resource):
 
         return resp
 
-    @internal_error_handler
     def render_GET(self, req):  # pylint: disable=invalid-name
         return self.__render(req, HttpMethod.GET)
 
-    @internal_error_handler
     def render_POST(self, req):  # pylint: disable=invalid-name
         return self.__render(req, HttpMethod.POST)
 
-    @internal_error_handler
     def render_PUT(self, req):  # pylint: disable=invalid-name
         return self.__render(req, HttpMethod.PUT)
 
-    @internal_error_handler
     def render_DELETE(self, req):  # pylint: disable=invalid-name
         return self.__render(req, HttpMethod.DEL)
 
