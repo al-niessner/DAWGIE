@@ -46,37 +46,33 @@ import dawgie.security
 
 import logging
 import os
-import twisted.web.resource
 import twisted.web.util
 
+from dawgie.fe.basis import BaseResource
 from dawgie.util import resolve_site
-from .decor import internal_error_handler
 from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
 
-class RedirectContent(twisted.web.resource.Resource):
-
+class RedirectContent(BaseResource):
     isLeaf = True
 
     def __init__(self, url):
-        twisted.web.resource.Resource.__init__(self)
+        super().__init__()
         self.__url = url
 
-    @internal_error_handler
     def render_GET(self, request):  # pylint: disable=invalid-name
         return twisted.web.util.redirectTo(self.__url.encode(), request)
 
 
-class StaticContent(twisted.web.resource.Resource):
+class StaticContent(BaseResource):
     isLeaf = True
 
     def __init__(self):
-        twisted.web.resource.Resource.__init__(self)
+        super().__init__()
         self.__bdir, self.__isdep = resolve_site()
 
-    @internal_error_handler
     def render_GET(self, request):  # pylint: disable=invalid-name
         return _static(request.uri.decode(), self.__bdir, self.__isdep, request)
 
