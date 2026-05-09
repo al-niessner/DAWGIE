@@ -81,7 +81,10 @@ class DeferContainer:
 
 # pylint: disable=too-few-public-methods
 class BaseResource(twisted.web.resource.Resource):
-    '''cleanly handle Internal Server Errors without crashing twisted'''
+    '''cleanly handle Internal Server Errors without crashing twisted
+
+    Note: this handles all of the direct calls but the deferred calls using
+    NOT_DONE_YET must handle the errors on their own.'''
 
     def render(self, request):
         try:

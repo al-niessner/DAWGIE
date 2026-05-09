@@ -48,13 +48,14 @@ import logging
 import os
 import twisted.web.util
 
+from dawgie.fe.basis import BaseResource
 from dawgie.util import resolve_site
 from pathlib import Path
 
 LOG = logging.getLogger(__name__)
 
 
-class RedirectContent(dawgie.fe.basis.BaseResource):
+class RedirectContent(BaseResource):
     isLeaf = True
 
     def __init__(self, url):
@@ -65,7 +66,7 @@ class RedirectContent(dawgie.fe.basis.BaseResource):
         return twisted.web.util.redirectTo(self.__url.encode(), request)
 
 
-class StaticContent(dawgie.fe.basis.BaseResource):
+class StaticContent(BaseResource):
     isLeaf = True
 
     def __init__(self):
