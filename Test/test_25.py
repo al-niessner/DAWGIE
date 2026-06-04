@@ -46,6 +46,6 @@ class Worker(unittest.TestCase):
     def test_pairings(self):
         with open(dawgie.context.__file__, 'rt', encoding='utf-8') as file:
             code = file.read()
-        for envkey, varname in dawgie.pl.worker.OVERRIDES:
+        for envkey, varname in dawgie.pl.worker.OVERRIDES.items():
             self.assertTrue(f"os.environ.get('{envkey}'," in code)
             self.assertTrue(hasattr(dawgie.context, varname))
