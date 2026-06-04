@@ -130,12 +130,20 @@ class Process:
         return None
 
     def step_0(self):
-        '''setup the Defer steps to be run asynchronously'''
+        '''setup the Defer steps to be run asynchronously
+
+        1. start with step_1
+        2. if things got well then step_2 otherwise handle the failure
+           a. step 2 spawns a task to see if the new code is dawgie compliant
+           b. the spawn job uses proecessEnded
+              i.  if compliant, then do step 3
+              ii. if not compliant, then do failure
+        3. add failure in case something goes awry in step 2
+        '''
         dawgie.tools.submit.mail_list = dawgie.context.email_alerts_to
         d = twisted.internet.defer.Deferred()
         d.addCallback(self.step_1)
         d.addCallbacks(self.step_2, self.failure)
-        d.addCallbacks(self.step_3, self.failure)
         d.addErrback(self.failure)
         twisted.internet.reactor.callLater(0, d.callback, None)
 
