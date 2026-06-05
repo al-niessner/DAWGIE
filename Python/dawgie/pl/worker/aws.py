@@ -489,7 +489,7 @@ def execute(address: (str, int), inc: int, ps_hint: int, rev: str):
             if job.ps_hint is not None:
                 ps_hint = job.ps_hint
 
-            dawgie.context.loads(job.context)
+            dawgie.pl.worker.load_context_with_overrides(job.context)
             dawgie.db.reopen()
             handler = dawgie.pl.logger.TwistedHandler(
                 host=address[0], port=dawgie.context.log_port

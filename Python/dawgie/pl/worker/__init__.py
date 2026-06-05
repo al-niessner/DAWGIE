@@ -41,11 +41,25 @@ NTR: 49811
 '''
 
 import datetime
+import dawgie.context
 import dawgie.pl.logger
 import dawgie.pl.message
 import dawgie.pl.version
 import dawgie.security
 import dawgie.util
+import logging
+import os
+
+LOG = logging.getLogger(__name__)
+OVERRIDES = {
+    'DAWGIE_CFE_PORT': 'cfe_port',
+    'DAWGIE_CLOUD_PORT': 'cloud_port',
+    'DAWGIE_DB_HOST': 'db_host',
+    'DAWGIE_DB_PORT': 'db_port',
+    'DAWGIE_FARM_PORT': 'farm_port',
+    'DAWGIE_FE_PORT': 'fe_port',
+    'DAWGIE_LOG_PORT': 'log_port',
+}
 
 
 class Context:
@@ -88,3 +102,14 @@ class Context:
         return task.new_values()
 
     pass
+
+
+def load_context_with_overrides(msg):
+    dawgie.context.loads(msg.context)
+    for envkey, varname in OVERRIDES.items():
+        value = os.environ.get(envkey, '')
+        if value:
+            try:
+                setattr(dawgie.context, varname, int(value))
+            except ValueError:
+                LOG.exception('the value "%s" is not an integer', value)

@@ -55,7 +55,7 @@ import os
 import sys
 
 ap = argparse.ArgumentParser(
-    description='The main routine to run and individual worker.'
+    description='The main routine to run and individual worker. Beyond the parameters provided, the worker can override the context downloaded from the foreman using the DAWGIE_*_PORT environment variables. See OVERRIDES in dawgie.pl.worker for a complete list.'
 )
 ap.add_argument(
     '-a', '--ae-path', required=True, type=str, help='the path to the AE'
