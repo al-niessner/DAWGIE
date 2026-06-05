@@ -9,9 +9,9 @@ psycopg>=3.2.12
 psycopg-binary>=3.2.12
 pydot
 pyparsing>=2.4.7
-pyOpenSSL==26.0.0
+pyOpenSSL>=26.2.0
 python-gnupg==0.4.9
 service_identity
 requests>=2.20.0
 transitions
-twisted>=24.3.0
+twisted>=26.4.0
