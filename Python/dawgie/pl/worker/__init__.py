@@ -104,8 +104,8 @@ class Context:
     pass
 
 
-def load_context_with_overrides(msg):
-    dawgie.context.loads(msg.context)
+def load_context_with_overrides(context: bytes):
+    dawgie.context.loads(context)
     for envkey, varname in OVERRIDES.items():
         value = os.environ.get(envkey, '')
         if value:
