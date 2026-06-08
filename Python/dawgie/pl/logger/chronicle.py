@@ -37,10 +37,11 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR: 49811
 '''
 
-import datetime
 import dawgie.context
 import json
 import os
+
+from datetime import UTC, datetime
 
 
 def append(entry: {}):
@@ -60,13 +61,13 @@ def append(entry: {}):
             'does not look like an execution mesage because it is missing expected keys'
         )
     for key, value in entry['timing'].items():
-        if isinstance(value, datetime.datetime):
+        if isinstance(value, datetime):
             entry[key] = value.isoformat(sep=' ')
     entries = []
     journal = os.path.join(
         dawgie.context.data_dbs,
         'chronicles',
-        entry['timing']['started'].split(' ')[0].replace('-', os.path.sep),
+        entry['timing']['completed'].split(' ')[0].replace('-', os.path.sep),
     )
     if not os.path.isdir(journal):
         os.makedirs(journal, 0o755, True)
@@ -77,3 +78,26 @@ def append(entry: {}):
     entries.append(entry)
     with open(journal, 'tw', encoding='utf-8') as file:
         json.dump(entries, file, indent=2)
+
+
+def find(
+    after: datetime = None,
+    before: datetime = None,
+    limit: int = None,
+    succeeded: bool = True,
+):
+    '''Find the failed/succeeded tasks between two dates to a limit
+
+    after - the date time the entries completion time should be after
+    before - the date time the entries completion time should be before
+    limit - total number of entries to be returned with None meaning unbounded
+
+    Resulting list in youngest to oldest with the length of the list being
+    less than or equal to the limit.
+
+    Will throw error if after, before, and limit are None.
+    '''
+    if all(a is None for a in [after, before, limit]):
+        raise ValueError('all arguments are None: after, before, limit')
+    entries = []
+    return entries
