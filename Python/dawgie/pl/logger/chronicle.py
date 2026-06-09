@@ -46,10 +46,11 @@ from datetime import UTC, datetime, timedelta
 
 def _load(after: datetime, before: datetime, journal: str, succeeded: bool):
     entries = []
-    status = 'sucess' if succeeded else 'failure'
-    for jsonfile in filter(
+    status = 'success' if succeeded else 'failure'
+    for fn in filter(
         lambda fn: fn.endswith('.json'), os.listdir(journal)
     ):
+        jsonfile = os.path.join(journal, fn)
         with open(jsonfile, 'rt', encoding='utf-8') as file:
             for entry in json.load(file):
                 completed = datetime.fromisoformat(entry['timing']['completed'])
@@ -86,7 +87,7 @@ def append(entry: {}):
         )
     for key, value in entry['timing'].items():
         if isinstance(value, datetime):
-            entry[key] = value.isoformat(sep=' ')
+            entry['timing'][key] = value.isoformat(sep=' ')
     entries = []
     journal = os.path.join(
         dawgie.context.data_dbs,
@@ -123,24 +124,24 @@ def find(
     '''
     if all(a is None for a in [after, before, limit]):
         raise ValueError('all arguments are None: after, before, limit')
-    after = datetime(1980, 1, 1) if after is None else after
+    after = datetime(1980, 1, 1, tzinfo=UTC) if after is None else after
     before = datetime.now(UTC) if before is None else before
     entries = []
+    one = timedelta(seconds=1)
     oneday = timedelta(days=1)
-    while len(entries) < limit and before > after:
+    while (limit is None or len(entries) < limit) and before > after:
         journal = os.path.join(
             dawgie.context.data_dbs, 'chronicles', str(before.year)
         )
         if os.path.isdir(journal):
-            journal = os.path.join(journal, str(before.month))
+            journal = os.path.join(journal, f'{before.month:02d}')
             if os.path.isdir(journal):
-                journal = os.path.join(journal, str(before.day))
+                journal = os.path.join(journal, f'{before.day:02d}')
                 if os.path.isdir(journal):
                     entries.extend(_load(after, before, journal, succeeded))
-                else:
-                    before = before - oneday
+                before = before - oneday
             else:
-                before = datetime(before.yar, before.month, 1) - oneday
+                before = datetime(before.year, before.month, 1, tzinfo=UTC) - one
         else:
-            before = datetime(before.year - 1, 1, 1)
+            before = datetime(before.year, 1, 1, tzinfo=UTC) - one
     return entries[:limit]
