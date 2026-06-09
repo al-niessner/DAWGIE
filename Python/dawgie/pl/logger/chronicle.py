@@ -47,9 +47,7 @@ from datetime import UTC, datetime, timedelta
 def _load(after: datetime, before: datetime, journal: str, succeeded: bool):
     entries = []
     status = 'success' if succeeded else 'failure'
-    for fn in filter(
-        lambda fn: fn.endswith('.json'), os.listdir(journal)
-    ):
+    for fn in filter(lambda fn: fn.endswith('.json'), os.listdir(journal)):
         jsonfile = os.path.join(journal, fn)
         with open(jsonfile, 'rt', encoding='utf-8') as file:
             for entry in json.load(file):
@@ -141,7 +139,9 @@ def find(
                     entries.extend(_load(after, before, journal, succeeded))
                 before = before - oneday
             else:
-                before = datetime(before.year, before.month, 1, tzinfo=UTC) - one
+                before = (
+                    datetime(before.year, before.month, 1, tzinfo=UTC) - one
+                )
         else:
             before = datetime(before.year, 1, 1, tzinfo=UTC) - one
     return entries[:limit]

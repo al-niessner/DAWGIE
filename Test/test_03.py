@@ -61,10 +61,11 @@ RECORD = {
     "timing": {
         "scheduled": datetime.fromisoformat("2026-06-06 05:25:50.950738+00:00"),
         "started": datetime.fromisoformat("2026-06-06 05:25:52.477235+00:00"),
-        "completed": datetime.fromisoformat("2026-06-06 05:26:05.075088+00:00")
+        "completed": datetime.fromisoformat("2026-06-06 05:26:05.075088+00:00"),
     },
-    "version": "1.3.2"
+    "version": "1.3.2",
 }
+
 
 class Chronicles(unittest.TestCase):
     @classmethod
@@ -81,8 +82,8 @@ class Chronicles(unittest.TestCase):
         offset = timedelta(seconds=11)
         for i in range(5):
             record = deepcopy(RECORD)
-            record['runid'] = 1540 + i//3
-            record['status'] = 'failure' if i%2 else 'success'
+            record['runid'] = 1540 + i // 3
+            record['status'] = 'failure' if i % 2 else 'success'
             record['timing']['completed'] = completed + (offset * i)
             dawgie.pl.logger.chronicle.append(record)
         path = os.path.join(
@@ -103,65 +104,72 @@ class Chronicles(unittest.TestCase):
         self.assertEqual(2, len(entries))
 
     def test_find(self):
-        shutil.rmtree(os.path.join(
-            dawgie.context.data_dbs, 'chronicles', '2017'), ignore_errors=True)
+        shutil.rmtree(
+            os.path.join(dawgie.context.data_dbs, 'chronicles', '2017'),
+            ignore_errors=True,
+        )
         completed = datetime(2017, 7, 5, 13, 3, 37, tzinfo=UTC)
         offset = timedelta(seconds=11)
         for i in range(13):
             record = deepcopy(RECORD)
-            record['runid'] = 1550 + i//3
-            record['status'] = 'failure' if i%2 else 'success'
+            record['runid'] = 1550 + i // 3
+            record['status'] = 'failure' if i % 2 else 'success'
             record['timing']['completed'] = completed + (offset * i)
             dawgie.pl.logger.chronicle.append(record)
         completed = datetime(2017, 3, 7, 11, 13, 37, tzinfo=UTC)
         offset = timedelta(seconds=11)
         for i in range(11):
             record = deepcopy(RECORD)
-            record['runid'] = 1540 + i//3
-            record['status'] = 'failure' if i%2 else 'success'
+            record['runid'] = 1540 + i // 3
+            record['status'] = 'failure' if i % 2 else 'success'
             record['timing']['completed'] = completed + (offset * i)
             dawgie.pl.logger.chronicle.append(record)
         completed = datetime(2017, 3, 5, 13, 7, 37, tzinfo=UTC)
         offset = timedelta(seconds=11)
         for i in range(7):
             record = deepcopy(RECORD)
-            record['runid'] = 1540 + i//3
-            record['status'] = 'failure' if i%2 else 'success'
+            record['runid'] = 1540 + i // 3
+            record['status'] = 'failure' if i % 2 else 'success'
             record['timing']['completed'] = completed + (offset * i)
             dawgie.pl.logger.chronicle.append(record)
         completed = datetime(2011, 3, 5, 13, 7, 37, tzinfo=UTC)
         offset = timedelta(seconds=11)
         for i in range(5):
             record = deepcopy(RECORD)
-            record['runid'] = 1540 + i//3
-            record['status'] = 'failure' if i%2 else 'success'
+            record['runid'] = 1540 + i // 3
+            record['status'] = 'failure' if i % 2 else 'success'
             record['timing']['completed'] = completed + (offset * i)
             dawgie.pl.logger.chronicle.append(record)
         entries = dawgie.pl.logger.chronicle.find(
-            after=datetime(2017,7,1, tzinfo=UTC))
+            after=datetime(2017, 7, 1, tzinfo=UTC)
+        )
         self.assertEqual(7, len(entries))
         entries = dawgie.pl.logger.chronicle.find(
-            after=datetime(2017,7,1, tzinfo=UTC), succeeded=False)
+            after=datetime(2017, 7, 1, tzinfo=UTC), succeeded=False
+        )
         self.assertEqual(6, len(entries))
         entries = dawgie.pl.logger.chronicle.find(before=datetime.now(UTC))
         self.assertEqual(20, len(entries))
         entries = dawgie.pl.logger.chronicle.find(limit=10)
         self.assertEqual(10, len(entries))
         entries = dawgie.pl.logger.chronicle.find(
-            after=datetime(2017,1,1, tzinfo=UTC),
-            before=datetime(2018,1,1, tzinfo=UTC))
+            after=datetime(2017, 1, 1, tzinfo=UTC),
+            before=datetime(2018, 1, 1, tzinfo=UTC),
+        )
         self.assertEqual(17, len(entries))
         entries = dawgie.pl.logger.chronicle.find(
-            after=datetime(2017,1,1, tzinfo=UTC),
-            before=datetime(2018,1,1, tzinfo=UTC),
+            after=datetime(2017, 1, 1, tzinfo=UTC),
+            before=datetime(2018, 1, 1, tzinfo=UTC),
             succeeded=False,
         )
         self.assertEqual(14, len(entries))
         entries = dawgie.pl.logger.chronicle.find(
-            after=datetime(2017,1,1, tzinfo=UTC),
-            before=datetime(2018,1,1, tzinfo=UTC),
-            limit=10)
+            after=datetime(2017, 1, 1, tzinfo=UTC),
+            before=datetime(2018, 1, 1, tzinfo=UTC),
+            limit=10,
+        )
         self.assertEqual(10, len(entries))
+
 
 class Logger(unittest.TestCase):
     @classmethod
