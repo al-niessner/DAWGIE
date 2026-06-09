@@ -111,11 +111,12 @@ class Schedule(unittest.TestCase):
                 )
             nodes[dei].get('doing').add('b')
             dawgie.pl.schedule.que.append(nodes[dei])
+            timing = {'started': '11-13-17 23:29:31'}
             dawgie.pl.schedule.complete(
                 nodes[dei],
                 3,
                 'b',
-                {'started': '11-13-17 23:29:31'},
+                timing,
                 dawgie.pl.jobinfo.State.success,
             )
             self.assertEqual(0, len(dawgie.pl.schedule.que))
@@ -126,16 +127,17 @@ class Schedule(unittest.TestCase):
                 nodes[dei],
                 3,
                 'd',
-                {'started': '11-13-17 23:29:31'},
+                timing,
                 dawgie.pl.jobinfo.State.success,
             )
             self.assertEqual(1, len(dawgie.pl.schedule.que))
             jf = os.path.join(
                 dawgie.context.data_dbs,
                 'chronicles',
-                '11',
-                '13',
-                '17',
+                timing['completed']
+                .isoformat()
+                .split('T')[0]
+                .replace('-', os.path.sep),
                 '3.json',
             )
             self.assertTrue(os.path.isfile(jf))
