@@ -61,15 +61,6 @@ def _legacy_arg_fixer(index: int, limit: int):
     return index, limit, (index + limit) if limit is not None else limit
 
 
-def _legacy_sort(msg):
-    return (
-        msg['timing']['completed'],
-        int(msg['runid']),
-        msg['target'],
-        msg['task'],
-    )
-
-
 def doing(asis: bool = False, index: int = 0, limit: int = None):
     if asis:
         return dawgie.pl.schedule.view_doing(index, limit)

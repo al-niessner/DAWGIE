@@ -41,7 +41,31 @@ import dawgie.context
 import json
 import os
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+
+
+def _load(after: datetime, before: datetime, journal: str, succeeded: bool):
+    entries = []
+    status = 'sucess' if succeeded else 'failure'
+    for jsonfile in filter(
+        lambda fn: fn.endswith('.json'), os.listdir(journal)
+    ):
+        with open(jsonfile, 'rt', encoding='utf-8') as file:
+            for entry in json.load(file):
+                completed = datetime.fromisoformat(entry['timing']['completed'])
+                if after < completed < before and entry['status'] == status:
+                    entries.append(entry)
+    entries.sort(key=_most_recent_first, reverse=True)
+    return entries
+
+
+def _most_recent_first(entry):
+    return (
+        entry['timing']['completed'],
+        int(entry['runid']),
+        entry['target'],
+        entry['task'],
+    )
 
 
 def append(entry: {}):
@@ -99,8 +123,24 @@ def find(
     '''
     if all(a is None for a in [after, before, limit]):
         raise ValueError('all arguments are None: after, before, limit')
-    after = datetime(1980,1,1) if after is None else after
+    after = datetime(1980, 1, 1) if after is None else after
     before = datetime.now(UTC) if before is None else before
     entries = []
-    while entries < limit:
-    return entries
+    oneday = timedelta(days=1)
+    while len(entries) < limit and before > after:
+        journal = os.path.join(
+            dawgie.context.data_dbs, 'chronicles', str(before.year)
+        )
+        if os.path.isdir(journal):
+            journal = os.path.join(journal, str(before.month))
+            if os.path.isdir(journal):
+                journal = os.path.join(journal, str(before.day))
+                if os.path.isdir(journal):
+                    entries.extend(_load(after, before, journal, succeeded))
+                else:
+                    before = before - oneday
+            else:
+                before = datetime(before.yar, before.month, 1) - oneday
+        else:
+            before = datetime(before.year - 1, 1, 1)
+    return entries[:limit]
