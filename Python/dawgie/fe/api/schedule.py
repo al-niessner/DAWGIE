@@ -37,10 +37,12 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
+from datetime import UTC, datetime
 from dawgie.fe.basis import Status, build_return_object
 
 import dawgie.context
 import dawgie.pl.farm
+import dawgie.pl.logger.chronicle
 import dawgie.pl.schedule
 
 
@@ -59,15 +61,6 @@ def _legacy_arg_fixer(index: int, limit: int):
     return index, limit, (index + limit) if limit is not None else limit
 
 
-def _legacy_sort(msg):
-    return (
-        msg['timing']['completed'],
-        int(msg['runid']),
-        msg['target'],
-        msg['task'],
-    )
-
-
 def doing(asis: bool = False, index: int = 0, limit: int = None):
     if asis:
         return dawgie.pl.schedule.view_doing(index, limit)
@@ -84,13 +77,18 @@ def events(index: int = 0, limit: int = None):
     return build_return_object(e)
 
 
-def failed(asis: bool = False, index: int = 0, limit: int = None):
-    if asis:
-        return dawgie.pl.schedule.view_failure()
-    f = dawgie.pl.schedule.view_failure()
-    f.sort(key=_legacy_sort, reverse=True)
-    index, _limit, term = _legacy_arg_fixer(index, limit)
-    return build_return_object(f[index:term])
+def failed(before: str = None, index: int = None, limit: int = None):
+    if index is not None:
+        build_return_object(None, Status.FAILURE, 'index has been deprecated')
+    if before is None or not before:
+        before = datetime.now(UTC)
+    else:
+        before = datetime.fromisoformat(before)
+    return build_return_object(
+        dawgie.pl.logger.chronicle.find(
+            before=before, limit=limit, succeeded=False
+        )
+    )
 
 
 def inprogress(index: int = 0, limit: int = None):
@@ -119,13 +117,18 @@ def stats():
     )
 
 
-def succeeded(asis: bool = False, index: int = 0, limit: int = None):
-    if asis:
-        return dawgie.pl.schedule.view_success()
-    index, _limit, term = _legacy_arg_fixer(index, limit)
-    s = dawgie.pl.schedule.view_success()
-    s.sort(key=_legacy_sort, reverse=True)
-    return build_return_object(s[index:term])
+def succeeded(before: str = None, index: int = 0, limit: int = None):
+    if index is not None:
+        build_return_object(None, Status.FAILURE, 'index has been deprecated')
+    if before is None or not before:
+        before = datetime.now(UTC)
+    else:
+        before = datetime.fromisoformat(before)
+    return build_return_object(
+        dawgie.pl.logger.chronicle.find(
+            before=before, limit=limit, succeeded=True
+        )
+    )
 
 
 def todo(asis: bool = False, index: int = 0, limit: int = None):

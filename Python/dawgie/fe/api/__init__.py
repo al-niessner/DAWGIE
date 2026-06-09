@@ -46,6 +46,7 @@ from dawgie.fe.basis import (
 
 import dawgie
 import dawgie.context
+import dawgie.pl.logger.chronicle
 import dawgie.pl.logger.fe
 import logging
 
@@ -106,11 +107,15 @@ def df_model_statistics(node_name: str):
     if node_name in schedule.todo(True):
         return build_return_object({'status': 'scheduled'})
     matched = []
-    for known in schedule.failed(True):
+    for known in dawgie.pl.logger.chronicle.find(
+        after=dawgie.context.boot_time, succeeded=False
+    ):
         if known['task'] == node_name:
             known['status'] = 'failed'
             matched.append(known)
-    for known in schedule.succeeded(True):
+    for known in dawgie.pl.logger.chronicle.find(
+        after=dawgie.context.boot_time, succeeded=True
+    ):
         if known['task'] == node_name:
             known['status'] = 'succeeded'
             matched.append(known)

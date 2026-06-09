@@ -39,6 +39,7 @@ NTR: 49811
 
 import argparse
 import enum
+import datetime
 import dawgie.types
 import importlib
 import inspect
@@ -80,6 +81,8 @@ ae_repository_branch_test = os.environ.get(
 )
 
 allow_promotion = os.environ.get('DAWGIE_PROMOTION', 'false').lower() in 'true'
+
+boot_time = datetime.datetime.now(datetime.UTC)
 
 cfe_port = int(
     os.environ.get('DAWGIE_CFE_PORT', 8080 + PortOffset.certFE.value)
