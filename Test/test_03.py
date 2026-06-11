@@ -91,7 +91,7 @@ class Chronicles(unittest.TestCase):
         )
         self.assertTrue(os.path.exists(path))
         self.assertTrue(os.path.isdir(path))
-        self.assertEqual(['1540.json', '1541.json'], os.listdir(path))
+        self.assertEqual(['1540.json', '1541.json'], sorted(os.listdir(path)))
         fn = os.path.join(path, '1540.json')
         self.assertTrue(os.path.isfile(fn))
         with open(fn, 'rt', encoding='utf-8') as file:
