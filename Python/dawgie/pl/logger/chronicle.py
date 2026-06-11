@@ -132,6 +132,8 @@ def find(
     '''
     if all(a is None for a in [after, before, limit]):
         raise ValueError('all arguments are None: after, before, limit')
+    if after is not None and before is not None:
+        limit = None
     after = datetime(1980, 1, 1, tzinfo=UTC) if after is None else after
     before = datetime.now(UTC) if before is None else before
     entries = []
