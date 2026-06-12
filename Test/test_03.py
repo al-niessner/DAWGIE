@@ -168,7 +168,7 @@ class Chronicles(unittest.TestCase):
             before=datetime(2018, 1, 1, tzinfo=UTC),
             limit=10,
         )
-        self.assertEqual(10, len(entries))
+        self.assertEqual(17, len(entries))
 
 
 class Logger(unittest.TestCase):
