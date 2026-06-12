@@ -91,7 +91,7 @@ class Chronicles(unittest.TestCase):
         )
         self.assertTrue(os.path.exists(path))
         self.assertTrue(os.path.isdir(path))
-        self.assertEqual(['1540.json', '1541.json'], os.listdir(path))
+        self.assertEqual(['1540.json', '1541.json'], sorted(os.listdir(path)))
         fn = os.path.join(path, '1540.json')
         self.assertTrue(os.path.isfile(fn))
         with open(fn, 'rt', encoding='utf-8') as file:
@@ -168,7 +168,7 @@ class Chronicles(unittest.TestCase):
             before=datetime(2018, 1, 1, tzinfo=UTC),
             limit=10,
         )
-        self.assertEqual(10, len(entries))
+        self.assertEqual(17, len(entries))
 
 
 class Logger(unittest.TestCase):

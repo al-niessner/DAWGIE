@@ -119,12 +119,25 @@ def find(
     less than or equal to the limit.
 
     Will throw error if after, before, and limit are None.
+
+    Rules:
+
+    1. before defined but not after, return most recent up to limit
+    2. after but not before, return oldest (closest to after) up to limit
+    3. limit only is defined, return most recent limit
+    4. before and after, ignore limit and return that block
+
+    - For 1 and 2, if limit is not defined they return the same list.
+    - 3 is the same as 1 with the same defined limit
     '''
     if all(a is None for a in [after, before, limit]):
         raise ValueError('all arguments are None: after, before, limit')
+    if after is not None and before is not None:
+        limit = None
     after = datetime(1980, 1, 1, tzinfo=UTC) if after is None else after
     before = datetime.now(UTC) if before is None else before
     entries = []
+    oldest = after > datetime(1980, 1, 1, tzinfo=UTC) and limit is not None
     one = timedelta(seconds=1)
     oneday = timedelta(days=1)
     while (limit is None or len(entries) < limit) and before > after:
@@ -144,4 +157,4 @@ def find(
                 )
         else:
             before = datetime(before.year, 1, 1, tzinfo=UTC) - one
-    return entries[:limit]
+    return entries[-limit:] if oldest else entries[:limit]
