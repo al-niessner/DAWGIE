@@ -37,7 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-from datetime import UTC, datetime
+from datetime import datetime
 from dawgie.fe.basis import Status, build_return_object
 
 import dawgie.context
@@ -77,7 +77,12 @@ def events(index: int = 0, limit: int = None):
     return build_return_object(e)
 
 
-def failed(after: [str] = None, before: [str] = None, index: [int] = None, limit: [int] = None):
+def failed(
+    after: [str] = None,
+    before: [str] = None,
+    index: [int] = None,
+    limit: [int] = None,
+):
     if index is not None:
         build_return_object(None, Status.FAILURE, 'index has been deprecated')
     after = datetime.fromisoformat(after[0]) if after else None
@@ -116,7 +121,12 @@ def stats():
     )
 
 
-def succeeded(after: [str] = None, before: [str] = None, index: [int] = None, limit: [int] = None):
+def succeeded(
+    after: [str] = None,
+    before: [str] = None,
+    index: [int] = None,
+    limit: [int] = None,
+):
     if index is not None:
         build_return_object(None, Status.FAILURE, 'index has been deprecated')
     after = datetime.fromisoformat(after[0]) if after else None
