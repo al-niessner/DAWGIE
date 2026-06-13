@@ -37,7 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 NTR:
 '''
 
-from datetime import UTC, datetime
+from datetime import datetime
 from dawgie.fe.basis import Status, build_return_object
 
 import dawgie.context
@@ -77,13 +77,17 @@ def events(index: int = 0, limit: int = None):
     return build_return_object(e)
 
 
-def failed(before: str = None, index: int = None, limit: int = None):
+def failed(
+    after: [str] = None,
+    before: [str] = None,
+    index: [int] = None,
+    limit: [int] = None,
+):
     if index is not None:
         build_return_object(None, Status.FAILURE, 'index has been deprecated')
-    if before is None or not before:
-        before = datetime.now(UTC)
-    else:
-        before = datetime.fromisoformat(before)
+    after = datetime.fromisoformat(after[0]) if after else None
+    before = datetime.fromisoformat(before[0]) if before else None
+    limit = int(limit[0]) if limit else None
     return build_return_object(
         dawgie.pl.logger.chronicle.find(
             before=before, limit=limit, succeeded=False
@@ -117,13 +121,17 @@ def stats():
     )
 
 
-def succeeded(before: str = None, index: int = 0, limit: int = None):
+def succeeded(
+    after: [str] = None,
+    before: [str] = None,
+    index: [int] = None,
+    limit: [int] = None,
+):
     if index is not None:
         build_return_object(None, Status.FAILURE, 'index has been deprecated')
-    if before is None or not before:
-        before = datetime.now(UTC)
-    else:
-        before = datetime.fromisoformat(before)
+    after = datetime.fromisoformat(after[0]) if after else None
+    before = datetime.fromisoformat(before[0]) if before else None
+    limit = int(limit[0]) if limit else None
     return build_return_object(
         dawgie.pl.logger.chronicle.find(
             before=before, limit=limit, succeeded=True
