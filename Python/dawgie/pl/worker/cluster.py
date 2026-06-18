@@ -72,11 +72,7 @@ def execute(address: (str, int), inc: int, ps_hint: int, rev: str):
 
         dawgie.pl.worker.load_context_with_overrides(m.context)
         dawgie.db.reopen()
-        handler = dawgie.pl.logger.TwistedHandler(
-            host=address[0], port=dawgie.context.log_port
-        )
-        logging.basicConfig(handlers=[handler], level=dawgie.context.log_level)
-        logging.captureWarnings(True)
+        dawgie.pl.worker.LOGGING.reassign(address[0])
         try:
             factory = getattr(
                 importlib.import_module(m.factory[0]), m.factory[1]

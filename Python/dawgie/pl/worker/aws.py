@@ -491,15 +491,7 @@ def execute(address: (str, int), inc: int, ps_hint: int, rev: str):
 
             dawgie.pl.worker.load_context_with_overrides(job.context)
             dawgie.db.reopen()
-            handler = dawgie.pl.logger.TwistedHandler(
-                host=address[0], port=dawgie.context.log_port
-            )
-            handler.setLevel(dawgie.context.log_level)
-            logging.basicConfig(
-                handlers=[handler, logging.StreamHandler()],
-                level=dawgie.context.log_level,
-            )
-            logging.captureWarnings(True)
+            dawgie.pl.worker.LOGGING.reassign(address[0])
             log = logging.getLogger(__name__)
             log.critical('starting AWS work')
             try:

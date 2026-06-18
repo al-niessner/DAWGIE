@@ -41,16 +41,19 @@ import dawgie.context
 import dawgie.pl.logger
 import dawgie.pl.logger.chronicle
 import dawgie.util.args
+import io
 import json
 import logging
 import os
 import shutil
 import tempfile
+import types
 import twisted.internet
 import unittest
 
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
+from unittest.mock import MagicMock, patch
 
 RECORD = {
     "changeset": "f2b2db7fa9979c3bfbc22b5dadf163335b1e6be5",
@@ -222,3 +225,57 @@ class Logger(unittest.TestCase):
         self.assertEqual(
             logging.INFO, dawgie.util.args.log_level('logging.INFO')
         )
+
+    @patch('sys.stderr', new_callable=io.StringIO)
+    def test_issue_370_pre(self, mock_stderr):
+        '''Verifies dawgie.pl.worker.LogManager captures logs and echoes warnings.'''
+        logging.getLogger().handlers.clear()
+        test_manager = dawgie.pl.worker.LogManager()
+        logger = logging.getLogger('dawgie.pl.worker.startup')
+        logger.info('This info diagnostic should sit silently in the deque.')
+        logger.warning('This warning must break through immediately to stderr.')
+        console_output = mock_stderr.getvalue()
+        self.assertIn(
+            'This warning must break through immediately to stderr.',
+            console_output,
+        )
+        self.assertNotIn(
+            'This info diagnostic should sit silently in the deque.',
+            console_output,
+        )
+        self.assertEqual(len(test_manager._log_queue), 2)
+        logging.getLogger().handlers.clear()
+
+    def test_issue_370_post(self):
+        '''Verifies the global manager deque filters records and dumps cleanly to the server handler.'''
+        logging.getLogger().handlers.clear()
+        dawgie.context.log_level = logging.INFO
+        dawgie.context.log_port = 8089
+        test_manager = dawgie.pl.worker.LogManager()
+        logger = logging.getLogger('dawgie.pl.worker.exec')
+        logger.debug('Bypassed: Below the INFO threshold.')
+        logger.info('Captured: Matches the INFO threshold.')
+        logger.warning('Captured: Above the INFO threshold.')
+        with patch(
+            'dawgie.pl.logger.TwistedHandler',
+            return_value=MagicMock(spec=logging.Handler),
+        ) as mock_class:
+            mock_handler_instance = mock_class.return_value
+            mock_handler_instance.level = logging.INFO
+            test_manager.reassign(host='localhost')
+            self.assertEqual(logging.getLogger().level, logging.INFO)
+            self.assertEqual(len(test_manager._log_queue), 0)
+            handled_calls = mock_handler_instance.handle.call_args_list
+            handled_messages = [
+                call.args[0].getMessage() for call in handled_calls
+            ]
+            self.assertIn(
+                'Captured: Matches the INFO threshold.', handled_messages
+            )
+            self.assertIn(
+                'Captured: Above the INFO threshold.', handled_messages
+            )
+            self.assertNotIn(
+                'Bypassed: Below the INFO threshold.', handled_messages
+            )
+        logging.getLogger().handlers.clear()

@@ -49,12 +49,7 @@ class Handler(logging.handlers.BufferingHandler):
             self, dawgie.context.log_capacity
         )
         self.setFormatter(
-            logging.Formatter(
-                '%(asctime)s;\n;'
-                + '%(name)s;\n;'
-                + '%(levelname)s;\n;'
-                + '%(message)s'
-            )
+            logging.Formatter(dawgie.pl.logger.FORMAT.replace(' :: ', ';\n;'))
         )
         return
 

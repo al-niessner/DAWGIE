@@ -48,9 +48,14 @@ import dawgie.pl.version
 import dawgie.security
 import dawgie.util
 import logging
+import logging.handlers
 import os
+import sys
+
+from collections import deque
 
 LOG = logging.getLogger(__name__)
+LOGGING = None
 OVERRIDES = {
     'DAWGIE_CFE_PORT': 'cfe_port',
     'DAWGIE_CLOUD_PORT': 'cloud_port',
@@ -102,6 +107,45 @@ class Context:
         return task.new_values()
 
     pass
+
+
+class LogManager(logging.Handler):
+    '''Manages the two-phase worker logging lifecycle.'''
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._log_queue: deque = deque()
+        self._fallback_console_handler: logging.StreamHandler | None = None
+        logging.getLogger().setLevel(logging.NOTSET)
+        logging.getLogger().addHandler(self)
+        self._fallback_console_handler = logging.StreamHandler(sys.stderr)
+        self._fallback_console_handler.setLevel(logging.WARNING)
+        formatter = logging.Formatter(dawgie.pl.logger.FORMAT)
+        self._fallback_console_handler.setFormatter(formatter)
+        logging.getLogger().addHandler(self._fallback_console_handler)
+        logging.captureWarnings(True)
+
+    def emit(self, record: logging.LogRecord) -> None:
+        '''Intercepts and stores records into the internal deque during Phase 1.'''
+        self._log_queue.append(record)
+
+    def reassign(self, host: str) -> None:
+        '''Flushes queued logs and routes all future logs to the server.
+
+        Uses parameters from the updated dawgie.context module.
+        '''
+        logging.getLogger().handlers.clear()
+        self._fallback_console_handler.close()
+        handler = dawgie.pl.logger.TwistedHandler(
+            host=host, port=dawgie.context.log_port
+        )
+        handler.setLevel(dawgie.context.log_level)
+        logging.getLogger().addHandler(handler)
+        logging.getLogger().setLevel(dawgie.context.log_level)
+        while self._log_queue:
+            record = self._log_queue.popleft()
+            if record.levelno >= dawgie.context.log_level:
+                handler.handle(record)
 
 
 def load_context_with_overrides(context: bytes):

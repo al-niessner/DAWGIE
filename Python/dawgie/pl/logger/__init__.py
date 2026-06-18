@@ -46,6 +46,7 @@ import twisted.internet.reactor
 import twisted.internet.threads
 
 _ROOT = None
+FORMAT = '%(asctime)s :: %(name)s :: %(levelname)s :: %(message)s'
 
 # Importing libraries gets complicated so pylint: disable=import-outside-toplevel
 
@@ -116,14 +117,7 @@ class LogSinkFactory(twisted.internet.protocol.Factory):
             )
         )
         self.__actual.addFilter(LogFilter('gnupg'))
-        self.__actual.setFormatter(
-            logging.Formatter(
-                '%(asctime)s :: '
-                + '%(name)s :: '
-                + '%(levelname)s :: '
-                + '%(message)s'
-            )
-        )
+        self.__actual.setFormatter(logging.Formatter(FORMAT))
         self.__host = dawgie.security._my_ip()
         self.__pid = os.getpid()
         return
