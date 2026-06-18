@@ -109,29 +109,25 @@ class Context:
     pass
 
 
-class LogManager:
+class LogManager(logging.Handler):
     '''Manages the two-phase worker logging lifecycle.'''
 
     def __init__(self) -> None:
+        super().__init__()
         self._log_queue: deque = deque()
         self._fallback_console_handler: logging.StreamHandler | None = None
-        self._queue_handler: logging.handlers.QueueHandler | None = None
-        self._queue_listener: logging.handlers.QueueListener | None = None
-        self._server_handler: logging.Handler | None = None
-
         logging.getLogger().setLevel(logging.NOTSET)
-        self._queue_handler = logging.handlers.QueueHandler(self._log_queue)
-        logging.getLogger().addHandler(self._queue_handler)
+        logging.getLogger().addHandler(self)
         self._fallback_console_handler = logging.StreamHandler(sys.stderr)
         self._fallback_console_handler.setLevel(logging.WARNING)
-        formatter = logging.Formatter(LogManager.get_format())
+        formatter = logging.Formatter(dawgie.pl.logger.FORMAT)
         self._fallback_console_handler.setFormatter(formatter)
         logging.getLogger().addHandler(self._fallback_console_handler)
         logging.captureWarnings(True)
 
-    @staticmethod
-    def get_format() -> str:
-        return '%(asctime)s :: %(name)s :: %(levelname)s :: %(message)s'
+    def emit(self, record: logging.LogRecord) -> None:
+        '''Intercepts and stores records into the internal deque during Phase 1.'''
+        self._log_queue.append(record)
 
     def reassign(self, host: str) -> None:
         '''Flushes queued logs and routes all future logs to the server.
