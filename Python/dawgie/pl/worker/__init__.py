@@ -48,9 +48,14 @@ import dawgie.pl.version
 import dawgie.security
 import dawgie.util
 import logging
+import logging.handlers
 import os
+import sys
+
+from collections import deque
 
 LOG = logging.getLogger(__name__)
+LOGGING = None
 OVERRIDES = {
     'DAWGIE_CFE_PORT': 'cfe_port',
     'DAWGIE_CLOUD_PORT': 'cloud_port',
@@ -102,6 +107,49 @@ class Context:
         return task.new_values()
 
     pass
+
+
+class LogManager:
+    '''Manages the two-phase worker logging lifecycle.'''
+
+    def __init__(self) -> None:
+        self._log_queue: deque = deque()
+        self._fallback_console_handler: logging.StreamHandler | None = None
+        self._queue_handler: logging.handlers.QueueHandler | None = None
+        self._queue_listener: logging.handlers.QueueListener | None = None
+        self._server_handler: logging.Handler | None = None
+
+        logging.getLogger().setLevel(logging.NOTSET)
+        self._queue_handler = logging.handlers.QueueHandler(self._log_queue)
+        logging.getLogger().addHandler(self._queue_handler)
+        self._fallback_console_handler = logging.StreamHandler(sys.stderr)
+        self._fallback_console_handler.setLevel(logging.WARNING)
+        formatter = logging.Formatter(LogManager.get_format())
+        self._fallback_console_handler.setFormatter(formatter)
+        logging.getLogger().addHandler(self._fallback_console_handler)
+        logging.captureWarnings(True)
+
+    @staticmethod
+    def get_format() -> str:
+        return '%(asctime)s :: %(name)s :: %(levelname)s :: %(message)s'
+
+    def reassign(self, host: str) -> None:
+        '''Flushes queued logs and routes all future logs to the server.
+
+        Uses parameters from the updated dawgie.context module.
+        '''
+        logging.getLogger().handlers.clear()
+        self._fallback_console_handler.close()
+        handler = dawgie.pl.logger.TwistedHandler(
+            host=host, port=dawgie.context.log_port
+        )
+        handler.setLevel(dawgie.context.log_level)
+        logging.getLogger().addHandler(handler)
+        logging.getLogger().setLevel(dawgie.context.log_level)
+        while self._log_queue:
+            record = self._log_queue.popleft()
+            if record.levelno >= dawgie.context.log_level:
+                handler.handle(record)
 
 
 def load_context_with_overrides(context: bytes):
