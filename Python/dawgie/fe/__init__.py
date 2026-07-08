@@ -94,12 +94,14 @@ def _static(
 ) -> bytes:
     result = b'Error: could not find static files '
     fn = fn.lstrip('/')  # since a URL, remove all leading /
+    valid = True
     for d in [Path(dawgie.context.fe_path).resolve(), Path(bdir).resolve()]:
         ffn = (d / fn).resolve()
 
         if not ffn.is_relative_to(d):
             result += b'attempted jail break'
             LOG.error('tried a jailbreak with %s from %s', ffn, d)
+            valid = False
             continue
         if ffn.is_dir():
             ffn = ffn / 'index.html'
@@ -107,7 +109,7 @@ def _static(
             break
         result += bytes(ffn) + b'     '
 
-    if ffn.is_file():
+    if valid and ffn.is_file():
         if isdep and ffn.suffix.lower() == '.html':
             with open(ffn, 'rt', encoding='utf-8') as f:
                 html = f.read()
@@ -145,7 +147,7 @@ def _static(
                 request.setHeader(b'Content-Type', b'application/javascript')
             with open(ffn, 'rb') as f:
                 result = f.read()
-    else:
+    elif valid:
         LOG.warning('request for the non-existent file %s', ffn)
 
     return result
