@@ -56,18 +56,24 @@ class SearchImplementation(SearchFacade):
         SearchFacade.__init__(self)
         self._conn = connection_factory
         self._cur = cursor_factory
+        self._latest = False
 
-    @staticmethod
-    def __add_runids(args: [], constraints: [], runids) -> []:
+    def __add_runids(self, args: [], constraints: [], runids) -> []:
         '''add ranges to args and contraints and return the runids'''
         indices = []
-        for rid in filter(lambda i: i >= 0, runids):
+        for rid in rids:
             if isinstance(rid, Range):
                 if rid.stop:
                     constraints.append(_RANGE)
                     args.extend((rid.start, rid.stop))
+                else:
+                    contraints.append(_RANGE_UE)
+                    args.extend(rid.start)
             else:
-                indices.append(rid)
+                if rid < 0:
+                    self._latest = -1
+                else:
+                    indices.append(rid)
         return indices
 
     def __args_n_constraints(self, parameters: Params) -> ([], []):
