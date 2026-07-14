@@ -44,53 +44,77 @@ from ..basis import Params, Range, SearchFacade, SearchResults
 
 _CONSTRAINT = 'p.{sql.fk} = ANY(%s)'
 _FKS = 'SELECT pk FROM {sql.table} WHERE name = ANY(%s);'
+_LATEST_CTE = (
+    'WITH ranked AS ('
+    'SELECT p.run_ID, tn.name AS tn_name, task.name AS task_name, '
+    'alg.name AS alg_name, sv.name AS sv_name, '
+    'MAX(p.run_ID) OVER ('
+    'PARTITION BY p.tn_ID, p.task_ID, alg.name, sv.name'
+    ') AS max_run_id '
+    'FROM Prime p '
+    'JOIN Target tn ON p.tn_ID = tn.PK '
+    'JOIN Task task ON p.task_ID = task.PK '
+    'JOIN Algorithm alg ON p.alg_ID = alg.PK '
+    'JOIN StateVector sv ON p.sv_ID = sv.PK '
+    '{where}'
+    ')'
+)
 _NAMES_ALL = 'SELECT name FROM {sql.table};'
 _NAMES_SOME = 'SELECT name FROM {sql.table} WHERE pk = ANY(%s);'
 _PKS = 'SELECT p.{sql.fk} FROM Prime p WHERE {sql.constraints};'
-_RANGE = 'run_ID >= %s and run_ID < %s'
-_RANGE_UE = 'run_ID >= %s'
+_RANGE = 'p.run_ID >= %s and p.run_ID < %s'
+_RANGE_UE = 'p.run_ID >= %s'
 
 
 class SearchImplementation(SearchFacade):
     def __init__(self, connection_factory, cursor_factory):
         SearchFacade.__init__(self)
+        self._args = []
         self._conn = connection_factory
+        self._constraints = []
         self._cur = cursor_factory
+        self._latest = False
 
-    @staticmethod
-    def __add_runids(args: [], constraints: [], runids) -> []:
+    def __add_runids(self, runids, sql_info) -> []:
         '''add ranges to args and contraints and return the runids'''
+        ranges = []
         indices = []
-        for rid in filter(lambda i: i >= 0, runids):
+        for rid in runids:
             if isinstance(rid, Range):
                 if rid.stop:
-                    constraints.append(_RANGE)
-                    args.extend((rid.start, rid.stop))
+                    self._args.extend((rid.start, rid.stop))
+                    ranges.append(_RANGE)
+                else:
+                    self._args.append(rid.start)
+                    ranges.append(_RANGE_UE)
+            elif rid < 0:
+                self._latest = True
             else:
                 indices.append(rid)
-        return indices
+        if indices:
+            self._args.append(indices)
+            ranges.append(_CONSTRAINT.format(sql=sql_info))
+        if ranges:
+            constraint = ' OR '.join(ranges)
+            self._constraints.append(f'({constraint})')
+        return
 
     def __args_n_constraints(self, parameters: Params) -> ([], []):
-        args = []
-        constraints = []
         for k, v in filter(lambda t: bool(t[1]), parameters._asdict().items()):
             sql_info = _SQL_TABLE[k]
             if k == 'runids':
-                indices = self.__add_runids(args, constraints, v)
-                if indices:
-                    constraints.append(_CONSTRAINT.format(sql=sql_info))
-                    args.append(indices)
+                self.__add_runids(v, sql_info)
             else:
                 connection = self._conn()
                 cursor = self._cur(connection)
                 try:
                     cursor.execute(_FKS.format(sql=sql_info), (v,))
-                    args.append(list(row[0] for row in cursor.fetchall()))
-                    constraints.append(_CONSTRAINT.format(sql=sql_info))
+                    self._args.append(list(row[0] for row in cursor.fetchall()))
+                    self._constraints.append(_CONSTRAINT.format(sql=sql_info))
                 finally:
                     cursor.close()
                     connection.close()
-        return args, constraints
+        return
 
     def _facet(self, parameters: Params) -> [str]:
         '''Find the sublist(s) given some constraints
@@ -103,20 +127,20 @@ class SearchImplementation(SearchFacade):
         then the list will always be 0..1 strings. If 0, then no match. If 1,
         then it be first:last+1 even if the indices are not continuous.
         '''
-        args, constraints = self.__args_n_constraints(parameters)
+        self.__args_n_constraints(parameters)
         results = []
         sql_info = None
         for k, v in parameters._asdict().items():
             if SearchFacade._isempty(v):
                 sql_info = _SQL_TABLE[k]
                 sql_info = sql_info._replace(
-                    constraints=' AND '.join(constraints)
+                    constraints=' AND '.join(self._constraints)
                 )
         connection = self._conn()
         cursor = self._cur(connection)
         try:
             if sql_info.constraints:
-                cursor.execute(_PKS.format(sql=sql_info), args)
+                cursor.execute(_PKS.format(sql=sql_info), self._args)
                 pks = list(set(row[0] for row in cursor.fetchall()))
                 if pks:
                     cursor.execute(_NAMES_SOME.format(sql=sql_info), (pks,))
@@ -139,11 +163,11 @@ class SearchImplementation(SearchFacade):
         as no caching is done for simplicity reasons. Hence large searches
         are expensive.
         '''
-        args, constraints = self.__args_n_constraints(parameters)
-        constraints = ' AND '.join(constraints)
+        self.__args_n_constraints(parameters)
+        constraints = ' AND '.join(self._constraints)
         items = []
         total = -2
-        if not constraints:
+        if not self._constraints and not self._latest:
             raise ValueError(
                 'No constaints means the whole Prime table. '
                 'Apply some constraints and try again'
@@ -151,32 +175,56 @@ class SearchImplementation(SearchFacade):
         connection = self._conn()
         cursor = self._cur(connection)
         try:
-            cursor.execute(
-                'SELECT count(DISTINCT (p.run_ID, p.tn_ID, p.task_ID, '
-                f'p.alg_ID, p.sv_ID)) FROM Prime p WHERE {constraints};',
-                args,
-            )
-            total = cursor.fetchone()[0]
-            limit = total if limit is None else limit
-            if limit:
-                args.extend([limit, index])
+            if self._latest:
+                cte = _LATEST_CTE.format(
+                    where=f'WHERE {constraints}' if constraints else ''
+                )
                 cursor.execute(
-                    'SELECT DISTINCT ON '
-                    '(p.run_ID, p.tn_ID, p.task_ID, p.alg_ID, p.sv_ID) '
-                    'p.run_ID, tn.name, task.name, alg.name, sv.name '
-                    'FROM Prime p '
-                    'JOIN Target tn ON p.tn_ID = tn.PK '
-                    'JOIN Task task ON p.task_ID = task.PK '
-                    'JOIN Algorithm alg ON p.alg_ID = alg.PK '
-                    'JOIN StateVector sv ON p.sv_ID = sv.PK '
-                    f'WHERE {constraints} '
-                    'ORDER BY p.run_ID, p.tn_ID, p.task_ID, p.alg_ID, p.sv_ID '
-                    'LIMIT %s OFFSET %s;',
-                    args,
+                    f'{cte} SELECT count(*) FROM ranked '
+                    'WHERE run_ID = max_run_id;',
+                    self._args,
                 )
-                items.extend(
-                    '.'.join(map(str, row)) for row in cursor.fetchall()
+                total = cursor.fetchone()[0]
+                limit = total if limit is None else limit
+                if limit:
+                    cursor.execute(
+                        f'{cte} SELECT DISTINCT run_ID, tn_name, task_name, '
+                        'alg_name, sv_name FROM ranked '
+                        'WHERE run_ID = max_run_id '
+                        'ORDER BY run_ID, tn_name, task_name, alg_name, sv_name '
+                        'LIMIT %s OFFSET %s;',
+                        self._args + [limit, index],
+                    )
+                    items.extend(
+                        '.'.join(map(str, row)) for row in cursor.fetchall()
+                    )
+            else:
+                cursor.execute(
+                    'SELECT count(DISTINCT (p.run_ID, p.tn_ID, p.task_ID, '
+                    f'p.alg_ID, p.sv_ID)) FROM Prime p WHERE {constraints};',
+                    self._args,
                 )
+                total = cursor.fetchone()[0]
+                limit = total if limit is None else limit
+                if limit:
+                    self._args.extend([limit, index])
+                    cursor.execute(
+                        'SELECT DISTINCT ON '
+                        '(p.run_ID, p.tn_ID, p.task_ID, p.alg_ID, p.sv_ID) '
+                        'p.run_ID, tn.name, task.name, alg.name, sv.name '
+                        'FROM Prime p '
+                        'JOIN Target tn ON p.tn_ID = tn.PK '
+                        'JOIN Task task ON p.task_ID = task.PK '
+                        'JOIN Algorithm alg ON p.alg_ID = alg.PK '
+                        'JOIN StateVector sv ON p.sv_ID = sv.PK '
+                        f'WHERE {constraints} '
+                        'ORDER BY p.run_ID, p.tn_ID, p.task_ID, p.alg_ID, p.sv_ID '
+                        'LIMIT %s OFFSET %s;',
+                        self._args,
+                    )
+                    items.extend(
+                        '.'.join(map(str, row)) for row in cursor.fetchall()
+                    )
         finally:
             cursor.close()
             connection.close()

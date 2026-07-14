@@ -61,6 +61,10 @@ class DbSearchFacadeScrub(unittest.TestCase):
             SearchFacade._scrub(Params('1:10', **kwds)),
         )
         self.assertEqual(
+            Params([Range(3, None)], **kwds),
+            SearchFacade._scrub(Params('3:', **kwds)),
+        )
+        self.assertEqual(
             Params([Range(1, 10)], **kwds),
             SearchFacade._scrub(Params('6,1:10,9', **kwds)),
         )

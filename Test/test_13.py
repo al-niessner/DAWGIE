@@ -395,24 +395,33 @@ class DB:
         dawgie.db.close()
         self.assertRaises(RuntimeError, dawgie.db.search)
         dawgie.db.open()
-        search = dawgie.db.search()
-        self.assertIsInstance(search, SearchFacade)
-        self.assertEqual([], search.facet(Params(3, [])))
-        self.assertEqual(['__all__', 'test'], search.facet(Params(17, [])))
-        self.assertEqual([], search.facet(Params(17, ['apple'], [])))
+        self.assertIsInstance(dawgie.db.search(), SearchFacade)
+        self.assertEqual([], dawgie.db.search().facet(Params(3, [])))
+        self.assertEqual(
+            ['__all__', 'test'], dawgie.db.search().facet(Params(17, []))
+        )
+        self.assertEqual(
+            [], dawgie.db.search().facet(Params(17, ['apple'], []))
+        )
         asps = list(a[0]._name() for a in dawgie.db.testdata.ASPECTS)
         dsts = list(d[1]._name() for d in dawgie.db.testdata.DATASETS)
         regs = list(t[0]._name() for t in dawgie.db.testdata.TIMELINES)
         asps.sort()
         dsts.sort()
         regs.sort()
-        self.assertEqual(asps, search.facet(Params(17, ['__all__'], [])))
-        self.assertEqual(dsts, search.facet(Params(17, ['test'], [])))
-        self.assertEqual(regs, search.facet(Params([0], ['test'], [])))
+        self.assertEqual(
+            asps, dawgie.db.search().facet(Params(17, ['__all__'], []))
+        )
+        self.assertEqual(
+            dsts, dawgie.db.search().facet(Params(17, ['test'], []))
+        )
+        self.assertEqual(
+            regs, dawgie.db.search().facet(Params([0], ['test'], []))
+        )
         rest = SearchResults(['17.test.Task_03.Algorithm_10.StateVector_03'], 1)
         self.assertEqual(
             rest,
-            search.find(
+            dawgie.db.search().find(
                 Params(
                     17,
                     ['test'],
