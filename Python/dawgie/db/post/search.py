@@ -75,31 +75,35 @@ class SearchImplementation(SearchFacade):
         self._cur = cursor_factory
         self._latest = False
 
-    def __add_runids(self, runids) -> []:
+    def __add_runids(self, runids, sql_info) -> []:
         '''add ranges to args and contraints and return the runids'''
+        ranges = []
         indices = []
         for rid in runids:
             if isinstance(rid, Range):
                 if rid.stop:
-                    self._constraints.append(_RANGE)
                     self._args.extend((rid.start, rid.stop))
+                    ranges.append(_RANGE)
                 else:
-                    self._constraints.append(_RANGE_UE)
                     self._args.append(rid.start)
+                    ranges.append(_RANGE_UE)
             elif rid < 0:
                 self._latest = True
             else:
                 indices.append(rid)
-        return indices
+        if indices:
+            self._args.append(indices)
+            ranges.append(_CONSTRAINT.format(sql=sql_info))
+        if ranges:
+            constraint = ' OR '.join(ranges)
+            self._constraints.append(f'({constraint})')
+        return
 
     def __args_n_constraints(self, parameters: Params) -> ([], []):
         for k, v in filter(lambda t: bool(t[1]), parameters._asdict().items()):
             sql_info = _SQL_TABLE[k]
             if k == 'runids':
-                indices = self.__add_runids(v)
-                if indices:
-                    self._args.append(indices)
-                    self._constraints.append(_CONSTRAINT.format(sql=sql_info))
+                self.__add_runids(v, sql_info)
             else:
                 connection = self._conn()
                 cursor = self._cur(connection)
