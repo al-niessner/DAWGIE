@@ -108,7 +108,7 @@ def df_model_statistics(node_name: str):
         return build_return_object({'status': 'scheduled'})
     matched = []
     for known in dawgie.pl.logger.chronicle.find(
-        after=dawgie.context.boot_time, status='failed'
+        after=dawgie.context.boot_time, status='failure'
     ):
         if known['task'] == node_name:
             known['status'] = 'failed'

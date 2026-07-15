@@ -90,7 +90,7 @@ def failed(
     limit = int(limit[0]) if limit else None
     return build_return_object(
         dawgie.pl.logger.chronicle.find(
-            before=before, limit=limit, status='failed'
+            before=before, limit=limit, status='failure'
         )
     )
 
