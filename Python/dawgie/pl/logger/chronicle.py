@@ -44,15 +44,14 @@ import os
 from datetime import UTC, datetime, timedelta
 
 
-def _load(after: datetime, before: datetime, journal: str, succeeded: bool):
+def _load(after: datetime, before: datetime, journal: str, status: str):
     entries = []
-    status = 'success' if succeeded else 'failure'
     for fn in filter(lambda fn: fn.endswith('.json'), os.listdir(journal)):
         jsonfile = os.path.join(journal, fn)
         with open(jsonfile, 'rt', encoding='utf-8') as file:
             for entry in json.load(file):
                 completed = datetime.fromisoformat(entry['timing']['completed'])
-                if after < completed < before and entry['status'] == status:
+                if after < completed < before and entry['status'] in status:
                     entries.append(entry)
     entries.sort(key=_most_recent_first, reverse=True)
     return entries
@@ -107,9 +106,9 @@ def find(
     after: datetime = None,
     before: datetime = None,
     limit: int = None,
-    succeeded: bool = True,
+    status: str = 'success',
 ):
-    '''Find the failed/succeeded tasks between two dates to a limit
+    '''Find the failed/invalid/succeeded tasks between two dates to a limit
 
     after - the date time the entries completion time should be after
     before - the date time the entries completion time should be before
@@ -149,7 +148,7 @@ def find(
             if os.path.isdir(journal):
                 journal = os.path.join(journal, f'{before.day:02d}')
                 if os.path.isdir(journal):
-                    entries.extend(_load(after, before, journal, succeeded))
+                    entries.extend(_load(after, before, journal, status))
                 before = before - oneday
             else:
                 before = (

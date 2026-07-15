@@ -108,13 +108,13 @@ def df_model_statistics(node_name: str):
         return build_return_object({'status': 'scheduled'})
     matched = []
     for known in dawgie.pl.logger.chronicle.find(
-        after=dawgie.context.boot_time, succeeded=False
+        after=dawgie.context.boot_time, status='failed'
     ):
         if known['task'] == node_name:
             known['status'] = 'failed'
             matched.append(known)
     for known in dawgie.pl.logger.chronicle.find(
-        after=dawgie.context.boot_time, succeeded=True
+        after=dawgie.context.boot_time, status='success'
     ):
         if known['task'] == node_name:
             known['status'] = 'succeeded'
@@ -186,6 +186,7 @@ DynamicContent(schedule.doing, '/api/schedule/doing')
 DynamicContent(schedule.events, '/api/schedule/events')
 DynamicContent(schedule.failed, '/api/schedule/failed')
 DynamicContent(schedule.inprogress, '/api/schedule/in-progress')
+DynamicContent(schedule.invalid, '/api/schedule/invalid')
 DynamicContent(schedule.stats, '/api/schedule/stats')
 DynamicContent(schedule.succeeded, '/api/schedule/succeeded')
 DynamicContent(schedule.todo, '/api/schedule/to-do')
