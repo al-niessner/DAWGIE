@@ -148,7 +148,7 @@ class Chronicles(unittest.TestCase):
         )
         self.assertEqual(7, len(entries))
         entries = dawgie.pl.logger.chronicle.find(
-            after=datetime(2017, 7, 1, tzinfo=UTC), succeeded=False
+            after=datetime(2017, 7, 1, tzinfo=UTC), status='failure'
         )
         self.assertEqual(6, len(entries))
         entries = dawgie.pl.logger.chronicle.find(before=datetime.now(UTC))
@@ -163,7 +163,7 @@ class Chronicles(unittest.TestCase):
         entries = dawgie.pl.logger.chronicle.find(
             after=datetime(2017, 1, 1, tzinfo=UTC),
             before=datetime(2018, 1, 1, tzinfo=UTC),
-            succeeded=False,
+            status='failure',
         )
         self.assertEqual(14, len(entries))
         entries = dawgie.pl.logger.chronicle.find(

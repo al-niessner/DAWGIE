@@ -90,7 +90,7 @@ def failed(
     limit = int(limit[0]) if limit else None
     return build_return_object(
         dawgie.pl.logger.chronicle.find(
-            before=before, limit=limit, succeeded=False
+            before=before, limit=limit, status='failure'
         )
     )
 
@@ -98,6 +98,24 @@ def failed(
 def inprogress(index: int = 0, limit: int = None):
     index, _limit, term = _legacy_arg_fixer(index, limit)
     return build_return_object(dawgie.pl.farm.crew()['busy'][index:term])
+
+
+def invalid(
+    after: [str] = None,
+    before: [str] = None,
+    index: [int] = None,
+    limit: [int] = None,
+):
+    if index is not None:
+        build_return_object(None, Status.FAILURE, 'index has been deprecated')
+    after = datetime.fromisoformat(after[0]) if after else None
+    before = datetime.fromisoformat(before[0]) if before else None
+    limit = int(limit[0]) if limit else None
+    return build_return_object(
+        dawgie.pl.logger.chronicle.find(
+            before=before, limit=limit, status='invalid'
+        )
+    )
 
 
 def stats():
@@ -134,7 +152,7 @@ def succeeded(
     limit = int(limit[0]) if limit else None
     return build_return_object(
         dawgie.pl.logger.chronicle.find(
-            before=before, limit=limit, succeeded=True
+            before=before, limit=limit, status='success'
         )
     )
 
