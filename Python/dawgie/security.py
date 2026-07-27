@@ -483,6 +483,7 @@ def is_sanctioned(
             '/app/schedule/doing',
             '/app/schedule/events',
             '/app/schedule/failure',
+            '/app/schedule/invalid',
             '/app/schedule/success',
             '/app/schedule/tasks',
             '/app/schedule/todo',
