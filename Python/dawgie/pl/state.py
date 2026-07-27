@@ -247,10 +247,20 @@ class FSM:
                     int(dawgie.context.fe_port), factory, cert.options()
                 )
                 if dawgie.security.clients():
+                    trust_roots = (
+                        twisted.internet.ssl.trustRootFromCertificates(
+                            dawgie.security.clients()
+                        )
+                    )
+                    context_factory = twisted.internet.ssl.CertificateOptions(
+                        privateKey=cert.privateKey.original,
+                        certificate=cert.original,
+                        trustRoot=trust_roots,
+                        requireCertificate=True,  # enforce client certs
+                        verify=True,
+                    )
                     twisted.internet.reactor.listenSSL(
-                        dawgie.context.cfe_port,
-                        factory,
-                        cert.options(*dawgie.security.clients()),
+                        dawgie.context.cfe_port, factory, context_factory
                     )
             else:
                 log.info('starting front end using HTTP')
