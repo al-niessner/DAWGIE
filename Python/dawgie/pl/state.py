@@ -256,8 +256,6 @@ class FSM:
                         privateKey=cert.privateKey.original,
                         certificate=cert.original,
                         trustRoot=trust_roots,
-                        requireCertificate=True,  # enforce client certs
-                        verify=True,
                     )
                     twisted.internet.reactor.listenSSL(
                         dawgie.context.cfe_port, factory, context_factory
