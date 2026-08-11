@@ -48,9 +48,12 @@ import twisted.internet
 import twisted.web.resource
 import twisted.web.server
 
+from dawgie.security import AccessLevel
+
 dawgie.context.fsm = dawgie.pl.state.FSM()
 dawgie.security.initialize(
     path=dawgie.context.guest_public_keys,
+    myauth=dawgie.context.ssl_pem_myauth,
     myname=dawgie.context.ssl_pem_myname,
     myself=dawgie.context.ssl_pem_myself,
     system=dawgie.context.ssl_pem_file,
@@ -58,15 +61,20 @@ dawgie.security.initialize(
 factory = twisted.web.server.Site(dawgie.fe.root())
 
 if dawgie.security.use_tls():
-    cert = dawgie.security.authority()
+    cert = dawgie.security.owner(AccessLevel.public)
     twisted.internet.reactor.listenSSL(
         dawgie.context.fe_port, factory, cert.options()
     )
     if dawgie.security.clients():
+        cert = dawgie.security.owner('protected')
+        trust = dawgie.security.trust('protected')
+        context_factory = twisted.internet.ssl.CertificateOptions(
+            privateKey=cert.privateKey.original,
+            certificate=cert.original,
+            trustRoot=trust,
+        )
         twisted.internet.reactor.listenSSL(
-            dawgie.context.cfe_port,
-            factory,
-            cert.options(*dawgie.security.clients()),
+            dawgie.context.cfe_port, factory, context_factory
         )
 else:
     twisted.internet.reactor.listenTCP(dawgie.context.fe_port, factory)

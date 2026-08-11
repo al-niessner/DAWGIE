@@ -51,6 +51,8 @@ import math
 import struct
 import twisted.internet.task
 
+from dawgie.security import AccessLevel
+
 ARCHIVE = False
 
 
@@ -429,13 +431,10 @@ def plow():
         pass
 
     if dawgie.security.use_tls():
-        controller = dawgie.security.authority().options(
-            *dawgie.security.certificates()
-        )
         twisted.internet.reactor.listenSSL(
             int(dawgie.context.farm_port),
             Foreman(),
-            controller,
+            dawgie.security.owner(AccessLevel.private).options(),
             dawgie.context.worker_backlog,
         )
     else:

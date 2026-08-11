@@ -57,6 +57,8 @@ import requests
 import tempfile
 import twisted.internet.task
 
+from dawgie.security import AccessLevel
+
 _contractors = []
 
 
@@ -574,13 +576,10 @@ def execute(address: (str, int), inc: int, ps_hint: int, rev: str):
 
 def initialize():
     if dawgie.security.use_tls():
-        controller = dawgie.security.authority().options(
-            *dawgie.security.certificates()
-        )
         twisted.internet.reactor.listenSSL(
             int(dawgie.context.cloud_port),
             Company(),
-            controller,
+            dawgie.security.owner(AccessLevel.private),
             dawgie.context.worker_backlog,
         )
     else:

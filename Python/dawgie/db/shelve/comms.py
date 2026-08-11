@@ -60,6 +60,8 @@ from .enums import Mutex
 from .enums import Table
 from .state import DBI
 
+from dawgie.security import AccessLevel
+
 COMMAND = collections.namedtuple(
     'COMMAND', ['func', 'keyset', 'table', 'value']
 )
@@ -136,13 +138,10 @@ class DBSerializer(twisted.internet.protocol.Factory):
     def open():
         try:
             if dawgie.security.use_tls():
-                controller = dawgie.security.authority().options(
-                    *dawgie.security.certificates()
-                )
                 twisted.internet.reactor.listenSSL(
                     int(dawgie.context.db_port),
                     DBSerializer(),
-                    controller,
+                    dawgie.security.owner(AccessLevel.private).options(),
                     dawgie.context.worker_backlog,
                 )
             else:

@@ -137,6 +137,9 @@ def lambda_handler(event, context):
 
     if event['httpMethod'] == 'POST':
         dawgie.security.initialize(
+            myauth=os.path.expandvars(
+                os.path.expanduser(dawgie.context.ssl_pem_myauth)
+            ),
             myname=dawgie.context.myname,
             myself=dawgie.context.myself,
             system=dawgie.context.ssl_pem_file,

@@ -242,20 +242,17 @@ class FSM:
 
             if dawgie.security.use_tls():
                 log.info('starting front end using HTTPS')
-                cert = dawgie.security.authority()
+                cert = dawgie.security.owner(dawgie.security.AccessLevel.public)
                 twisted.internet.reactor.listenSSL(
                     int(dawgie.context.fe_port), factory, cert.options()
                 )
                 if dawgie.security.clients():
-                    trust_roots = (
-                        twisted.internet.ssl.trustRootFromCertificates(
-                            dawgie.security.clients()
-                        )
-                    )
+                    cert = dawgie.security.owner('protected')
+                    trust = dawgie.security.trust('protected')
                     context_factory = twisted.internet.ssl.CertificateOptions(
                         privateKey=cert.privateKey.original,
                         certificate=cert.original,
-                        trustRoot=trust_roots,
+                        trustRoot=trust,
                     )
                     twisted.internet.reactor.listenSSL(
                         dawgie.context.cfe_port, factory, context_factory
@@ -351,6 +348,9 @@ class FSM:
             dawgie.security.initialize(
                 path=os.path.expandvars(
                     os.path.expanduser(dawgie.context.guest_public_keys)
+                ),
+                myauth=os.path.expandvars(
+                    os.path.expanduser(dawgie.context.ssl_pem_myauth)
                 ),
                 myname=dawgie.context.ssl_pem_myname,
                 myself=os.path.expandvars(

@@ -150,6 +150,9 @@ if __name__ == '__main__':
         path=os.path.expandvars(
             os.path.expanduser(dawgie.context.guest_public_keys)
         ),
+        myauth=os.path.expandvars(
+            os.path.expanduser(dawgie.context.ssl_pem_myauth)
+        ),
         myname=dawgie.context.ssl_pem_myname,
         myself=os.path.expandvars(
             os.path.expanduser(dawgie.context.ssl_pem_myself)
