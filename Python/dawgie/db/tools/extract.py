@@ -116,7 +116,7 @@ if __name__ == '__main__':
     import dawgie.db
     import dawgie.util
     from dawgie.util import resolve_security_args
-    
+
     UNIQUE_FN = '.'.join(['extract', getpass.getuser(), 'log'])
     ap = argparse.ArgumentParser(
         description='Extract a single state vector from a database.'
