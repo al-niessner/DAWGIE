@@ -54,6 +54,8 @@ import matplotlib; matplotlib.use('Agg')  # fmt: skip # noqa: E702 # pylint: dis
 import os
 import sys
 
+from dawgie.util import resolve_security_args
+
 dawgie.pl.worker.LOGGING = dawgie.pl.worker.LogManager()
 ap = argparse.ArgumentParser(
     description='The main routine to run and individual worker. Beyond the parameters provided, the worker can override the context downloaded from the foreman using the DAWGIE_*_PORT environment variables. See OVERRIDES in dawgie.pl.worker for a complete list.'
@@ -113,19 +115,7 @@ python_path = dawgie.context.ae_base_path
 for junk in dawgie.context.ae_base_package.split('.'):
     python_path = os.path.dirname(python_path)
 sys.path.insert(0, python_path)
-dawgie.security.initialize(
-    path=os.path.expandvars(
-        os.path.expanduser(dawgie.context.guest_public_keys)
-    ),
-    myauth=os.path.expandvars(
-        os.path.expanduser(dawgie.context.ssl_pem_myauth)
-    ),
-    myname=dawgie.context.ssl_pem_myname,
-    myself=os.path.expandvars(
-        os.path.expanduser(dawgie.context.ssl_pem_myself)
-    ),
-    system=dawgie.context.ssl_pem_file,
-)
+dawgie.security.initialize(**resolve_security_args())
 try:
     if args.cloud_provider == 'aws':
         dawgie.pl.worker.aws.execute(

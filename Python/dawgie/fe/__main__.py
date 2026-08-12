@@ -49,15 +49,10 @@ import twisted.web.resource
 import twisted.web.server
 
 from dawgie.security import AccessLevel
+from dawgie.util import resolve_security_args
 
 dawgie.context.fsm = dawgie.pl.state.FSM()
-dawgie.security.initialize(
-    path=dawgie.context.guest_public_keys,
-    myauth=dawgie.context.ssl_pem_myauth,
-    myname=dawgie.context.ssl_pem_myname,
-    myself=dawgie.context.ssl_pem_myself,
-    system=dawgie.context.ssl_pem_file,
-)
+dawgie.security.initialize(**resolve_security_args())
 factory = twisted.web.server.Site(dawgie.fe.root())
 
 if dawgie.security.use_tls():
