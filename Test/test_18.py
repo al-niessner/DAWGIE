@@ -71,14 +71,14 @@ class Security(unittest.TestCase):
         self.assertFalse(
             dawgie.security.use_client_verification(), 'clear known serts'
         )
-        with open(os.path.join(self.wdir, 'dawgie.public.pem'), 'tw') as file:
+        with open(os.path.join(self.wdir, 'signed.public.pem'), 'tw') as file:
             file.write('bad cert')
         with self.assertRaises(OpenSSL.crypto.Error):
             dawgie.security._tls_initialize(self.wdir)
         self.assertFalse(
             dawgie.security.use_client_verification(), 'clear known serts'
         )
-        with open(os.path.join(self.wdir, 'dawgie.public.pem'), 'tw') as file:
+        with open(os.path.join(self.wdir, 'signed.public.pem'), 'tw') as file:
             file.write('''-----BEGIN CERTIFICATE-----
 MIID7DCCAtSgAwIBAgIUB0JGjlKNuRBhs1ElGrhsobOa+AMwDQYJKoZIhvcNAQEL
 BQAwTDELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAkNBMQswCQYDVQQHDAJMQTENMAsG

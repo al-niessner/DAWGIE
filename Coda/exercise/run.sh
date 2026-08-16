@@ -105,7 +105,7 @@ make_cert ${tempdir}/certs/guest.pem  # client should load this into browser
 make_cert ${tempdir}/certs/myself.pem # allows interconnection
 make_cert ${tempdir}/certs/server.pem # for https
 # rename guest certificate to something dawgie will find
-cp ${tempdir}/certs/guest.pem.public ${tempdir}/certs/dawgie.public.pem.guest
+cp ${tempdir}/certs/guest.pem.public ${tempdir}/certs/signed.public.pem.guest
 
 # make sure the user is well defined
 if [ -z "${UID}" ]

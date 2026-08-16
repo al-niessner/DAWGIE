@@ -372,7 +372,7 @@ def _tls_initialize(
     Rather than have the user maintain a set of certificates, allow anyone and
     everyone access.
 
-    path   : path to find the PGP keys dawgie.public.pem*
+    path   : path to find the PGP keys signed.public.pem*
     myauth : CA for myself and guests
     myname : the host name in the certificate
     myself : absolute file path a private certificate PEM that contains the
@@ -405,7 +405,7 @@ def _tls_initialize(
         )
     if ca and path and os.path.exists(path) and os.path.isdir(path):
         for fn in filter(
-            lambda fn: fn.startswith('dawgie.public.pem'), os.listdir(path)
+            lambda fn: fn.startswith('signed.public.pem'), os.listdir(path)
         ):
             log.info('Found public key file: %s', fn)
             with open(os.path.join(path, fn), 'rt', encoding='utf-8') as file:
