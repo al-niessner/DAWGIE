@@ -222,8 +222,6 @@ class Foreman(twisted.internet.protocol.Factory):
     def buildProtocol(self, addr):
         return Hand(addr)
 
-    pass
-
 
 _agency = [None]
 _busy = []

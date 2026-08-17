@@ -89,6 +89,20 @@ EOF
             -out "${2}" -sha256 -extfile "${EXT}" -days 7
 }
 
+selfsign() {
+    EXT=$(mktemp)
+    cat > "${EXT}" <<EOF
+basicConstraints=critical,CA:FALSE
+keyUsage=critical,digitalSignature,keyEncipherment
+extendedKeyUsage=clientAuth,serverAuth
+EOF
+    openssl x509 -req -in ${1}.csr -signkey ${1}.key -days 7 \
+            -out ${1}.crt -extfile "${EXT}"
+    rm -f "${EXT}"
+    cat ${1}.key ${1}.crt > ${1}.self.signed.pem
+    chmod 600 ${1}.self.signed.pem
+}
+
 if [[ $# -gt 1 ]]
 then
     echo "usage: $(basename $0) [post|shelve]"
@@ -119,9 +133,10 @@ mkdir -p ${tempdir}/{certs,db,dbs,fe,logs,stg}
 make_ca ${tempdir}/certs/ex-ca
 make_cert ${tempdir}/certs/guest  # client should load this into browser
 make_cert ${tempdir}/certs/myself # allows interconnection
-#make_cert ${tempdir}/certs/server # for https
-mv ${tempdir}/certs/signed.public.pem.myself ${tempdir}/certs/myself.crt
-#mv ${tempdir}/certs/signed.public.pem.server ${tempdir}/certs/server.crt
+mv ${tempdir}/certs/myself.pem ${tempdir}/certs/myself.ca.signed.pem
+selfsign ${tempdir}/certs/myself
+# server needs to be a self signed cert
+# normally, this would be a cert provided by the company that fully validates
 openssl req -x509 -newkey rsa:4096 -sha256 -days 365 -nodes \
   -keyout ${tempdir}/certs/server.key -out ${tempdir}/certs/server.crt \
   -subj "/CN=localhost" \

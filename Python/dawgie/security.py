@@ -421,11 +421,6 @@ def _tls_initialize(
         pubs = _pub_certs(cxt)
         prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
         prv = prv.options(*pubs)
-        if ca and not _verified_by_ca(
-            twisted.internet.ssl.Certificate.loadPEM(cxt), ca
-        ):
-            log.warning('Ignoring self cert %s: not signed by CA', myself)
-            return
         _myself.update(
             {'file': myself, 'name': myname, 'private': prv, 'public': pubs}
         )
