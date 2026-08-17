@@ -65,8 +65,8 @@ make_cert () {
             -keyout ${1}.key -out ${1}.csr \
             -subj "/CN=$(id -un)"
     sign ${1}.csr ${tempdir}/certs/signed.public.pem.$(basename $1)
-    cat ${1}.key ${tempdir}/certs/signed.public.pem.$(basename $1) > ${1}.pem
-    chmod 600 ${1}.pem
+    cat ${1}.key ${tempdir}/certs/signed.public.pem.$(basename $1) > ${1}.ca.signed.pem
+    chmod 600 ${1}.ca.signed.pem
 }
 
 sign () {
@@ -133,7 +133,6 @@ mkdir -p ${tempdir}/{certs,db,dbs,fe,logs,stg}
 make_ca ${tempdir}/certs/ex-ca
 make_cert ${tempdir}/certs/guest  # client should load this into browser
 make_cert ${tempdir}/certs/myself # allows interconnection
-mv ${tempdir}/certs/myself.pem ${tempdir}/certs/myself.ca.signed.pem
 selfsign ${tempdir}/certs/myself
 # server needs to be a self signed cert
 # normally, this would be a cert provided by the company that fully validates
