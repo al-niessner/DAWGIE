@@ -243,12 +243,10 @@ def connect(address: (str, int)) -> socket.socket:
     try:
         if use_tls():
             context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-            file = _system['file'] if _system else _myself['file']
-            context.load_verify_locations(file)
+            context.check_hostname = False
+            context.load_verify_locations(_myself['file'])
             context.load_cert_chain(_myself['file'])
-            ss = context.wrap_socket(
-                s, server_hostname=file['private'].getSubject()['commonName']
-            )
+            ss = context.wrap_socket(s, server_hostname=address[0])
             ss.connect(address)
             return ss
 
@@ -384,13 +382,6 @@ def _tls_initialize(
     _myself.clear()
     _system.clear()
     certs = []
-    if system and os.path.isfile(system):
-        with open(system, 'rt', encoding='utf-8') as file:
-            cxt = file.read()
-        prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
-        prv.options(*_pub_certs(cxt))
-        _system['file'] = system
-        _system['private'] = prv
     ca = None
     if myauth and os.path.isfile(myauth):
         with open(myauth, 'rt', encoding='utf-8') as file:
@@ -403,6 +394,12 @@ def _tls_initialize(
             'ignored, myself will be accepted unverified',
             myauth,
         )
+    if system and os.path.isfile(system):
+        with open(system, 'rt', encoding='utf-8') as file:
+            cxt = file.read()
+        prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
+        _system['file'] = system
+        _system['private'] = prv
     if ca and path and os.path.exists(path) and os.path.isdir(path):
         for fn in filter(
             lambda fn: fn.startswith('signed.public.pem'), os.listdir(path)
@@ -423,7 +420,7 @@ def _tls_initialize(
             cxt = file.read()
         pubs = _pub_certs(cxt)
         prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
-        prv.options(*pubs)
+        prv = prv.options(*pubs)
         if ca and not _verified_by_ca(
             twisted.internet.ssl.Certificate.loadPEM(cxt), ca
         ):
@@ -610,7 +607,7 @@ def trust(access: AccessLevel):
     # this exact self-signed cert back to connect. blocks any other
     # process (dev, prod, whatever) that doesn't hold this file.
     justme = twisted.internet.ssl.trustRootFromCertificates(
-        [_myself['private']]
+        _myself['public']
     )
     match access:
         case AccessLevel.private:

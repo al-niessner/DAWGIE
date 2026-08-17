@@ -51,27 +51,42 @@ cleanup () {
     exit $1
 }
 
-make_cert () {
-    # make CSR
-    openssl req -newkey rsa:2048 -nodes -keyout device.key \
-            -subj "/C=US/ST=CA/L=LA/O=None/CN=exercise.dawgie" -out device.csr
-    # write the v3.ext file
-    echo "authorityKeyIdentifier=keyid,issuer
-basicConstraints=CA:FALSE
-keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
-subjectAltName = @alt_names
+make_ca() {
+    openssl req -x509 -new -nodes -newkey rsa:4096 -keyout ${1}.key -out ${1}.crt -days 7 \
+            -subj "/CN=Exercise User CA" \
+            -addext "basicConstraints=critical,CA:TRUE,pathlen:0" \
+            -addext "keyUsage=critical,keyCertSign,cRLSign" \
+            -addext "extendedKeyUsage=clientAuth" \
+            -addext "nameConstraints=critical,permitted;URI:exercise.local"
+}
 
-[alt_names]
-DNS.1 = exercise.dawgie
-DNS.2 = localhost
-DNS.3 = server_ex" > v3.ext
-    # build the certificate
-    openssl x509 -req -in device.csr -signkey device.key -out device.crt \
-            -sha256 -extfile v3.ext -days 36500 
-    # build the complete pem and just public bit for being a guest
-    cat device.key device.crt > $1
-    mv device.crt $1.public
-    rm device.csr device.key v3.ext
+make_cert () {
+    openssl req -new -nodes -newkey rsa:2048 \
+            -keyout ${1}.key -out ${1}.csr \
+            -subj "/CN=$(id -un)"
+    sign ${1}.csr ${tempdir}/certs/signed.public.pem.$(basename $1)
+    cat ${1}.key ${tempdir}/certs/signed.public.pem.$(basename $1) > ${1}.pem
+    chmod 600 ${1}.pem
+}
+
+sign () {
+    CALLER=$USER
+    EXT=$(mktemp)
+    trap 'rm -f "${EXT}"' EXIT
+
+    cat > "${EXT}" <<EOF
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=critical,CA:FALSE
+keyUsage=critical,digitalSignature,keyEncipherment
+extendedKeyUsage=clientAuth
+subjectAltName=URI:https://exercise.local/user/${CALLER}
+EOF
+
+    CA_CRT=${tempdir}/certs/ex-ca.crt
+    CA_KEY=${tempdir}/certs/ex-ca.key
+    openssl x509 -req -in "${1}" \
+            -CA "${CA_CRT}" -CAkey "${CA_KEY}" -CAcreateserial \
+            -out "${2}" -sha256 -extfile "${EXT}" -days 7
 }
 
 if [[ $# -gt 1 ]]
@@ -101,11 +116,17 @@ trap abort SIGINT
 exdir=$(realpath $(dirname $0))
 export tempdir=$(mktemp -d /tmp/dex.XXXXXX) # will be deleted when fininshed
 mkdir -p ${tempdir}/{certs,db,dbs,fe,logs,stg}
-make_cert ${tempdir}/certs/guest.pem  # client should load this into browser
-make_cert ${tempdir}/certs/myself.pem # allows interconnection
-make_cert ${tempdir}/certs/server.pem # for https
-# rename guest certificate to something dawgie will find
-cp ${tempdir}/certs/guest.pem.public ${tempdir}/certs/signed.public.pem.guest
+make_ca ${tempdir}/certs/ex-ca
+make_cert ${tempdir}/certs/guest  # client should load this into browser
+make_cert ${tempdir}/certs/myself # allows interconnection
+#make_cert ${tempdir}/certs/server # for https
+mv ${tempdir}/certs/signed.public.pem.myself ${tempdir}/certs/myself.crt
+#mv ${tempdir}/certs/signed.public.pem.server ${tempdir}/certs/server.crt
+openssl req -x509 -newkey rsa:4096 -sha256 -days 365 -nodes \
+  -keyout ${tempdir}/certs/server.key -out ${tempdir}/certs/server.crt \
+  -subj "/CN=localhost" \
+  -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,DNS:*.local"
+cat ${tempdir}/certs/server.key ${tempdir}/certs/server.crt > ${tempdir}/certs/server.pem
 
 # make sure the user is well defined
 if [ -z "${UID}" ]

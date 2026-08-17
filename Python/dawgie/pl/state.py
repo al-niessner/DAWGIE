@@ -98,6 +98,7 @@ import twisted.internet.ssl
 import twisted.web.resource
 import twisted.web.server
 
+from dawgie.security import AccessLevel
 from dawgie.util import resolve_security_args, resolve_site
 from pathlib import Path
 
@@ -242,13 +243,13 @@ class FSM:
 
             if dawgie.security.use_tls():
                 log.info('starting front end using HTTPS')
-                cert = dawgie.security.owner(dawgie.security.AccessLevel.public)
+                cert = dawgie.security.owner(AccessLevel.public)
                 twisted.internet.reactor.listenSSL(
                     int(dawgie.context.fe_port), factory, cert.options()
                 )
                 if dawgie.security.clients():
-                    cert = dawgie.security.owner('protected')
-                    trust = dawgie.security.trust('protected')
+                    cert = dawgie.security.owner(AccessLevel.protected)
+                    trust = dawgie.security.trust(AccessLevel.protected)
                     context_factory = twisted.internet.ssl.CertificateOptions(
                         privateKey=cert.privateKey.original,
                         certificate=cert.original,
