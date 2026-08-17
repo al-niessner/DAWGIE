@@ -601,9 +601,7 @@ def trust(access: AccessLevel):
     # mutual TLS pinned to our own cert only -- a peer must present
     # this exact self-signed cert back to connect. blocks any other
     # process (dev, prod, whatever) that doesn't hold this file.
-    justme = twisted.internet.ssl.trustRootFromCertificates(
-        _myself['public']
-    )
+    justme = twisted.internet.ssl.trustRootFromCertificates(_myself['public'])
     match access:
         case AccessLevel.private:
             return justme
