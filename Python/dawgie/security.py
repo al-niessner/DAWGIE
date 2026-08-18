@@ -409,6 +409,7 @@ def _tls_initialize(
                 cert = twisted.internet.ssl.Certificate.loadPEM(file.read())
             if _verified_by_ca(cert, ca):
                 certs.append(cert)
+                log.info('Adding client cert: %s', fn)
             else:
                 log.warning('Ignoring guest cert %s: not signed by CA', fn)
         # FUTURE: add check if not certs then raise ValueError()
