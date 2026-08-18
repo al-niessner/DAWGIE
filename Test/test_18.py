@@ -78,7 +78,11 @@ class Security(unittest.TestCase):
             dawgie.security.use_client_verification(), 'clear known certs'
         )
         # add CA here then it should fail
-        auth =  os.path.join(self.wdir, 'ca.pem')
+        '''
+$ openssl req -x509 -new -nodes -newkey rsa:4096   -keyout test-ca.key -out test-ca.crt    -days 36500         -subj "/CN=DAWGIE Unit Testing"         -addext "basicConstraints=critical,CA:TRUE,pathlen:0"         -addext "keyUsage=critical,keyCertSign,cRLSign"         -addext "extendedKeyUsage=clientAuth"         -addext "nameConstraints=critical,permitted;URI:dawgie.local"
+$ cat test-ca.key test-ca.crt > test-ca.pem
+        '''
+        auth = os.path.join(self.wdir, 'ca.pem')
         with open(auth, 'tw') as file:
             file.write('''
 -----BEGIN PRIVATE KEY-----
@@ -202,6 +206,18 @@ V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
         self.assertFalse(  # because cert is not signed by CA
             dawgie.security.use_client_verification(), 'clear known certs'
         )
+        '''
+$ openssl req -new -nodes -newkey rsa:2048             -keyout test.key -out test.csr             -subj "/CN=test"
+$ cat > v3.ext <<EOF
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=critical,CA:FALSE
+keyUsage=critical,digitalSignature,keyEncipherment
+extendedKeyUsage=clientAuth
+subjectAltName=URI:https://dawgie.local/user/test
+EOF
+$ openssl x509 -req -in test.csr             -CA test-ca.crt -CAkey test-ca.key -CAcreateserial             -out test.crt -sha256 -extfile v3.ext -days 36500   $ openssl verify -CAfile test-ca.pem test.crt
+test.crt: OK
+     '''
         with open(os.path.join(self.wdir, 'signed.public.pem.2'), 'tw') as file:
             file.write('''
 -----BEGIN CERTIFICATE-----
@@ -238,7 +254,9 @@ vAMQ03c3Z4am3wHNvwVGS6VE7NJtgzl4s2odLmbG7dmPGVeNtFlhT6TCo1PMsNat
         )
         base = os.path.join(self.wdir, 'myself.pem')
         with self.assertRaises(FileNotFoundError):
-            dawgie.security._tls_initialize(self.wdir, auth, 'example.com', base)
+            dawgie.security._tls_initialize(
+                self.wdir, auth, 'example.com', base
+            )
         self.assertTrue(
             dawgie.security.use_client_verification(),
             'find and load client certs',
@@ -270,7 +288,9 @@ V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
 -----END CERTIFICATE-----
 ''')
         with self.assertRaises(OpenSSL.crypto.Error):
-            dawgie.security._tls_initialize(self.wdir, auth, 'example.com', base)
+            dawgie.security._tls_initialize(
+                self.wdir, auth, 'example.com', base
+            )
         self.assertTrue(
             dawgie.security.use_client_verification(),
             'find and load client certs',
