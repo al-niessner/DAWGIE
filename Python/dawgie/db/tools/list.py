@@ -78,6 +78,7 @@ if __name__ == '__main__':
     import dawgie.context
     import dawgie.db
     import dawgie.util
+    from dawgie.util import resolve_security_args
 
     UNIQUE_FN = '.'.join(['list', getpass.getuser(), 'log'])
     ap = argparse.ArgumentParser(
@@ -146,16 +147,7 @@ if __name__ == '__main__':
         level=args.log_level,
     )
 
-    dawgie.security.initialize(
-        path=os.path.expandvars(
-            os.path.expanduser(dawgie.context.guest_public_keys)
-        ),
-        myname=dawgie.context.ssl_pem_myname,
-        myself=os.path.expandvars(
-            os.path.expanduser(dawgie.context.ssl_pem_myself)
-        ),
-        system=dawgie.context.ssl_pem_file,
-    )
+    dawgie.security.initialize(**resolve_security_args())
     info(
         args.run_id,
         args.target_name,
@@ -163,10 +155,8 @@ if __name__ == '__main__':
         args.alg_name,
         args.state_vector_name,
     )
-    pass
 else:
     import dawgie.context
     import dawgie.db
     import dawgie.util
-
-    pass
+    from dawgie.util import resolve_security_args

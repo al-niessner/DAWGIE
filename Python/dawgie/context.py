@@ -144,6 +144,7 @@ sanction_override = os.environ.get(
 )
 site_path = os.environ.get('DAWGIE_SITE_PATH', '')
 ssl_pem_file = os.environ.get('DAWGIE_SSL_PEM_FILE', '')
+ssl_pem_myauth = os.environ.get('DAWGIE_SSL_PEM_MYAUTH', '')
 ssl_pem_myname = os.environ.get('DAWGIE_SSL_PEM_MYNAME', 'dawgie')
 ssl_pem_myself = os.environ.get('DAWGIE_SSL_PEM_MYSELF', '')
 worker_backlog = int(os.environ.get('DAWGIE_LISTENER_BACKLOG', 50))
@@ -411,6 +412,12 @@ def add_arguments(ap):
         help='when pointing at an existing file, it will be used to initiate an https service [%(default)s]',
     )
     ap.add_argument(
+        '--context-ssl-pem-myauth',
+        default=ssl_pem_myauth,
+        required=False,
+        help='the Certificate Authority (CA) for the "myself" and "guest" certificates [%(default)s]',
+    )
+    ap.add_argument(
         '--context-ssl-pem-myname',
         default=ssl_pem_myname,
         required=False,
@@ -536,6 +543,7 @@ def override(args):
     dawgie.context.sanction_override = args.context_security_is_sanctioned
     dawgie.context.site_path = args.context_site_path
     dawgie.context.ssl_pem_file = args.context_ssl_pem_file
+    dawgie.context.ssl_pem_myauth = args.context_ssl_pem_myauth
     dawgie.context.ssl_pem_myname = args.context_ssl_pem_myname
     dawgie.context.ssl_pem_myself = args.context_ssl_pem_myself
     dawgie.context.worker_backlog = args.context_worker_backlog

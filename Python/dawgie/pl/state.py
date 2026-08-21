@@ -98,7 +98,8 @@ import twisted.internet.ssl
 import twisted.web.resource
 import twisted.web.server
 
-from dawgie.util import resolve_site
+from dawgie.security import AccessLevel
+from dawgie.util import resolve_security_args, resolve_site
 from pathlib import Path
 
 
@@ -242,15 +243,20 @@ class FSM:
 
             if dawgie.security.use_tls():
                 log.info('starting front end using HTTPS')
-                cert = dawgie.security.authority()
+                cert = dawgie.security.owner(AccessLevel.public)
                 twisted.internet.reactor.listenSSL(
                     int(dawgie.context.fe_port), factory, cert.options()
                 )
                 if dawgie.security.clients():
+                    cert = dawgie.security.owner(AccessLevel.protected)
+                    trust = dawgie.security.trust(AccessLevel.protected)
+                    context_factory = twisted.internet.ssl.CertificateOptions(
+                        privateKey=cert.privateKey.original,
+                        certificate=cert.original,
+                        trustRoot=trust,
+                    )
                     twisted.internet.reactor.listenSSL(
-                        dawgie.context.cfe_port,
-                        factory,
-                        cert.options(*dawgie.security.clients()),
+                        dawgie.context.cfe_port, factory, context_factory
                     )
             else:
                 log.info('starting front end using HTTP')
@@ -340,16 +346,7 @@ class FSM:
         if self.__doctest:
             print('self._security()')
         else:
-            dawgie.security.initialize(
-                path=os.path.expandvars(
-                    os.path.expanduser(dawgie.context.guest_public_keys)
-                ),
-                myname=dawgie.context.ssl_pem_myname,
-                myself=os.path.expandvars(
-                    os.path.expanduser(dawgie.context.ssl_pem_myself)
-                ),
-                system=dawgie.context.ssl_pem_file,
-            )
+            dawgie.security.initialize(**resolve_security_args())
         return
 
     @property

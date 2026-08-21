@@ -66,6 +66,8 @@ class Handler(logging.handlers.BufferingHandler):
 
 
 def remembered(levels: [str] = None, limit: int = 0):
+    if INSTANCE is None:
+        return []
     if levels is None:
         levels = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
     if not levels:

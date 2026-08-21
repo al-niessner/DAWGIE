@@ -262,14 +262,7 @@ def main():
     ):
         host, port, gpghome = args.log_file.split('::')[1:-1]
         print(args.log_file, host, port, gpghome)
-        dawgie.security.initialize(
-            path=os.path.expandvars(os.path.expanduser(gpghome)),
-            myname=dawgie.context.ssl_pem_myname,
-            myself=os.path.expandvars(
-                os.path.expanduser(dawgie.context.ssl_pem_myself)
-            ),
-            system=dawgie.context.ssl_pem_file,
-        )
+        dawgie.security.initialize(**resolve_security_args())
         print('dawgie.security.initialize')
         handler = dawgie.pl.logger.TwistedHandler(host=host, port=int(port))
         print('dawgie.pl.logger.TwistedHandler')
@@ -920,6 +913,7 @@ if __name__ == '__main__':
     import dawgie.security
     import dawgie.tools.compliant
     import dawgie.util
+    from dawgie.util import resolve_security_args
 
     PASSED = main()
 
@@ -936,3 +930,4 @@ else:
     import dawgie.security
     import dawgie.tools.compliant
     import dawgie.util
+    from dawgie.util import resolve_security_args

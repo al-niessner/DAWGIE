@@ -51,6 +51,8 @@ import math
 import struct
 import twisted.internet.task
 
+from dawgie.security import AccessLevel
+
 ARCHIVE = False
 
 
@@ -219,8 +221,6 @@ class Hand(twisted.internet.protocol.Protocol):
 class Foreman(twisted.internet.protocol.Factory):
     def buildProtocol(self, addr):
         return Hand(addr)
-
-    pass
 
 
 _agency = [None]
@@ -429,13 +429,10 @@ def plow():
         pass
 
     if dawgie.security.use_tls():
-        controller = dawgie.security.authority().options(
-            *dawgie.security.certificates()
-        )
         twisted.internet.reactor.listenSSL(
             int(dawgie.context.farm_port),
             Foreman(),
-            controller,
+            dawgie.security.owner(AccessLevel.private),
             dawgie.context.worker_backlog,
         )
     else:

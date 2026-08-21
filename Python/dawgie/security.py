@@ -46,12 +46,14 @@ NTR:
 
 import argparse
 import datetime
+import enum
 import getpass
 import gnupg
 import importlib
 import inspect
 
 import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
+import OpenSSL
 import os
 import random
 import shutil
@@ -62,6 +64,7 @@ import tempfile
 import traceback
 import twisted.internet.ssl
 
+_auths = []
 _certs = []
 _myself = {}
 _system = {}
@@ -71,6 +74,8 @@ gpgargname = (
     if 'gnupghome' in inspect.signature(gnupg.GPG).parameters
     else 'homedir'
 )
+
+AccessLevel = enum.Enum('AccessLevel', ['protected', 'private', 'public'])
 
 
 class TwistedWrapper:
@@ -238,12 +243,10 @@ def connect(address: (str, int)) -> socket.socket:
     try:
         if use_tls():
             context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-            file = _system['file'] if _system else _myself['file']
-            context.load_verify_locations(file)
+            context.check_hostname = False
+            context.load_verify_locations(_myself['file'])
             context.load_cert_chain(_myself['file'])
-            ss = context.wrap_socket(
-                s, server_hostname=authority().getSubject()['commonName']
-            )
+            ss = context.wrap_socket(s, server_hostname=address[0])
             ss.connect(address)
             return ss
 
@@ -287,6 +290,7 @@ def finalize() -> None:
 
 def initialize(
     path: str = None,
+    myauth: str = None,
     myname: str = None,
     myself: str = None,
     system: str = None,
@@ -296,7 +300,7 @@ def initialize(
     Load both PGP and TLS to be backward compatible.
     '''
     _pgp_initialize(path)
-    _tls_initialize(path, myname, myself, system)
+    _tls_initialize(path, myauth, myname, myself, system)
     return
 
 
@@ -354,7 +358,11 @@ def _pub_certs(cxt: str):
 
 
 def _tls_initialize(
-    path: str = None, myname: str = None, myself: str = None, system: str = None
+    path: str = None,
+    myauth: str = None,
+    myname: str = None,
+    myself: str = None,
+    system: str = None,
 ) -> None:
     '''initialize this library with the TLS certificates
 
@@ -362,31 +370,48 @@ def _tls_initialize(
     Rather than have the user maintain a set of certificates, allow anyone and
     everyone access.
 
-    path   : path to find the PGP keys dawgie.public.pem*
+    path   : path to find the PGP keys signed.public.pem*
+    myauth : CA for myself and guests
     myname : the host name in the certificate
     myself : absolute file path a private certificate PEM that contains the
              private key and a single certificate.
     system : should be dawgie.conext.ssl_pem_file
     '''
+    _auths.clear()
     _certs.clear()
     _myself.clear()
     _system.clear()
     certs = []
+    ca = None
+    if myauth and os.path.isfile(myauth):
+        with open(myauth, 'rt', encoding='utf-8') as file:
+            cxt = file.read()
+        ca = twisted.internet.ssl.Certificate.loadPEM(cxt)
+        _auths.append(ca)
+    else:
+        log.warning(
+            'No CA found at %s; guest certs cannot be verified and will be '
+            'ignored, myself will be accepted unverified',
+            myauth,
+        )
     if system and os.path.isfile(system):
         with open(system, 'rt', encoding='utf-8') as file:
             cxt = file.read()
         prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
-        prv.options(*_pub_certs(cxt))
         _system['file'] = system
-        _system['pem'] = prv
-    if path and os.path.exists(path) and os.path.isdir(path):
+        _system['private'] = prv
+    if ca and path and os.path.exists(path) and os.path.isdir(path):
         for fn in filter(
-            lambda fn: fn.startswith('dawgie.public.pem'), os.listdir(path)
+            lambda fn: fn.startswith('signed.public.pem'), os.listdir(path)
         ):
             log.info('Found public key file: %s', fn)
             with open(os.path.join(path, fn), 'rt', encoding='utf-8') as file:
                 cert = twisted.internet.ssl.Certificate.loadPEM(file.read())
+            if _verified_by_ca(cert, ca):
                 certs.append(cert)
+                log.info('Adding client cert: %s', fn)
+            else:
+                log.warning('Ignoring guest cert %s: not signed by CA', fn)
         # FUTURE: add check if not certs then raise ValueError()
         if not certs:
             log.warning('No TLS kes found for secure clients in %s', path)
@@ -396,11 +421,26 @@ def _tls_initialize(
             cxt = file.read()
         pubs = _pub_certs(cxt)
         prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
-        prv.options(*pubs)
+        prv = prv.options(*pubs)
         _myself.update(
             {'file': myself, 'name': myname, 'private': prv, 'public': pubs}
         )
     return
+
+
+def _verified_by_ca(
+    cert: twisted.internet.ssl.Certificate, ca: twisted.internet.ssl.Certificate
+) -> bool:
+    '''return True if cert was signed by ca'''
+    store = OpenSSL.crypto.X509Store()
+    store.add_cert(ca.original)
+    ctx = OpenSSL.crypto.X509StoreContext(store, cert.original)
+    try:
+        ctx.verify_certificate()
+        return True
+    except OpenSSL.crypto.X509StoreContextError as e:
+        log.warning('certificate not signed by CA: %s', e)
+        return False
 
 
 def pgp():
@@ -413,10 +453,6 @@ def _lookup(fullname: str):
     fncname = name[-1]
     mod = importlib.import_module(modname)
     return getattr(mod, fncname)
-
-
-def authority() -> twisted.internet.ssl.PrivateCertificate:
-    return _system['pem'] if _system else _myself['private']
 
 
 def certificates() -> [twisted.internet.ssl.Certificate.loadPEM]:
@@ -520,6 +556,7 @@ def is_sanctioned(
             '/api/schedule/events',
             '/api/schedule/failed',
             '/api/schedule/in-progress',
+            '/api/schedule/invalid',
             '/api/schedule/stats',
             '/api/schedule/succeeded',
             '/api/schedule/to-do',
@@ -530,6 +567,20 @@ def is_sanctioned(
             return False
         return True
     return True
+
+
+def owner(access: AccessLevel) -> twisted.internet.ssl.PrivateCertificate:
+    '''get the correct owner of a socket
+
+    access:
+      public/protected - return system if present otherwise myself
+      private - return myself (mutual TLS)
+    '''
+    match access:
+        case AccessLevel.public | AccessLevel.protected:
+            return _system['private'] if _system else _myself['private']
+        case AccessLevel.private:
+            return _myself['private']
 
 
 def sanctioned(endpoint: str, cert: twisted.internet.ssl.Certificate) -> bool:
@@ -544,6 +595,25 @@ def sanctioned(endpoint: str, cert: twisted.internet.ssl.Certificate) -> bool:
             'Defaulting to False.'
         )
     return False
+
+
+def trust(access: AccessLevel):
+    '''return the trust root for verifying peers on the given level'''
+    # mutual TLS pinned to our own cert only -- a peer must present
+    # this exact self-signed cert back to connect. blocks any other
+    # process (dev, prod, whatever) that doesn't hold this file.
+    justme = twisted.internet.ssl.trustRootFromCertificates(_myself['public'])
+    match access:
+        case AccessLevel.private:
+            return justme
+        case AccessLevel.protected:
+            return (
+                twisted.internet.ssl.trustRootFromCertificates(_auths)
+                if _auths
+                else justme
+            )
+        case AccessLevel.public:
+            raise ValueError('public acess does not require a trust root')
 
 
 def use_client_verification():

@@ -88,9 +88,10 @@ services:
       DAWGIE_FE_PATH: /proj/data/fe
       DAWGIE_GUEST_PUBLIC_KEYS: /proj/data/certs
       DAWGIE_SITE_PATH: ${DAWGIE_SITE_PATH}
+      DAWGIE_SSL_PEM_MYAUTH: /proj/data/certs/ex-ca.crt
       DAWGIE_SSL_PEM_FILE: /proj/data/certs/server.pem
       DAWGIE_SSL_PEM_MYNAME: exercise.dawgie
-      DAWGIE_SSL_PEM_MYSELF: /proj/data/certs/myself.pem
+      DAWGIE_SSL_PEM_MYSELF: /proj/data/certs/myself.self.signed.pem
       MPLCONFIGDIR: /tmp
       USER: $DB_USER
     healthcheck:
@@ -134,8 +135,9 @@ services:
     environment:
       DAWGIE_GUEST_PUBLIC_KEYS: /proj/data/certs
       DAWGIE_SSL_PEM_FILE: /proj/data/certs/server.pem
-      DAWGIE_SSL_PEM_MYNAME: exercise.dawgie
-      DAWGIE_SSL_PEM_MYSELF: /proj/data/certs/myself.pem
+      DAWGIE_SSL_PEM_MYAUTH: /proj/data/certs/ex-ca.crt
+      DAWGIE_SSL_PEM_MYNAME: exercise/user
+      DAWGIE_SSL_PEM_MYSELF: /proj/data/certs/myself.self.signed.pem
       MPLCONFIGDIR: /tmp
       USER: $DB_USER
     image: dex/worker

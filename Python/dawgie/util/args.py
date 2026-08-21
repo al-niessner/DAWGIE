@@ -39,6 +39,7 @@ NTR: 49811
 '''
 
 import dawgie.context
+import os.path
 
 # needed for eval in log_level(); pylint: disable=unused-import
 import logging  # noqa: F401
@@ -54,6 +55,22 @@ def log_level(level):
     except:  # noqa: E722
         ll = eval(level)
     return ll
+
+
+def resolve_security_args() -> {}:
+    return {
+        'path': os.path.expandvars(
+            os.path.expanduser(dawgie.context.guest_public_keys)
+        ),
+        'myauth': os.path.expandvars(
+            os.path.expanduser(dawgie.context.ssl_pem_myauth)
+        ),
+        'myname': dawgie.context.ssl_pem_myname,
+        'myself': os.path.expandvars(
+            os.path.expanduser(dawgie.context.ssl_pem_myself)
+        ),
+        'system': dawgie.context.ssl_pem_file,
+    }
 
 
 def set_ports(fe_port: int) -> None:

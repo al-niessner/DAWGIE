@@ -45,6 +45,8 @@ import struct
 import twisted.internet.reactor
 import twisted.internet.threads
 
+from dawgie.security import AccessLevel
+
 _ROOT = None
 FORMAT = '%(asctime)s :: %(name)s :: %(levelname)s :: %(message)s'
 
@@ -180,13 +182,10 @@ def start(path: str, port: int) -> None:
 
     dawgie.pl.logger._ROOT = LogSinkFactory(path)
     if dawgie.security.use_tls():
-        controller = dawgie.security.authority().options(
-            *dawgie.security.certificates()
-        )
         twisted.internet.reactor.listenSSL(
             port,
             dawgie.pl.logger._ROOT,
-            controller,
+            dawgie.security.owner(AccessLevel.private),
             dawgie.context.worker_backlog,
         )
     else:
