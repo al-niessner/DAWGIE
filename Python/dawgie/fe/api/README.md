@@ -33,7 +33,9 @@ An example of how to use the endpoint with curl including its output. All exampl
 
 - [`/api/ae/name`](#apiaename-get)
 - [`/api/cmd/reset`](#/api/cmd/reset-put)
+- [`/api/cmd/revision`](#/api/cmd/revision-get)
 - [`/api/cmd/run`](#/api/cmd/run-put)
+- [`/api/cmd/submit`](#/api/cmd/submit-get)
 - [`/api/database/filter/target`](#/api/database/filter/target-get)
 - [`/api/database/filter/task`](#/api/database/filter/task-get)
 - [`/api/database/filter/alg`](#/api/database/filter/alg-get)
@@ -47,8 +49,6 @@ An example of how to use the endpoint with curl including its output. All exampl
 - [`/api/df_model/statistics`](#/api/df_model/statistics-get)
 - [`/api/logs/recent?limit=3`](#/api/logs/recent?limit=3-get)
 - [`/api/pipeline/state`](#/apipipelinestate-get)
-- [`/api/rev/current`](#/api/rev/current-get)
-- [`/api/rev/submit`](#/api/rev/submit-get)
 - [`/api/schedule/doing`](#/api/schedule/doing-get)
 - [`/api/schedule/events`](#/api/schedule/events-get)
 - [`/api/schedule/failed`](#/api/schedule/failed-get)
@@ -94,6 +94,24 @@ curl -ksX POST 'https://localhost:8080/api/cmd/reset' | j
   "status": "success"
 }
 ```
+### `/api/cmd/revision` (GET)
+#### Description
+Return the current revision identifier for the AE. For GIT, this is the current commit hash.
+#### Parameters
+_None_
+#### Content
+JSON string of the current revious number.
+#### Example
+```
+curl -ksX GET 'https://localhost:8080/api/cmd/revision' | jq
+```
+```
+{
+  "content": "FAKE-VERSION-FOR-EXERCISE",
+  "message": "",
+  "status": "success"
+}
+```
 ### `/api/cmd/run` (PUT)
 #### Description
 Request that runnables be scheduled to run with targets.
@@ -112,6 +130,18 @@ curl -ksX POST 'https://localhost:8080/api/cmd/run?runnables=a.b&targets=foo' | 
   "message": "",
   "status": "success"
 }
+```
+### `/api/cmd/submit` (GET)
+#### Description
+Request the pipeline update the AE to a new version (git changeset)
+#### Parameters
+- changeset : the hash that git uses to identify a commit
+- submission : one of the following strings: ??
+#### Content
+A simple string indicating success.
+#### Example
+```
+curl -ksX POST 'https://localhost:8080/api/cmd/submit?changeset=apple&submission=now' | jq
 ```
 ### `/api/database/filter/target` (GET)
 #### Description
@@ -510,36 +540,6 @@ curl -ksX GET 'https://localhost:8080/api/pipeline/state' | jq
   "message": "",
   "status": "success"
 }
-```
-### `/api/rev/current` (GET)
-#### Description
-Return the current revision identifier for the AE. For GIT, this is the current commit hash.
-#### Parameters
-_None_
-#### Content
-JSON string of the current revious number.
-#### Example
-```
-curl -ksX GET 'https://localhost:8080/api/rev/current' | jq
-```
-```
-{
-  "content": "FAKE-VERSION-FOR-EXERCISE",
-  "message": "",
-  "status": "success"
-}
-```
-### `/api/rev/submit` (GET)
-#### Description
-Request the pipeline update the AE to a new version (git changeset)
-#### Parameters
-- changeset : the hash that git uses to identify a commit
-- submission : one of the following strings: ??
-#### Content
-A simple string indicating success.
-#### Example
-```
-curl -ksX POST 'https://localhost:8080/api/rev/submit?changeset=apple&submission=now' | jq
 ```
 ### `/api/schedule/doing` (GET)
 #### Description

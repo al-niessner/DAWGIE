@@ -141,7 +141,9 @@ class DBSerializer(twisted.internet.protocol.Factory):
                 twisted.internet.reactor.listenSSL(
                     int(dawgie.context.db_port),
                     DBSerializer(),
-                    dawgie.security.owner(AccessLevel.private),
+                    dawgie.security.options(
+                        AccessLevel.private, AccessLevel.private
+                    ),
                     dawgie.context.worker_backlog,
                 )
             else:

@@ -51,8 +51,7 @@ import getpass
 import gnupg
 import importlib
 import inspect
-
-import logging; log = logging.getLogger(__name__)  # fmt: skip # noqa: E702 # pylint: disable=multiple-statements
+import logging
 import OpenSSL
 import os
 import random
@@ -64,10 +63,33 @@ import tempfile
 import traceback
 import twisted.internet.ssl
 
-_auths = []
-_certs = []
+from twisted.internet.ssl import CertificateOptions, trustRootFromCertificates
+
+
+class Options(CertificateOptions):
+    def __init__(self, owner, trust=None, **kwds):
+        super().__init__(
+            privateKey=owner['pair'].privateKey.original,
+            certificate=owner['pair'].original,
+            trustRoot=trust,
+            **kwds,
+        )
+        self.__owner = owner
+        self.__trust = trust
+
+    def getContext(self):
+        self.certificate = self.__owner['pair'].cert.original
+        self.privateKey = self.__owner['pair'].privateKey.original
+        if self.__trust is not None:
+            self.trustRoot = trustRootFromCertificates([self.__trust['root']])
+        return super().getContext()
+
+
+_guests = {}
 _myself = {}
 _system = {}
+_trust = {}
+_log = logging.getLogger(__name__)
 _PGP = None
 gpgargname = (
     'gnupghome'
@@ -102,24 +124,24 @@ class TwistedWrapper:
         return self.__phase
 
     def _p1(self, data: bytes) -> bool:
-        log.debug('pi: %s', str(self.__address))
+        _log.debug('pi: %s', str(self.__address))
         result = struct.unpack('>I', data)[0] == 4
         self.__phase = self._p2
         return result
 
     def _p2(self, data: bytes) -> bool:
-        log.debug('p2: %s', str(self.__address))
+        _log.debug('p2: %s', str(self.__address))
         self.__len = struct.unpack('>I', data)[0]
         self.__phase = self._p3
         return True
 
     def _p3(self, hid: bytes) -> bool:
-        log.debug('p3: %s', str(self.__address))
+        _log.debug('p3: %s', str(self.__address))
         response = _PGP.verify(hid)
 
         if response.valid:
             hid = _PGP.decrypt(hid).data.decode()
-            log.debug('Received handshake identification:\n%s', hid)
+            _log.debug('Received handshake identification:\n%s', hid)
             self.__msg = 'timestamp: ' + str(
                 datetime.datetime.now(datetime.UTC)
             )
@@ -137,14 +159,14 @@ class TwistedWrapper:
         return response.valid
 
     def _p4(self, data: bytes) -> bool:
-        log.debug('p4: %s', str(self.__address))
+        _log.debug('p4: %s', str(self.__address))
         lens = struct.unpack('>II', data)
         self.__len = lens[1]
         self.__phase = self._p5
         return lens[0] == 4
 
     def _p5(self, reply: bytes) -> bool:
-        log.debug('p5: %s', str(self.__address))
+        _log.debug('p5: %s', str(self.__address))
         response = _PGP.verify(reply)
 
         if response.valid:
@@ -152,7 +174,7 @@ class TwistedWrapper:
             response.valid = reply.strip() == self.__msg.strip()
 
             if not response.valid:
-                log.warning(
+                _log.warning(
                     'Did not echo my message. Expectation: "%s" but received this "%s".',
                     self.__msg.strip(),
                     reply.strip(),
@@ -165,7 +187,7 @@ class TwistedWrapper:
             self.__buf = b''
             pass
         if response.valid:
-            log.debug('handshake was successful')
+            _log.debug('handshake was successful')
 
         self.__phase = self._p6
         return response.valid
@@ -182,7 +204,7 @@ class TwistedWrapper:
             self.__buf = self.__buf[self.__len :]
 
             if not self.__phase(data):
-                log.error(
+                _log.error(
                     'failed to pass handshake at %s of %s. Killing the connection to %s.',
                     self.__phase.__name__,
                     str(type(self.__p)),
@@ -229,7 +251,7 @@ def _send(s: socket.socket, message: str):
             + signed.data
         )
     else:
-        log.error(signed.status)
+        _log.error(signed.status)
         s.shutdown(socket.SHUT_RDWR)
         s.close()
         pass
@@ -263,7 +285,7 @@ def connect(address: (str, int)) -> socket.socket:
     # then continue raising the same eception, which makes catching bare
     # exception just fine
     except:  # fmt: skip # noqa: E722 # pylint: disable=bare-except
-        log.exception(
+        _log.exception(
             'Could not connect to %s:%s because',
             str(address[0]),
             str(address[1]),
@@ -339,11 +361,32 @@ def _pgp_initialize(path: str = None) -> None:
         if keys:
             keys = _PGP.import_keys('\n'.join(keys))
         else:
-            log.warning(
+            _log.warning(
                 'No PGP keys found for secure handshake in %s', str(path)
             )
         pass
     return
+
+
+def _grant_access():
+    '''scan the path given at initialization time for acceptible keys'''
+    certs = []
+    path = _guests['path']
+    for fn in filter(
+        lambda fn: fn.startswith('signed.public.pem'), os.listdir(path)
+    ):
+        _log.info('Found public key file: %s', fn)
+        with open(os.path.join(path, fn), 'rt', encoding='utf-8') as file:
+            cert = twisted.internet.ssl.Certificate.loadPEM(file.read())
+        if _verified_by_ca(cert, _trust['root']):
+            certs.append(cert)
+            _log.info('Adding client cert: %s', fn)
+        else:
+            _log.warning('Ignoring guest cert %s: not signed by CA', fn)
+    # FUTURE: add check if not certs then raise ValueError()
+    if not certs:
+        _log.warning('No TLS kes found for secure clients in %s', path)
+    _guests['certs'] = certs
 
 
 def _pub_certs(cxt: str):
@@ -355,6 +398,19 @@ def _pub_certs(cxt: str):
         pub.append(twisted.internet.ssl.Certificate.loadPEM(cxt[bdx:edx]))
         bdx = cxt.find('-----BEGIN CERTIFICATE-----', edx)
     return pub
+
+
+def _reload(pem):
+    '''reload from the same file PEM information'''
+    with open(pem['file'], 'rt', encoding='utf-8') as file:
+        cxt = file.read()
+    if 'pair' in pem and 'root' in pem:
+        pem['pair'] = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
+        pem['root'] = _pub_certs(cxt)
+    elif 'pair' in pem:
+        pem['pair'] = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
+    elif 'root' in pem:
+        pem['root'] = twisted.internet.ssl.Certificate.loadPEM(cxt)
 
 
 def _tls_initialize(
@@ -377,54 +433,42 @@ def _tls_initialize(
              private key and a single certificate.
     system : should be dawgie.conext.ssl_pem_file
     '''
-    _auths.clear()
-    _certs.clear()
+    _guests.clear()
     _myself.clear()
     _system.clear()
-    certs = []
-    ca = None
+    _trust.clear()
     if myauth and os.path.isfile(myauth):
-        with open(myauth, 'rt', encoding='utf-8') as file:
-            cxt = file.read()
-        ca = twisted.internet.ssl.Certificate.loadPEM(cxt)
-        _auths.append(ca)
+        _trust['file'] = myauth
+        _trust['root'] = None
+        _reload(_trust)
     else:
-        log.warning(
+        _log.warning(
             'No CA found at %s; guest certs cannot be verified and will be '
             'ignored, myself will be accepted unverified',
             myauth,
         )
     if system and os.path.isfile(system):
-        with open(system, 'rt', encoding='utf-8') as file:
-            cxt = file.read()
-        prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
         _system['file'] = system
-        _system['private'] = prv
-    if ca and path and os.path.exists(path) and os.path.isdir(path):
-        for fn in filter(
-            lambda fn: fn.startswith('signed.public.pem'), os.listdir(path)
-        ):
-            log.info('Found public key file: %s', fn)
-            with open(os.path.join(path, fn), 'rt', encoding='utf-8') as file:
-                cert = twisted.internet.ssl.Certificate.loadPEM(file.read())
-            if _verified_by_ca(cert, ca):
-                certs.append(cert)
-                log.info('Adding client cert: %s', fn)
-            else:
-                log.warning('Ignoring guest cert %s: not signed by CA', fn)
-        # FUTURE: add check if not certs then raise ValueError()
-        if not certs:
-            log.warning('No TLS kes found for secure clients in %s', path)
-        _certs.extend(certs)
-    if myself:
-        with open(myself, 'rt', encoding='utf-8') as file:
-            cxt = file.read()
-        pubs = _pub_certs(cxt)
-        prv = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
-        prv = prv.options(*pubs)
-        _myself.update(
-            {'file': myself, 'name': myname, 'private': prv, 'public': pubs}
+        _system['pair'] = None
+        _reload(_system)
+    else:
+        _log.warning(
+            'No system wide certificate given the HTTPS service. '
+            'Will attempt to fall back to using myself if available. '
+            'Otherwise, will have to fall back to just HTTP and open sockets.'
         )
+    if myself:
+        _myself.update(
+            {'file': myself, 'name': myname, 'pair': None, 'root': None}
+        )
+        _reload(_myself)
+    else:
+        _log.warning('Really should define myself as a self-signed cert.')
+    if _trust and path and os.path.exists(path) and os.path.isdir(path):
+        _guests['path'] = path
+        _grant_access()
+    else:
+        _log.warning('No guests allowed.')
     return
 
 
@@ -439,7 +483,7 @@ def _verified_by_ca(
         ctx.verify_certificate()
         return True
     except OpenSSL.crypto.X509StoreContextError as e:
-        log.warning('certificate not signed by CA: %s', e)
+        _log.warning('certificate not signed by CA: %s', e)
         return False
 
 
@@ -455,12 +499,8 @@ def _lookup(fullname: str):
     return getattr(mod, fncname)
 
 
-def certificates() -> [twisted.internet.ssl.Certificate.loadPEM]:
-    return _myself['public']
-
-
 def clients() -> [twisted.internet.ssl.Certificate]:
-    return _certs.copy()
+    return _guests.copy()
 
 
 def fetch_identity(cert: twisted.internet.ssl.Certificate):
@@ -486,7 +526,7 @@ def identity(of_cert: twisted.internet.ssl.Certificate):
     try:
         return _lookup(dawgie.context.identity_override)(of_cert)
     except:  # all exceptions are equal, pylint: disable=bare-except # noqa: E722
-        log.exception(
+        _log.exception(
             'Could not translate certificate to any response. '
             'Defaulting to anonymous.'
         )
@@ -535,9 +575,11 @@ def is_sanctioned(
             '/app/versions',
             # 3.0.0 remove - to here
             '/api/ae/name',
+            '/api/cmd/revision',
             # '/api/cmd/reset',  # should require client cert (trusted)
             # '/api/cmd/run',  # should require client cert (any)
             # '/api/cmd/snapshot',  # should require client cert (admin)
+            # '/api/cmd/submit',  # should require client cert (any)
             '/api/database/runid/max',
             '/api/database/runnables',
             '/api/database/search',
@@ -550,8 +592,6 @@ def is_sanctioned(
             '/api/df_model/statistics',
             '/api/logs/recent',
             '/api/pipeline/state',
-            '/api/rev/current',
-            # '/api/rev/submit',  # should require client cert (any)
             '/api/schedule/doing',
             '/api/schedule/events',
             '/api/schedule/failed',
@@ -569,18 +609,60 @@ def is_sanctioned(
     return True
 
 
-def owner(access: AccessLevel) -> twisted.internet.ssl.PrivateCertificate:
-    '''get the correct owner of a socket
+def options(
+    owner: AccessLevel, trust: AccessLevel = None
+) -> CertificateOptions:
+    '''create a mutatable options to support reload
 
-    access:
+    owner:
       public/protected - return system if present otherwise myself
       private - return myself (mutual TLS)
+
+    trust:
+      public - throw an error because cannot trust the public
+      protected - use system if present otherwise myself
+      private - myself only (mutual TLS)
     '''
-    match access:
+    match owner:
         case AccessLevel.public | AccessLevel.protected:
-            return _system['private'] if _system else _myself['private']
+            own = _system if _system else _myself
         case AccessLevel.private:
-            return _myself['private']
+            own = _myself
+
+    # mutual TLS pinned to our own cert only -- a peer must present
+    # this exact self-signed cert back to connect. blocks any other
+    # process (dev, prod, whatever) that doesn't hold this file.
+    match trust:
+        case AccessLevel.private:
+            root = _myself
+        case AccessLevel.protected:
+            root = _trust if _trust else _myself
+        case AccessLevel.public:
+            raise ValueError('public acess does not require a trust root')
+        case None:
+            root = None
+    return Options(own, root)
+
+
+def reload(
+    ca: bool = False,
+    guests: bool = False,
+    myself: bool = False,
+    system: bool = False,
+):
+    result = []
+    if ca and _trust:
+        _reload(_trust)
+        result.append('CA')
+    if system and _system:
+        _reload(_system)
+        result.append('system PEM')
+    if myself and _myself:
+        _reload(_myself)
+        result.append('myself PEM')
+    if guests and _guests:
+        _grant_access()
+        result.append('guest CERTs')
 
 
 def sanctioned(endpoint: str, cert: twisted.internet.ssl.Certificate) -> bool:
@@ -590,34 +672,15 @@ def sanctioned(endpoint: str, cert: twisted.internet.ssl.Certificate) -> bool:
     try:
         return _lookup(dawgie.context.sanction_override)(endpoint, cert)
     except:  # all exceptions are equal, pylint: disable=bare-except # noqa: E722
-        log.exception(
+        _log.exception(
             'Could not determine if endpoint is sanctioned. '
             'Defaulting to False.'
         )
     return False
 
 
-def trust(access: AccessLevel):
-    '''return the trust root for verifying peers on the given level'''
-    # mutual TLS pinned to our own cert only -- a peer must present
-    # this exact self-signed cert back to connect. blocks any other
-    # process (dev, prod, whatever) that doesn't hold this file.
-    justme = twisted.internet.ssl.trustRootFromCertificates(_myself['public'])
-    match access:
-        case AccessLevel.private:
-            return justme
-        case AccessLevel.protected:
-            return (
-                twisted.internet.ssl.trustRootFromCertificates(_auths)
-                if _auths
-                else justme
-            )
-        case AccessLevel.public:
-            raise ValueError('public acess does not require a trust root')
-
-
 def use_client_verification():
-    return bool(_certs)
+    return bool(_guests)
 
 
 def use_tls():
