@@ -179,15 +179,15 @@ target="__all__"
 while [[ "$target" != "/tmp/"* ]]
 do
     sleep 1
-    obj=$(curl --insecure -Ss 'https://localhost:8080/app/db/targets')
-    target=$(echo $obj | jq -r .[0])
+    obj=$(curl --insecure -Ss 'https://localhost:8080/api/database/targets')
+    target=$(echo $obj | jq -r .content[0])
     if [[ "$target" == "__all__" ]]
     then
         target=$(echo $obj | jq -r .[1])
     fi
 done
 echo "Requesting feeback on ${target}"
-curl -XPOST --cert ${tempdir}/certs/guest.pem --insecure "https://localhost:8085/app/run?tasks=feedback.command&targets=${target}"
+curl -XPOST --cert ${tempdir}/certs/guest.ca.signed.pem --insecure "https://localhost:8085/api/cmd/run?runnables=feedback.command&targets=${target}"
 echo
 
 echo

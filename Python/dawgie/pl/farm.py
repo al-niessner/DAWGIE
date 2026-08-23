@@ -432,7 +432,7 @@ def plow():
         twisted.internet.reactor.listenSSL(
             int(dawgie.context.farm_port),
             Foreman(),
-            dawgie.security.owner(AccessLevel.private),
+            dawgie.security.options(AccessLevel.private, AccessLevel.private),
             dawgie.context.worker_backlog,
         )
     else:

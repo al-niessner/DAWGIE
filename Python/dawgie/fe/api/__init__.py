@@ -48,6 +48,8 @@ import dawgie
 import dawgie.context
 import dawgie.pl.logger.chronicle
 import dawgie.pl.logger.fe
+import dawgie.security
+import inspect
 import logging
 
 from . import database
@@ -61,6 +63,22 @@ REV_SUBMIT = submit.Defer()
 
 def ae_name():
     return build_return_object(dawgie.context.ae_base_package)
+
+
+def cmd_reload(pems: [str] = None):
+    args = set(inspect.signature(dawgie.security.reload))
+    if len(pems) == 1 and ',' in pems[0]:
+        pems = pems[0].split(',')
+    if set(pems).issubset(args):
+        dawgie.security.reload(**{pem: True for pem in pems})
+        return build_return_object(
+            f'Reloaded the PEMs: {pems}. See logs for details.'
+        )
+    return build_return_object(
+        None,
+        Status.FAILURE,
+        f'PEMs must be a comma separated list from {sorted(args)}',
+    )
 
 
 def cmd_reset(archive: [str] = None):
@@ -81,7 +99,15 @@ def cmd_reset(archive: [str] = None):
     return build_return_object('Reset the pipeline as requested.')
 
 
+def cmd_revision():
+    return build_return_object(dawgie.context.git_rev)
+
+
 def cmd_run(runnables: [str], targets: [str]):
+    if runnables and len(runnables) == 1 and ',' in runnables:
+        runnables = runnables[0].split(',')
+    if targets and len(targets) == 1 and ',' in targets:
+        targets = targets[0].split(',')
     dawgie.pl.schedule.organize(
         task_names=set(runnables),
         targets=set(targets),
@@ -160,14 +186,13 @@ def pipeline_state():
     )
 
 
-def rev_current():
-    return build_return_object(dawgie.context.git_rev)
-
-
 DynamicContent(ae_name, '/api/ae/name')
+DynamicContent(cmd_reload, '/api/cmd/reload', [HttpMethod.POST])
 DynamicContent(cmd_reset, '/api/cmd/reset', [HttpMethod.POST])
+DynamicContent(cmd_revision, '/api/cmd/revision')
 DynamicContent(cmd_run, '/api/cmd/run', [HttpMethod.POST])
 DynamicContent(cmd_snapshot, '/api/cmd/snapshot')
+DynamicContent(REV_SUBMIT, '/api/cmd/submit', [HttpMethod.POST])
 DynamicContent(facet.target, '/api/database/filter/target')
 DynamicContent(facet.task, '/api/database/filter/task')
 DynamicContent(facet.alg, '/api/database/filter/alg')
@@ -180,8 +205,6 @@ DynamicContent(database.VIEW, '/api/database/view')
 DynamicContent(df_model_statistics, '/api/df_model/statistics')
 DynamicContent(logs_recent, '/api/logs/recent')
 DynamicContent(pipeline_state, '/api/pipeline/state')
-DynamicContent(rev_current, '/api/rev/current')
-DynamicContent(REV_SUBMIT, '/api/rev/submit', [HttpMethod.POST])
 DynamicContent(schedule.doing, '/api/schedule/doing')
 DynamicContent(schedule.events, '/api/schedule/events')
 DynamicContent(schedule.failed, '/api/schedule/failed')

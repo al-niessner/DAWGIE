@@ -185,7 +185,7 @@ def start(path: str, port: int) -> None:
         twisted.internet.reactor.listenSSL(
             port,
             dawgie.pl.logger._ROOT,
-            dawgie.security.owner(AccessLevel.private),
+            dawgie.security.options(AccessLevel.private, AccessLevel.private),
             dawgie.context.worker_backlog,
         )
     else:

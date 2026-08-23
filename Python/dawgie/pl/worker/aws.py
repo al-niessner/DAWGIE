@@ -579,7 +579,7 @@ def initialize():
         twisted.internet.reactor.listenSSL(
             int(dawgie.context.cloud_port),
             Company(),
-            dawgie.security.owner(AccessLevel.private),
+            dawgie.security.options(AccessLevel.private, AccessLevel.private),
             dawgie.context.worker_backlog,
         )
     else:

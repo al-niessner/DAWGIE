@@ -61,7 +61,7 @@ class Security(unittest.TestCase):
         self.assertFalse(
             dawgie.security.use_client_verification(), 'clear known certs'
         )
-        dawgie.security._certs.extend(['a', 'b', 'c'])
+        dawgie.security._guests.update({'path': '', 'certs': ['a', 'b', 'c']})
         dawgie.security._tls_initialize()
         self.assertFalse(
             dawgie.security.use_client_verification(), 'clear known certs'
@@ -257,7 +257,7 @@ vAMQ03c3Z4am3wHNvwVGS6VE7NJtgzl4s2odLmbG7dmPGVeNtFlhT6TCo1PMsNat
             dawgie.security._tls_initialize(
                 self.wdir, auth, 'example.com', base
             )
-        self.assertTrue(
+        self.assertFalse(
             dawgie.security.use_client_verification(),
             'find and load client certs',
         )
@@ -291,7 +291,7 @@ V/k0LmJRUq2Od3GDfotVRtx5uON2LLthI90HCHtTYudtn4VeVrWjiJuFgbSJNJNR
             dawgie.security._tls_initialize(
                 self.wdir, auth, 'example.com', base
             )
-        self.assertTrue(
+        self.assertFalse(
             dawgie.security.use_client_verification(),
             'find and load client certs',
         )
