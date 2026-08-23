@@ -61,7 +61,7 @@ class Security(unittest.TestCase):
         self.assertFalse(
             dawgie.security.use_client_verification(), 'clear known certs'
         )
-        dawgie.security._guests.update({'path':'', 'certs':['a', 'b', 'c']})
+        dawgie.security._guests.update({'path': '', 'certs': ['a', 'b', 'c']})
         dawgie.security._tls_initialize()
         self.assertFalse(
             dawgie.security.use_client_verification(), 'clear known certs'

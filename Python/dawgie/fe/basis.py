@@ -129,20 +129,9 @@ class DynamicContent(BaseResource):
     def __render(self, request, method: HttpMethod):
         sig = inspect.signature(self.__fnc)
         kwds = {}
-        transport = getattr(request.channel, 'transport', None)
-        cert = None
-        if transport and hasattr(transport, 'getPeerCertificate'):
-            cert = transport.getPeerCertificate()
-            if cert is None:
-                LOG.warning('transport returned none for peer certificate')
-                handle = getattr(transport, 'getHandle', None)
-                if handle:
-                    conn = handle()
-                    chain = conn.get_peer_cert_chain()
-                    if chain:
-                        cert = chain[0]
-                    else:
-                        LOG.error('transport connection does not have a chain')
+        cert = _client_from_transport(
+            getattr(request.channel, 'transport', None)
+        )
         if cert is not None:
             cert = twisted.internet.ssl.Certificate(cert)
         if not dawgie.security.sanctioned(self.__uri, cert):
@@ -234,6 +223,25 @@ class Status(enum.Enum):
 
 
 _root = RoutePoint('root')
+
+
+def _client_from_transport(transport):
+    cert = None
+    # complex testing due to possible TLS 1.3 glitch of passing client up
+    # pylint: disable=too-many-branches
+    if transport and hasattr(transport, 'getPeerCertificate'):
+        cert = transport.getPeerCertificate()
+        if cert is None:
+            LOG.warning('transport returned none for peer certificate')
+            handle = getattr(transport, 'getHandle', None)
+            if handle:
+                conn = handle()
+                chain = conn.get_peer_cert_chain()
+                if chain:
+                    cert = chain[0]
+                else:
+                    LOG.error('transport connection does not have a chain')
+    return cert
 
 
 def build_return_object(
