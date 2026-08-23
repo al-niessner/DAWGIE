@@ -104,6 +104,10 @@ def cmd_revision():
 
 
 def cmd_run(runnables: [str], targets: [str]):
+    if runnables and len(runnables) == 1 and ',' in runnables:
+        runnables = runnables[0].split(',')
+    if targets and len(targets) == 1 and ',' in targets:
+        targets = targets[0].split(',')
     dawgie.pl.schedule.organize(
         task_names=set(runnables),
         targets=set(targets),

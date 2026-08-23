@@ -63,25 +63,25 @@ import tempfile
 import traceback
 import twisted.internet.ssl
 
+from OpenSSL import crypto
 from twisted.internet.ssl import CertificateOptions, trustRootFromCertificates
 
 
 class Options(CertificateOptions):
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, owner, trust=None, **kwds):
-        super().__init__(
-            privateKey=owner['pair'].privateKey.original,
-            certificate=owner['pair'].original,
-            trustRoot=trust,
-            **kwds,
-        )
+        super().__init__(**kwds)
         self.__owner = owner
         self.__trust = trust
 
     def getContext(self):
-        self.certificate = self.__owner['pair'].cert.original
+        self.certificate = self.__owner['pair'].original
         self.privateKey = self.__owner['pair'].privateKey.original
         if self.__trust is not None:
-            self.trustRoot = trustRootFromCertificates([self.__trust['root']])
+            self.requireCertificate = True
+            self.trustRoot = trustRootFromCertificates(self.__trust['root'])
+            self.verify = True
+        self._context = None
         return super().getContext()
 
 
@@ -378,7 +378,7 @@ def _grant_access():
         _log.info('Found public key file: %s', fn)
         with open(os.path.join(path, fn), 'rt', encoding='utf-8') as file:
             cert = twisted.internet.ssl.Certificate.loadPEM(file.read())
-        if _verified_by_ca(cert, _trust['root']):
+        if _verified_by_ca(cert, _trust['root'][0]):
             certs.append(cert)
             _log.info('Adding client cert: %s', fn)
         else:
@@ -410,7 +410,7 @@ def _reload(pem):
     elif 'pair' in pem:
         pem['pair'] = twisted.internet.ssl.PrivateCertificate.loadPEM(cxt)
     elif 'root' in pem:
-        pem['root'] = twisted.internet.ssl.Certificate.loadPEM(cxt)
+        pem['root'] = [twisted.internet.ssl.Certificate.loadPEM(cxt)]
 
 
 def _tls_initialize(
@@ -500,7 +500,7 @@ def _lookup(fullname: str):
 
 
 def clients() -> [twisted.internet.ssl.Certificate]:
-    return _guests.copy()
+    return _guests['certs'].copy()
 
 
 def fetch_identity(cert: twisted.internet.ssl.Certificate):
@@ -516,7 +516,11 @@ def fetch_identity(cert: twisted.internet.ssl.Certificate):
     given certificate or the certificate is None. In essence, the empty string is
     the anonymous or blank identity.
     '''
-    return hex(cert.get_serial_number()) if cert else ''
+    return (
+        crypto.dump_publickey(crypto.FILETYPE_ASN1, cert.original.get_pubkey())
+        if cert is not None
+        else ''
+    )
 
 
 def identity(of_cert: twisted.internet.ssl.Certificate):
@@ -545,6 +549,8 @@ def is_sanctioned(
     are accessable. Yes, this can be a security leak but that should be resolved
     when the PGP is removed and no client TLS certs causes an error.
     '''
+    _log.warning('number of clients: %d', len(clients()))
+    _log.warning('cert is None: %s', cert is None)
     if clients():
         all_access = [
             # 3.0.0 remove - endpoints from here
@@ -576,6 +582,7 @@ def is_sanctioned(
             # 3.0.0 remove - to here
             '/api/ae/name',
             '/api/cmd/revision',
+            # '/api/cmd/reload',  # should require client cert (trusted)
             # '/api/cmd/reset',  # should require client cert (trusted)
             # '/api/cmd/run',  # should require client cert (any)
             # '/api/cmd/snapshot',  # should require client cert (admin)
@@ -601,11 +608,14 @@ def is_sanctioned(
             '/api/schedule/succeeded',
             '/api/schedule/to-do',
         ]
-        if cert is None and endpoint in all_access:
+        if endpoint in all_access:
             return True
         if cert is None:
             return False
-        return True
+        cid = fetch_identity(cert)
+        matching = any(cid == identity(c) for c in clients())
+        _log.info('Tried to match cert: %s', matching)
+        return any(cid == identity(c) for c in clients())
     return True
 
 
