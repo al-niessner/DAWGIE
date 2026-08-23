@@ -372,6 +372,7 @@ def _grant_access():
     '''scan the path given at initialization time for acceptible keys'''
     certs = []
     path = _guests['path']
+    _guests['certs'] = certs
     for fn in filter(
         lambda fn: fn.startswith('signed.public.pem'), os.listdir(path)
     ):
@@ -386,7 +387,6 @@ def _grant_access():
     # FUTURE: add check if not certs then raise ValueError()
     if not certs:
         _log.warning('No TLS kes found for secure clients in %s', path)
-    _guests['certs'] = certs
 
 
 def _pub_certs(cxt: str):
@@ -690,11 +690,11 @@ def sanctioned(endpoint: str, cert: twisted.internet.ssl.Certificate) -> bool:
 
 
 def use_client_verification():
-    return bool(_guests)
+    return bool(_guests) and bool(_guests['certs'])
 
 
 def use_tls():
-    return bool(_myself)
+    return bool(_myself) and bool(_myself['pair'])
 
 
 if __name__ == '__main__':
