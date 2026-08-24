@@ -150,7 +150,7 @@ class DynamicContent(BaseResource):
                         'alert_message': msg,
                     }
                 )
-            return json.dumps(response).encode()
+                return json.dumps(response).encode()
 
         for ak in request.args.keys():
             if ak.decode() in sig.parameters:
