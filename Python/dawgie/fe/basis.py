@@ -38,6 +38,7 @@ NTR:
 '''
 
 import datetime
+import dawgie.context
 import dawgie.security
 import enum
 import inspect
@@ -129,21 +130,26 @@ class DynamicContent(BaseResource):
     def __render(self, request, method: HttpMethod):
         sig = inspect.signature(self.__fnc)
         kwds = {}
-        cert = _client_from_transport(
-            getattr(request.channel, 'transport', None)
-        )
-        if cert is not None:
-            cert = twisted.internet.ssl.Certificate(cert)
-        if not dawgie.security.sanctioned(self.__uri, cert):
-            msg = f'The endpoint {self.__uri} requires a client certficate to be provided and that certificate be known to this service.'
-            response = build_return_object(None, Status.FAILURE, msg, False)
-            # 3.0.o remove - the response.update here nd probably other places
-            response.update(
-                {
-                    'alert_status': 'danger',
-                    'alert_message': msg,
-                }
+        if dawgie.security.use_tls():
+            cert = (
+                _client_from_transport(
+                    getattr(request.channel, 'transport', None)
+                )
+                if request.getHost().port == dawgie.context.cfe_port
+                else None
             )
+            if cert is not None:
+                cert = twisted.internet.ssl.Certificate(cert)
+            if not dawgie.security.sanctioned(self.__uri, cert):
+                msg = f'The endpoint {self.__uri} requires a client certficate to be provided and that certificate be known to this service.'
+                response = build_return_object(None, Status.FAILURE, msg, False)
+                # 3.0.o remove - the response.update here nd probably other places
+                response.update(
+                    {
+                        'alert_status': 'danger',
+                        'alert_message': msg,
+                    }
+                )
             return json.dumps(response).encode()
 
         for ak in request.args.keys():
@@ -241,6 +247,10 @@ def _client_from_transport(transport):
                     cert = chain[0]
                 else:
                     LOG.error('transport connection does not have a chain')
+            else:
+                LOG.error('transport.getHandle() does not exist')
+    else:
+        LOG.error('transport is null or does not support getPeerCertificate')
     return cert
 
 
