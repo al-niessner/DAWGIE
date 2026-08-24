@@ -246,13 +246,12 @@ class FSM:
                 twisted.internet.reactor.listenSSL(
                     int(dawgie.context.fe_port), factory, options
                 )
-                if dawgie.security.clients():
-                    options = dawgie.security.options(
-                        owner=AccessLevel.protected, trust=AccessLevel.protected
-                    )
-                    twisted.internet.reactor.listenSSL(
-                        dawgie.context.cfe_port, factory, options
-                    )
+                options = dawgie.security.options(
+                    owner=AccessLevel.protected, trust=AccessLevel.protected
+                )
+                twisted.internet.reactor.listenSSL(
+                    dawgie.context.cfe_port, factory, options
+                )
             else:
                 log.info('starting front end using HTTP')
                 print('critical 323: front-end socket is not secure!!')

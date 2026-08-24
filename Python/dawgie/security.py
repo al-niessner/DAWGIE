@@ -549,8 +549,6 @@ def is_sanctioned(
     are accessable. Yes, this can be a security leak but that should be resolved
     when the PGP is removed and no client TLS certs causes an error.
     '''
-    _log.warning('number of clients: %d', len(clients()))
-    _log.warning('cert is None: %s', cert is None)
     if clients():
         all_access = [
             # 3.0.0 remove - endpoints from here
