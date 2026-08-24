@@ -611,10 +611,19 @@ def is_sanctioned(
         if cert is None:
             return False
         cid = fetch_identity(cert)
-        matching = any(cid == identity(c) for c in clients())
-        _log.info('Tried to match cert: %s', matching)
-        return any(cid == identity(c) for c in clients())
-    return True
+        for known in clients():
+            if cid == identity(known):
+                _log.info(
+                    'approved cert common name %s for endpoint %s',
+                    known.getSubject().commonName,
+                    endpoint,
+                )
+                return True
+        _log.info(
+            'denied cert common name %s because it is not known',
+            cert.getSubject().commonName,
+        )
+    return False
 
 
 def options(
