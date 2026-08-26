@@ -66,7 +66,7 @@ def ae_name():
 
 
 def cmd_reload(pems: [str] = None):
-    args = set(inspect.signature(dawgie.security.reload))
+    args = set(inspect.signature(dawgie.security.reload).parameters)
     if len(pems) == 1 and ',' in pems[0]:
         pems = pems[0].split(',')
     if set(pems).issubset(args):
