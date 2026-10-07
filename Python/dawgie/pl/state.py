@@ -280,7 +280,7 @@ class FSM:
                 host=dawgie.context.db_host, port=dawgie.context.log_port
             )
             logging.basicConfig(
-                datefmt='%Y-%m-%d %H:%M:%S.%03f%:z',
+                datefmt='%Y-%m-%d %H:%M:%S.%.3f%:z',
                 handlers=[dawgie.pl.logger.fe.INSTANCE, twisted_handler],
                 level=self.args.log_level,
             )
