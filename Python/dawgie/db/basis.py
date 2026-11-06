@@ -67,7 +67,7 @@ class Params(typing.NamedTuple):
 
 
 class SearchResults(typing.NamedTuple):
-    items: [str] = []
+    items: tuple[()] | list[str] = ()
     total: int = -1
 
 
